@@ -1,6 +1,8 @@
+using System.Globalization;
 using System.Text.Json;
 using ScalarScope.Models;
 using ScalarScope.Services;
+using ScalarScope.Services.Connectors;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -34,6 +36,8 @@ public partial class ComparisonViewModel : ObservableObject
 
     private string? _leftSourcePath;
     private string? _rightSourcePath;
+    private RuntimeRunTrace? _leftTrace;
+    private RuntimeRunTrace? _rightTrace;
 
     // Comparison state
     [ObservableProperty]
@@ -80,6 +84,30 @@ public partial class ComparisonViewModel : ObservableObject
     // Overlay mode - Phase 3.2 Comparative Analysis
     [ObservableProperty]
     private bool _isOverlayMode;
+
+    [ObservableProperty]
+    private bool _showTraceReview;
+
+    [ObservableProperty]
+    private bool _showTraceDistribution;
+
+    [ObservableProperty]
+    private bool _showGeometryChrome;
+
+    [ObservableProperty]
+    private bool _showSideBySide;
+
+    [ObservableProperty]
+    private bool _showOverlay;
+
+    [ObservableProperty]
+    private TraceReview? _traceReview;
+
+    [ObservableProperty]
+    private string _traceNote = "";
+
+    [ObservableProperty]
+    private bool _hasTraceNote;
 
     [ObservableProperty]
     private bool _showDeviation = true;
@@ -298,12 +326,14 @@ public partial class ComparisonViewModel : ObservableObject
 
         NotifyComputedPropertiesChanged();
         
-        // Phase 3: Update deltas with current time
-        if (HasBothRuns)
+        // Phase 3: Update deltas with current time. A trace review keeps the playhead and does not recompute geometry deltas.
+        if (HasBothRuns && !ShowTraceReview)
         {
             UpdateCanonicalDeltas();
         }
     }
+
+    partial void OnIsOverlayModeChanged(bool value) => SyncChrome();
 
     /// <summary>
     /// Called when SelectedAlignment property changes.
@@ -311,6 +341,9 @@ public partial class ComparisonViewModel : ObservableObject
     /// </summary>
     partial void OnSelectedAlignmentChanged(TemporalAlignment value)
     {
+        if (ShowTraceReview)
+            return;
+
         // Update alignment description
         var anchors = TemporalAlignmentService.GetAnchors(LeftRun, RightRun, value);
         AlignmentDescription = anchors.AnchorDescription;
@@ -380,9 +413,11 @@ public partial class ComparisonViewModel : ObservableObject
     public void ResetLeftRun()
     {
         LeftRun = null;
+        _leftTrace = null;
         LeftRunName = "Load Path A";
         HasLeftRun = false;
-        UpdateComparisonState();
+        _leftSourcePath = null;
+        RefreshPair();
         NotifyComputedPropertiesChanged();
     }
 
@@ -393,9 +428,11 @@ public partial class ComparisonViewModel : ObservableObject
     public void ResetRightRun()
     {
         RightRun = null;
+        _rightTrace = null;
         RightRunName = "Load Path B";
         HasRightRun = false;
-        UpdateComparisonState();
+        _rightSourcePath = null;
+        RefreshPair();
         NotifyComputedPropertiesChanged();
     }
 
@@ -411,15 +448,21 @@ public partial class ComparisonViewModel : ObservableObject
         }
 
         LeftRun = null;
+        _leftTrace = null;
         LeftRunName = "Load Path A";
         HasLeftRun = false;
         _leftSourcePath = null;
 
         RightRun = null;
+        _rightTrace = null;
         RightRunName = "Load Path B";
         HasRightRun = false;
         _rightSourcePath = null;
 
+        ShowTraceReview = false;
+        TraceReview = null;
+        TraceNote = "";
+        HasTraceNote = false;
         HasBothRuns = false;
         ComparisonSummary = "";
         InterpretationVerdict = "";
@@ -429,6 +472,7 @@ public partial class ComparisonViewModel : ObservableObject
         IsRightDominant = null;
 
         Player.JumpToTimeCommand.Execute(0.0);
+        SyncChrome();
         NotifyComputedPropertiesChanged();
     }
 
@@ -458,6 +502,10 @@ public partial class ComparisonViewModel : ObservableObject
         // Load Path A (orthogonal) on the left
         _leftSourcePath = null;
         _rightSourcePath = null;
+        _leftTrace = null;
+        _rightTrace = null;
+        ShowTraceReview = false;
+        TraceReview = null;
         LeftRun = pathA;
         LeftRunName = pathA.Metadata?.Condition ?? "Path A: Orthogonal";
         HasLeftRun = true;
@@ -531,18 +579,12 @@ public partial class ComparisonViewModel : ObservableObject
     {
         var result = await FilePicker.Default.PickAsync(new PickOptions
         {
-            PickerTitle = "Select Path A / Orthogonal Run",
-            FileTypes = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
-            {
-                { DevicePlatform.WinUI, new[] { ".json" } },
-                { DevicePlatform.macOS, new[] { "json" } },
-            })
+            PickerTitle = "Open path A",
+            FileTypes = RunFileTypes()
         });
 
         if (result != null)
-        {
             await LoadLeftFromFileAsync(result.FullPath);
-        }
     }
 
     [RelayCommand]
@@ -550,92 +592,250 @@ public partial class ComparisonViewModel : ObservableObject
     {
         var result = await FilePicker.Default.PickAsync(new PickOptions
         {
-            PickerTitle = "Select Path B / Correlated Run",
-            FileTypes = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
-            {
-                { DevicePlatform.WinUI, new[] { ".json" } },
-                { DevicePlatform.macOS, new[] { "json" } },
-            })
+            PickerTitle = "Open path B",
+            FileTypes = RunFileTypes()
         });
 
         if (result != null)
-        {
             await LoadRightFromFileAsync(result.FullPath);
-        }
     }
 
-    public async Task LoadLeftFromFileAsync(string path)
+    public Task LoadLeftFromFileAsync(string path) => LoadSideAsync(left: true, path);
+
+    public Task LoadRightFromFileAsync(string path) => LoadSideAsync(left: false, path);
+
+    private static FilePickerFileType RunFileTypes() => new(new Dictionary<DevicePlatform, IEnumerable<string>>
     {
-        // End demo mode if user loads their own file
+        { DevicePlatform.WinUI, new[] { ".json", ".csv", ".log", ".gz" } },
+        { DevicePlatform.macOS, new[] { "json", "csv", "log" } }
+    });
+
+    private async Task LoadSideAsync(bool left, string path)
+    {
         EndDemoModeIfActive();
+
+        string text;
+        try
+        {
+            text = await File.ReadAllTextAsync(path);
+        }
+        catch (Exception ex)
+        {
+            FailSide(left, ex.Message);
+            return;
+        }
+
+        if (TraceOpen.IsGeometryRun(text))
+        {
+            LoadGeometrySide(left, path, text);
+            return;
+        }
 
         try
         {
-            var json = await File.ReadAllTextAsync(path);
+            var trace = await new TensorFlowRTOfflineConnector().ImportRuntimeAsync(path);
+            SetTraceSide(left, path, trace);
+        }
+        catch (Exception ex)
+        {
+            FailSide(left, ex.Message);
+        }
+    }
+
+    private void LoadGeometrySide(bool left, string path, string json)
+    {
+        try
+        {
             var run = JsonSerializer.Deserialize<GeometryRun>(json);
-
-            if (run != null)
+            if (run == null)
             {
-                // Invariant check: trajectory must have data
-                if (!InvariantGuard.AssertTrajectoryNonEmpty(run, $"LoadLeftFromFileAsync({Path.GetFileName(path)})"))
-                {
-                    LeftRunName = "Error: No trajectory data";
-                    HasLeftRun = false;
-                    return;
-                }
+                FailSide(left, "The file did not contain a run.");
+                return;
+            }
 
-                // Invariant check: data consistency
-                InvariantGuard.AssertDataConsistentLengths(run, $"LoadLeftFromFileAsync({Path.GetFileName(path)})");
+            var where = left ? "LoadLeftFromFileAsync" : "LoadRightFromFileAsync";
+            if (!InvariantGuard.AssertTrajectoryNonEmpty(run, $"{where}({Path.GetFileName(path)})"))
+            {
+                FailSide(left, "No trajectory data");
+                return;
+            }
 
+            InvariantGuard.AssertDataConsistentLengths(run, $"{where}({Path.GetFileName(path)})");
+            if (left)
+            {
+                _leftTrace = null;
                 LeftRun = run;
                 LeftRunName = Path.GetFileNameWithoutExtension(path);
                 _leftSourcePath = path;
                 HasLeftRun = true;
-                UpdateComparisonState();
             }
-        }
-        catch (Exception ex)
-        {
-            LeftRunName = $"Error: {ex.Message}";
-            HasLeftRun = false;
-        }
-    }
-
-    public async Task LoadRightFromFileAsync(string path)
-    {
-        // End demo mode if user loads their own file
-        EndDemoModeIfActive();
-
-        try
-        {
-            var json = await File.ReadAllTextAsync(path);
-            var run = JsonSerializer.Deserialize<GeometryRun>(json);
-
-            if (run != null)
+            else
             {
-                // Invariant check: trajectory must have data
-                if (!InvariantGuard.AssertTrajectoryNonEmpty(run, $"LoadRightFromFileAsync({Path.GetFileName(path)})"))
-                {
-                    RightRunName = "Error: No trajectory data";
-                    HasRightRun = false;
-                    return;
-                }
-
-                // Invariant check: data consistency
-                InvariantGuard.AssertDataConsistentLengths(run, $"LoadRightFromFileAsync({Path.GetFileName(path)})");
-
+                _rightTrace = null;
                 RightRun = run;
                 RightRunName = Path.GetFileNameWithoutExtension(path);
                 _rightSourcePath = path;
                 HasRightRun = true;
-                UpdateComparisonState();
             }
+
+            TraceNote = "";
+            HasTraceNote = false;
+            RefreshPair();
         }
         catch (Exception ex)
         {
-            RightRunName = $"Error: {ex.Message}";
-            HasRightRun = false;
+            FailSide(left, ex.Message);
         }
+    }
+
+    private void SetTraceSide(bool left, string path, RuntimeRunTrace trace)
+    {
+        var label = string.IsNullOrWhiteSpace(trace.Label)
+            ? Path.GetFileNameWithoutExtension(path)
+            : trace.Label;
+
+        if (left)
+        {
+            LeftRun = null;
+            _leftTrace = trace;
+            LeftRunName = label;
+            _leftSourcePath = path;
+            HasLeftRun = true;
+        }
+        else
+        {
+            RightRun = null;
+            _rightTrace = trace;
+            RightRunName = label;
+            _rightSourcePath = path;
+            HasRightRun = true;
+        }
+
+        TraceNote = "";
+        HasTraceNote = false;
+        RefreshPair();
+    }
+
+    private void FailSide(bool left, string message)
+    {
+        if (left)
+        {
+            LeftRun = null;
+            _leftTrace = null;
+            LeftRunName = "Could not read";
+            HasLeftRun = false;
+            _leftSourcePath = null;
+        }
+        else
+        {
+            RightRun = null;
+            _rightTrace = null;
+            RightRunName = "Could not read";
+            HasRightRun = false;
+            _rightSourcePath = null;
+        }
+
+        TraceNote = message;
+        HasTraceNote = true;
+        RefreshPair();
+    }
+
+    private void RefreshPair()
+    {
+        var mixed = (_leftTrace != null && RightRun != null) || (_rightTrace != null && LeftRun != null);
+        if (mixed)
+        {
+            ShowTraceReview = false;
+            TraceReview = null;
+            HasBothRuns = false;
+            IsCompareMode = false;
+            CanonicalDeltas = [];
+            AutoSummary = "";
+            TraceNote = "One side is a geometry run and the other is an inference trace. Load two of the same kind.";
+            HasTraceNote = true;
+            SyncChrome();
+            return;
+        }
+
+        if (_leftTrace != null && _rightTrace != null)
+        {
+            PublishTraceReview();
+            return;
+        }
+
+        ShowTraceReview = false;
+        TraceReview = null;
+        UpdateComparisonState();
+    }
+
+    private void PublishTraceReview()
+    {
+        var left = _leftTrace!;
+        var right = _rightTrace!;
+        var comparison = new RunTraceComparer().Compare(
+            left,
+            right,
+            ComparisonIntent.TfrtOptimization(LeftRunName, RightRunName));
+        var review = TraceReviewBuilder.Build(
+            left,
+            right,
+            comparison,
+            _leftSourcePath ?? "",
+            _rightSourcePath ?? "");
+
+        TraceReview = review;
+        ShowTraceReview = true;
+        HasBothRuns = true;
+        IsCompareMode = true;
+        CanonicalDeltas = [];
+        DeltaCount = review.FiredSymbols.Count;
+        AutoSummary = review.Verdict;
+        ComparisonSummary = review.Caption;
+        InterpretationVerdict = review.Verdict;
+        LeftDescription = DescribeSide(review.LeftLabel, review, review.LeftP50, review.LeftP95, review.LeftValues.Count);
+        RightDescription = DescribeSide(review.RightLabel, review, review.RightP50, review.RightP95, review.RightValues.Count);
+        FrameworkName = "TFRT";
+        PresetName = "TFRT Runtime";
+        HasPreset = true;
+        IsLeftDominant = null;
+        IsRightDominant = null;
+        TryRecordTrace(review);
+        SyncChrome();
+    }
+
+    private static string DescribeSide(string label, TraceReview review, double? p50, double? p95, int count)
+    {
+        var mid = p50 is double median ? median.ToString("0.###", CultureInfo.InvariantCulture) : "none";
+        var tail = p95 is double high ? high.ToString("0.###", CultureInfo.InvariantCulture) : "none";
+        return $"{label} · {review.Signal} · {count} samples · p50 {mid} {review.Unit} · p95 {tail} {review.Unit}";
+    }
+
+    private void TryRecordTrace(TraceReview review)
+    {
+        try
+        {
+            ComparisonLog.Record(new ComparisonLogEntry
+            {
+                Kind = "trace",
+                LeftName = review.LeftLabel,
+                RightName = review.RightLabel,
+                LeftPath = review.LeftPath,
+                RightPath = review.RightPath,
+                Alignment = review.Caption,
+                DeltasFired = review.FiredSymbols.ToList()
+            }, ComparisonLog.DefaultDirectory);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Comparison log: {ex.Message}");
+        }
+    }
+
+    private void SyncChrome()
+    {
+        ShowGeometryChrome = HasBothRuns && !ShowTraceReview;
+        ShowSideBySide = ShowGeometryChrome && !IsOverlayMode;
+        ShowOverlay = ShowGeometryChrome && IsOverlayMode;
     }
 
     /// <summary>
@@ -722,6 +922,8 @@ public partial class ComparisonViewModel : ObservableObject
             HighlightedDeltaId = null;
             HighlightedAnchorTime = -1;
         }
+
+        SyncChrome();
     }
 
     private void GenerateComparisonSummary()

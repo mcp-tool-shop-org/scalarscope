@@ -2,6 +2,25 @@ using System.Globalization;
 
 namespace ScalarScope.Converters;
 
+public class AllTrueConverter : IMultiValueConverter
+{
+    public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+    {
+        foreach (var value in values)
+        {
+            if (value is not bool flag || !flag)
+                return false;
+        }
+
+        return values.Length > 0;
+    }
+
+    public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+    {
+        throw new NotSupportedException();
+    }
+}
+
 public class InverseBoolConverter : IValueConverter
 {
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)

@@ -50,8 +50,8 @@ It covers time-synced playback, animated SkiaSharp canvases, comparison views, a
 
 1. Install **ScalarScope** from the [Microsoft Store](https://apps.microsoft.com/detail/9P3HT1PHBKQK) (Store ID: `9P3HT1PHBKQK`)
 2. Click **Compare Two Runs**
-3. Load baseline TFRT trace (before optimization)
-4. Load optimized TFRT trace (after optimization)
+3. Load a baseline trace: a latency CSV, a benchmark JSON, or a profiler `trace.json`
+4. Load the optimized trace in the same kind of file
 5. Review deltas in the **Compare** tab
 6. Export a `.scbundle` for reproducible sharing
 

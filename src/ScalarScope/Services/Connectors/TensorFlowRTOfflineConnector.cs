@@ -170,25 +170,27 @@ public sealed partial class TensorFlowRTOfflineConnector : IRunConnector
         );
     }
     
-    /// <inheritdoc />
-    public async Task<RunTrace> ImportAsync(string source, ConnectorOptions options, CancellationToken ct = default)
+    /// <summary>
+    /// Import the runtime trace Compare reviews. The bytes stay the latency, throughput, and memory series.
+    /// </summary>
+    public async Task<RuntimeRunTrace> ImportRuntimeAsync(string source, CancellationToken ct = default)
     {
-        // Step 1: Detect sources
         var detectedSources = await DetectSourcesAsync(source, ct);
         if (detectedSources.Count == 0)
         {
             throw new InvalidOperationException(
                 $"[{TfrtErrorCodes.TFRT_NO_SUPPORTED_EXPORT}] No supported TFRT export found at: {source}");
         }
-        
-        // Step 2: Parse best source
+
         var best = detectedSources.OrderByDescending(s => s.Priority).First();
         var rawData = await ParseSourceAsync(best, ct);
-        
-        // Step 3: Build RuntimeRunTrace
-        var runtime = await BuildRuntimeTraceAsync(rawData, source, ct);
-        
-        // Step 4: Convert to standard RunTrace for ScalarScope
+        return await BuildRuntimeTraceAsync(rawData, source, ct);
+    }
+
+    /// <inheritdoc />
+    public async Task<RunTrace> ImportAsync(string source, ConnectorOptions options, CancellationToken ct = default)
+    {
+        var runtime = await ImportRuntimeAsync(source, ct);
         return ConvertToRunTrace(runtime, options);
     }
     
@@ -344,7 +346,7 @@ public sealed partial class TensorFlowRTOfflineConnector : IRunConnector
     {
         var name = Path.GetFileName(path).ToLowerInvariant();
         
-        if (name.StartsWith("trace.json"))
+        if (name.StartsWith("trace.json") || LooksLikeProfilerTrace(path))
             return new TfrtSource { Type = TfrtSourceType.ProfilerTrace, Path = path, Priority = 100, Context = context };
         
         if (name == "overview.json")
@@ -353,13 +355,57 @@ public sealed partial class TensorFlowRTOfflineConnector : IRunConnector
         if (name == "benchmark.csv" || (name.EndsWith(".csv") && IsTfrtCsv(path)))
             return new TfrtSource { Type = TfrtSourceType.BenchmarkCsv, Path = path, Priority = 50, Context = context };
         
-        if (name == "benchmark.json" && name.EndsWith(".json"))
+        if (name.EndsWith(".json") && LooksLikeBenchmarkJson(path))
             return new TfrtSource { Type = TfrtSourceType.BenchmarkJson, Path = path, Priority = 40, Context = context };
         
         if (name.EndsWith(".log") && IsTfrtLog(path))
             return new TfrtSource { Type = TfrtSourceType.RuntimeLog, Path = path, Priority = 10, Context = context };
         
         return null;
+    }
+
+    /// <summary>
+    /// A profiler export is a Chrome trace. The file name does not have to be trace.json.
+    /// </summary>
+    private static bool LooksLikeProfilerTrace(string path)
+    {
+        if (!path.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        try
+        {
+            using var stream = File.OpenRead(path);
+            using var document = JsonDocument.Parse(stream);
+            return document.RootElement.TryGetProperty("traceEvents", out var events)
+                && events.ValueKind == JsonValueKind.Array;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// A benchmark export carries a results, iterations, or benchmarks array.
+    /// </summary>
+    private static bool LooksLikeBenchmarkJson(string path)
+    {
+        try
+        {
+            using var stream = File.OpenRead(path);
+            using var document = JsonDocument.Parse(stream);
+            var root = document.RootElement;
+            return ArrayProperty(root, "results") || ArrayProperty(root, "iterations") || ArrayProperty(root, "benchmarks");
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static bool ArrayProperty(JsonElement root, string name)
+    {
+        return root.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.Array;
     }
     
     private static bool IsTfrtCsv(string path)

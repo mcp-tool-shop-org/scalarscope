@@ -86,7 +86,7 @@
                     StrokeShape="RoundRectangle 8">
                 <Grid ColumnDefinitions="*,Auto">
                     <VerticalStackLayout Spacing="2">
-                        <Label Text="PATH A (Orthogonal)"
+                        <Label Text="PATH A"
                                FontSize="10"
                                TextColor="#4ecdc4"/>
                         <Label Text="{Binding LeftRunName}"
@@ -104,7 +104,7 @@
                             Padding="10,5"
                             HeightRequest="32"
                             AutomationProperties.Name="Load Path A"
-                            AutomationProperties.HelpText="Load the baseline run for comparison"/>
+                            AutomationProperties.HelpText="Load a geometry JSON or an inference trace for path A"/>
                 </Grid>
             </Border>
 
@@ -155,7 +155,7 @@
                     StrokeShape="RoundRectangle 8">
                 <Grid ColumnDefinitions="*,Auto">
                     <VerticalStackLayout Spacing="2">
-                        <Label Text="PATH B (Correlated)"
+                        <Label Text="PATH B"
                                FontSize="10"
                                TextColor="#ff6b6b"/>
                         <Label Text="{Binding RightRunName}"
@@ -173,14 +173,14 @@
                             Padding="10,5"
                             HeightRequest="32"
                             AutomationProperties.Name="Load Path B"
-                            AutomationProperties.HelpText="Load the correlated run for comparison"/>
+                            AutomationProperties.HelpText="Load a geometry JSON or an inference trace for path B"/>
                 </Grid>
             </Border>
         </Grid>
 
         <!-- Side-by-Side Canvases (normal mode) -->
         <Grid Grid.Row="4" ColumnDefinitions="*,2,*"
-              IsVisible="{Binding IsOverlayMode, Converter={StaticResource InverseBoolConverter}}">
+              IsVisible="{Binding ShowSideBySide}">
             <!-- Left Canvas -->
             <controls:ComparisonTrajectoryCanvas Grid.Column="0"
                                                   Run="{Binding LeftRun}"
@@ -211,14 +211,35 @@
                                           ShowDeviation="{Binding ShowDeviation}"
                                           ShowStatisticalBands="{Binding ShowStatisticalBands}"
                                           ShowDistanceMetrics="{Binding ShowDistanceMetrics}"
-                                          IsVisible="{Binding IsOverlayMode}"/>
+                                          IsVisible="{Binding ShowOverlay}"/>
+
+        <controls:TraceReviewCanvas Grid.Row="4"
+                                   Review="{Binding TraceReview}"
+                                   CurrentTime="{Binding Player.Time}"
+                                   ShowDistribution="{Binding ShowTraceDistribution}"
+                                   IsVisible="{Binding ShowTraceReview}"
+                                   Margin="10,4"/>
+
+        <HorizontalStackLayout Grid.Row="5"
+                               Spacing="16"
+                               Padding="15,8"
+                               BackgroundColor="#1a1a2e"
+                               IsVisible="{Binding ShowTraceReview}">
+            <Label Text="Series" TextColor="#4ecdc4" FontSize="11" VerticalOptions="Center"/>
+            <Switch IsToggled="{Binding ShowTraceDistribution}" OnColor="#ffd93d" Scale="0.8" VerticalOptions="Center"
+                    AutomationProperties.Name="Trace drawing"
+                    AutomationProperties.HelpText="Off draws the aligned series. On draws the distribution of those same samples."/>
+            <Label Text="Distribution" TextColor="#ffd93d" FontSize="11" VerticalOptions="Center"/>
+            <Label Text="{Binding TraceReview.Caption}" TextColor="#888" FontSize="11" VerticalOptions="Center" LineBreakMode="TailTruncation"/>
+        </HorizontalStackLayout>
 
         <!-- Toggle Bar -->
         <HorizontalStackLayout Grid.Row="5"
                                Spacing="15"
                                Padding="15,8"
                                BackgroundColor="#1a1a2e"
-                               HorizontalOptions="Center">
+                               HorizontalOptions="Center"
+                               IsVisible="{Binding ShowGeometryChrome}">
             <!-- Overlay Mode Toggle -->
             <VerticalStackLayout Spacing="1">
                 <HorizontalStackLayout Spacing="5">
@@ -279,7 +300,7 @@
         </HorizontalStackLayout>
 
         <!-- Delta Zone (Phase 3: Canonical Delta Display) -->
-        <Grid Grid.Row="6" ColumnDefinitions="3*,*" Margin="10,5" IsVisible="{Binding HasBothRuns}">
+        <Grid Grid.Row="6" ColumnDefinitions="3*,*" Margin="10,5" IsVisible="{Binding ShowGeometryChrome}">
             <VerticalStackLayout Grid.Column="0" Spacing="6">
                 <!-- First-occurrence hints (Phase 4) -->
                 <controls:DeltaHints Deltas="{Binding CanonicalDeltas}"/>
@@ -338,8 +359,14 @@
                                            LeftRun="{Binding LeftRun}"
                                            RightRun="{Binding RightRun}"
                                            CurrentTime="{Binding Player.Time}"
-                                           Margin="10,5"
-                                           IsVisible="{Binding IsToggled, Source={x:Reference analyticsSwitch}}"/>
+                                           Margin="10,5">
+            <controls:ComparisonAnalyticsPanel.IsVisible>
+                <MultiBinding Converter="{StaticResource AllTrueConverter}">
+                    <Binding Path="ShowGeometryChrome"/>
+                    <Binding Path="IsToggled" Source="{x:Reference analyticsSwitch}"/>
+                </MultiBinding>
+            </controls:ComparisonAnalyticsPanel.IsVisible>
+        </controls:ComparisonAnalyticsPanel>
 
         <!-- No runs message - Designed Empty State -->
         <Border Grid.Row="8"
@@ -364,11 +391,17 @@
                        HorizontalOptions="Center"/>
                 
                 <!-- Instructions -->
-                <Label Text="Load two inference runs to see how optimizations affect convergence, latency, and throughput."
+                <Label Text="Load two runs. A geometry JSON opens the path view. A latency CSV, benchmark JSON, or profiler trace opens the series and the distribution of those same samples."
                        FontSize="13"
                        TextColor="{StaticResource TextSecondary}"
                        HorizontalTextAlignment="Center"
                        LineBreakMode="WordWrap"/>
+                <Label Text="{Binding TraceNote}"
+                       FontSize="12"
+                       TextColor="#ffd93d"
+                       HorizontalTextAlignment="Center"
+                       LineBreakMode="WordWrap"
+                       IsVisible="{Binding HasTraceNote}"/>
                 
                 <!-- Visual hint -->
                 <Grid ColumnDefinitions="*,Auto,*" ColumnSpacing="16" Margin="0,8,0,0">

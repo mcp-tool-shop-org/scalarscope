@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.0.0] - 2026-10-03
 
 ### Added
+- Compare opens a real inference trace. A latency CSV, a benchmark JSON, or a profiler trace loads as the series it measured. The same samples can be drawn as a series or as their distribution. A geometry JSON still opens the path view.
 - Home keeps a local comparison log. A review is written when both runs are loaded: the two names, the deltas that fired across the full run (ΔF, ΔTc, ΔTd, ΔĀ, ΔO), and the bundle hash once a bundle is saved or opened. The file stays in app data.
 
 ### Fixed
