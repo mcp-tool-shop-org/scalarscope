@@ -1,6 +1,8 @@
-using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using ScalarScope.Models;
+using ScalarScope.Services;
+using ScalarScope.Services.Evidence;
 
 namespace ScalarScope.SoakTests;
 
@@ -17,10 +19,16 @@ public class Phase32ValidationRunner
         _logger = logger ?? NullLogger.Instance;
     }
 
+    /// <summary>Recorded floors. Probes sit on these numbers so a threshold edit changes the exit code.</summary>
+    private const int ResolutionStepsFloor = 3;
+    private const int MinDurationFloor = 4;
+    private const int PersistenceStepsFloor = 3;
+    private const int StepCount = 40;
+
     /// <summary>
     /// Run Phase 3.2 validation and return summary report.
     /// </summary>
-    public async Task<Phase32ValidationReport> RunValidationAsync()
+    public Task<Phase32ValidationReport> RunValidationAsync()
     {
         _logger.LogInformation("=== Phase 3.2 Delta Suite Validation ===");
 
@@ -30,184 +38,341 @@ public class Phase32ValidationRunner
             Phase = "3.2 - Scientific Tuning"
         };
 
-        // Document implementation status for each delta
-        report.DeltaImplementationStatus = GetImplementationStatus();
+        try
+        {
+            var measured = MeasurePairs();
+            report.PairResults = measured.Pairs;
+            report.DeltaImplementationStatus = measured.Status;
+            report.DeltaFVerification = measured.FailureChecks;
+            report.SuiteGates = measured.Gates;
+            report.Notes.Add($"CanonicalDeltaService measured {measured.Pairs.Count} pairs.");
+            report.Notes.Add($"Clearly different present deltas: {measured.ClearPresent}. Nearly identical present deltas: {measured.NearPresent}.");
+            report.Notes.Add($"Resolution boundary (floor {ResolutionStepsFloor}): below fired={measured.ResolutionBelowFired}, at floor fired={measured.ResolutionAtFired}.");
+            report.Notes.Add($"Persistence boundary (floor {PersistenceStepsFloor}): {PersistenceStepsFloor - 1}-step fired={measured.ShortSpikeFired}, {PersistenceStepsFloor}-step fired={measured.PersistentSpikeFired}.");
+            report.Notes.Add($"Stability boundary (MinDuration {MinDurationFloor}, area-above-theta): short fired={measured.ShortEpisodeFired}, qualifying fired={measured.QualifyingEpisodeFired}, sub-noise fired={measured.TinyAreaFired}, evidence episodes={measured.QualifyingEvidenceEpisodes}.");
+        }
+        catch (Exception ex)
+        {
+            report.Notes.Add($"Detector measurement failed: {ex.Message}");
+            report.Locked = false;
+            report.LockDecision = "Detector measurement threw. Not locked.";
+            _logger.LogError(ex, "Phase 3.2 measurement failed");
+            return Task.FromResult(report);
+        }
 
-        // ΔF Verification
-        report.DeltaFVerification = await RunDeltaFVerificationAsync();
-
-        // Suite gates evaluation based on implementation
-        report.SuiteGates = EvaluateSuiteGates(report);
-
-        // Lock decision
         report.Locked = CanLock(report);
-        report.LockDecision = report.Locked 
-            ? "All Phase 3.2 tunings implemented with evidence-based thresholds. Ready for lock."
-            : "Implementation complete but requires pair validation run for empirical lock-in.";
-
-        report.Notes.Add("Phase 3.2 implementation complete. All five delta detectors tuned.");
-        report.Notes.Add("Run actual pair comparisons via EvidenceExportService to complete empirical validation.");
-
-        return report;
+        report.LockDecision = report.Locked
+            ? "Measured gates passed. Ready for lock."
+            : "Measured gates did not pass. Not locked.";
+        _logger.LogInformation("Phase 3.2 lock={Locked}", report.Locked);
+        return Task.FromResult(report);
     }
 
-    private DeltaImplementationStatus GetImplementationStatus()
+    private static MeasuredSuite MeasurePairs()
     {
-        return new DeltaImplementationStatus
+        var evidence = new EvidenceExportService();
+        var calm = Flat("calm");
+        var twin = Flat("twin");
+        var failed = Flat("failed", failures:
+        [
+            new FailureEvent { T = 0.4, Category = "collapse", Severity = "HIGH", Description = "synthetic failure" }
+        ]);
+
+        var clear = Measure(calm, failed);
+        var near = Measure(calm, twin);
+        var resolutionBelow = Measure(Settled("early", WindowStart), Settled("late-below", WindowStart + ResolutionStepsFloor - 1));
+        var resolutionAt = Measure(Settled("early-at", WindowStart), Settled("late-at", WindowStart + ResolutionStepsFloor));
+        var shortSpike = Measure(calm, Spiked("spike-2", PersistenceStepsFloor - 1));
+        var persistentSpike = Measure(calm, Spiked("spike-3", PersistenceStepsFloor));
+        var moderate = Measure(Alternating("alt-a"), Alternating("alt-b"));
+        var shortEpisode = Measure(Flat("still-a"), Curved("curve-3", MinDurationFloor - 1, 1.0));
+        var qualifyingRun = Curved("curve-4", MinDurationFloor, 1.0);
+        var qualifying = Measure(Flat("still-b"), qualifyingRun);
+        var tinyArea = Measure(Flat("still-c"), Curved("curve-noise", MinDurationFloor, 0.02));
+        var alignmentBelow = Measure(Aligned("align-low-a", 0.20), Aligned("align-low-b", 0.24));
+        var alignmentAt = Measure(Aligned("align-high-a", 0.20), Aligned("align-high-b", 0.26));
+        var emerged = Measure(Flat("distributed"), Dominant("dominant"));
+
+        var qualifyingEvidence = evidence.CaptureDetectorDiagnostics(
+            Flat("evidence-flat"), qualifyingRun, TemporalAlignment.ByStep, 1.0, "area-above-theta");
+        var qualifyingEpisodes = qualifyingEvidence.Stability?.RunBEpisodes.Count(episode =>
+            episode.Duration >= MinDurationFloor && episode.AreaScore > 0) ?? 0;
+        var tinyEvidence = evidence.CaptureDetectorDiagnostics(
+            Flat("evidence-flat-tiny"), Curved("curve-noise-b", MinDurationFloor, 0.02),
+            TemporalAlignment.ByStep, 1.0, "area-below-noise");
+        var tinyEpisodes = tinyEvidence.Stability?.RunBEpisodes.Count ?? -1;
+
+        var clearPresent = clear.Count(delta => delta.Status == ScalarScope.Services.DeltaStatus.Present);
+        var nearPresent = near.Count(delta => delta.Status == ScalarScope.Services.DeltaStatus.Present);
+        var clearFired = Present(clear, "FailurePresence") && clearPresent >= 1;
+        var nearQuiet = nearPresent == 0 && !Present(near, "FailurePresence");
+        var resolutionBelowFired = Present(resolutionBelow, "ConvergenceTiming");
+        var resolutionAtFired = Present(resolutionAt, "ConvergenceTiming");
+        var shortSpikeFired = Present(shortSpike, "FailurePresence");
+        var persistentSpikeFired = Present(persistentSpike, "FailurePresence");
+        var moderateFired = Present(moderate, "FailurePresence");
+        var shortEpisodeFired = Present(shortEpisode, "StabilityOscillation");
+        var qualifyingEpisodeFired = Present(qualifying, "StabilityOscillation");
+        var tinyAreaFired = Present(tinyArea, "StabilityOscillation");
+        var alignmentBelowFired = Present(alignmentBelow, "EvaluatorAlignment");
+        var alignmentAtFired = Present(alignmentAt, "EvaluatorAlignment");
+        var emergenceFired = Present(emerged, "StructuralEmergence");
+
+        var falsePositivePassed = nearQuiet && !moderateFired;
+        var persistencePassed = !shortSpikeFired && persistentSpikeFired;
+        var extremeThresholdPassed = !moderateFired && persistentSpikeFired;
+        var resolutionPassed = !resolutionBelowFired && resolutionAtFired;
+        var noisePassed = !shortEpisodeFired && qualifyingEpisodeFired && qualifyingEpisodes > 0
+            && !tinyAreaFired && tinyEpisodes == 0;
+        var alignmentPassed = !alignmentBelowFired && alignmentAtFired;
+
+        List<CanonicalDelta> byStep;
+        List<CanonicalDelta> byConvergence;
+        string? alignmentError = null;
+        try
         {
-            DeltaA = new DeltaStatus
-            {
-                Name = "ΔĀ (Evaluator Alignment)",
-                Implemented = true,
-                Changes = new[]
-                {
-                    "Persistence-weighted delta: weights final 25% of trajectory at 2× importance",
-                    "Dual-gate suppression: abs(ΔĀ_persist) < 0.05 AND abs(ΔĀ_raw) < 0.10",
-                    "Reports both raw and persistence-weighted values in diagnostics"
-                },
-                EvidenceBasis = "Prevents flicker-dominant early timesteps from dominating aligned pairs"
-            },
-            DeltaTd = new DeltaStatus
-            {
-                Name = "ΔTd (Structural Emergence)",
-                Implemented = true,
-                Changes = new[]
-                {
-                    "Recurrence rule: mark peaks that recur ≥2 times with gap ≤3 steps",
-                    "Spikes at steps 1-2 excluded unless they recur",
-                    "Flicker-before-stabilize patterns isolated from true emergence"
-                },
-                EvidenceBasis = "Prevents single-spike variance bursts from triggering false ΔTd"
-            },
-            DeltaTc = new DeltaStatus
-            {
-                Name = "ΔTc (Convergence Timing)",
-                Implemented = true,
-                Changes = new[]
-                {
-                    "Step-based resolution (ResolutionSteps=3) is ONLY suppression gate",
-                    "DisplayResolutionNorm=0.05 for normalized display (not used in suppression)",
-                    "Confidence heuristics: TailLength, TailViolations, ConvergenceConfidence",
-                    "Signal-level epsilon: ε_eff = max(Epsilon, sigma × EpsilonSigmaMultiplier) where Epsilon=0.02, multiplier=0.5",
-                    "One-run-converged handling: if only one run converges, report step 0 for other"
-                },
-                EvidenceBasis = "3-4 steps difference is meaningful even if normalized < 0.05"
-            },
-            DeltaO = new DeltaStatus
-            {
-                Name = "ΔO (Stability Oscillation)",
-                Implemented = true,
-                Changes = new[]
-                {
-                    "Area-above-θ scoring replaces raw episode count",
-                    "Adaptive θ_eff = max(median×1.5, sigma×ThetaSigmaMultiplier)",
-                    "ThetaSigmaMultiplier=1.0 provides sigma-based floor",
-                    "MinDuration raised from 3→4 to suppress short jitter",
-                    "Episode-based scoring: sum of (amplitude × duration) for episodes ≥ MinDuration"
-                },
-                EvidenceBasis = "Suppresses benign jitter, surfaces sustained meaningful oscillation"
-            },
-            DeltaF = new DeltaStatus
-            {
-                Name = "ΔF (Failure Detection)",
-                Implemented = true,
-                Changes = new[]
-                {
-                    "Verify-only: No parameter changes in Phase 3.2",
-                    "Conservative detection: explicit Failures list preferred",
-                    "Proxy triggers: divergence (10× velocity, 3 steps), collapse (eigensum < 0.001, 3 steps)"
-                },
-                EvidenceBasis = "Existing thresholds are extreme by design; no adaptive risk identified"
-            }
+            byStep = Measure(calm, failed, TemporalAlignment.ByStep);
+            byConvergence = Measure(calm, failed, TemporalAlignment.ByConvergence);
+        }
+        catch (Exception ex)
+        {
+            byStep = [];
+            byConvergence = [];
+            alignmentError = ex.Message;
+        }
+
+        var consistent = alignmentError == null && SameConclusions(byStep, byConvergence);
+
+        var pairs = new List<PairValidationResult>
+        {
+            ToPair("clearly-different", "clearly_different", clear, clearFired),
+            ToPair("nearly-identical", "nearly_identical", near, nearQuiet),
+            ToPair("resolution-below", "subtly_different", resolutionBelow, !resolutionBelowFired),
+            ToPair("resolution-at-floor", "clearly_different", resolutionAt, resolutionAtFired),
+            ToPair("persistence-below", "nearly_identical", shortSpike, !shortSpikeFired),
+            ToPair("persistence-at-floor", "one_failure", persistentSpike, persistentSpikeFired),
+            ToPair("moderate-variance", "nearly_identical", moderate, !moderateFired),
+            ToPair("duration-below", "nearly_identical", shortEpisode, !shortEpisodeFired),
+            ToPair("duration-at-floor", "clearly_different", qualifying, qualifyingEpisodeFired),
+            ToPair("area-below-noise", "nearly_identical", tinyArea, !tinyAreaFired),
+            ToPair("alignment-boundary", "subtly_different", alignmentAt, alignmentPassed),
+            ToPair("emergence", "clearly_different", emerged, emergenceFired)
+        };
+
+        var status = new DeltaImplementationStatus
+        {
+            DeltaA = Status("ΔĀ (Evaluator Alignment)", alignmentPassed,
+                "Persistence score must clear the 0.05 floor over a sustained segment."),
+            DeltaTd = Status("ΔTd (Structural Emergence)", emergenceFired,
+                "Dominance on one run and not the other must surface StructuralEmergence."),
+            DeltaTc = Status("ΔTc (Convergence Timing)", resolutionPassed,
+                $"Only a step gap of at least {ResolutionStepsFloor} fires ConvergenceTiming."),
+            DeltaO = Status("ΔO (Stability Oscillation)", noisePassed,
+                $"Episodes shorter than {MinDurationFloor} or under the area noise floor must not fire."),
+            DeltaF = Status("ΔF (Failure Detection)", persistencePassed && falsePositivePassed,
+                $"{PersistenceStepsFloor} consecutive divergence steps fire; fewer steps and 2× velocity do not.")
+        };
+
+        var checks = new DeltaFVerificationResult
+        {
+            Summary = falsePositivePassed && persistencePassed && extremeThresholdPassed
+                ? "ΔF trigger counts matched the recorded floors."
+                : "ΔF trigger counts missed a recorded floor.",
+            Checks =
+            [
+                Check("ΔF-1: False-positive audit",
+                    "ΔF triggers on 0 nearly-identical and moderate pairs",
+                    falsePositivePassed,
+                    $"nearly-identical present={nearPresent}; moderate failure={moderateFired}"),
+                Check("ΔF-2: PersistenceWindow boundary",
+                    $"{PersistenceStepsFloor - 1} divergence steps do not fire; {PersistenceStepsFloor} do",
+                    persistencePassed,
+                    $"shortFired={shortSpikeFired}; persistentFired={persistentSpikeFired}"),
+                Check("ΔF-3: Extreme threshold",
+                    "2× velocity does not fire; a 10× persistent spike does",
+                    extremeThresholdPassed,
+                    $"moderateFired={moderateFired}; persistentFired={persistentSpikeFired}")
+            ]
+        };
+
+        var gates = new SuiteGatesResult
+        {
+            GateA = clearFired && nearQuiet && pairs.Count > 0,
+            GateB = resolutionPassed && alignmentPassed,
+            GateC = noisePassed,
+            GateD = consistent
+        };
+        gates.GateANotes.Add($"Clearly different present={clearPresent} (need >= 1). Nearly identical present={nearPresent} (need 0).");
+        gates.GateBNotes.Add($"Convergence gap {ResolutionStepsFloor - 1} fired={resolutionBelowFired}; gap {ResolutionStepsFloor} fired={resolutionAtFired}.");
+        gates.GateBNotes.Add($"Alignment difference 0.04 fired={alignmentBelowFired}; difference 0.06 fired={alignmentAtFired}.");
+        gates.GateCNotes.Add($"Duration {MinDurationFloor - 1} fired={shortEpisodeFired}; duration {MinDurationFloor} fired={qualifyingEpisodeFired}; evidence episodes={qualifyingEpisodes}.");
+        gates.GateCNotes.Add($"Sub-noise area fired={tinyAreaFired}; evidence episodes={tinyEpisodes}.");
+        gates.GateDNotes.Add(alignmentError == null
+            ? "ByStep and ByConvergence present-delta sets and signs matched on the failure pair."
+            : $"Alignment comparison threw: {alignmentError}");
+
+        return new MeasuredSuite(pairs, status, checks, gates, clearPresent, nearPresent,
+            resolutionBelowFired, resolutionAtFired, shortSpikeFired, persistentSpikeFired,
+            shortEpisodeFired, qualifyingEpisodeFired, tinyAreaFired, qualifyingEpisodes);
+    }
+
+    private const int WindowStart = 5;
+
+    private static List<CanonicalDelta> Measure(GeometryRun left, GeometryRun right, TemporalAlignment alignment = TemporalAlignment.ByStep)
+        => CanonicalDeltaService.ComputeDeltas(left, right, alignment, 1.0, CanonicalDeltaService.DefaultConfig);
+
+    private static bool Present(IReadOnlyList<CanonicalDelta> deltas, string id)
+        => deltas.Any(delta => delta.Id == id && delta.Status == ScalarScope.Services.DeltaStatus.Present);
+
+    private static bool SameConclusions(IReadOnlyList<CanonicalDelta> left, IReadOnlyList<CanonicalDelta> right)
+    {
+        var leftIds = left.Where(delta => delta.Status == ScalarScope.Services.DeltaStatus.Present).Select(delta => delta.Id).OrderBy(id => id).ToArray();
+        var rightIds = right.Where(delta => delta.Status == ScalarScope.Services.DeltaStatus.Present).Select(delta => delta.Id).OrderBy(id => id).ToArray();
+        if (leftIds.Length == 0 || !leftIds.SequenceEqual(rightIds))
+            return false;
+
+        foreach (var id in leftIds)
+        {
+            var a = left.First(delta => delta.Id == id && delta.Status == ScalarScope.Services.DeltaStatus.Present);
+            var b = right.First(delta => delta.Id == id && delta.Status == ScalarScope.Services.DeltaStatus.Present);
+            if (Math.Sign(a.Delta) != Math.Sign(b.Delta))
+                return false;
+        }
+
+        return true;
+    }
+
+    private static PairValidationResult ToPair(string name, string category, IReadOnlyList<CanonicalDelta> deltas, bool passes)
+        => new()
+        {
+            PairName = name,
+            Category = category,
+            DeltaF = Map(deltas, "FailurePresence"),
+            DeltaTc = Map(deltas, "ConvergenceTiming"),
+            DeltaTd = Map(deltas, "StructuralEmergence"),
+            DeltaA = Map(deltas, "EvaluatorAlignment"),
+            DeltaO = Map(deltas, "StabilityOscillation"),
+            PassesGates = passes
+        };
+
+    private static DeltaResult Map(IReadOnlyList<CanonicalDelta> deltas, string id)
+    {
+        var hit = deltas.FirstOrDefault(delta => delta.Id == id && delta.Status == ScalarScope.Services.DeltaStatus.Present);
+        if (hit == null)
+            return new DeltaResult { Suppressed = true, SuppressionReason = "absent", KeyValue = "" };
+
+        return new DeltaResult
+        {
+            Suppressed = false,
+            KeyValue = hit.Explanation,
+            Confidence = hit.Confidence,
+            TriggerType = hit.DeltaType.ToString()
         };
     }
 
-    private Task<DeltaFVerificationResult> RunDeltaFVerificationAsync()
+    private static ScalarScope.SoakTests.DeltaStatus Status(string name, bool implemented, string evidence)
+        => new()
+        {
+            Name = name,
+            Implemented = implemented,
+            Changes = [evidence],
+            EvidenceBasis = evidence
+        };
+
+    private static VerificationCheck Check(string name, string condition, bool passed, string notes)
+        => new()
+        {
+            Name = name,
+            Description = condition,
+            PassCondition = condition,
+            Implemented = passed,
+            Passed = passed,
+            Notes = notes
+        };
+
+    private static bool CanLock(Phase32ValidationReport report)
+        => report.PairResults.Count > 0
+           && report.SuiteGates?.GateA == true
+           && report.DeltaFVerification?.Checks.Count > 0
+           && report.DeltaFVerification.Checks.All(check => check.Passed)
+           && (report.DeltaImplementationStatus?.AllImplemented ?? false);
+
+    private static GeometryRun Flat(string id, IReadOnlyList<FailureEvent>? failures = null)
+        => Build(id, _ => 0.05, _ => 0, _ => EqualSpectrum(0.20), failures);
+
+    private static GeometryRun Settled(string id, int settleStep)
+        => Build(id, step => step < settleStep ? 1.0 : 0.05, _ => 0, _ => EqualSpectrum(0.20), null);
+
+    private static GeometryRun Spiked(string id, int spikeSteps)
+        => Build(id, step => step >= 20 && step < 20 + spikeSteps ? 5.0 : 0.2, _ => 0, _ => EqualSpectrum(0.20), null);
+
+    private static GeometryRun Alternating(string id)
+        => Build(id, step => step % 2 == 0 ? 0.2 : 0.4, _ => 0, _ => EqualSpectrum(0.20), null);
+
+    private static GeometryRun Curved(string id, int burstSteps, double curvature)
+        => Build(id, _ => 0.05, step => step >= 10 && step < 10 + burstSteps ? curvature : 0, _ => EqualSpectrum(0.20), null);
+
+    private static GeometryRun Aligned(string id, double firstShare)
+        => Build(id, _ => 0.05, _ => 0, _ => ShareSpectrum(firstShare), null);
+
+    private static GeometryRun Dominant(string id)
+        => Build(id, _ => 0.05, _ => 0, _ => [0.90, 0.20, 0.10, 0.10, 0.10], null);
+
+    private static List<double> EqualSpectrum(double share) => [share, share, share, share, share];
+
+    private static List<double> ShareSpectrum(double first)
     {
-        _logger.LogInformation("ΔF Verification Started");
-
-        var result = new DeltaFVerificationResult();
-
-        // ΔF-1: False-positive audit structure
-        result.Checks.Add(new VerificationCheck
-        {
-            Name = "ΔF-1: False-positive audit",
-            Description = "ΔF should trigger 0 times in pairs where humans saw no collapse",
-            PassCondition = "ΔF triggers in 0 'nearly identical' or 'subtle difference' pairs without real failure",
-            Implemented = true,
-            Passed = true, // Design-verified; empirical run not required due to extreme thresholds
-            Notes = "Detection paths: event (explicit Failures list), divergence_proxy (10× velocity spike 3 consecutive), collapse_proxy (eigenvalue sum < 0.001 for 3 consecutive). Design-verified: thresholds are extreme → false-positive risk minimal."
-        });
-
-        // ΔF-2: PersistenceWindow sanity
-        result.Checks.Add(new VerificationCheck
-        {
-            Name = "ΔF-2: PersistenceWindow = 3 consecutive steps",
-            Description = "Every ΔF trigger must have violation for 3 consecutive mapped steps",
-            PassCondition = "All triggers show sustained violation segments",
-            Implemented = true,
-            Passed = true, // Design-verified via code inspection
-            Notes = "Implemented in HasPersistentFailure(): divergenceCount/collapseCount >= PersistenceWindow(3) before trigger. Design-verified."
-        });
-
-        // ΔF-3: Adaptive threshold risk
-        result.Checks.Add(new VerificationCheck
-        {
-            Name = "ΔF-3: No adaptive threshold collapse risk",
-            Description = "Proxy triggers should occur in extreme tail of signal distribution",
-            PassCondition = "Fixed thresholds (10×, 1.0, 0.001) are extreme by design",
-            Implemented = true,
-            Passed = true, // Design-verified; no adaptive thresholds in ΔF
-            Notes = "ΔF does NOT use adaptive thresholds. 10× velocity jump, 1.0 norm floor, 0.001 collapse floor are all extreme values that won't trigger on normal variance. Design-verified."
-        });
-
-        result.Summary = "ΔF passes all verification checks (design-verified). Conservative detection with extreme fixed thresholds. No changes needed.";
-        _logger.LogInformation("ΔF Verification: {Summary}", result.Summary);
-
-        return Task.FromResult(result);
+        var rest = (1.0 - first) / 4.0;
+        return [first, rest, rest, rest, rest];
     }
 
-    private SuiteGatesResult EvaluateSuiteGates(Phase32ValidationReport report)
+    private static GeometryRun Build(
+        string id,
+        Func<int, double> velocity,
+        Func<int, double> curvature,
+        Func<int, List<double>> spectrum,
+        IReadOnlyList<FailureEvent>? failures)
     {
-        var gates = new SuiteGatesResult();
-
-        // Gate A: Discrimination - requires implementation complete AND empirical pair data
-        var hasImplementation = report.DeltaImplementationStatus?.AllImplemented ?? false;
-        var hasPairData = report.PairResults.Any();
-        gates.GateA = hasImplementation && hasPairData;
-        
-        if (!hasPairData)
+        var steps = new List<TrajectoryTimestep>(StepCount);
+        var eigenvalues = new List<EigenTimestep>(StepCount);
+        for (var i = 0; i < StepCount; i++)
         {
-            gates.GateANotes.Add("⏳ PENDING empirical confirmation: no pair results yet.");
+            var t = i / (double)(StepCount - 1);
+            var speed = velocity(i);
+            steps.Add(new TrajectoryTimestep
+            {
+                T = t,
+                State2D = [t, 0],
+                Velocity = [speed, 0],
+                Curvature = curvature(i)
+            });
+            eigenvalues.Add(new EigenTimestep { T = t, Values = spectrum(i) });
         }
-        gates.GateANotes.Add("Implementation complete. Clearly different pairs should fire ≥1 delta.");
-        gates.GateANotes.Add("Nearly identical pairs should fire 0-1 deltas (expected: 0).");
 
-        // Gate B: Trustworthiness - thresholds are evidence-based
-        gates.GateB = true;
-        gates.GateBNotes.Add("All threshold choices documented with evidence basis in spec.");
-        gates.GateBNotes.Add("Reviewer validation pending on actual pair runs.");
-
-        // Gate C: Noise Control - anti-flicker measures in place
-        gates.GateC = true;
-        gates.GateCNotes.Add("ΔO: MinDuration=4 + area-scoring prevents short jitter");
-        gates.GateCNotes.Add("ΔTd: Recurrence rule prevents single-spike false positives");
-        gates.GateCNotes.Add("ΔĀ: Persistence-weighting + dual-gate prevents early flicker dominance");
-
-        // Gate D: Consistency - alignment modes don't invert conclusions
-        gates.GateD = true;
-        gates.GateDNotes.Add("Implementation uses mode-agnostic comparison where possible.");
-        gates.GateDNotes.Add("Empirical validation needed with different alignment settings.");
-
-        return gates;
+        return new GeometryRun
+        {
+            Metadata = new RunMetadata { RunId = id },
+            Trajectory = new Trajectory { Timesteps = steps },
+            Geometry = new GeometryMetrics { Eigenvalues = eigenvalues },
+            Failures = failures?.ToList() ?? []
+        };
     }
 
-    private bool CanLock(Phase32ValidationReport report)
-    {
-        // Lock requires all implementations complete and ΔF verified
-        return (report.DeltaImplementationStatus?.AllImplemented ?? false) &&
-               (report.DeltaFVerification?.Checks.All(c => c.Passed) ?? false);
-    }
+    private sealed record MeasuredSuite(
+        List<PairValidationResult> Pairs,
+        DeltaImplementationStatus Status,
+        DeltaFVerificationResult FailureChecks,
+        SuiteGatesResult Gates,
+        int ClearPresent,
+        int NearPresent,
+        bool ResolutionBelowFired,
+        bool ResolutionAtFired,
+        bool ShortSpikeFired,
+        bool PersistentSpikeFired,
+        bool ShortEpisodeFired,
+        bool QualifyingEpisodeFired,
+        bool TinyAreaFired,
+        int QualifyingEvidenceEpisodes);
 }
 
 /// <summary>
@@ -231,10 +396,12 @@ public class Phase32ValidationReport
     public bool Locked { get; set; }
     public string LockDecision { get; set; } = "";
 
-    public bool AllGatesPassed => 
+    public bool AllGatesPassed =>
+        PairResults.Count > 0 &&
         (DeltaImplementationStatus?.AllImplemented ?? false) &&
+        (DeltaFVerification?.Checks.Count > 0) &&
         (DeltaFVerification?.Checks.All(c => c.Passed) ?? false) &&
-        (SuiteGates == null || (SuiteGates.GateA && SuiteGates.GateB && SuiteGates.GateC && SuiteGates.GateD));
+        SuiteGates is { GateA: true, GateB: true, GateC: true, GateD: true };
 
     public string ToSummaryTable()
     {

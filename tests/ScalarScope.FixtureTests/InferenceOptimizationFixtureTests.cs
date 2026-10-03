@@ -3,6 +3,8 @@
 // Uses xUnit with FluentAssertions.
 
 using System.Linq;
+using System.Reflection;
+using System.Text.Json;
 using FluentAssertions;
 using ScalarScope.Services.Connectors;
 using Xunit;
@@ -494,6 +496,40 @@ public class InferenceOptimizationFixtureTests
         deltaA!.IsSuppressed.Should().BeTrue("ΔĀ should be suppressed");
     }
 
+    [Fact]
+    public void NearlyIdentical_Comparison_Should_Match_Expected_Assertions()
+    {
+        var nearBaseline = FixtureLoader.LoadRunTrace("nearly_identical_baseline_tfrt_runtrace.json");
+        var nearOptimized = FixtureLoader.LoadRunTrace("nearly_identical_optimized_tfrt_runtrace.json");
+        var assertions = FixtureLoader.LoadAssertions("expected_assertions_nearly_identical.json");
+        var intent = ComparisonIntent.TfrtOptimization();
+
+        var result = _comparer.Compare(nearBaseline, nearOptimized, intent);
+        var expected = assertions.Expected!;
+
+        ExpectDelta(result, "ΔTc", expected.ExpectedDeltas?.DeltaTc);
+        ExpectDelta(result, "ΔO", expected.ExpectedDeltas?.DeltaO);
+        ExpectDelta(result, "ΔF", expected.ExpectedDeltas?.DeltaF);
+        ExpectDelta(result, "ΔTd", expected.ExpectedDeltas?.DeltaTd);
+        ExpectDelta(result, "ΔĀ", expected.ExpectedDeltas?.DeltaA);
+
+        expected.ExpectedOutcome.Should().NotBeNull();
+        result.FiredDeltas.Count().Should().Be(expected.ExpectedOutcome!.DeltasFireCount);
+        result.SuppressedDeltas.Count().Should().Be(expected.ExpectedOutcome.SuppressedCount);
+
+        if (expected.Fingerprints?.ModelIdentical == true)
+            nearBaseline.Metadata.ModelFingerprint.Should().Be(nearOptimized.Metadata.ModelFingerprint);
+        if (expected.Fingerprints?.DatasetIdentical == true)
+            nearBaseline.Metadata.DatasetFingerprint.Should().Be(nearOptimized.Metadata.DatasetFingerprint);
+        if (expected.Fingerprints?.CodeIdentical == true)
+            nearBaseline.Metadata.CodeFingerprint.Should().Be(nearOptimized.Metadata.CodeFingerprint);
+        if (expected.Fingerprints?.EnvironmentIdentical == true)
+            nearBaseline.Metadata.EnvironmentFingerprint.Should().Be(nearOptimized.Metadata.EnvironmentFingerprint);
+
+        ExpectMilestone(nearBaseline, expected.Milestones?["baseline"]);
+        ExpectMilestone(nearOptimized, expected.Milestones?["optimized"]);
+    }
+
     #endregion
 
     #region F) Expected Assertions Validation
@@ -522,38 +558,55 @@ public class InferenceOptimizationFixtureTests
         // Act
         var result = _comparer.Compare(baseline, optimized, intent);
 
-        // Assert - validate against expected assertions
         var expected = assertions.Expected!;
+        var baselineValidation = _validator.Validate(baseline);
+        var optimizedValidation = _validator.Validate(optimized);
 
-        // Validation expectations
-        if (expected.Validation?.BaselineValid == true)
+        if (expected.Validation?.BaselineValid != null)
+            baselineValidation.IsValid.Should().Be(expected.Validation.BaselineValid.Value);
+        if (expected.Validation?.OptimizedValid != null)
+            optimizedValidation.IsValid.Should().Be(expected.Validation.OptimizedValid.Value);
+        if (expected.Validation?.NoErrors == true)
         {
-            _validator.Validate(baseline).IsValid.Should().BeTrue();
+            baselineValidation.Errors.Should().BeEmpty();
+            optimizedValidation.Errors.Should().BeEmpty();
         }
-        if (expected.Validation?.OptimizedValid == true)
+        else if (expected.Validation?.NoErrors == false)
         {
-            _validator.Validate(optimized).IsValid.Should().BeTrue();
+            (baselineValidation.Errors.Count + optimizedValidation.Errors.Count).Should().BeGreaterThan(0);
         }
+        if (expected.Validation?.BaselineRunId != null)
+            baseline.RunId.Should().Be(expected.Validation.BaselineRunId);
+        if (expected.Validation?.OptimizedRunId != null)
+            optimized.RunId.Should().Be(expected.Validation.OptimizedRunId);
 
-        // Comparison intent expectations
+        ExpectCapabilities(baseline, expected.Capabilities?["baseline"]);
+        ExpectCapabilities(optimized, expected.Capabilities?["optimized"]);
+        ExpectMilestone(baseline, expected.Milestones?["baseline"]);
+        ExpectMilestone(optimized, expected.Milestones?["optimized"]);
+        ExpectFingerprints(baseline, optimized, expected.Fingerprints);
+
         if (expected.ComparisonIntent?.PresetId != null)
-        {
             result.PresetId.Should().Be(expected.ComparisonIntent.PresetId);
-        }
+        if (expected.ComparisonIntent?.AlignmentMode != null)
+            result.Intent.Alignment.ToString().Should().BeEquivalentTo(expected.ComparisonIntent.AlignmentMode);
+        if (expected.ComparisonIntent?.PrimaryMilestone != null)
+            MilestoneToken(result.Intent.PrimaryAnchor).Should().Be(expected.ComparisonIntent.PrimaryMilestone);
+        if (expected.ComparisonIntent?.FallbackMilestone != null)
+            MilestoneToken(result.Intent.FallbackAnchor).Should().Be(expected.ComparisonIntent.FallbackMilestone);
+        if (expected.ComparisonIntent?.LabelA != null)
+            result.Intent.LabelA.Should().Be(expected.ComparisonIntent.LabelA);
+        if (expected.ComparisonIntent?.LabelB != null)
+            result.Intent.LabelB.Should().Be(expected.ComparisonIntent.LabelB);
 
-        // Delta expectations
-        if (expected.ExpectedDeltas?.DeltaTc?.Fired == true)
-        {
-            result.Deltas.Should().Contain(d => d.DeltaType == "ΔTc" && d.Fired);
-        }
-        if (expected.ExpectedDeltas?.DeltaTd?.ShouldBeSuppressed == true)
-        {
-            result.Deltas.Should().Contain(d => d.DeltaType == "ΔTd" && d.IsSuppressed);
-        }
-        if (expected.ExpectedDeltas?.DeltaA?.ShouldBeSuppressed == true)
-        {
-            result.Deltas.Should().Contain(d => d.DeltaType == "ΔĀ" && d.IsSuppressed);
-        }
+        ExpectDelta(result, "ΔTc", expected.ExpectedDeltas?.DeltaTc);
+        ExpectDelta(result, "ΔO", expected.ExpectedDeltas?.DeltaO);
+        ExpectDelta(result, "ΔF", expected.ExpectedDeltas?.DeltaF);
+        ExpectDelta(result, "ΔTd", expected.ExpectedDeltas?.DeltaTd);
+        ExpectDelta(result, "ΔĀ", expected.ExpectedDeltas?.DeltaA);
+
+        ExpectSteadyState(baseline, optimized, expected.SteadyStateMetrics);
+        ExpectBundle(result, baseline, optimized, expected.BundleExport);
     }
 
     [Fact]
@@ -568,28 +621,246 @@ public class InferenceOptimizationFixtureTests
 
         // Assert
         var expected = assertions.ExpectedValidation!;
-        
-        result.IsValid.Should().Be(expected.IsValid ?? true);
-        
-        // Order-independent error code matching:
-        // The assertions file lists ALL errors that exist in the fixture,
-        // but validator may short-circuit (only report first error found).
-        // We check that at least one expected error is present.
-        var actualErrorCodes = result.Errors.Select(e => e.Code).ToHashSet();
-        var expectedErrorCodes = expected.Errors?.Select(e => e.Code).ToHashSet() 
-            ?? new HashSet<string?>();
+        expected.IsValid.Should().NotBeNull();
+        expected.ErrorCount.Should().NotBeNull();
+        result.IsValid.Should().Be(expected.IsValid!.Value);
+        result.Errors.Should().HaveCount(expected.ErrorCount!.Value);
+        result.Warnings.Should().HaveCount(expected.Warnings?.Count ?? 0);
+        result.Infos.Should().HaveCount(expected.Infos?.Count ?? 0);
 
-        // At least one expected error should be detected
-        actualErrorCodes.Intersect(expectedErrorCodes!).Should().NotBeEmpty(
-            "at least one expected error code should be present (order-independent)");
-        
-        // All actual errors should be in the expected list (no unexpected errors)
-        foreach (var actualCode in actualErrorCodes)
+        expected.Errors.Should().NotBeNullOrEmpty();
+        result.Errors.Select(e => e.Code).Should().Equal(expected.Errors!.Select(e => e.Code));
+
+        for (var i = 0; i < expected.Errors.Count; i++)
         {
-            expectedErrorCodes.Should().Contain(actualCode,
-                $"error '{actualCode}' should be in expected list");
+            var actual = result.Errors[i];
+            var wanted = expected.Errors[i];
+            actual.Severity.ToString().Should().Be(wanted.Severity);
+            actual.Message.Should().Contain(wanted.MessageContains);
+            actual.Path.Should().Contain(wanted.PathContains);
+            wanted.Context.Should().NotBeNull();
+            actual.Context.Should().NotBeNull();
+            ReadInt(actual.Context!["index"]).Should().Be(ReadInt(wanted.Context!["indexOfViolation"]));
+            ReadInt(actual.Context["previous"]).Should().Be(ReadInt(wanted.Context["repeatedValue"]));
+            ReadInt(actual.Context["current"]).Should().Be(ReadInt(wanted.Context["repeatedValue"]));
+        }
+
+        assertions.TestCases.Should().NotBeNull();
+        assertions.TestCases!.ValidatorRejectsTrace.Should().NotBeNull();
+        assertions.TestCases.ValidatorRejectsTrace!.Input.Should().Be("broken_baseline_tfrt_runtrace.json");
+        assertions.TestCases.ValidatorRejectsTrace.ExpectedResult.Should().Contain($"{result.Errors.Count} error");
+        assertions.TestCases.ErrorCodesStable.Should().NotBeNull();
+        assertions.TestCases.ErrorCodesStable!.AssertCodes.Should().Equal(result.Errors.Select(e => e.Code));
+        assertions.TestCases.ErrorCodesStable.IndexOfViolation.Should().Be(ReadInt(expected.Errors[0].Context!["indexOfViolation"]));
+        assertions.TestCases.ErrorCodesStable.RepeatedValue.Should().Be(ReadInt(expected.Errors[0].Context["repeatedValue"]));
+        assertions.TestCases.ErrorCodesStable.Reason.Should().NotBeNullOrWhiteSpace();
+
+        if (assertions.ExpectedBehavior?.ComparisonBlocked == true)
+            result.IsValid.Should().BeFalse();
+        if (assertions.ExpectedBehavior?.DeltasComputed == false)
+            result.IsValid.Should().BeFalse();
+    }
+
+    private static void ExpectCapabilities(RuntimeRunTrace trace, CapabilityExpectation? expected)
+    {
+        expected.Should().NotBeNull();
+        if (expected!.HasLatency != null)
+            trace.Capabilities.HasLatency.Should().Be(expected.HasLatency.Value);
+        if (expected.HasThroughput != null)
+            trace.Capabilities.HasThroughput.Should().Be(expected.HasThroughput.Value);
+        if (expected.HasMemory != null)
+            trace.Capabilities.HasMemory.Should().Be(expected.HasMemory.Value);
+        if (expected.HasLoss != null)
+            trace.Capabilities.HasLoss.Should().Be(expected.HasLoss.Value);
+        if (expected.HasAccuracy != null)
+            trace.Capabilities.HasAccuracy.Should().Be(expected.HasAccuracy.Value);
+    }
+
+    private static void ExpectMilestone(RuntimeRunTrace trace, MilestoneExpectation? expected)
+    {
+        expected.Should().NotBeNull();
+        if (expected!.WarmupEnd != null)
+            trace.Milestones.WarmupEndStep.Should().Be(expected.WarmupEnd);
+        if (expected.SteadyStateStart != null)
+            trace.Milestones.SteadyStateStartStep.Should().Be(expected.SteadyStateStart);
+        if (expected.SteadyStateEnd != null)
+            trace.Milestones.OfType(RuntimeMilestoneType.SteadyStateEnd).First().Step.Should().Be(expected.SteadyStateEnd);
+    }
+
+    private static void ExpectFingerprints(RuntimeRunTrace baseline, RuntimeRunTrace optimized, FingerprintsExpectation? expected)
+    {
+        expected.Should().NotBeNull();
+        if (expected!.DatasetMustMatch == true)
+            baseline.Metadata.DatasetFingerprint.Should().Be(optimized.Metadata.DatasetFingerprint);
+        else if (expected.DatasetMustMatch == false)
+            baseline.Metadata.DatasetFingerprint.Should().NotBe(optimized.Metadata.DatasetFingerprint);
+        if (expected.CodeMustMatch == true)
+            baseline.Metadata.CodeFingerprint.Should().Be(optimized.Metadata.CodeFingerprint);
+        else if (expected.CodeMustMatch == false)
+            baseline.Metadata.CodeFingerprint.Should().NotBe(optimized.Metadata.CodeFingerprint);
+        if (expected.EnvironmentMustMatch == true)
+            baseline.Metadata.EnvironmentFingerprint.Should().Be(optimized.Metadata.EnvironmentFingerprint);
+        else if (expected.EnvironmentMustMatch == false)
+            baseline.Metadata.EnvironmentFingerprint.Should().NotBe(optimized.Metadata.EnvironmentFingerprint);
+        if (expected.ModelMayDiffer == false)
+            baseline.Metadata.ModelFingerprint.Should().Be(optimized.Metadata.ModelFingerprint);
+
+        expected.Baseline.Should().NotBeNull();
+        expected.Optimized.Should().NotBeNull();
+        baseline.Metadata.ModelFingerprint.Should().Be(expected.Baseline!.Model);
+        baseline.Metadata.DatasetFingerprint.Should().Be(expected.Baseline.Dataset);
+        baseline.Metadata.CodeFingerprint.Should().Be(expected.Baseline.Code);
+        baseline.Metadata.EnvironmentFingerprint.Should().Be(expected.Baseline.Environment);
+        optimized.Metadata.ModelFingerprint.Should().Be(expected.Optimized!.Model);
+        optimized.Metadata.DatasetFingerprint.Should().Be(expected.Optimized.Dataset);
+        optimized.Metadata.CodeFingerprint.Should().Be(expected.Optimized.Code);
+        optimized.Metadata.EnvironmentFingerprint.Should().Be(expected.Optimized.Environment);
+    }
+
+    private static void ExpectDelta(ComparisonResult result, string deltaType, DeltaExpectation? expected)
+    {
+        if (expected == null)
+            return;
+
+        var delta = result.Deltas.FirstOrDefault(d => d.DeltaType == deltaType);
+        if (expected.ShouldBePresent == true)
+            delta.Should().NotBeNull($"{deltaType} is recorded as present");
+        else if (expected.ShouldBePresent == false)
+            delta.Should().BeNull($"{deltaType} is recorded as absent");
+
+        if (expected.Fired != null)
+        {
+            delta.Should().NotBeNull();
+            delta!.Fired.Should().Be(expected.Fired.Value, $"{deltaType} fired flag");
+        }
+        if (expected.ShouldBeSuppressed != null)
+        {
+            delta.Should().NotBeNull();
+            delta!.IsSuppressed.Should().Be(expected.ShouldBeSuppressed.Value, $"{deltaType} suppression");
+        }
+        if (expected.MinDeltaSteps != null)
+        {
+            delta.Should().NotBeNull();
+            Math.Abs(delta!.AbsoluteDifference).Should().BeGreaterThanOrEqualTo(expected.MinDeltaSteps.Value);
+        }
+        if (expected.Direction == "optimized_stabilizes_earlier")
+        {
+            delta.Should().NotBeNull();
+            delta!.ValueB.Should().BeLessThan(delta.ValueA);
         }
     }
+
+    private static void ExpectSteadyState(RuntimeRunTrace baseline, RuntimeRunTrace optimized, SteadyStateMetricsExpectation? expected)
+    {
+        expected.Should().NotBeNull();
+        expected!.Baseline.Should().NotBeNull();
+        expected.Optimized.Should().NotBeNull();
+        expected.Improvement.Should().NotBeNull();
+
+        var baseStart = baseline.Milestones.SteadyStateStartStep!.Value;
+        var baseEnd = baseline.Milestones.OfType(RuntimeMilestoneType.SteadyStateEnd).First().Step;
+        var optStart = optimized.Milestones.SteadyStateStartStep!.Value;
+        var optEnd = optimized.Milestones.OfType(RuntimeMilestoneType.SteadyStateEnd).First().Step;
+
+        var (baseLatency, baseLatencyStd) = Steady(baseline, "latency_ms", baseStart, baseEnd);
+        var (optLatency, optLatencyStd) = Steady(optimized, "latency_ms", optStart, optEnd);
+        var (baseThroughput, _) = Steady(baseline, "throughput_items_per_sec", baseStart, baseEnd);
+        var (optThroughput, _) = Steady(optimized, "throughput_items_per_sec", optStart, optEnd);
+
+        baseLatency.Should().BeApproximately(expected.Baseline!.LatencyMean!.Value, 0.05);
+        baseLatencyStd.Should().BeApproximately(expected.Baseline.LatencyStdDev!.Value, 0.05);
+        baseThroughput.Should().BeApproximately(expected.Baseline.ThroughputMean!.Value, 0.05);
+        optLatency.Should().BeApproximately(expected.Optimized!.LatencyMean!.Value, 0.05);
+        optLatencyStd.Should().BeApproximately(expected.Optimized.LatencyStdDev!.Value, 0.05);
+        optThroughput.Should().BeApproximately(expected.Optimized.ThroughputMean!.Value, 0.05);
+
+        $"{Math.Round((baseLatency - optLatency) / baseLatency * 100.0):0}%"
+            .Should().Be(expected.Improvement!.LatencyReduction);
+        $"{Math.Round((optThroughput - baseThroughput) / baseThroughput * 100.0):0}%"
+            .Should().Be(expected.Improvement.ThroughputIncrease);
+    }
+
+    private void ExpectBundle(ComparisonResult result, RuntimeRunTrace baseline, RuntimeRunTrace optimized, BundleExportExpectation? expected)
+    {
+        expected.Should().NotBeNull();
+        expected!.MustInclude.Should().NotBeNullOrEmpty();
+
+        ReviewOnlyBundle? bundle = null;
+        var exportThrew = false;
+        try
+        {
+            bundle = _comparer.ExportReviewBundle(result, baseline, optimized);
+        }
+        catch
+        {
+            exportThrew = true;
+        }
+
+        if (expected.ShouldSucceed == true)
+        {
+            exportThrew.Should().BeFalse();
+            bundle.Should().NotBeNull();
+        }
+        else if (expected.ShouldSucceed == false)
+        {
+            (exportThrew || bundle == null).Should().BeTrue();
+            return;
+        }
+
+        var members = typeof(ReviewOnlyBundle).GetProperties(BindingFlags.Instance | BindingFlags.Public)
+            .Select(property => property.Name)
+            .ToHashSet(StringComparer.Ordinal);
+        foreach (var name in expected.MustInclude!)
+        {
+            members.Should().Contain(name, $"{name} is not a ReviewOnlyBundle member");
+            var value = typeof(ReviewOnlyBundle).GetProperty(name)!.GetValue(bundle);
+            value.Should().NotBeNull($"{name} was missing on the exported bundle");
+        }
+
+        if (expected.ReviewModeEnabled == true)
+            bundle!.ExportMode.Should().Be(ReviewExportMode.Review);
+        else if (expected.ReviewModeEnabled == false)
+            bundle!.ExportMode.Should().NotBe(ReviewExportMode.Review);
+        if (expected.RecomputeDisabled != null)
+            bundle!.RecomputeDisabled.Should().Be(expected.RecomputeDisabled.Value);
+    }
+
+    private static (double Mean, double StdDev) Steady(RuntimeRunTrace trace, string seriesName, int start, int end)
+    {
+        var series = trace.Scalars.GetByName(seriesName);
+        series.Should().NotBeNull();
+        var values = new List<double>();
+        for (var i = 0; i < trace.Timeline.Steps.Count; i++)
+        {
+            var step = trace.Timeline.Steps[i];
+            if (step >= start && step <= end && series!.Values[i].HasValue)
+                values.Add(series.Values[i]!.Value);
+        }
+
+        values.Should().NotBeEmpty();
+        var mean = values.Average();
+        var variance = values.Sum(value => (value - mean) * (value - mean)) / values.Count;
+        return (mean, Math.Sqrt(variance));
+    }
+
+    private static string? MilestoneToken(RuntimeMilestoneType? type) => type switch
+    {
+        RuntimeMilestoneType.SteadyStateStart => "steady_state_start",
+        RuntimeMilestoneType.SteadyStateEnd => "steady_state_end",
+        RuntimeMilestoneType.WarmupEnd => "warmup_end",
+        null => null,
+        _ => type.ToString()
+    };
+
+    private static int ReadInt(object? value) => value switch
+    {
+        JsonElement element when element.ValueKind == JsonValueKind.Number => element.GetInt32(),
+        JsonElement element when element.ValueKind == JsonValueKind.String => int.Parse(element.GetString()!),
+        int number => number,
+        long number => (int)number,
+        double number => (int)number,
+        _ => throw new InvalidOperationException($"Cannot read an integer from '{value}'")
+    };
 
     #endregion
 

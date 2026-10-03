@@ -77,7 +77,7 @@ if (runValidation)
     Console.WriteLine();
     Console.WriteLine($"  Report saved to: {validationOutput}");
     
-    return validationReport.AllGatesPassed ? 0 : 1;
+    return validationReport.Locked && validationReport.AllGatesPassed ? 0 : 1;
 }
 
 // Set up logging

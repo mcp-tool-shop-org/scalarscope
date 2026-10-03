@@ -146,15 +146,25 @@ public class FixtureSmokeTests
         // Arrange - load all runtraces that have "broken" in the name
         var sets = FixtureLoader.DiscoverFixtureSets();
         var unexpectedPasses = new List<string>();
+        var brokenCount = 0;
 
         // Act
+        sets.Should().NotBeEmpty("a fixture set with no broken trace is not a negative test");
         foreach (var set in sets)
         {
-            foreach (var file in set.RunTraceFiles.Where(f => f.Contains("broken")))
+            var brokenFiles = set.RunTraceFiles.Where(f => f.Contains("broken")).ToList();
+            if (brokenFiles.Count == 0)
+            {
+                unexpectedPasses.Add($"{set.Name}: no broken traces");
+                continue;
+            }
+
+            brokenCount += brokenFiles.Count;
+            foreach (var file in brokenFiles)
             {
                 var trace = FixtureLoader.LoadRunTraceFromSet(set.Path, file);
                 var result = _validator.Validate(trace);
-                
+
                 if (result.IsValid)
                 {
                     unexpectedPasses.Add($"{set.Name}/{file}");
@@ -163,8 +173,23 @@ public class FixtureSmokeTests
         }
 
         // Assert
+        brokenCount.Should().BeGreaterThan(0, "deleting every broken trace must fail this test");
         unexpectedPasses.Should().BeEmpty(
             $"broken fixtures should fail validation: {string.Join("; ", unexpectedPasses)}");
+    }
+
+    [Fact]
+    public void InferenceOptimization_Broken_Baseline_Should_Be_Invalid()
+    {
+        var sets = FixtureLoader.DiscoverFixtureSets();
+        var ioSet = sets.Should().ContainSingle(s => s.Name == "InferenceOptimization").Subject;
+        ioSet.RunTraceFiles.Should().Contain("broken_baseline_tfrt_runtrace.json");
+
+        var trace = FixtureLoader.LoadRunTraceFromSet(ioSet.Path, "broken_baseline_tfrt_runtrace.json");
+        var result = _validator.Validate(trace);
+
+        result.IsValid.Should().BeFalse();
+        result.Errors.Should().Contain(e => e.Code == RunTraceErrorCodes.RT_TIMELINE_NON_MONOTONIC);
     }
 
     [Fact]
@@ -256,8 +281,13 @@ public class FixtureSmokeTests
 
         // Assert
         ioSet.Should().NotBeNull();
-        ioSet!.RunTraceFiles.Should().HaveCountGreaterOrEqualTo(4,
+        ioSet!.RunTraceFiles.Should().Contain("broken_baseline_tfrt_runtrace.json");
+        ioSet.RunTraceFiles.Should().Contain("baseline_tfrt_runtrace.json");
+        ioSet.RunTraceFiles.Should().Contain("optimized_tfrt_runtrace.json");
+        ioSet.RunTraceFiles.Should().Contain("nearly_identical_baseline_tfrt_runtrace.json");
+        ioSet.RunTraceFiles.Should().HaveCountGreaterOrEqualTo(4,
             "InferenceOptimization should have baseline, optimized, broken, and nearly_identical traces");
+        ioSet.AssertionFiles.Should().Contain("expected_assertions_nearly_identical.json");
         ioSet.AssertionFiles.Should().HaveCountGreaterOrEqualTo(2,
             "InferenceOptimization should have assertion files");
     }

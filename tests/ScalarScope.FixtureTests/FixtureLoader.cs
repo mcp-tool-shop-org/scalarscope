@@ -439,6 +439,7 @@ public class ExpectedAssertions
     public ExpectedSection? Expected { get; set; }
     public ExpectedValidationSection? ExpectedValidation { get; set; }
     public ExpectedBehaviorSection? ExpectedBehavior { get; set; }
+    public TestCasesSection? TestCases { get; set; }
 }
 
 public class ExpectedSection
@@ -595,6 +596,26 @@ public class ExpectedBehaviorSection
     public bool? BundleExportDisabled { get; set; }
     public bool? ErrorExplanationShown { get; set; }
     public bool? PresetApplicationBlocked { get; set; }
+}
+
+public class TestCasesSection
+{
+    public ValidatorRejectCase? ValidatorRejectsTrace { get; set; }
+    public ErrorCodesCase? ErrorCodesStable { get; set; }
+}
+
+public class ValidatorRejectCase
+{
+    public string? Input { get; set; }
+    public string? ExpectedResult { get; set; }
+}
+
+public class ErrorCodesCase
+{
+    public List<string>? AssertCodes { get; set; }
+    public int? IndexOfViolation { get; set; }
+    public int? RepeatedValue { get; set; }
+    public string? Reason { get; set; }
 }
 
 #endregion

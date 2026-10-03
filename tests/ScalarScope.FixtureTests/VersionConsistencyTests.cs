@@ -29,7 +29,7 @@ public class VersionConsistencyTests
         var root = FindRepoRoot();
         var csproj = XDocument.Load(Path.Combine(root, "src", "ScalarScope", "ScalarScope.csproj"));
         var version = csproj.Descendants("ApplicationDisplayVersion").First().Value;
-        version.Should().MatchRegex(@"^\d+\.\d+\.\d+");
+        version.Should().MatchRegex(@"^\d+\.\d+\.\d+$");
     }
 
     [Fact]
@@ -38,8 +38,9 @@ public class VersionConsistencyTests
         var root = FindRepoRoot();
         var csproj = XDocument.Load(Path.Combine(root, "src", "ScalarScope", "ScalarScope.csproj"));
         var version = csproj.Descendants("ApplicationDisplayVersion").First().Value;
-        var major = int.Parse(version.Split('.')[0]);
-        major.Should().BeGreaterThanOrEqualTo(1);
+        var parts = version.Split('.').Select(int.Parse).ToArray();
+        parts.Should().HaveCountGreaterOrEqualTo(3);
+        parts[0].Should().BeGreaterThanOrEqualTo(3, "display version must not fall behind 3.0.0");
     }
 
     [Fact]
@@ -53,12 +54,29 @@ public class VersionConsistencyTests
 
         identity.Attribute("Name")!.Value.Should().Be("mcp-tool-shop.ScalarScope");
         identity.Attribute("Publisher")!.Value.Should().Be("CN=5305D976-6952-4F00-9C21-3A5DB090359F");
-        identity.Attribute("Version")!.Value.Should().Be("3.0.0.0");
+        var manifestVersion = identity.Attribute("Version")!.Value;
+        manifestVersion.Should().MatchRegex(@"^\d+\.\d+\.\d+\.\d+$");
+        manifestVersion.Should().Be("3.0.0.0");
         properties.Element(ns + "PublisherDisplayName")!.Value.Should().Be("mcp-tool-shop");
 
         var csproj = XDocument.Load(Path.Combine(root, "src", "ScalarScope", "ScalarScope.csproj"));
-        csproj.Descendants("ApplicationDisplayVersion").First().Value.Should().Be("3.0.0");
-        csproj.Descendants("Version").First().Value.Should().Be("3.0.0.0");
-        int.Parse(csproj.Descendants("ApplicationVersion").First().Value).Should().BeGreaterThanOrEqualTo(30);
+        var display = csproj.Descendants("ApplicationDisplayVersion").First().Value;
+        var packaged = csproj.Descendants("Version").First().Value;
+        display.Should().Be("3.0.0");
+        packaged.Should().Be("3.0.0.0");
+        packaged.Should().Be(manifestVersion);
+        csproj.Descendants("ApplicationId").First().Value.Should().Be("org.mcptoolshop.scalarscope");
+
+        var displayParts = display.Split('.').Select(int.Parse).ToArray();
+        var manifestParts = manifestVersion.Split('.').Select(int.Parse).ToArray();
+        manifestParts.Should().HaveCount(4);
+        var behindDisplay = manifestParts[0] < displayParts[0]
+            || (manifestParts[0] == displayParts[0] && manifestParts[1] < displayParts[1])
+            || (manifestParts[0] == displayParts[0] && manifestParts[1] == displayParts[1] && manifestParts[2] < displayParts[2]);
+        behindDisplay.Should().BeFalse("the packaged four-part version must not sit behind ApplicationDisplayVersion");
+
+        // ApplicationVersion is the MSIX revision counter, not the fourth Identity component.
+        int.Parse(csproj.Descendants("ApplicationVersion").First().Value)
+            .Should().BeGreaterThanOrEqualTo(30, "ApplicationVersion is the package revision and must stay above the 2.x revision");
     }
 }

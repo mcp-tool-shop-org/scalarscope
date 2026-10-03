@@ -35,19 +35,19 @@
     },
     "expectedDeltas": {
       "deltaTc": {
-        "shouldBePresent": false,
+        "shouldBePresent": true,
         "fired": false,
-        "reason": "Same steady_state_start step (6) - no timing difference"
+        "reason": "Comparer always appends ΔTc. Same steady_state_start step (6) so it does not fire."
       },
       "deltaO": {
-        "shouldBePresent": false,
+        "shouldBePresent": true,
         "fired": false,
-        "reason": "Both runs have zero variance in steady state"
+        "reason": "Comparer always appends ΔO. Both runs have zero variance in steady state."
       },
       "deltaF": {
-        "shouldBePresent": false,
+        "shouldBePresent": true,
         "fired": false,
-        "reason": "No outliers in either run"
+        "reason": "Comparer always appends ΔF. No outliers in either run."
       },
       "deltaTd": {
         "shouldBeSuppressed": true,
@@ -61,7 +61,7 @@
     "expectedOutcome": {
       "summary": "No significant differences detected",
       "deltasFireCount": 0,
-      "suppressedCount": 5,
+      "suppressedCount": 2,
       "reason": "Runs are functionally identical - comparison should report no meaningful differences"
     }
   }
