@@ -75,7 +75,9 @@ public class Phase32ValidationRunner
         var twin = Flat("twin");
         var failed = Flat("failed", failures:
         [
-            new FailureEvent { T = 0.4, Category = "collapse", Severity = "HIGH", Description = "synthetic failure" }
+            new FailureEvent { T = 0.40, Category = "collapse", Severity = "HIGH", Description = "synthetic failure" },
+            new FailureEvent { T = 0.45, Category = "collapse", Severity = "HIGH", Description = "synthetic failure" },
+            new FailureEvent { T = 0.50, Category = "collapse", Severity = "HIGH", Description = "synthetic failure" }
         ]);
 
         var clear = Measure(calm, failed);
@@ -222,7 +224,10 @@ public class Phase32ValidationRunner
         => CanonicalDeltaService.ComputeDeltas(left, right, alignment, 1.0, CanonicalDeltaService.DefaultConfig);
 
     private static bool Present(IReadOnlyList<CanonicalDelta> deltas, string id)
-        => deltas.Any(delta => delta.Id == id && delta.Status == ScalarScope.Services.DeltaStatus.Present);
+        => deltas.Any(delta => SameId(delta.Id, id) && delta.Status == ScalarScope.Services.DeltaStatus.Present);
+
+    private static bool SameId(string? left, string? right)
+        => DeltaIds.Canonical(left) == DeltaIds.Canonical(right);
 
     private static bool SameConclusions(IReadOnlyList<CanonicalDelta> left, IReadOnlyList<CanonicalDelta> right)
     {
@@ -257,7 +262,7 @@ public class Phase32ValidationRunner
 
     private static DeltaResult Map(IReadOnlyList<CanonicalDelta> deltas, string id)
     {
-        var hit = deltas.FirstOrDefault(delta => delta.Id == id && delta.Status == ScalarScope.Services.DeltaStatus.Present);
+        var hit = deltas.FirstOrDefault(delta => SameId(delta.Id, id) && delta.Status == ScalarScope.Services.DeltaStatus.Present);
         if (hit == null)
             return new DeltaResult { Suppressed = true, SuppressionReason = "absent", KeyValue = "" };
 

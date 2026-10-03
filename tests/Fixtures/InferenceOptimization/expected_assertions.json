@@ -78,8 +78,8 @@
       },
       "deltaF": {
         "shouldBePresent": true,
-        "fired": false,
-        "reason": "No outliers in either run"
+        "fired": true,
+        "reason": "Full-series population 3-sigma: optimized latency 40 is one outlier and the baseline has none, so an introduced outlier fires ΔF."
       },
       "deltaTd": {
         "shouldBeSuppressed": true,

@@ -118,6 +118,7 @@ public static class DeterminismTestSuite
                 new CanonicalDelta
                 {
                     Id = DeltaIds.FailurePresence,
+                    Name = "Failure Events",
                     Status = DeltaStatus.Present,
                     Confidence = 0.95,
                     LeftValue = 1.25,
@@ -128,6 +129,7 @@ public static class DeterminismTestSuite
                 new CanonicalDelta
                 {
                     Id = DeltaIds.ConvergenceTiming,
+                    Name = "Convergence",
                     Status = DeltaStatus.Suppressed,
                     Confidence = 0.0,
                     Delta = 0,

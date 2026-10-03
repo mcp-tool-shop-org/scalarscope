@@ -54,12 +54,29 @@ public class TraceReviewTests
         var left = await connector.ImportRuntimeAsync(leftPath);
         var right = await connector.ImportRuntimeAsync(rightPath);
         var comparison = new RunTraceComparer().Compare(left, right, ComparisonIntent.TfrtOptimization());
-        comparison.Deltas.Should().Contain(delta => delta.DeltaType == "ΔTc" && delta.Fired);
+        var deltaTc = comparison.Deltas.Should().ContainSingle(delta => delta.DeltaType == "ΔTc").Which;
+        deltaTc.Fired.Should().BeFalse("a missing steady-state milestone is not a stabilization time");
+        deltaTc.ValueA.Should().Be(0);
+        deltaTc.ValueB.Should().Be(0);
+        deltaTc.Interpretation.Should().Be("steady state not detected");
 
         var review = TraceReviewBuilder.Build(left, right, comparison, leftPath, rightPath);
         review.FiredSymbols.Should().NotContain("ΔTc");
-        review.Withheld.Should().Contain(line => line.Contains("withheld", StringComparison.OrdinalIgnoreCase));
-        review.Verdict.Should().Contain("not a stabilization time");
+        review.Verdict.Should().NotContain("Stabilizes");
+
+        var forced = comparison with
+        {
+            Deltas = comparison.Deltas
+                .Select(delta => delta.DeltaType == "ΔTc"
+                    ? delta with { Fired = true, Interpretation = "Stabilizes 4 steps earlier" }
+                    : delta)
+                .ToList()
+        };
+        var withheldReview = TraceReviewBuilder.Build(left, right, forced, leftPath, rightPath);
+        withheldReview.FiredSymbols.Should().NotContain("ΔTc");
+        withheldReview.Withheld.Should().Contain(line => line.Contains("withheld", StringComparison.OrdinalIgnoreCase));
+        withheldReview.Verdict.Should().Contain("not a stabilization time");
+        withheldReview.Verdict.Should().NotContain("Stabilizes 4 steps earlier");
     }
 
     [Fact]
