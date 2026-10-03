@@ -1,9 +1,19 @@
 # ScalarScope Microsoft Store Listing
 
 **Store ID:** 9P3HT1PHBKQK  
+**Package name:** mcp-tool-shop.ScalarScope  
+**Publisher:** CN=5305D976-6952-4F00-9C21-3A5DB090359F  
+**Publisher display name:** mcp-tool-shop  
 **Package Family Name:** mcp-tool-shop.ScalarScope_yn6b8xqrexa5j  
-**Publisher:** mcp-tool-shop  
-**Version:** 2.0.0
+**Package SID:** S-1-15-2-850189134-3642041993-2632034504-2327210781-2703906947-3194312410-3859322172  
+**Version:** 3.0.0.0
+
+Packages already in the Partner Center submission:
+
+- `ScalarScope_1.0.3.0_x64.msix`
+- `ScalarScope_v2.0.0_Store.msixupload`
+
+The next upload is `ScalarScope_3.0.0.0_Store.msixupload`. Its package version is `3.0.0.0`, which is above both of those.
 
 ---
 
@@ -86,7 +96,7 @@ ScalarScope collects no telemetry, sends no analytics, and stores all data local
 1. [ ] Download from Microsoft Store (9P3HT1PHBKQK)
 2. [ ] Launch ScalarScope
 3. [ ] Verify Welcome page appears with CTAs
-4. [ ] Check version shows 2.0.0 in Settings > About
+4. [ ] Check Settings > About shows 3.0.0. The package identity version is 3.0.0.0.
 
 ### Core Workflow
 5. [ ] Click "Compare Two Runs"
@@ -100,12 +110,12 @@ ScalarScope collects no telemetry, sends no analytics, and stores all data local
 ### Export Flow
 12. [ ] Open Bundle Export panel
 13. [ ] Click "Export Bundle"
-14. [ ] Verify .scsbundle file created
+14. [ ] Verify .scbundle file created
 15. [ ] Copy bundle hash
 
 ### Review Flow
 16. [ ] Click "Open Review Bundle" on Welcome page
-17. [ ] Select .scsbundle file
+17. [ ] Select .scbundle file
 18. [ ] Verify Review Mode banner appears
 19. [ ] Verify Load buttons are disabled
 20. [ ] Verify bundle hash matches original
@@ -140,6 +150,10 @@ ScalarScope collects no telemetry, sends no analytics, and stores all data local
 - **Disk:** 100 MB
 
 ---
+
+## Release Notes (v3.0.0.0)
+
+The next Partner Center upload. Name, publisher, and publisher display name are the same product. The package version moves to 3.0.0.0 because the 3.x line is a sweeping change over the published 2.x build.
 
 ## Release Notes (v2.0.0)
 

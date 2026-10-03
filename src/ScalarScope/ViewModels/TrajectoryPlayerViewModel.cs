@@ -11,6 +11,7 @@ namespace ScalarScope.ViewModels;
 public partial class TrajectoryPlayerViewModel : ObservableObject, IDisposable
 {
     private System.Timers.Timer? _playbackTimer;
+    private int _tickQueued;
     private const double TickIntervalMs = 16.67; // ~60fps
 
     private static readonly double[] SpeedValues = [0.25, 0.5, 1.0, 2.0, 4.0];
@@ -236,37 +237,61 @@ public partial class TrajectoryPlayerViewModel : ObservableObject, IDisposable
 
     private void OnPlaybackTick(object? sender, System.Timers.ElapsedEventArgs e)
     {
-        // Smooth speed transition (ease toward target)
-        if (Math.Abs(Speed - _targetSpeed) > 0.01)
-        {
-            Speed += ((_targetSpeed - Speed) * SpeedTransitionRate);
-        }
-        else
-        {
-            Speed = _targetSpeed;
-        }
+        // The timer thread must not write bound properties. Drop this tick if one is already queued.
+        if (Interlocked.CompareExchange(ref _tickQueued, 1, 0) != 0)
+            return;
 
-        var delta = (TickIntervalMs / 1000.0) / Duration * Speed;
-        Time += delta;
-
-        if (Time >= 1.0)
+        try
         {
-            if (Loop)
+            MainThread.BeginInvokeOnMainThread(AdvancePlaybackOnUi);
+        }
+        catch (InvalidOperationException)
+        {
+            // No UI thread in this process. Drop the tick.
+            Interlocked.Exchange(ref _tickQueued, 0);
+        }
+    }
+
+    private void AdvancePlaybackOnUi()
+    {
+        try
+        {
+            // Smooth speed transition (ease toward target)
+            if (Math.Abs(Speed - _targetSpeed) > 0.01)
             {
-                Time = 0.0; // Loop back to start
+                Speed += ((_targetSpeed - Speed) * SpeedTransitionRate);
             }
             else
             {
-                Time = 1.0;
-                IsPlaying = false;
-                _playbackTimer?.Stop();
+                Speed = _targetSpeed;
             }
+
+            var delta = (TickIntervalMs / 1000.0) / Duration * Speed;
+            Time += delta;
+
+            if (Time >= 1.0)
+            {
+                if (Loop)
+                {
+                    Time = 0.0; // Loop back to start
+                }
+                else
+                {
+                    Time = 1.0;
+                    IsPlaying = false;
+                    _playbackTimer?.Stop();
+                }
+            }
+
+            // Check for demo annotations at current time
+            DemoAnnotationService.CheckTimeThreshold(Time);
+
+            TimeChanged?.Invoke();
         }
-
-        // Check for demo annotations at current time
-        DemoAnnotationService.CheckTimeThreshold(Time);
-
-        TimeChanged?.Invoke();
+        finally
+        {
+            Interlocked.Exchange(ref _tickQueued, 0);
+        }
     }
 
     public void Dispose()

@@ -50,7 +50,7 @@ During this beta period, we're looking for feedback on:
 ## How to Report Issues
 
 ### Before Reporting
-1. Check [existing issues](https://github.com/mcp-tool-shop-org/scalarscope-desktop/issues)
+1. Check [existing issues](https://github.com/mcp-tool-shop-org/scalarscope/issues)
 2. Create a support bundle (Help > Create Support Bundle)
 
 ### What to Include
@@ -109,9 +109,9 @@ For this RC1 release:
 
 ## Feedback Channels
 
-- **Bug reports**: [GitHub Issues](https://github.com/mcp-tool-shop-org/scalarscope-desktop/issues)
-- **Feature requests**: [GitHub Issues](https://github.com/mcp-tool-shop-org/scalarscope-desktop/issues) with `[FEATURE]` prefix
-- **Questions**: [GitHub Discussions](https://github.com/mcp-tool-shop-org/scalarscope-desktop/discussions)
+- **Bug reports**: [GitHub Issues](https://github.com/mcp-tool-shop-org/scalarscope/issues)
+- **Feature requests**: [GitHub Issues](https://github.com/mcp-tool-shop-org/scalarscope/issues) with `[FEATURE]` prefix
+- **Questions**: [GitHub Discussions](https://github.com/mcp-tool-shop-org/scalarscope/discussions)
 - **Security issues**: See SECURITY.md
 
 ## Timeline

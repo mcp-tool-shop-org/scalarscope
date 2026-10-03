@@ -16,7 +16,12 @@ MAJOR.MINOR.PATCH[-PRERELEASE]
 - `alpha.N` - Alpha release (e.g., `1.0.0-alpha.1`)
 
 ### Current Version
-- **2.0.0** - Major release for Microsoft Store
+- **3.0.0.0** - Next Partner Center update of store `9P3HT1PHBKQK`
+  - Package name `mcp-tool-shop.ScalarScope`
+  - Publisher `CN=5305D976-6952-4F00-9C21-3A5DB090359F`
+  - Publisher display name `mcp-tool-shop`
+  - Unsigned MSIX. Partner Center signs it on ingestion.
+- **2.0.0** - Previous Microsoft Store release
   - New Welcome experience (Phase H)
   - Unified design system
   - Simplified navigation (4 tabs)

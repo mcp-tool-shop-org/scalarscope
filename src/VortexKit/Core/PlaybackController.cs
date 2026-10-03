@@ -10,6 +10,7 @@ namespace VortexKit.Core;
 public partial class PlaybackController : ObservableObject, IDisposable
 {
     private System.Timers.Timer? _playbackTimer;
+    private int _tickQueued;
     private const double DefaultTickInterval = 16.67; // ~60fps
 
     private static readonly double[] SpeedPresets = [0.25, 0.5, 1.0, 2.0, 4.0];
@@ -171,25 +172,49 @@ public partial class PlaybackController : ObservableObject, IDisposable
 
     private void OnPlaybackTick(object? sender, System.Timers.ElapsedEventArgs e)
     {
-        var delta = (DefaultTickInterval / 1000.0) / Duration * Speed;
-        Time += delta;
+        // The timer thread must not write bound properties. Drop this tick if one is already queued.
+        if (Interlocked.CompareExchange(ref _tickQueued, 1, 0) != 0)
+            return;
 
-        if (Time >= 1.0)
+        try
         {
-            if (Loop)
-            {
-                Time = 0.0;
-            }
-            else
-            {
-                Time = 1.0;
-                IsPlaying = false;
-                _playbackTimer?.Stop();
-                PlaybackEnded?.Invoke();
-            }
+            MainThread.BeginInvokeOnMainThread(AdvancePlaybackOnUi);
         }
+        catch (InvalidOperationException)
+        {
+            // No UI thread in this process. Drop the tick.
+            Interlocked.Exchange(ref _tickQueued, 0);
+        }
+    }
 
-        TimeChanged?.Invoke();
+    private void AdvancePlaybackOnUi()
+    {
+        try
+        {
+            var delta = (DefaultTickInterval / 1000.0) / Duration * Speed;
+            Time += delta;
+
+            if (Time >= 1.0)
+            {
+                if (Loop)
+                {
+                    Time = 0.0;
+                }
+                else
+                {
+                    Time = 1.0;
+                    IsPlaying = false;
+                    _playbackTimer?.Stop();
+                    PlaybackEnded?.Invoke();
+                }
+            }
+
+            TimeChanged?.Invoke();
+        }
+        finally
+        {
+            Interlocked.Exchange(ref _tickQueued, 0);
+        }
     }
 
     public void Dispose()

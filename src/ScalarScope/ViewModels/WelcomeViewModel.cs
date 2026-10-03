@@ -56,31 +56,23 @@ public partial class WelcomeViewModel : ObservableObject
                 PickerTitle = "Open Review Bundle",
                 FileTypes = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
                 {
-                    { DevicePlatform.WinUI, new[] { ".scsbundle", ".json" } },
-                    { DevicePlatform.macOS, new[] { "scsbundle", "json" } }
+                    { DevicePlatform.WinUI, new[] { ".scbundle" } },
+                    { DevicePlatform.macOS, new[] { "scbundle" } }
                 })
             });
 
             if (result == null) return;
 
-            // Navigate to compare page which handles bundle loading
+            // Compare reads this when it appears. The query string is the same request.
+            App.Comparison.RequestBundleOpen(result.FullPath);
             await Shell.Current.GoToAsync($"//compare?bundle={Uri.EscapeDataString(result.FullPath)}");
-            
-            // Record this bundle open
-            AddRecentComparison(new RecentComparisonItem
-            {
-                Id = Guid.NewGuid().ToString(),
-                Title = Path.GetFileNameWithoutExtension(result.FullPath),
-                Subtitle = "Review bundle",
-                Icon = "📦",
-                FilePath = result.FullPath,
-                IsBundle = true,
-                Timestamp = DateTimeOffset.UtcNow
-            });
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Failed to open bundle: {ex.Message}");
+            if (Shell.Current != null)
+            {
+                await Shell.Current.DisplayAlert("Could not open bundle", ex.Message, "OK");
+            }
         }
     }
 
@@ -90,7 +82,7 @@ public partial class WelcomeViewModel : ObservableObject
     [RelayCommand]
     private async Task TryExample()
     {
-        // Navigate to compare page with demo flag
+        App.Comparison.RequestDemoOpen();
         await Shell.Current.GoToAsync("//compare?demo=true");
     }
 
@@ -104,6 +96,7 @@ public partial class WelcomeViewModel : ObservableObject
 
         if (item.IsBundle && !string.IsNullOrEmpty(item.FilePath))
         {
+            App.Comparison.RequestBundleOpen(item.FilePath);
             await Shell.Current.GoToAsync($"//compare?bundle={Uri.EscapeDataString(item.FilePath)}");
         }
         else

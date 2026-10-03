@@ -21,10 +21,12 @@
 		<!-- App Identifier -->
 		<ApplicationId>org.mcptoolshop.scalarscope</ApplicationId>
 
-		<!-- Versions - v2.0.2 -->
-		<ApplicationDisplayVersion>2.0.2</ApplicationDisplayVersion>
-		<ApplicationVersion>22</ApplicationVersion>
-		<Version>2.0.2.0</Version>
+		<!-- Store identity version is Package.appxmanifest Version, literal 3.0.0.0.
+		     MAUI only overwrites that attribute when it is 0.0.0.0.
+		     ApplicationVersion 30 stays above the 2.x value of 22. -->
+		<ApplicationDisplayVersion>3.0.0</ApplicationDisplayVersion>
+		<ApplicationVersion>30</ApplicationVersion>
+		<Version>3.0.0.0</Version>
 
 		<!-- Package metadata -->
 		<Authors>ScalarScope Project (mcp-tool-shop-org)</Authors>

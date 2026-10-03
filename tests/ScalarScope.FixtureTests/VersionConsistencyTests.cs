@@ -41,4 +41,24 @@ public class VersionConsistencyTests
         var major = int.Parse(version.Split('.')[0]);
         major.Should().BeGreaterThanOrEqualTo(1);
     }
+
+    [Fact]
+    public void PackageIdentity_MatchesPartnerCenter()
+    {
+        var root = FindRepoRoot();
+        XNamespace ns = "http://schemas.microsoft.com/appx/manifest/foundation/windows10";
+        var manifest = XDocument.Load(Path.Combine(root, "src", "ScalarScope", "Platforms", "Windows", "Package.appxmanifest"));
+        var identity = manifest.Root!.Element(ns + "Identity")!;
+        var properties = manifest.Root.Element(ns + "Properties")!;
+
+        identity.Attribute("Name")!.Value.Should().Be("mcp-tool-shop.ScalarScope");
+        identity.Attribute("Publisher")!.Value.Should().Be("CN=5305D976-6952-4F00-9C21-3A5DB090359F");
+        identity.Attribute("Version")!.Value.Should().Be("3.0.0.0");
+        properties.Element(ns + "PublisherDisplayName")!.Value.Should().Be("mcp-tool-shop");
+
+        var csproj = XDocument.Load(Path.Combine(root, "src", "ScalarScope", "ScalarScope.csproj"));
+        csproj.Descendants("ApplicationDisplayVersion").First().Value.Should().Be("3.0.0");
+        csproj.Descendants("Version").First().Value.Should().Be("3.0.0.0");
+        int.Parse(csproj.Descendants("ApplicationVersion").First().Value).Should().BeGreaterThanOrEqualTo(30);
+    }
 }

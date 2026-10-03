@@ -5,6 +5,18 @@ All notable changes to ScalarScope will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 2026-10-03
+
+### Fixed
+- Home opens a `.scbundle`. Compare imports that bundle, and Try Example loads the built-in runs. A bundle is added to Recent only after it loads.
+- Playback advances on the UI thread. A tick that is already queued is dropped.
+- Recovery resumes to Home, Compare, Help, or Settings. Start fresh returns to Home.
+
+### Changed
+- Package identity version is `3.0.0.0` for the next Partner Center update of store `9P3HT1PHBKQK`. Name, publisher, and publisher display name are unchanged.
+- The release workflow publishes an unsigned `ScalarScope_3.0.0.0_Store.msixupload`, the same upload shape as `ScalarScope_v2.0.0_Store.msixupload`. Partner Center signs it. The old workflow built an unpackaged exe.
+- Welcome and Settings read the assembly version instead of a hardcoded `2.0.0`.
+
 ## [2.0.2] - 2026-03-25
 
 ### Added

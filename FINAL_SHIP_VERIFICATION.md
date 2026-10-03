@@ -1,5 +1,7 @@
 # ScalarScope v2.0.0 - Final Ship Verification
 
+This file records the 2.0.0 ship. It is not the current package. The working package version is **3.0.0.0**. Name, publisher, and publisher display name are unchanged.
+
 Generated: 2026-02-09
 
 ## FINAL COMPLETION CHECKLIST - VERIFIED ✅

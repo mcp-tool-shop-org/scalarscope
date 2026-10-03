@@ -19,31 +19,27 @@ ScalarScope is self-contained and includes all required runtimes:
 
 ## Installation Methods
 
-### Method 1: MSIX Package (Recommended)
+### Method 1: Microsoft Store
 
-1. **Download** the latest `ScalarScope-{version}-x64.msix` from GitHub Releases
-2. **Verify** the checksum matches `ScalarScope-{version}-checksums.txt`
-3. **Double-click** the MSIX file
-4. **Click "Install"** in the App Installer dialog
-5. **Wait** for installation to complete (~30 seconds)
-6. **Launch** from Start Menu: "ScalarScope"
+The app is published. Store id `9P3HT1PHBKQK`.
 
-### Method 2: Microsoft Store (When Available)
+1. Open https://apps.microsoft.com/detail/9P3HT1PHBKQK
+2. Click Get
+3. Launch ScalarScope from the Start menu
 
-1. Open Microsoft Store
-2. Search for "ScalarScope"
-3. Click "Get" / "Install"
-4. Launch from Start Menu
+An update must keep package name `mcp-tool-shop.ScalarScope`, publisher `CN=5305D976-6952-4F00-9C21-3A5DB090359F`, and publisher display name `mcp-tool-shop`. The next package version is `3.0.0.0`.
 
-### Method 3: Manual Installation (Development)
+### Method 2: Partner Center upload
+
+The release workflow builds an unsigned MSIX. Partner Center signs it during ingestion. That file will not install if you double-click it.
+
+### Method 3: Build from source
 
 ```powershell
-# Clone and build
-git clone https://github.com/mcp-tool-shop-org/scalarscope-desktop.git
-cd scalarscope-desktop
+git clone https://github.com/mcp-tool-shop-org/scalarscope.git
+cd scalarscope
+dotnet workload install maui-windows
 dotnet build src/ScalarScope/ScalarScope.csproj -c Release -f net9.0-windows10.0.19041.0
-
-# Run
 dotnet run --project src/ScalarScope/ScalarScope.csproj -f net9.0-windows10.0.19041.0
 ```
 
@@ -58,9 +54,9 @@ After installation, verify the app works correctly:
 - **Expected**: App opens with welcome screen within 3 seconds
 
 ### Step 2: Load Sample Data
-- Click "Open Run" or press Ctrl+O
-- Navigate to a sample training run JSON file
-- **Expected**: Trajectory visualization appears
+- On Home, click "Compare Two Runs"
+- Load a baseline trace and an optimized trace
+- **Expected**: The Compare tab shows the two runs
 
 ### Step 3: Test Playback
 - Press Space to start playback
@@ -73,11 +69,8 @@ After installation, verify the app works correctly:
 
 ## Upgrade Procedure
 
-### MSIX Upgrade (Automatic)
-1. Download new MSIX version
-2. Double-click to install
-3. App Installer will detect existing installation and upgrade
-4. **User data is preserved**
+### Store upgrade
+Install the newer package from Partner Center or the Microsoft Store. The package name and publisher must match the installed app. User data stays. An unsigned MSIX from this repo is the upload file, not the installer.
 
 ### Upgrade Verification Checklist
 - [ ] Version number updated (Help > About)
@@ -181,6 +174,6 @@ Use this checklist to certify a clean install:
 
 If you encounter issues not covered here:
 
-1. Check [GitHub Issues](https://github.com/mcp-tool-shop-org/scalarscope-desktop/issues)
+1. Check [GitHub Issues](https://github.com/mcp-tool-shop-org/scalarscope/issues)
 2. Create a support bundle: Help > Create Support Bundle
 3. Open a new issue with the support bundle attached

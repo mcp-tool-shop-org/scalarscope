@@ -3,10 +3,12 @@ using ScalarScope.ViewModels;
 
 namespace ScalarScope.Views;
 
-public partial class ComparisonPage : ContentPage
+public partial class ComparisonPage : ContentPage, IQueryAttributable
 {
     // Use the shared comparison instance from App
     private ComparisonViewModel ViewModel => App.Comparison;
+
+    private int _openSerial;
 
     public ComparisonPage()
     {
@@ -44,38 +46,149 @@ public partial class ComparisonPage : ContentPage
             var result = await FilePicker.PickAsync(options);
             if (result == null) return;
 
-            // Show loading indicator
-            openBundleButton.IsEnabled = false;
-            openBundleButton.Text = "Loading...";
-
-            try
-            {
-                // Import the bundle
-                var importResult = await BundleImportService.Instance.ImportAsync(result.FullPath);
-                
-                if (importResult.Success && importResult.LoadedBundle != null)
-                {
-                    // Hydrate the UI with bundle data
-                    await HydrateBundleAsync(importResult.LoadedBundle);
-                }
-                else
-                {
-                    // Show error
-                    var errorMessage = importResult.ErrorMessage ?? "Failed to import bundle";
-                    if (importResult.ErrorExplanation != null)
-                    {
-                        errorMessage += $"\n\n{importResult.ErrorExplanation.Summary}";
-                    }
-                    
-                    await DisplayAlert("Import Failed", errorMessage, "OK");
-                }
-            }
-            finally
-            {
-                openBundleButton.IsEnabled = true;
-                openBundleButton.Text = "📦 Open Bundle...";
-            }
+            await LoadBundleFromPathAsync(result.FullPath);
         }, "Bundle open");
+    }
+
+    /// <summary>
+    /// Shell delivers the same request Home stored on the comparison.
+    /// </summary>
+    public void ApplyQueryAttributes(IDictionary<string, object> query)
+    {
+        if (query.TryGetValue("bundle", out var bundleValue) && bundleValue != null)
+        {
+            var path = bundleValue.ToString();
+            if (!string.IsNullOrWhiteSpace(path))
+            {
+                ViewModel.RequestBundleOpen(DecodeBundlePath(path));
+                ScheduleOpenRequest();
+                return;
+            }
+        }
+
+        if (query.TryGetValue("demo", out var demoValue) && IsDemoQuery(demoValue))
+        {
+            ViewModel.RequestDemoOpen();
+            ScheduleOpenRequest();
+        }
+    }
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+        // Update delta label when time changes
+        ViewModel.Player.TimeChanged += UpdateDeltaLabel;
+        // Trigger initial update if runs are loaded
+        UpdateDeltaLabel();
+
+        // Re-subscribe to MessagingCenter (may have been unsubscribed)
+        MessagingCenter.Subscribe<HelpPage, string>(this, "HighlightDelta", OnHighlightDeltaRequested);
+
+        ScheduleOpenRequest();
+    }
+
+    private void ScheduleOpenRequest()
+    {
+        var serial = ++_openSerial;
+        MainThread.BeginInvokeOnMainThread(async () =>
+        {
+            if (serial != _openSerial)
+                return;
+
+            if (!ViewModel.TryTakeOpenRequest(out var bundlePath, out var demo))
+                return;
+
+            if (!string.IsNullOrEmpty(bundlePath))
+                await LoadBundleFromPathAsync(bundlePath);
+            else if (demo)
+                await LoadDemoFromQueryAsync();
+        });
+    }
+
+    private async Task LoadBundleFromPathAsync(string path)
+    {
+        openBundleButton.IsEnabled = false;
+        openBundleButton.Text = "Loading...";
+
+        try
+        {
+            if (!File.Exists(path))
+            {
+                await DisplayAlert("Import Failed", $"File not found:\n{path}", "OK");
+                return;
+            }
+
+            var importResult = await BundleImportService.Instance.ImportAsync(path);
+
+            if (importResult.Success && importResult.LoadedBundle != null)
+            {
+                await HydrateBundleAsync(importResult.LoadedBundle);
+            }
+            else
+            {
+                var errorMessage = importResult.ErrorMessage ?? "Failed to import bundle";
+                if (importResult.ErrorExplanation != null)
+                {
+                    errorMessage += $"\n\n{importResult.ErrorExplanation.Summary}";
+                }
+
+                await DisplayAlert("Import Failed", errorMessage, "OK");
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Import Failed", ex.Message, "OK");
+        }
+        finally
+        {
+            openBundleButton.IsEnabled = true;
+            openBundleButton.Text = "📦 Open Bundle...";
+        }
+    }
+
+    private async Task LoadDemoFromQueryAsync()
+    {
+        openBundleButton.IsEnabled = false;
+
+        try
+        {
+            var (pathA, pathB) = await DemoService.StartDemoAsync();
+            if (pathA == null || pathB == null)
+            {
+                await DisplayAlert("Example unavailable", "The built-in example runs could not be loaded.", "OK");
+                return;
+            }
+
+            ViewModel.LoadDemoRuns(pathA, pathB);
+            await Task.Delay(500);
+            if (!ViewModel.Player.IsPlaying)
+            {
+                ViewModel.Player.PlayPauseCommand.Execute(null);
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Example unavailable", ex.Message, "OK");
+        }
+        finally
+        {
+            openBundleButton.IsEnabled = true;
+            openBundleButton.Text = "📦 Open Bundle...";
+        }
+    }
+
+    private static string DecodeBundlePath(string value)
+    {
+        return value.Contains('%', StringComparison.Ordinal)
+            ? Uri.UnescapeDataString(value)
+            : value;
+    }
+
+    private static bool IsDemoQuery(object? value)
+    {
+        return value is bool flag
+            ? flag
+            : string.Equals(value?.ToString(), "true", StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>
@@ -95,6 +208,8 @@ public partial class ComparisonPage : ContentPage
             insightsTray.SetInsights(bundle.Insights);
         }
         
+        RememberOpenedBundle(bundle);
+
         // Show review mode banner
         await DisplayAlert(
             "Bundle Loaded",
@@ -103,6 +218,24 @@ public partial class ComparisonPage : ContentPage
             $"Deltas: {bundle.Deltas.Count}\n" +
             $"Badge: {bundle.ReproducibilityBadge}",
             "OK");
+    }
+
+    private static void RememberOpenedBundle(LoadedBundle bundle)
+    {
+        if (string.IsNullOrWhiteSpace(bundle.FilePath))
+            return;
+
+        var welcome = new WelcomeViewModel();
+        welcome.AddRecentComparison(new RecentComparisonItem
+        {
+            Id = Guid.NewGuid().ToString(),
+            Title = Path.GetFileNameWithoutExtension(bundle.FilePath),
+            Subtitle = $"{bundle.Deltas.Count} deltas · {bundle.ReproducibilityBadge}",
+            Icon = "📦",
+            FilePath = bundle.FilePath,
+            IsBundle = true,
+            Timestamp = DateTimeOffset.UtcNow
+        });
     }
 
     private void SetupBundleHandlers()
@@ -262,18 +395,6 @@ public partial class ComparisonPage : ContentPage
             "delta_f" => (delta.FailedA == true || delta.FailedB == true) ? "event" : "proxy",
             _ => null
         };
-    }
-
-    protected override void OnAppearing()
-    {
-        base.OnAppearing();
-        // Update delta label when time changes
-        ViewModel.Player.TimeChanged += UpdateDeltaLabel;
-        // Trigger initial update if runs are loaded
-        UpdateDeltaLabel();
-        
-        // Re-subscribe to MessagingCenter (may have been unsubscribed)
-        MessagingCenter.Subscribe<HelpPage, string>(this, "HighlightDelta", OnHighlightDeltaRequested);
     }
 
     private void UpdateDeltaLabel()

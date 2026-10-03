@@ -2,6 +2,8 @@
   <a href="README.md">English</a> | <a href="README.ja.md">日本語</a> | <a href="README.zh.md">中文</a> | <a href="README.es.md">Español</a> | <a href="README.fr.md">Français</a> | <a href="README.hi.md">हिन्दी</a> | <a href="README.it.md">Italiano</a> | <a href="README.pt-BR.md">Português (BR)</a>
 </p>
 
+The other languages are the 2.x prototype. They still name the old repository and a NuGet package. This English page is the current one.
+
 <p align="center">
   <img src="https://raw.githubusercontent.com/mcp-tool-shop-org/brand/main/logos/ScalarScope-Desktop/readme.png" alt="ScalarScope" width="400">
 </p>
@@ -16,6 +18,8 @@
 </p>
 
 **ASPIRE Scalar Vortex Visualizer — a .NET MAUI desktop app for comparing ML inference runs with scientific rigor.**
+
+Package version **3.0.0.0**. Store updates of [9P3HT1PHBKQK](https://apps.microsoft.com/detail/9P3HT1PHBKQK) keep the name `mcp-tool-shop.ScalarScope` and the publisher `CN=5305D976-6952-4F00-9C21-3A5DB090359F`.
 
 ---
 
@@ -136,7 +140,7 @@ Open any `.scbundle` without recomputing. Review mode verifies integrity, displa
 
 ### VortexKit Visualization Framework
 
-VortexKit is the extracted visualization engine, published as a standalone NuGet package:
+VortexKit is the visualization library in `src/VortexKit`. It ships with this repo. It is not a NuGet package.
 
 | Component | What It Does |
 |-----------|-------------|
@@ -207,7 +211,7 @@ scalarscope/
 │   │       ├── Styles/DesignSystem.xaml # Unified visual grammar
 │   │       └── Raw/Samples/            # Built-in example traces
 │   │
-│   └── VortexKit/                      # Standalone NuGet library
+│   └── VortexKit/                      # Visualization library in this repo
 │       ├── Core/
 │       │   ├── AnimatedCanvas.cs       # Time-synced SkiaSharp canvas base
 │       │   ├── PlaybackController.cs   # Shared playback timeline

@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:ScalarScope.ViewModels"
+             xmlns:svc="clr-namespace:ScalarScope.Services"
              x:Class="ScalarScope.Views.WelcomePage"
              x:DataType="vm:WelcomeViewModel"
              Shell.NavBarIsVisible="False"
@@ -228,7 +229,7 @@
         
         <!-- Footer -->
         <HorizontalStackLayout Grid.Row="2" Spacing="16" HorizontalOptions="Center" Margin="0,16,0,0">
-            <Label Text="v2.0.0" Style="{StaticResource StatusText}"/>
+            <Label Text="{x:Static svc:VersionInfo.Version}" Style="{StaticResource StatusText}"/>
             <Label Text="•" Style="{StaticResource StatusText}" Opacity="0.4"/>
             <Label Text="DeltaSpec 1.0" Style="{StaticResource StatusText}"/>
             <Label Text="•" Style="{StaticResource StatusText}" Opacity="0.4"/>

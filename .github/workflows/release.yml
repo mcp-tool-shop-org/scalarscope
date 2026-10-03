@@ -28,60 +28,47 @@ jobs:
     - name: Install MAUI workload
       run: dotnet workload install maui-windows --skip-sign-check
 
-    - name: Extract version from tag
-      id: version
-      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $env:GITHUB_OUTPUT
-
-    - name: Build Release
+    - name: Publish unsigned MSIX
       run: |
         dotnet publish src/ScalarScope/ScalarScope.csproj `
           --configuration Release `
           -f net9.0-windows10.0.19041.0 `
           -p:RuntimeIdentifier=win-x64 `
-          -p:WindowsPackageType=None `
-          -p:PublishSingleFile=true `
-          -p:SelfContained=true `
-          --output ./publish
+          -p:WindowsPackageType=MSIX `
+          -p:AppxPackageSigningEnabled=false
 
-    - name: Generate checksums
+    - name: Collect the MSIX
+      shell: pwsh
       run: |
-        cd publish
-        Get-ChildItem -Recurse -File | ForEach-Object {
-          $hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash
-          "$hash  $($_.Name)" | Out-File -Append -FilePath checksums.txt
-        }
+        New-Item -ItemType Directory -Force -Path release | Out-Null
+        $msix = Get-ChildItem -Path src/ScalarScope/bin/Release -Recurse -Filter *.msix |
+          Where-Object { $_.FullName -match '\\AppPackages\\' -and $_.Name -like 'ScalarScope_*.msix' } |
+          Sort-Object LastWriteTime -Descending |
+          Select-Object -First 1
+        if (-not $msix) { throw "No ScalarScope MSIX under AppPackages" }
+        Copy-Item $msix.FullName (Join-Path release $msix.Name)
+        $uploadName = "ScalarScope_3.0.0.0_Store.msixupload"
+        $uploadPath = Join-Path release $uploadName
+        $staging = Join-Path $env:TEMP "scalarscope-msixupload"
+        if (Test-Path $staging) { Remove-Item $staging -Recurse -Force }
+        New-Item -ItemType Directory -Force -Path $staging | Out-Null
+        Copy-Item $msix.FullName (Join-Path $staging $msix.Name)
+        $types = '<?xml version="1.0" encoding="utf-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="msix" ContentType="application/vnd.ms-appx" /></Types>'
+        [System.IO.File]::WriteAllText((Join-Path $staging '[Content_Types].xml'), $types)
+        if (Test-Path $uploadPath) { Remove-Item $uploadPath -Force }
+        Add-Type -AssemblyName System.IO.Compression.FileSystem
+        [System.IO.Compression.ZipFile]::CreateFromDirectory($staging, $uploadPath)
+        $hash = (Get-FileHash $uploadPath -Algorithm SHA256).Hash
+        "$hash  $uploadName" | Set-Content -Encoding ascii (Join-Path release "checksums.txt")
+        "$( (Get-FileHash $msix.FullName -Algorithm SHA256).Hash )  $($msix.Name)" | Add-Content -Encoding ascii (Join-Path release "checksums.txt")
+        Get-Content (Join-Path release "checksums.txt")
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
-        files: publish/*
+        files: release/*
         body_path: CHANGELOG.md
         draft: true
         prerelease: ${{ contains(github.ref, 'rc') || contains(github.ref, 'beta') || contains(github.ref, 'alpha') }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  build-vortexkit-release:
-    runs-on: windows-latest
-
-    steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
-      with:
-        dotnet-version: '9.0.x'
-
-    - name: Install MAUI workload
-      run: dotnet workload install maui-windows --skip-sign-check
-
-    - name: Pack VortexKit
-      run: dotnet pack src/VortexKit/VortexKit.csproj --configuration Release
-
-    - name: Push to NuGet (if not prerelease)
-      if: ${{ !contains(github.ref, 'rc') && !contains(github.ref, 'beta') && !contains(github.ref, 'alpha') }}
-      run: |
-        dotnet nuget push src/VortexKit/bin/Release/*.nupkg `
-          --api-key ${{ secrets.NUGET_API_KEY }} `
-          --source https://api.nuget.org/v3/index.json
-      continue-on-error: true

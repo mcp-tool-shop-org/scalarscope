@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:ScalarScope.ViewModels"
+             xmlns:svc="clr-namespace:ScalarScope.Services"
              x:Class="ScalarScope.Views.SettingsPage"
              x:DataType="vm:SettingsViewModel"
              Title="Settings"
@@ -456,7 +457,7 @@
                                FontSize="13"
                                TextColor="{AppThemeBinding Light=#666666, Dark=#888888}"/>
                         <Label Grid.Row="0" Grid.Column="1" 
-                               Text="2.0.0" 
+                               Text="{x:Static svc:VersionInfo.Version}" 
                                FontSize="13"
                                FontAttributes="Bold"
                                TextColor="{AppThemeBinding Light=#333333, Dark=#FFFFFF}"/>

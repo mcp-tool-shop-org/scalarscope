@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**ScalarScope** | Version 2.0.0 | Effective: January 2025
+**ScalarScope** | Version 3.0.0.0 | Policy effective: January 2025
 
 ## Summary
 
@@ -47,8 +47,8 @@ Since we don't collect data, there's nothing to:
 
 Questions about this policy:
 
-- GitHub Issues: https://github.com/mcp-tool-shop-org/scalarscope-desktop/issues
-- Repository: https://github.com/mcp-tool-shop-org/scalarscope-desktop
+- GitHub Issues: https://github.com/mcp-tool-shop-org/scalarscope/issues
+- Repository: https://github.com/mcp-tool-shop-org/scalarscope
 
 ## Changes
 

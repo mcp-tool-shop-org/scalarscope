@@ -209,6 +209,41 @@ public partial class ComparisonViewModel : ObservableObject
     // Shared playback controller
     public TrajectoryPlayerViewModel Player { get; } = new();
 
+    // Home sets one of these, then navigates here. The page takes it once.
+    private string? _pendingBundlePath;
+    private bool _pendingDemo;
+
+    /// <summary>
+    /// Ask Compare to import this bundle the next time the page appears.
+    /// </summary>
+    public void RequestBundleOpen(string path)
+    {
+        _pendingBundlePath = path;
+        _pendingDemo = false;
+    }
+
+    /// <summary>
+    /// Ask Compare to load the built-in example the next time the page appears.
+    /// </summary>
+    public void RequestDemoOpen()
+    {
+        _pendingBundlePath = null;
+        _pendingDemo = true;
+    }
+
+    /// <summary>
+    /// Take the one open Home asked for. A second call returns nothing.
+    /// </summary>
+    public bool TryTakeOpenRequest(out string? bundlePath, out bool demo)
+    {
+        bundlePath = _pendingBundlePath;
+        demo = _pendingDemo && string.IsNullOrEmpty(bundlePath);
+        var hasRequest = !string.IsNullOrEmpty(bundlePath) || _pendingDemo;
+        _pendingBundlePath = null;
+        _pendingDemo = false;
+        return hasRequest;
+    }
+
     // Computed properties for current time - Left
     public TrajectoryTimestep? LeftCurrentTrajectory => GetTrajectoryAtTime(LeftRun, Player.Time);
     public ScalarTimestep? LeftCurrentScalars => GetScalarsAtTime(LeftRun, Player.Time);

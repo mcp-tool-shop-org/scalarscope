@@ -438,4 +438,4 @@ The visualizations in ScalarScope make these abstract geometric properties tangi
 
 *Repositories:*
 - [aspire-engine](https://github.com/mcp-tool-shop-org/aspire-engine) - Core training framework
-- [scalarscope-desktop](https://github.com/mcp-tool-shop-org/scalarscope-desktop) - Visualization application
+- [scalarscope](https://github.com/mcp-tool-shop-org/scalarscope) - Visualization application

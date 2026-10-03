@@ -8,6 +8,9 @@ on:
       - "**/*.csproj"
       - "**/*.sln"
       - "**/*.xaml"
+      - "**/Package.appxmanifest"
+      - "**/app.manifest"
+      - "global.json"
       - ".github/workflows/**"
   pull_request:
     branches: [main]
@@ -16,6 +19,9 @@ on:
       - "**/*.csproj"
       - "**/*.sln"
       - "**/*.xaml"
+      - "**/Package.appxmanifest"
+      - "**/app.manifest"
+      - "global.json"
       - ".github/workflows/**"
   workflow_dispatch:
 

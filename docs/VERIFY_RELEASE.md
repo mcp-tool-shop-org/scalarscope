@@ -1,104 +1,56 @@
-# Release Verification Guide
+# Release Verification
 
-This guide explains how to verify the authenticity and integrity of ScalarScope releases.
+Use this to check a ScalarScope package before it goes to Partner Center, and to check the build you made yourself.
 
-## Quick Verification
+## Package identity
 
-### Step 1: Download Release Files
-From the [GitHub Releases](https://github.com/mcp-tool-shop-org/scalarscope-desktop/releases) page, download:
-- `ScalarScope-{version}-x64.msix` (the installer)
-- `ScalarScope-{version}-checksums.txt` (SHA256 hashes)
+The Store product is `9P3HT1PHBKQK`. An update must carry exactly:
 
-### Step 2: Verify Checksum
-Open PowerShell and run:
+| Field | Value |
+| --- | --- |
+| Name | `mcp-tool-shop.ScalarScope` |
+| Publisher | `CN=5305D976-6952-4F00-9C21-3A5DB090359F` |
+| Publisher display name | `mcp-tool-shop` |
+| Package Family Name | `mcp-tool-shop.ScalarScope_yn6b8xqrexa5j` |
+| Version | `3.0.0.0` for the next upload |
+
+Read the identity out of the MSIX:
+
 ```powershell
-# Navigate to downloads folder
-cd $env:USERPROFILE\Downloads
-
-# Calculate SHA256 of the downloaded MSIX
-Get-FileHash ScalarScope-1.0.0-rc.1-x64.msix -Algorithm SHA256
-
-# Compare with the value in checksums.txt
-Get-Content ScalarScope-1.0.0-rc.1-checksums.txt
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+$msix = "ScalarScope_3.0.0.0_x64.msix"
+$zip = [System.IO.Compression.ZipFile]::OpenRead((Resolve-Path $msix))
+$entry = $zip.GetEntry("AppxManifest.xml")
+$reader = New-Object System.IO.StreamReader($entry.Open())
+$xml = $reader.ReadToEnd()
+$reader.Close(); $zip.Dispose()
+[regex]::Match($xml, '<Identity[^>]*/>').Value
+[regex]::Match($xml, '<PublisherDisplayName>[^<]+</PublisherDisplayName>').Value
 ```
 
-The hash values must match exactly.
+The name, publisher, and version in that line are the Store update key. A different name or publisher is a new product, not an update.
 
-### Step 3: Verify Certificate (MSIX)
-When you double-click the MSIX, Windows App Installer shows:
-- Publisher name: should be "ScalarScope Project" or "mcp-tool-shop-org"
-- Certificate: Should show trusted or explain the certificate chain
+## Checksum
 
-## Checksum Example
+The release workflow writes `checksums.txt` next to the MSIX. Compare it with the file you have:
 
-```
-SHA256 Checksums for ScalarScope 1.0.0-rc.1
-Generated: 2025-02-04
-
-ScalarScope-1.0.0-rc.1-x64.msix
-  e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
-
-VortexKit.1.0.0-rc.1.nupkg
-  a2b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b856
+```powershell
+Get-FileHash .\ScalarScope_3.0.0.0_x64.msix -Algorithm SHA256
+Get-Content .\checksums.txt
 ```
 
-## What to Check
+## Signing
 
-| Item | How to Verify |
-|------|---------------|
-| File integrity | SHA256 checksum match |
-| Publisher | Certificate in MSIX |
-| Version | Help > About in app |
-| Source | Download from official GitHub releases only |
+The store file is `ScalarScope_3.0.0.0_Store.msixupload`. It is a zip of the unsigned MSIX. Partner Center already has `ScalarScope_1.0.3.0_x64.msix` and `ScalarScope_v2.0.0_Store.msixupload`. Partner Center signs the new upload during ingestion. Windows will not install the unsigned MSIX from a double-click. That is the upload shape, not a broken build.
 
-## Red Flags
+After Partner Center publishes, the installed app's publisher display name is `mcp-tool-shop`.
 
-Do NOT install if:
-- ❌ Checksum doesn't match
-- ❌ Downloaded from unofficial source
-- ❌ Certificate is untrusted or missing
-- ❌ File size is significantly different from expected
+## Build from source
 
-## Reporting Issues
-
-If you suspect a tampered release:
-1. Do NOT install the file
-2. Note the download source
-3. Report to security@(project email) or [GitHub Security Advisory](https://github.com/mcp-tool-shop-org/scalarscope-desktop/security/advisories)
-
-## Build Reproducibility
-
-For advanced verification, you can build from source:
-
-```bash
-# Clone the exact tag
-git clone --branch v1.0.0-rc.1 https://github.com/mcp-tool-shop-org/scalarscope-desktop.git
-
-# Build
-cd scalarscope-desktop
-dotnet build src/ScalarScope/ScalarScope.csproj -c Release -f net10.0-windows10.0.19041.0
-
-# The output should match the distributed binaries
+```powershell
+git clone https://github.com/mcp-tool-shop-org/scalarscope.git
+cd scalarscope
+dotnet publish src/ScalarScope/ScalarScope.csproj -c Release -f net9.0-windows10.0.19041.0 -p:AppxPackageSigningEnabled=false
 ```
 
-## CI/CD Pipeline
-
-All releases are built by GitHub Actions:
-- Source: Tagged commit on main branch
-- Build: Windows-latest runner
-- Artifacts: Uploaded to GitHub Releases
-- No manual intervention in build process
-
-## Certificate Information
-
-For pre-Store releases, MSIX packages may be self-signed or signed with a test certificate. This is normal for RC releases. The Microsoft Store version will have a Microsoft-trusted certificate.
-
-### Installing Self-Signed MSIX
-1. Enable Developer Mode: Settings > Update & Security > For Developers
-2. Or: Right-click MSIX > Properties > Digital Signatures > View Certificate > Install Certificate
-
-## Questions?
-
-If you have questions about verification:
-- Check [GitHub Discussions](https://github.com/mcp-tool-shop-org/scalarscope-desktop/discussions)
-- Open an [Issue](https://github.com/mcp-tool-shop-org/scalarscope-desktop/issues)
+The MSIX lands under `src/ScalarScope/bin/Release/net9.0-windows10.0.19041.0/win-x64/AppPackages/`.

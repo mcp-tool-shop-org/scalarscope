@@ -87,20 +87,26 @@ public partial class RecoveryPage : ContentPage
 
         CrashReportingService.ClearSessionState();
 
-        // Navigate to the page they were on (or trajectory as default)
-        var targetPage = sessionState?.CurrentPage?.ToLowerInvariant() switch
-        {
-            "overview" => "//overview",
-            "scalars" => "//scalars",
-            "geometry" => "//geometry",
-            "compare" => "//compare",
-            "failures" => "//failures",
-            "settings" => "//settings",
-            "help" => "//help",
-            _ => "//trajectory"
-        };
+        var hasFile = sessionState != null
+            && !string.IsNullOrEmpty(sessionState.LoadedFilePath)
+            && File.Exists(sessionState.LoadedFilePath);
 
-        await Shell.Current.GoToAsync(targetPage);
+        await Shell.Current.GoToAsync(ResumeDestination(sessionState?.CurrentPage, hasFile));
+    }
+
+    /// <summary>
+    /// Only the four shell tabs exist. A restored file opens Compare. Anything else opens Home.
+    /// </summary>
+    private static string ResumeDestination(string? currentPage, bool hasFile)
+    {
+        return currentPage?.Trim().ToLowerInvariant() switch
+        {
+            "welcome" => "//welcome",
+            "compare" => "//compare",
+            "help" => "//help",
+            "settings" => "//settings",
+            _ => hasFile ? "//compare" : "//welcome"
+        };
     }
 
     private async void OnStartFreshClicked(object sender, EventArgs e)
@@ -109,8 +115,7 @@ public partial class RecoveryPage : ContentPage
         CrashReportingService.AcknowledgeCrash();
         CrashReportingService.ClearSessionState();
 
-        // Navigate to main app
-        await Shell.Current.GoToAsync("//trajectory");
+        await Shell.Current.GoToAsync("//welcome");
     }
 
     private async void OnSupportBundleClicked(object sender, EventArgs e)

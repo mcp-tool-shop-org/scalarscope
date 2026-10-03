@@ -94,15 +94,15 @@ All exports are available at full resolution (up to 4K) with configurable option
 
 ### Requirements
 
-- .NET 8.0 or later
-- Windows 10/11, macOS, or Linux (via .NET MAUI)
+- .NET 9.0 SDK and the `maui-windows` workload
+- Windows 10 (build 17763) or later, x64
 
 ### Quick Start
 
 ```bash
 # Clone the repository
-git clone https://github.com/mcp-tool-shop-org/scalarscope-desktop.git
-cd scalarscope-desktop
+git clone https://github.com/mcp-tool-shop-org/scalarscope.git
+cd scalarscope
 
 # Build and run
 dotnet build src/ScalarScope
@@ -139,7 +139,7 @@ export_geometry(
 
 ## Source Code and Data Availability
 
-- **ScalarScope**: https://github.com/mcp-tool-shop-org/scalarscope-desktop
+- **ScalarScope**: https://github.com/mcp-tool-shop-org/scalarscope
 - **ASPIRE Engine**: https://github.com/mcp-tool-shop-org/aspire-engine
 - **Sample Data**: Included in repository under `data/sample_runs/`
 
@@ -152,7 +152,7 @@ If you use ScalarScope in your research, please cite:
   title = {ScalarScope: Interactive Visualization for Evaluative Learning Dynamics},
   author = {[Authors]},
   year = {2024},
-  url = {https://github.com/mcp-tool-shop-org/scalarscope-desktop},
+  url = {https://github.com/mcp-tool-shop-org/scalarscope},
   note = {Scientific instrument for studying conscience formation and evaluator geometry}
 }
 ```
