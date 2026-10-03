@@ -47,6 +47,7 @@ fn latency_csv_round_trips_and_keeps_throughput_beside_it() {
     assert_eq!(review.right_p99, Some(7.0));
     assert!(review.left_steady.is_none());
     assert!(review.caption.contains("not a confidence interval"));
+    assert!(!review.caption.contains("vertical line"));
     assert_eq!(review.left_cdf.last().map(|point| point.1), Some(1.0));
 }
 
@@ -135,6 +136,29 @@ fn a_training_file_beside_a_trace_is_refused() {
     )
     .unwrap_err();
     assert!(error.contains("same kind"));
+}
+
+#[test]
+fn the_steady_line_is_named_only_when_both_milestones_exist() {
+    let flat = |count: usize| {
+        let mut csv = String::from("step,latency_ms\n");
+        for index in 0..count {
+            csv.push_str(&format!("{index},10\n"));
+        }
+        csv
+    };
+    let Pair::Inference(review) = pair(&open_text(&flat(20), "a").unwrap(), &open_text(&flat(20), "b").unwrap()).unwrap() else {
+        panic!("two flat series are an inference review");
+    };
+    assert!(review.left_steady.is_some());
+    assert!(review.right_steady.is_some());
+    assert!(review.caption.contains("The vertical line is the steady-state milestone."));
+
+    let Pair::Inference(short) = pair(&open_text(&flat(4), "a").unwrap(), &open_text(&flat(4), "b").unwrap()).unwrap() else {
+        panic!("two short series are an inference review");
+    };
+    assert!(short.left_steady.is_none());
+    assert!(!short.caption.contains("vertical line"));
 }
 
 #[test]

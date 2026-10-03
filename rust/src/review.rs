@@ -92,9 +92,12 @@ fn inference(left: &InferenceRun, right: &InferenceRun) -> InferenceReview {
     let (left_throughput, right_throughput) = throughput(left, right, skip_left, skip_right, count);
     let (findings, verdict) = inference_verdict(left, right);
     let fired = findings.iter().map(|row| row.symbol.clone()).collect();
-    let caption = format!(
+    let mut caption = format!(
         "latency_ms (ms). {summary} The band is a centered 5-sample rolling mean ± population standard deviation, not a confidence interval. Marks are 3-sigma on this window. p50, p95, and p99 are nearest-rank. The distribution is the empirical CDF of these same samples. ΔTd and ΔĀ stay off this page."
     );
+    if left.steady_step.is_some() && right.steady_step.is_some() {
+        caption.push_str(" The vertical line is the steady-state milestone.");
+    }
     InferenceReview {
         left_text: describe(&left.label, &left_values, &left_finite),
         right_text: describe(&right.label, &right_values, &right_finite),

@@ -8,8 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.0.0] - 2026-10-03
 
 ### Added
-- The Rust review writes a `.scbundle`. The archive uses the Phase 7.2 content hash: each file except `integrity.json` is SHA-256 of the stored UTF-8 bytes, and the bundle hash is SHA-256 of the ordinal `path:hash` lines. Opening the file shows that stored review. A matching hash is a content check, not a signature. The Store package is still the .NET app.
-- The review app in `rust/` is the ScalarScope being built. It opens two inference traces, or two backpropagate `run_history.json` files. Training loss stays training loss, and the eval numbers sit beside that curve. An inference pair reports ΔF and ΔO. ΔTc is reported only when both traces have a steady-state milestone, and a missing milestone is not called a stabilization time. ΔTd and ΔĀ stay off that page. The Store package is still the .NET app until this binary is the update.
+- The release workflow packs the Rust review as the unsigned `ScalarScope_3.0.0.0_x64.msix`. The package name stays `mcp-tool-shop.ScalarScope`, the publisher stays `CN=5305D976-6952-4F00-9C21-3A5DB090359F`, the version stays `3.0.0.0`, and the architecture stays x64. It is not uploaded. The Store copy is still the previous .NET package. A packaged run keeps `comparison-log.json` in that package's LocalState folder. An unpackaged run does not write that folder.
+- An inference series draws a vertical line at the steady-state milestone when both sides have one. A missing milestone draws no line, and the last step is not called a stabilization time.
+- The Rust review writes a `.scbundle`. The archive uses the Phase 7.2 content hash: each file except `integrity.json` is SHA-256 of the stored UTF-8 bytes, and the bundle hash is SHA-256 of the ordinal `path:hash` lines. Opening the file shows that stored review. A matching hash is a content check, not a signature.
+- The review app in `rust/` is the ScalarScope being built. It opens two inference traces, or two backpropagate `run_history.json` files. Training loss stays training loss, and the eval numbers sit beside that curve. An inference pair reports ΔF and ΔO. ΔTc is reported only when both traces have a steady-state milestone, and a missing milestone is not called a stabilization time. ΔTd and ΔĀ stay off that page.
 - Compare opens a real inference trace. A latency CSV, a benchmark JSON, or a profiler trace loads as the series it measured. The same samples can be drawn as a series or as their distribution. The series drawing adds a rolling spread band, 3-sigma marks, a steady-state span when that milestone exists, and throughput when both traces have it. A geometry JSON still opens the path view.
 - Home keeps a local comparison log. A review is written when both runs are loaded: the two names, the deltas that fired across the full run (ΔF, ΔTc, ΔTd, ΔĀ, ΔO), and the bundle hash once a bundle is saved or opened. The file stays in app data.
 
@@ -21,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Package identity version is `3.0.0.0` for the next Partner Center update of store `9P3HT1PHBKQK`. Name, publisher, and publisher display name are unchanged.
-- The release workflow publishes an unsigned `ScalarScope_3.0.0.0_Store.msixupload`, the same upload shape as `ScalarScope_v2.0.0_Store.msixupload`. Partner Center signs it. The old workflow built an unpackaged exe.
+- The release workflow publishes an unsigned `ScalarScope_3.0.0.0_Store.msixupload` whose binary is the Rust review, the same upload shape as `ScalarScope_v2.0.0_Store.msixupload`. Partner Center signs it. The old workflow built the .NET package.
 - Welcome and Settings read the assembly version instead of a hardcoded `2.0.0`.
 
 ## [2.0.2] - 2026-03-25

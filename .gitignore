@@ -15,6 +15,7 @@ TestResults/
 *.msixupload
 *.appx
 *.appxupload
+release/checksums.txt
 
 # Landing site dependencies
 node_modules/

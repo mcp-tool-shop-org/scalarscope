@@ -1,9 +1,12 @@
 //! The window. egui_plot draws the readings. It does not decide them.
 
+use std::path::Path;
+
 use eframe::egui::{self, Color32, RichText};
-use egui_plot::{Line, Plot, PlotPoints, Points, Polygon};
+use egui_plot::{Line, Plot, PlotPoints, Points, Polygon, VLine};
 
 use crate::bundle::{self, OpenedBundle};
+use crate::history::{self, LogEntry};
 use crate::open::{open_path, Loaded, Side};
 use crate::readings::Band;
 use crate::review::{self, InferenceReview, Pair, TrainingReview};
@@ -19,16 +22,26 @@ pub struct ScalarScopeApp {
     opened: Option<OpenedBundle>,
     note: String,
     distribution: bool,
+    /// Set only when this process is the Store package. An unpackaged run leaves LocalState alone.
+    history_dir: Option<std::path::PathBuf>,
+    recent: Vec<LogEntry>,
+    sitting_key: String,
 }
 
 impl Default for ScalarScopeApp {
     fn default() -> Self {
+        let history_dir = history::package_local_state();
+        let mut recent = history_dir.as_ref().map(|dir| history::read(dir)).unwrap_or_default();
+        recent.truncate(history::HOME_COUNT);
         Self {
             left: None,
             right: None,
             opened: None,
             note: String::new(),
             distribution: false,
+            history_dir,
+            recent,
+            sitting_key: String::new(),
         }
     }
 }
@@ -72,6 +85,20 @@ impl eframe::App for ScalarScopeApp {
             ui.label(RichText::new(&self.note).color(MARK));
         }
 
+        let built = if self.opened.is_none() {
+            match (&self.left, &self.right) {
+                (Some(left), Some(right)) => review::pair(&left.side, &right.side).ok(),
+                _ => None,
+            }
+        } else {
+            None
+        };
+        if let Some(pair) = &built {
+            let left_path = self.left.as_ref().map(|item| item.path.clone()).unwrap_or_default();
+            let right_path = self.right.as_ref().map(|item| item.path.clone()).unwrap_or_default();
+            self.remember(&left_path, &right_path, pair);
+        }
+
         ui.add_space(8.0);
         if let Some(opened) = opened {
             ui.label(RichText::new(format!("Stored review · {}", &opened.bundle_hash[..16])).color(NOTE));
@@ -87,23 +114,19 @@ impl eframe::App for ScalarScopeApp {
                     ui.label(RichText::new(&opened.review.caption).color(NOTE));
                 }
             }
-            return;
-        }
-
-        let built = match (&self.left, &self.right) {
-            (Some(left), Some(right)) => review::pair(&left.side, &right.side).ok(),
-            _ => None,
-        };
-        match built {
-            Some(Pair::Inference(review)) => self.draw_inference(ui, &review),
-            Some(Pair::Training(review)) => draw_training(ui, &review),
-            None => {
-                ui.label(
-                    RichText::new("Open two inference traces, or two backpropagate run histories. Or open a .scbundle.")
-                        .color(NOTE),
-                );
+        } else {
+            match built {
+                Some(Pair::Inference(review)) => self.draw_inference(ui, &review),
+                Some(Pair::Training(review)) => draw_training(ui, &review),
+                None => {
+                    ui.label(
+                        RichText::new("Open two inference traces, or two backpropagate run histories. Or open a .scbundle.")
+                            .color(NOTE),
+                    );
+                }
             }
         }
+        self.draw_recent(ui);
     }
 }
 
@@ -145,8 +168,11 @@ impl ScalarScopeApp {
         };
         match bundle::open_file(&path) {
             Ok(opened) => {
+                let path_text = path.display().to_string();
+                let hash = opened.bundle_hash.clone();
                 self.opened = Some(opened);
                 self.note.clear();
+                self.record_opened_bundle(&path_text, &hash);
             }
             Err(error) => {
                 self.opened = None;
@@ -179,6 +205,12 @@ impl ScalarScopeApp {
             Ok(sealed) => match bundle::write_file(&path, &sealed) {
                 Ok(()) => {
                     self.note = format!("Saved the stored review. Content check {}.", sealed.bundle_hash);
+                    if let Some(dir) = self.history_dir.clone() {
+                        match history::attach_bundle(&path.display().to_string(), Some(&sealed.bundle_hash), &dir) {
+                            Ok(_) => self.refresh_recent(),
+                            Err(error) => self.note = format!("{} The history was not stamped. {error}", self.note),
+                        }
+                    }
                 }
                 Err(error) => self.note = error,
             },
@@ -216,6 +248,12 @@ impl ScalarScopeApp {
                     plot.line(series_line("B", RIGHT, value_points(&review.right)));
                     plot.points(mark_points("A marks", &review.left, &review.left_marks));
                     plot.points(mark_points("B marks", &review.right, &review.right_marks));
+                    if let Some(step) = review.left_steady {
+                        plot.vline(VLine::new("A steady", step as f64).color(NOTE).width(1.0));
+                    }
+                    if let Some(step) = review.right_steady {
+                        plot.vline(VLine::new("B steady", step as f64).color(NOTE).width(1.0));
+                    }
                 }
             });
         if !distribution && !review.left_throughput.is_empty() && !review.right_throughput.is_empty() {
@@ -309,6 +347,149 @@ fn band_polygons(band: &[Option<Band>]) -> Vec<Vec<[f64; 2]>> {
         }
     }
     polygons
+}
+
+impl ScalarScopeApp {
+    fn remember(&mut self, left_path: &str, right_path: &str, pair: &Pair) {
+        let Some(dir) = self.history_dir.clone() else {
+            return;
+        };
+        let (alignment, deltas, left_name, right_name, left_run, right_run) = match pair {
+            Pair::Inference(review) => (
+                "latency".to_string(),
+                review.fired.clone(),
+                review.left_label.clone(),
+                review.right_label.clone(),
+                None,
+                None,
+            ),
+            Pair::Training(review) => (
+                "loss".to_string(),
+                Vec::new(),
+                review.left.run_id.clone(),
+                review.right.run_id.clone(),
+                Some(review.left.run_id.clone()),
+                Some(review.right.run_id.clone()),
+            ),
+        };
+        let key = format!("{left_path}|{right_path}|{alignment}|{}", deltas.join(","));
+        if key == self.sitting_key {
+            return;
+        }
+        let entry = LogEntry {
+            id: String::new(),
+            finished_at: String::new(),
+            left_name,
+            right_name,
+            left_path: Some(left_path.to_string()),
+            right_path: Some(right_path.to_string()),
+            left_run_id: left_run,
+            right_run_id: right_run,
+            bundle_path: None,
+            bundle_hash: None,
+            alignment,
+            deltas_fired: deltas,
+            kind: "compare".to_string(),
+        };
+        match history::record(entry, &dir) {
+            Ok(_) => {
+                self.sitting_key = key;
+                self.refresh_recent();
+            }
+            Err(error) => self.note = error,
+        }
+    }
+
+    fn record_opened_bundle(&mut self, path: &str, hash: &str) {
+        let Some(dir) = self.history_dir.clone() else {
+            return;
+        };
+        let name = Path::new(path)
+            .file_stem()
+            .and_then(|stem| stem.to_str())
+            .unwrap_or("bundle")
+            .to_string();
+        let entry = LogEntry {
+            id: String::new(),
+            finished_at: String::new(),
+            left_name: name,
+            right_name: String::new(),
+            left_path: None,
+            right_path: None,
+            left_run_id: None,
+            right_run_id: None,
+            bundle_path: Some(path.to_string()),
+            bundle_hash: Some(hash.to_string()),
+            alignment: String::new(),
+            deltas_fired: Vec::new(),
+            kind: "bundle".to_string(),
+        };
+        if history::record(entry, &dir).is_ok() {
+            self.refresh_recent();
+        }
+    }
+
+    fn refresh_recent(&mut self) {
+        let Some(dir) = &self.history_dir else {
+            self.recent.clear();
+            return;
+        };
+        let mut entries = history::read(dir);
+        entries.truncate(history::HOME_COUNT);
+        self.recent = entries;
+    }
+
+    fn draw_recent(&mut self, ui: &mut egui::Ui) {
+        ui.add_space(12.0);
+        if self.history_dir.is_none() {
+            ui.label(
+                RichText::new("Recent reviews stay in the Store package folder. This unpackaged run leaves that file alone.")
+                    .color(NOTE),
+            );
+            return;
+        }
+        ui.label(RichText::new("Recent").color(MARK));
+        if self.recent.is_empty() {
+            ui.label(RichText::new("No reviews in this package folder yet.").color(NOTE));
+            return;
+        }
+        let recent = self.recent.clone();
+        for entry in recent {
+            let label = format!("{}   {}", entry.title(), entry.subtitle());
+            if ui.button(label).clicked() {
+                self.reopen(&entry);
+            }
+        }
+    }
+
+    fn reopen(&mut self, entry: &LogEntry) {
+        if let Some(path) = entry.bundle_path.as_deref().filter(|path| !path.trim().is_empty()) {
+            match bundle::open_file(Path::new(path)) {
+                Ok(opened) => {
+                    self.opened = Some(opened);
+                    self.note.clear();
+                    return;
+                }
+                Err(error) => self.note = error,
+            }
+        }
+        if let (Some(left), Some(right)) = (entry.left_path.as_deref(), entry.right_path.as_deref()) {
+            match (open_path(Path::new(left)), open_path(Path::new(right))) {
+                (Ok(left_loaded), Ok(right_loaded)) => {
+                    self.opened = None;
+                    self.left = Some(left_loaded);
+                    self.right = Some(right_loaded);
+                    self.sitting_key.clear();
+                    self.note.clear();
+                }
+                (Err(error), _) | (_, Err(error)) => self.note = error,
+            }
+            return;
+        }
+        if self.note.is_empty() {
+            self.note = "That review has no file to reopen.".to_string();
+        }
+    }
 }
 
 fn side_name(loaded: &Option<Loaded>, empty: &str) -> String {
