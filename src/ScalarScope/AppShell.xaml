@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="ScalarScope.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:views="clr-namespace:ScalarScope.Views"
+    Title="ScalarScope"
+    Shell.FlyoutBehavior="Disabled"
+    BackgroundColor="#0f0f1a">
+
+    <Shell.Resources>
+        <Style TargetType="TabBar">
+            <Setter Property="Shell.TabBarBackgroundColor" Value="#1a1a2e"/>
+            <Setter Property="Shell.TabBarForegroundColor" Value="White"/>
+            <Setter Property="Shell.TabBarUnselectedColor" Value="#666"/>
+            <Setter Property="Shell.TabBarTitleColor" Value="#00d9ff"/>
+        </Style>
+    </Shell.Resources>
+
+    <TabBar>
+        <!-- Home: Clean landing experience (Phase H1) -->
+        <Tab Title="Home" Icon="home.png">
+            <ShellContent ContentTemplate="{DataTemplate views:WelcomePage}" Route="welcome"/>
+        </Tab>
+        
+        <!-- Compare: The star feature -->
+        <Tab Title="Compare" Icon="compare.png">
+            <ShellContent ContentTemplate="{DataTemplate views:ComparisonPage}" Route="compare"/>
+        </Tab>
+        
+        <!-- Guide: Interpretation help -->
+        <Tab Title="Guide" Icon="help.png">
+            <ShellContent ContentTemplate="{DataTemplate views:HelpPage}" Route="help"/>
+        </Tab>
+        
+        <!-- Settings: Preferences and About -->
+        <Tab Title="Settings" Icon="settings.png">
+            <ShellContent ContentTemplate="{DataTemplate views:SettingsPage}" Route="settings"/>
+        </Tab>
+    </TabBar>
+
+</Shell>

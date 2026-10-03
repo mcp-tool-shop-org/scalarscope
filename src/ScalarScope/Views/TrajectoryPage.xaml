@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:ScalarScope.Views.Controls"
+             xmlns:vm="clr-namespace:ScalarScope.ViewModels"
+             x:Class="ScalarScope.Views.TrajectoryPage"
+             x:DataType="vm:VortexSessionViewModel"
+             Title="Learning Path"
+             BackgroundColor="#0f0f1a">
+
+    <Grid RowDefinitions="*,Auto,Auto,Auto,Auto" ColumnDefinitions="*,Auto">
+        <!-- Main Canvas with Annotation Overlay -->
+        <Grid Grid.Row="0" Grid.Column="0">
+            <controls:TrajectoryCanvas x:Name="trajectoryCanvas"
+                                       Session="{Binding .}"
+                                       ShowVelocity="{Binding ShowVelocity, Source={x:Reference velocitySwitch}}"
+                                       ShowCurvature="{Binding ShowCurvature, Source={x:Reference curvatureSwitch}}"
+                                       ShowProfessors="{Binding ShowProfessors, Source={x:Reference professorsSwitch}}"/>
+
+            <!-- Annotation Overlay (layered on top) -->
+            <controls:AnnotationOverlay x:Name="annotationOverlay"
+                                        Run="{Binding Run}"
+                                        CurrentTime="{Binding Player.Time}"
+                                        ShowPhases="{Binding ShowPhases, Source={x:Reference annotationPanel}}"
+                                        ShowCurvatureWarnings="{Binding ShowCurvatureWarnings, Source={x:Reference annotationPanel}}"
+                                        ShowEigenInsights="{Binding ShowEigenInsights, Source={x:Reference annotationPanel}}"
+                                        ShowFailureMarkers="{Binding ShowFailureMarkers, Source={x:Reference annotationPanel}}"
+                                        IsVisible="{Binding IsToggled, Source={x:Reference annotationsSwitch}}"/>
+
+            <!-- Contextual Tooltip (Phase 2: event-triggered explanations) -->
+            <controls:ContextualTooltip x:Name="contextualTooltip"
+                                        HorizontalOptions="End"
+                                        VerticalOptions="Start"
+                                        Margin="0,10,10,0"/>
+
+            <!-- First-Run Hint (centered, dismissible) -->
+            <controls:InlineHint x:Name="playbackHint"
+                                 HintId="trajectory_playback"
+                                 HintText="Press Space to play, or drag the timeline to scrub through training"
+                                 AccentColor="#00d9ff"
+                                 HorizontalOptions="Center"
+                                 VerticalOptions="End"
+                                 Margin="0,0,0,20"
+                                 IsVisible="{Binding HasRun}"/>
+        </Grid>
+
+        <!-- Side Panel Container -->
+        <Grid Grid.Row="0" Grid.Column="1" RowDefinitions="Auto,*">
+            <!-- Annotation Panel (collapsible sidebar) -->
+            <controls:AnnotationPanel x:Name="annotationPanel"
+                                      Grid.Row="0"
+                                      WidthRequest="200"
+                                      Margin="5"
+                                      VerticalOptions="Start"
+                                      IsVisible="{Binding IsToggled, Source={x:Reference annotationsSwitch}}"/>
+
+            <!-- Probing Inspector Panel (Phase 3.3) -->
+            <controls:ProbingInspectorPanel Grid.Row="1"
+                                            WidthRequest="300"
+                                            Margin="5"
+                                            Run="{Binding Run}"
+                                            SelectedIndex="{Binding SelectedTimestepIndex}"
+                                            ShowGradientInspector="{Binding IsToggled, Source={x:Reference gradientSwitch}}"
+                                            WhatIfScenario="{Binding ActiveWhatIfScenario}"
+                                            IsVisible="{Binding IsToggled, Source={x:Reference probingSwitch}}"/>
+        </Grid>
+
+        <!-- Analysis Overlay Panel (Phase 3.1: Quantitative Overlays) -->
+        <controls:AnalysisOverlayPanel x:Name="analysisPanel"
+                                       Grid.Row="1"
+                                       Grid.ColumnSpan="2"
+                                       Session="{Binding .}"
+                                       HeightRequest="140"
+                                       Margin="5,0"
+                                       ShowEigenvalues="{Binding IsToggled, Source={x:Reference eigenvaluesSwitch}}"
+                                       ShowLyapunov="{Binding IsToggled, Source={x:Reference lyapunovSwitch}}"
+                                       ShowBifurcations="{Binding IsToggled, Source={x:Reference bifurcationsSwitch}}"
+                                       ShowDimensionAlerts="True"
+                                       IsVisible="{Binding IsToggled, Source={x:Reference analysisSwitch}}"/>
+
+        <!-- Toggle Panel with Intent-First Labels (Phase 2) -->
+        <HorizontalStackLayout Grid.Row="2"
+                               Grid.ColumnSpan="2"
+                               Spacing="20"
+                               Padding="15,8"
+                               BackgroundColor="#1a1a2e">
+            
+            <!-- === Core Signals (Default On) === -->
+            
+            <!-- Motion Speed Toggle -->
+            <VerticalStackLayout Spacing="1">
+                <HorizontalStackLayout Spacing="5">
+                    <Label Text="Motion" TextColor="#4ecdc4" VerticalOptions="Center" FontAttributes="Bold" FontSize="12"/>
+                    <Switch x:Name="velocitySwitch" IsToggled="True" OnColor="#4ecdc4"/>
+                </HorizontalStackLayout>
+                <Label Text="How fast is learning progressing?" TextColor="#777" FontSize="10"/>
+            </VerticalStackLayout>
+
+            <!-- Direction Changes Toggle -->
+            <VerticalStackLayout Spacing="1">
+                <HorizontalStackLayout Spacing="5">
+                    <Label Text="Turns" TextColor="#ff9f43" VerticalOptions="Center" FontAttributes="Bold" FontSize="12"/>
+                    <Switch x:Name="curvatureSwitch" IsToggled="True" OnColor="#ff9f43"/>
+                </HorizontalStackLayout>
+                <Label Text="Where does the model change its mind?" TextColor="#777" FontSize="10"/>
+            </VerticalStackLayout>
+
+            <!-- Evaluator Directions Toggle -->
+            <VerticalStackLayout Spacing="1">
+                <HorizontalStackLayout Spacing="5">
+                    <Label Text="Evaluators" TextColor="#a29bfe" VerticalOptions="Center" FontAttributes="Bold" FontSize="12"/>
+                    <Switch x:Name="professorsSwitch" IsToggled="True" OnColor="#a29bfe"/>
+                </HorizontalStackLayout>
+                <Label Text="Which directions pull the model?" TextColor="#777" FontSize="10"/>
+            </VerticalStackLayout>
+
+            <BoxView WidthRequest="1" Color="#2a2a4e" Margin="3,0"/>
+
+            <!-- === Optional Enhancements === -->
+            
+            <!-- Annotations Toggle -->
+            <VerticalStackLayout Spacing="1">
+                <HorizontalStackLayout Spacing="5">
+                    <Label Text="Labels" TextColor="#ffd93d" VerticalOptions="Center" FontAttributes="Bold" FontSize="12"/>
+                    <Switch x:Name="annotationsSwitch" IsToggled="False" OnColor="#ffd93d"/>
+                </HorizontalStackLayout>
+                <Label Text="Add text explanations on canvas" TextColor="#666" FontSize="10"/>
+            </VerticalStackLayout>
+
+            <!-- Point Inspector Toggle -->
+            <VerticalStackLayout Spacing="1">
+                <HorizontalStackLayout Spacing="5">
+                    <Label Text="Inspect" TextColor="#c56cf0" VerticalOptions="Center" FontAttributes="Bold" FontSize="12"/>
+                    <Switch x:Name="probingSwitch" IsToggled="False" OnColor="#c56cf0"/>
+                </HorizontalStackLayout>
+                <Label Text="Click any point for details" TextColor="#666" FontSize="10"/>
+            </VerticalStackLayout>
+
+            <!-- Probing sub-toggles (visible when probing is on) -->
+            <VerticalStackLayout Spacing="1" IsVisible="{Binding IsToggled, Source={x:Reference probingSwitch}}">
+                <HorizontalStackLayout Spacing="8">
+                    <HorizontalStackLayout Spacing="2">
+                        <Label Text="Gradients" TextColor="#4ecdc4" FontSize="10"/>
+                        <Switch x:Name="gradientSwitch" IsToggled="True" OnColor="#4ecdc4" Scale="0.7"/>
+                    </HorizontalStackLayout>
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+
+            <BoxView WidthRequest="1" Color="#2a2a4e" Margin="3,0"/>
+            
+            <!-- === Advanced Analysis (Collapsed by Default) === -->
+            
+            <!-- Analysis Panel Toggle -->
+            <VerticalStackLayout Spacing="1">
+                <HorizontalStackLayout Spacing="5">
+                    <Label Text="Metrics" TextColor="#00d9ff" VerticalOptions="Center" FontAttributes="Bold" FontSize="12"/>
+                    <Switch x:Name="analysisSwitch" IsToggled="False" OnColor="#00d9ff"/>
+                </HorizontalStackLayout>
+                <Label Text="Show quantitative analysis charts" TextColor="#666" FontSize="10"/>
+            </VerticalStackLayout>
+
+            <!-- Analysis sub-toggles (visible when analysis is on) -->
+            <VerticalStackLayout Spacing="2" IsVisible="{Binding IsToggled, Source={x:Reference analysisSwitch}}">
+                <HorizontalStackLayout Spacing="8">
+                    <VerticalStackLayout Spacing="0">
+                        <HorizontalStackLayout Spacing="2">
+                            <Label Text="Structure" TextColor="#00d9ff" FontSize="9"/>
+                            <Switch x:Name="eigenvaluesSwitch" IsToggled="True" OnColor="#00d9ff" Scale="0.65"/>
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Spacing="0">
+                        <HorizontalStackLayout Spacing="2">
+                            <Label Text="Stability" TextColor="#ff6b6b" FontSize="9"/>
+                            <Switch x:Name="lyapunovSwitch" IsToggled="True" OnColor="#ff6b6b" Scale="0.65"/>
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Spacing="0">
+                        <HorizontalStackLayout Spacing="2">
+                            <Label Text="Transitions" TextColor="#ff9500" FontSize="9"/>
+                            <Switch x:Name="bifurcationsSwitch" IsToggled="True" OnColor="#ff9500" Scale="0.65"/>
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+
+            <BoxView WidthRequest="1" Color="#2a2a4e" Margin="3,0"/>
+
+            <!-- Zoom Controls -->
+            <VerticalStackLayout Spacing="1">
+                <HorizontalStackLayout Spacing="5">
+                    <Button x:Name="resetViewButton"
+                            Text="⟲ Reset View"
+                            Clicked="OnResetViewClicked"
+                            BackgroundColor="#2a2a4e"
+                            TextColor="#00d9ff"
+                            FontSize="11"
+                            HeightRequest="28"
+                            Padding="8,0"
+                            CornerRadius="4"/>
+                </HorizontalStackLayout>
+                <Label Text="Scroll to zoom, drag to pan" TextColor="#555" FontSize="9"/>
+            </VerticalStackLayout>
+        </HorizontalStackLayout>
+
+        <!-- Toggle Hint -->
+        <controls:InlineHint Grid.Row="3"
+                             Grid.ColumnSpan="2"
+                             HintId="trajectory_toggles"
+                             HintText="Toggle Curvature to see phase transitions, or enable Annotations for deeper insights"
+                             AccentColor="#ff9f43"
+                             Margin="15,5"/>
+
+        <!-- Playback Control -->
+        <controls:PlaybackControl Grid.Row="4"
+                                  Grid.ColumnSpan="2"
+                                  BindingContext="{Binding Player}"/>
+    </Grid>
+</ContentPage>

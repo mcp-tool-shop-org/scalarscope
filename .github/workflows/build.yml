@@ -1,0 +1,104 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "**/*.cs"
+      - "**/*.csproj"
+      - "**/*.sln"
+      - "**/*.xaml"
+      - ".github/workflows/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - "**/*.cs"
+      - "**/*.csproj"
+      - "**/*.sln"
+      - "**/*.xaml"
+      - ".github/workflows/**"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
+      with:
+        global-json-file: global.json
+
+    - name: Install MAUI workload
+      run: dotnet workload install maui-windows --skip-sign-check
+
+    - name: Restore VortexKit
+      run: dotnet restore src/VortexKit/VortexKit.csproj
+
+    - name: Restore ScalarScope
+      run: dotnet restore src/ScalarScope/ScalarScope.csproj
+
+    - name: Build VortexKit (Release)
+      run: dotnet build src/VortexKit/VortexKit.csproj --configuration Release --no-restore
+
+    - name: Build ScalarScope (Release)
+      run: dotnet build src/ScalarScope/ScalarScope.csproj --configuration Release --no-restore
+
+    - name: Restore FixtureTests
+      run: dotnet restore tests/ScalarScope.FixtureTests/ScalarScope.FixtureTests.csproj
+
+    - name: Build FixtureTests (Release)
+      run: dotnet build tests/ScalarScope.FixtureTests/ScalarScope.FixtureTests.csproj --configuration Release --no-restore
+
+    - name: Run tests
+      run: dotnet test tests/ScalarScope.FixtureTests/ScalarScope.FixtureTests.csproj --configuration Release --no-build --verbosity normal
+
+    - name: Check code formatting
+      run: dotnet format src/ScalarScope/ScalarScope.csproj --verify-no-changes --verbosity diagnostic
+      continue-on-error: true
+
+    - name: Pack VortexKit
+      run: dotnet pack src/VortexKit/VortexKit.csproj --configuration Release --no-build
+
+    - name: Get version info
+      id: version
+      shell: pwsh
+      run: |
+        $version = (Select-Xml -Path "src/ScalarScope/ScalarScope.csproj" -XPath "//ApplicationDisplayVersion" | Select -First 1).Node.InnerText
+        $shortSha = "${{ github.sha }}".Substring(0, 7)
+        echo "VERSION=$version" >> $env:GITHUB_OUTPUT
+        echo "SHORT_SHA=$shortSha" >> $env:GITHUB_OUTPUT
+        echo "Version: $version+$shortSha"
+
+    - name: Upload ScalarScope artifacts
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      with:
+        name: scalarscope-windows-${{ steps.version.outputs.VERSION }}
+        path: src/ScalarScope/bin/Release/
+        retention-days: 14
+
+    - name: Upload VortexKit NuGet
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      with:
+        name: vortexkit-nuget-${{ steps.version.outputs.VERSION }}
+        path: src/VortexKit/bin/Release/*.nupkg
+        retention-days: 14
+
+    - name: Build Summary
+      run: |
+        echo "## Build Summary" >> $env:GITHUB_STEP_SUMMARY
+        echo "- **Version:** ${{ steps.version.outputs.VERSION }}+${{ steps.version.outputs.SHORT_SHA }}" >> $env:GITHUB_STEP_SUMMARY
+        echo "- **Branch:** ${{ github.ref_name }}" >> $env:GITHUB_STEP_SUMMARY
+        echo "- **Commit:** ${{ github.sha }}" >> $env:GITHUB_STEP_SUMMARY

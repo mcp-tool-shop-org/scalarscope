@@ -1,0 +1,475 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:ScalarScope.ViewModels"
+             xmlns:controls="clr-namespace:ScalarScope.Views.Controls"
+             x:Class="ScalarScope.Views.OverviewPage"
+             x:DataType="vm:VortexSessionViewModel"
+             Title="Overview"
+             BackgroundColor="#0f0f1a">
+
+    <Grid>
+        <!-- Main content with drop support -->
+        <ScrollView>
+            <ScrollView.GestureRecognizers>
+                <DropGestureRecognizer x:Name="dropGesture"
+                                       AllowDrop="True"
+                                       DragOver="OnDragOver"
+                                       DragLeave="OnDragLeave"
+                                       Drop="OnDrop"/>
+            </ScrollView.GestureRecognizers>
+            <VerticalStackLayout Spacing="20" Padding="20">
+
+                <!-- Header -->
+                <Label Text="ScalarScope"
+                       FontSize="24"
+                       FontAttributes="Bold"
+                       TextColor="White"
+                       HorizontalOptions="Center"/>
+
+            <!-- Load Button (hidden during first-run) -->
+            <Button Text="Load Training Dynamics (.json)"
+                    Command="{Binding LoadRunCommand}"
+                    BackgroundColor="#00d9ff"
+                    TextColor="White"
+                    FontAttributes="Bold"
+                    WidthRequest="240"
+                    HeightRequest="50"
+                    HorizontalOptions="Center"
+                    IsVisible="{Binding IsFirstRun, Converter={StaticResource InverseBoolConverter}}"/>
+
+            <!-- Recent Files Panel (hidden during first-run) -->
+            <Border x:Name="recentFilesFrame"
+                   BackgroundColor="#16213e"
+                   Stroke="#2a2a4e"
+                   StrokeShape="RoundRectangle 10"
+                   Padding="15"
+                   MaximumWidthRequest="500"
+                   HorizontalOptions="Center"
+                   IsVisible="False">
+                <VerticalStackLayout Spacing="10">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Text="Recent Files"
+                               FontSize="14"
+                               FontAttributes="Bold"
+                               TextColor="#888"
+                               VerticalOptions="Center"/>
+                        <Button Grid.Column="1"
+                                Text="Clear"
+                                x:Name="clearRecentButton"
+                                Clicked="OnClearRecentFilesClicked"
+                                BackgroundColor="Transparent"
+                                TextColor="#666"
+                                FontSize="11"
+                                HeightRequest="24"
+                                Padding="8,0"/>
+                    </Grid>
+                    
+                    <VerticalStackLayout x:Name="recentFilesContainer" Spacing="5">
+                        <!-- Recent files are populated in code-behind -->
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- First-Run Welcome Panel -->
+            <Border BackgroundColor="#16213e"
+                   Stroke="#00d9ff"
+                   StrokeShape="RoundRectangle 15"
+                   Padding="40"
+                   IsVisible="{Binding IsFirstRun}"
+                   WidthRequest="600"
+                   HorizontalOptions="Center">
+                <VerticalStackLayout Spacing="25" HorizontalOptions="Center">
+
+                    <!-- Welcome Header -->
+                    <Label Text="Welcome to ScalarScope"
+                           FontSize="28"
+                           FontAttributes="Bold"
+                           TextColor="#00d9ff"
+                           HorizontalOptions="Center"/>
+
+                    <!-- Description -->
+                    <Label Text="ScalarScope visualizes how training dynamics evolve over time. Watch eigenvalue structure emerge, observe phase transitions, and compare convergent vs. pluralistic learning paths."
+                           FontSize="14"
+                           TextColor="#aaa"
+                           HorizontalTextAlignment="Center"
+                           LineBreakMode="WordWrap"
+                           MaximumWidthRequest="500"/>
+
+                    <!-- Divider -->
+                    <BoxView HeightRequest="1" Color="#2a2a4e" Margin="20,10"/>
+
+                    <!-- Demo CTA -->
+                    <Label Text="Start with a 2-minute guided tour"
+                           FontSize="12"
+                           TextColor="#888"
+                           HorizontalOptions="Center"/>
+
+                    <!-- Primary Button: Start Demo -->
+                    <Button Text="▶  Start Guided Demo"
+                            x:Name="startDemoButton"
+                            Clicked="OnStartDemoClicked"
+                            BackgroundColor="#00d9ff"
+                            TextColor="#0f0f1a"
+                            FontSize="16"
+                            FontAttributes="Bold"
+                            WidthRequest="280"
+                            HeightRequest="50"
+                            CornerRadius="8"
+                            HorizontalOptions="Center"/>
+
+                    <Label Text="(Recommended for first-time users)"
+                           FontSize="11"
+                           TextColor="#666"
+                           HorizontalOptions="Center"/>
+
+                    <!-- Divider -->
+                    <BoxView HeightRequest="1" Color="#2a2a4e" Margin="20,5"/>
+
+                    <!-- Secondary Options -->
+                    <HorizontalStackLayout Spacing="20" HorizontalOptions="Center">
+                        <Button Text="📂 Load My Own Run"
+                                x:Name="loadOwnRunButton"
+                                Clicked="OnLoadOwnRunClicked"
+                                BackgroundColor="#2a2a4e"
+                                TextColor="White"
+                                FontSize="13"
+                                WidthRequest="160"
+                                HeightRequest="40"
+                                CornerRadius="6"/>
+
+                        <Button Text="⏭ Skip"
+                                x:Name="skipDemoButton"
+                                Clicked="OnSkipDemoClicked"
+                                BackgroundColor="Transparent"
+                                BorderColor="#444"
+                                BorderWidth="1"
+                                TextColor="#888"
+                                FontSize="13"
+                                WidthRequest="100"
+                                HeightRequest="40"
+                                CornerRadius="6"/>
+                    </HorizontalStackLayout>
+
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Error Display -->
+            <Border BackgroundColor="#2a1515"
+                   Stroke="#ff6b6b"
+                   StrokeShape="RoundRectangle 10"
+                   Padding="20"
+                   IsVisible="{Binding HasLoadError}">
+                <VerticalStackLayout Spacing="10">
+                    <HorizontalStackLayout Spacing="10">
+                        <Label Text="⚠"
+                               FontSize="20"
+                               TextColor="#ff6b6b"
+                               VerticalOptions="Center"/>
+                        <Label Text="{Binding RunName}"
+                               FontSize="18"
+                               FontAttributes="Bold"
+                               TextColor="#ff6b6b"
+                               VerticalOptions="Center"/>
+                    </HorizontalStackLayout>
+
+                    <Label Text="{Binding LoadError}"
+                           TextColor="#ffaaaa"
+                           FontSize="13"
+                           LineBreakMode="WordWrap"/>
+
+                    <Button Text="Try Again"
+                            Command="{Binding LoadRunCommand}"
+                            BackgroundColor="#ff6b6b"
+                            TextColor="White"
+                            WidthRequest="120"
+                            HeightRequest="36"
+                            HorizontalOptions="Start"
+                            Margin="0,5,0,0"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Run Summary Card -->
+            <Border BackgroundColor="#1a1a2e"
+                   Stroke="#2a2a4e"
+                   StrokeShape="RoundRectangle 10"
+                   Padding="20"
+                   IsVisible="{Binding HasRun}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Run Summary"
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           TextColor="#00d9ff"/>
+
+                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="15" RowSpacing="8">
+                        <Label Grid.Row="0" Grid.Column="0" Text="Run:" TextColor="#888"/>
+                        <Label Grid.Row="0" Grid.Column="1" Text="{Binding RunName}" TextColor="White"/>
+
+                        <Label Grid.Row="1" Grid.Column="0" Text="Condition:" TextColor="#888"/>
+                        <Label Grid.Row="1" Grid.Column="1" Text="{Binding Condition}" TextColor="White"/>
+
+                        <Label Grid.Row="2" Grid.Column="0" Text="Conscience Tier:" TextColor="#888"/>
+                        <Label Grid.Row="2" Grid.Column="1" Text="{Binding ConscienceTier}" TextColor="#00ff88"/>
+
+                        <Label Grid.Row="3" Grid.Column="0" Text="Failures:" TextColor="#888"/>
+                        <Label Grid.Row="3" Grid.Column="1" Text="{Binding FailureCount}" TextColor="#ff6b6b"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Warnings Panel -->
+            <Border BackgroundColor="#2a2a15"
+                   Stroke="#ffd93d"
+                   StrokeShape="RoundRectangle 10"
+                   Padding="15"
+                   IsVisible="{Binding LoadWarnings, Converter={StaticResource ListHasItemsConverter}}">
+                <VerticalStackLayout Spacing="8">
+                    <HorizontalStackLayout Spacing="8">
+                        <Label Text="ℹ"
+                               FontSize="16"
+                               TextColor="#ffd93d"
+                               VerticalOptions="Center"/>
+                        <Label Text="Notes"
+                               FontSize="14"
+                               FontAttributes="Bold"
+                               TextColor="#ffd93d"
+                               VerticalOptions="Center"/>
+                    </HorizontalStackLayout>
+
+                    <VerticalStackLayout x:Name="warningsContainer"
+                                         BindableLayout.ItemsSource="{Binding LoadWarnings}"
+                                         Spacing="4">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="x:String">
+                                <Label Text="{Binding .}"
+                                       TextColor="#cccc88"
+                                       FontSize="12"
+                                       LineBreakMode="WordWrap"/>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Interpretation Card -->
+            <Border BackgroundColor="#1a1a2e"
+                   Stroke="#2a2a4e"
+                   StrokeShape="RoundRectangle 10"
+                   Padding="20"
+                   IsVisible="{Binding HasRun}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Key Findings"
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           TextColor="#ffd93d"/>
+
+                    <Label Text="Explore the tabs:"
+                           TextColor="#888"/>
+
+                    <VerticalStackLayout Spacing="5" Padding="10,0">
+                        <Label Text="• Trajectory — State evolution through training" TextColor="White"/>
+                        <Label Text="• Scalars — Quality dimensions as rotating rings" TextColor="White"/>
+                        <Label Text="• Geometry — Eigenvalue structure over time" TextColor="White"/>
+                        <Label Text="• Compare — Path A vs Path B side-by-side" TextColor="White"/>
+                    </VerticalStackLayout>
+
+                    <Label Text="Path A vs Path B:"
+                           TextColor="#c56cf0"
+                           FontAttributes="Bold"
+                           Margin="0,10,0,0"/>
+
+                    <Label TextColor="#888"
+                           Text="One dominant eigenvalue = shared structure. Multiple stable eigenvalues = orthogonal evaluators."/>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Export Card -->
+            <Border BackgroundColor="#1a1a2e"
+                   Stroke="#2a2a4e"
+                   StrokeShape="RoundRectangle 10"
+                   Padding="20"
+                   IsVisible="{Binding HasRun}">
+                <VerticalStackLayout Spacing="15">
+                    <Label Text="Export"
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           TextColor="#4ecdc4"/>
+
+                    <Label Text="Save frames as images or sequences."
+                           TextColor="#888"/>
+
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                        <Button Grid.Column="0"
+                                Text="Quick Screenshot"
+                                x:Name="quickExportButton"
+                                Clicked="OnQuickExportClicked"
+                                BackgroundColor="#4ecdc4"
+                                TextColor="White"/>
+                        <Button Grid.Column="1"
+                                Text="Export Settings..."
+                                x:Name="exportSettingsButton"
+                                Clicked="OnExportSettingsClicked"
+                                BackgroundColor="#2a2a4e"
+                                TextColor="White"/>
+                    </Grid>
+
+                    <Label x:Name="exportStatusLabel"
+                           Text=""
+                           TextColor="#888"
+                           FontSize="11"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Keyboard Shortcuts Card -->
+            <Border BackgroundColor="#1a1a2e"
+                   Stroke="#2a2a4e"
+                   StrokeShape="RoundRectangle 10"
+                   Padding="20"
+                   IsVisible="{Binding HasRun}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Keyboard Shortcuts"
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           TextColor="#a29bfe"/>
+
+                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="20" RowSpacing="5">
+                        <Label Grid.Row="0" Grid.Column="0" Text="Space" TextColor="#00d9ff" FontAttributes="Bold"/>
+                        <Label Grid.Row="0" Grid.Column="1" Text="Play/Pause" TextColor="White"/>
+
+                        <Label Grid.Row="1" Grid.Column="0" Text="Left/Right" TextColor="#00d9ff" FontAttributes="Bold"/>
+                        <Label Grid.Row="1" Grid.Column="1" Text="Step backward/forward" TextColor="White"/>
+
+                        <Label Grid.Row="2" Grid.Column="0" Text="Home/End" TextColor="#00d9ff" FontAttributes="Bold"/>
+                        <Label Grid.Row="2" Grid.Column="1" Text="Jump to start/end" TextColor="White"/>
+
+                        <Label Grid.Row="3" Grid.Column="0" Text="S / Ctrl+E" TextColor="#00d9ff" FontAttributes="Bold"/>
+                        <Label Grid.Row="3" Grid.Column="1" Text="Quick screenshot" TextColor="White"/>
+
+                        <Label Grid.Row="4" Grid.Column="0" Text="A" TextColor="#00d9ff" FontAttributes="Bold"/>
+                        <Label Grid.Row="4" Grid.Column="1" Text="Toggle annotations" TextColor="White"/>
+
+                        <Label Grid.Row="5" Grid.Column="0" Text="1-6" TextColor="#00d9ff" FontAttributes="Bold"/>
+                        <Label Grid.Row="5" Grid.Column="1" Text="Switch tabs" TextColor="White"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Get Started Panel (Empty State - shows after first-run dismissed) -->
+            <Border BackgroundColor="#1a1a2e"
+                   Stroke="#00d9ff"
+                   StrokeShape="RoundRectangle 10"
+                   Padding="30"
+                   IsVisible="{Binding ShowEmptyState}">
+                <VerticalStackLayout Spacing="20" HorizontalOptions="Center">
+
+                    <!-- Hero Text -->
+                    <Label Text="Welcome to ScalarScope"
+                           FontSize="22"
+                           FontAttributes="Bold"
+                           TextColor="#00d9ff"
+                           HorizontalOptions="Center"/>
+
+                    <Label Text="Visualize how learning dynamics evolve over training."
+                           FontSize="14"
+                           TextColor="#ccc"
+                           HorizontalOptions="Center"/>
+
+                    <!-- Divider -->
+                    <BoxView HeightRequest="1" Color="#2a2a4e" Margin="0,5"/>
+
+                    <!-- Sample Runs -->
+                    <Label Text="Try a Sample Run"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="White"
+                           HorizontalOptions="Center"/>
+
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="15" RowSpacing="10" WidthRequest="500">
+                        <!-- Path A: Orthogonal -->
+                        <Border Grid.Column="0"
+                               BackgroundColor="#16213e"
+                               Stroke="#ff6b6b"
+                               StrokeShape="RoundRectangle 8"
+                               Padding="15">
+                            <VerticalStackLayout Spacing="8">
+                                <Label Text="Path A: Pluralistic"
+                                       FontAttributes="Bold"
+                                       TextColor="#ff6b6b"/>
+                                <Label Text="Orthogonal professors with incompatible criteria. Observe sustained multi-dimensional variance."
+                                       TextColor="#888"
+                                       FontSize="11"
+                                       LineBreakMode="WordWrap"/>
+                                <Button Text="Load Example"
+                                        x:Name="loadOrthogonalButton"
+                                        Clicked="OnLoadOrthogonalClicked"
+                                        BackgroundColor="#ff6b6b"
+                                        TextColor="White"
+                                        HeightRequest="35"
+                                        FontSize="12"/>
+                            </VerticalStackLayout>
+                        </Border>
+
+                        <!-- Path B: Correlated -->
+                        <Border Grid.Column="1"
+                               BackgroundColor="#16213e"
+                               Stroke="#4ecdc4"
+                               StrokeShape="RoundRectangle 8"
+                               Padding="15">
+                            <VerticalStackLayout Spacing="8">
+                                <Label Text="Path B: Convergent"
+                                       FontAttributes="Bold"
+                                       TextColor="#4ecdc4"/>
+                                <Label Text="Correlated professors with shared evaluative structure. Watch eigenvalues collapse to dominance."
+                                       TextColor="#888"
+                                       FontSize="11"
+                                       LineBreakMode="WordWrap"/>
+                                <Button Text="Load Example"
+                                        x:Name="loadCorrelatedButton"
+                                        Clicked="OnLoadCorrelatedClicked"
+                                        BackgroundColor="#4ecdc4"
+                                        TextColor="White"
+                                        HeightRequest="35"
+                                        FontSize="12"/>
+                            </VerticalStackLayout>
+                        </Border>
+                    </Grid>
+
+                    <!-- Divider -->
+                    <BoxView HeightRequest="1" Color="#2a2a4e" Margin="0,5"/>
+
+                    <!-- Or Load Your Own -->
+                    <Label Text="Or load your own geometry export"
+                           FontSize="12"
+                           TextColor="#666"
+                           HorizontalOptions="Center"/>
+
+                </VerticalStackLayout>
+            </Border>
+
+        </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Drop Overlay (shown when dragging file over) -->
+        <Border x:Name="dropOverlay"
+                BackgroundColor="#8000d9ff"
+                IsVisible="False"
+                InputTransparent="True">
+            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="10">
+                <Label Text="📂"
+                       FontSize="64"
+                       HorizontalOptions="Center"/>
+                <Label Text="Drop JSON file here"
+                       FontSize="18"
+                       FontAttributes="Bold"
+                       TextColor="White"
+                       HorizontalOptions="Center"/>
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- Phase 5.2: Loading Overlay with structural skeleton (plot scaffold) -->
+        <controls:LoadingOverlay IsLoading="{Binding IsLoading}"
+                                 Message="{Binding LoadingMessage}"
+                                 SkeletonType="PlotScaffold"
+                                 IsVisible="{Binding IsLoading}"/>
+    </Grid>
+</ContentPage>

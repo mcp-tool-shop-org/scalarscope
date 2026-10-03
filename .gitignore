@@ -1,0 +1,26 @@
+# Build
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.rsuser
+TestResults/
+
+# Signing material and store upload bundles. Never commit these.
+*.pfx
+*.snk
+*.msix
+*.msixupload
+*.appx
+*.appxupload
+
+# Landing site dependencies
+node_modules/
+
+# Per-agent swarm worktrees
+.swarm/
+
+# OS
+Thumbs.db
+Desktop.ini

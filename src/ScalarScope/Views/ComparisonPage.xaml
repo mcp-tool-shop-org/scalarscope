@@ -1,0 +1,406 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:ScalarScope.Views.Controls"
+             xmlns:vm="clr-namespace:ScalarScope.ViewModels"
+             x:Class="ScalarScope.Views.ComparisonPage"
+             x:DataType="vm:ComparisonViewModel"
+             Title="Compare Paths"
+             BackgroundColor="#0f0f1a">
+
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,2*,Auto,Auto,Auto,*,Auto">
+        <!-- Demo Annotation Banner (shows during guided demo) -->
+        <controls:DemoAnnotationBanner Grid.Row="0" x:Name="demoBanner"/>
+        
+        <!-- Review Mode Banner (shows when viewing a bundle) -->
+        <controls:ReviewModeBanner Grid.Row="1" 
+                                   x:Name="reviewModeBanner"
+                                   Bundle="{Binding ReviewBundle}"
+                                   Margin="10,5"
+                                   IsVisible="{Binding IsReviewMode}"/>
+
+        <!-- Context Header: What am I comparing? -->
+        <Border Grid.Row="2"
+                BackgroundColor="#12121f"
+                Padding="12,8"
+                IsVisible="{Binding HasBothRuns}">
+            <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="16">
+                <Label Text="COMPARING" 
+                       FontSize="10" 
+                       TextColor="#666" 
+                       FontAttributes="Bold"
+                       VerticalOptions="Center"
+                       CharacterSpacing="1"/>
+                <Label Grid.Column="1"
+                       VerticalOptions="Center">
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="{Binding LeftRunName}" TextColor="#4ecdc4" FontSize="12"/>
+                            <Span Text="  →  " TextColor="#666" FontSize="12"/>
+                            <Span Text="{Binding RightRunName}" TextColor="#ff6b6b" FontSize="12"/>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <Border Grid.Column="2"
+                        BackgroundColor="#2a2a4e"
+                        Padding="8,4"
+                        StrokeShape="RoundRectangle 4"
+                        Stroke="Transparent"
+                        VerticalOptions="Center">
+                    <Label Text="{Binding FrameworkName, FallbackValue='TFRT'}" 
+                           FontSize="10" 
+                           TextColor="#00d9ff"
+                           FontAttributes="Bold"/>
+                </Border>
+                <Border Grid.Column="3"
+                        BackgroundColor="#2a2a4e"
+                        Padding="8,4"
+                        StrokeShape="RoundRectangle 4"
+                        Stroke="Transparent"
+                        VerticalOptions="Center"
+                        IsVisible="{Binding HasPreset}">
+                    <Label Text="{Binding PresetName}" 
+                           FontSize="10" 
+                           TextColor="#888"/>
+                </Border>
+                <Label Grid.Column="4"
+                       Text="{Binding DeltaCount, StringFormat='{0} deltas'}"
+                       FontSize="10"
+                       TextColor="#666"
+                       VerticalOptions="Center"/>
+            </Grid>
+        </Border>
+
+        <!-- Header with load buttons -->
+        <Grid Grid.Row="3"
+              ColumnDefinitions="*,Auto,*"
+              Padding="10"
+              BackgroundColor="#1a1a2e">
+
+            <!-- Left Run Loader -->
+            <Border Grid.Column="0"
+                    StrokeThickness="1"
+                    Stroke="#4ecdc4"
+                    BackgroundColor="#16213e"
+                    Padding="10"
+                    StrokeShape="RoundRectangle 8">
+                <Grid ColumnDefinitions="*,Auto">
+                    <VerticalStackLayout Spacing="2">
+                        <Label Text="PATH A (Orthogonal)"
+                               FontSize="10"
+                               TextColor="#4ecdc4"/>
+                        <Label Text="{Binding LeftRunName}"
+                               FontSize="13"
+                               TextColor="White"
+                               LineBreakMode="TailTruncation"/>
+                    </VerticalStackLayout>
+                    <Button Grid.Column="1"
+                            Text="Load"
+                            Command="{Binding LoadLeftRunCommand}"
+                            IsEnabled="{Binding IsReviewMode, Converter={StaticResource InverseBoolConverter}}"
+                            BackgroundColor="#4ecdc4"
+                            TextColor="#0f0f1a"
+                            FontSize="11"
+                            Padding="10,5"
+                            HeightRequest="32"
+                            AutomationProperties.Name="Load Path A"
+                            AutomationProperties.HelpText="Load the baseline run for comparison"/>
+                </Grid>
+            </Border>
+
+            <!-- VS Label / Demo Controls -->
+            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="5">
+                <Label Text="VS"
+                       FontSize="18"
+                       FontAttributes="Bold"
+                       TextColor="#666"
+                       HorizontalOptions="Center"/>
+
+                <!-- End Demo button (only visible during demo) -->
+                <Button Text="End Demo"
+                        Command="{Binding EndDemoCommand}"
+                        BackgroundColor="Transparent"
+                        BorderColor="#c56cf0"
+                        BorderWidth="1"
+                        TextColor="#c56cf0"
+                        FontSize="10"
+                        Padding="8,3"
+                        HeightRequest="26"
+                        CornerRadius="4"
+                        IsVisible="{Binding IsDemoMode}"/>
+
+                <!-- Open Bundle button (Phase 7.2: Bundle Import) -->
+                <Button x:Name="openBundleButton"
+                        Text="📦 Open Bundle..."
+                        Clicked="OnOpenBundleClicked"
+                        BackgroundColor="Transparent"
+                        BorderColor="#74b9ff"
+                        BorderWidth="1"
+                        TextColor="#74b9ff"
+                        FontSize="10"
+                        Padding="8,3"
+                        HeightRequest="26"
+                        CornerRadius="4"
+                        IsVisible="{Binding IsDemoMode, Converter={StaticResource InverseBoolConverter}}"
+                        AutomationProperties.Name="Open Bundle"
+                        AutomationProperties.HelpText="Open a previously exported comparison bundle file"/>
+            </VerticalStackLayout>
+
+            <!-- Right Run Loader -->
+            <Border Grid.Column="2"
+                    StrokeThickness="1"
+                    Stroke="#ff6b6b"
+                    BackgroundColor="#16213e"
+                    Padding="10"
+                    StrokeShape="RoundRectangle 8">
+                <Grid ColumnDefinitions="*,Auto">
+                    <VerticalStackLayout Spacing="2">
+                        <Label Text="PATH B (Correlated)"
+                               FontSize="10"
+                               TextColor="#ff6b6b"/>
+                        <Label Text="{Binding RightRunName}"
+                               FontSize="13"
+                               TextColor="White"
+                               LineBreakMode="TailTruncation"/>
+                    </VerticalStackLayout>
+                    <Button Grid.Column="1"
+                            Text="Load"
+                            Command="{Binding LoadRightRunCommand}"
+                            IsEnabled="{Binding IsReviewMode, Converter={StaticResource InverseBoolConverter}}"
+                            BackgroundColor="#ff6b6b"
+                            TextColor="White"
+                            FontSize="11"
+                            Padding="10,5"
+                            HeightRequest="32"
+                            AutomationProperties.Name="Load Path B"
+                            AutomationProperties.HelpText="Load the correlated run for comparison"/>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Side-by-Side Canvases (normal mode) -->
+        <Grid Grid.Row="4" ColumnDefinitions="*,2,*"
+              IsVisible="{Binding IsOverlayMode, Converter={StaticResource InverseBoolConverter}}">
+            <!-- Left Canvas -->
+            <controls:ComparisonTrajectoryCanvas Grid.Column="0"
+                                                  Run="{Binding LeftRun}"
+                                                  CurrentTime="{Binding Player.Time}"
+                                                  Label="Path A"
+                                                  AccentColor="#4ecdc4"
+                                                  IsDominant="{Binding IsLeftDominant}"
+                                                  ShowAnnotations="{Binding IsToggled, Source={x:Reference annotationsSwitch}}"/>
+
+            <!-- Divider -->
+            <BoxView Grid.Column="1"
+                     Color="#2a2a4e"/>
+
+            <!-- Right Canvas -->
+            <controls:ComparisonTrajectoryCanvas Grid.Column="2"
+                                                  Run="{Binding RightRun}"
+                                                  CurrentTime="{Binding Player.Time}"
+                                                  Label="Path B"
+                                                  AccentColor="#ff6b6b"
+                                                  IsDominant="{Binding IsRightDominant}"
+                                                  ShowAnnotations="{Binding IsToggled, Source={x:Reference annotationsSwitch}}"/>
+        </Grid>
+
+        <!-- Overlay Canvas (overlay mode) -->
+        <controls:OverlayComparisonCanvas Grid.Row="4"
+                                          Runs="{Binding OverlayRuns}"
+                                          CurrentTime="{Binding Player.Time}"
+                                          ShowDeviation="{Binding ShowDeviation}"
+                                          ShowStatisticalBands="{Binding ShowStatisticalBands}"
+                                          ShowDistanceMetrics="{Binding ShowDistanceMetrics}"
+                                          IsVisible="{Binding IsOverlayMode}"/>
+
+        <!-- Toggle Bar -->
+        <HorizontalStackLayout Grid.Row="5"
+                               Spacing="15"
+                               Padding="15,8"
+                               BackgroundColor="#1a1a2e"
+                               HorizontalOptions="Center">
+            <!-- Overlay Mode Toggle -->
+            <VerticalStackLayout Spacing="1">
+                <HorizontalStackLayout Spacing="5">
+                    <Label Text="Stack" TextColor="#00d2d3" FontSize="11" FontAttributes="Bold" VerticalOptions="Center"/>
+                    <Switch IsToggled="{Binding IsOverlayMode}" OnColor="#00d2d3" Scale="0.8"/>
+                </HorizontalStackLayout>
+                <Label Text="Layer paths on top of each other" TextColor="#555" FontSize="9"/>
+            </VerticalStackLayout>
+            <BoxView WidthRequest="1" Color="#2a2a4e"/>
+            
+            <!-- Sub-toggles for overlay mode -->
+            <VerticalStackLayout Spacing="1" IsVisible="{Binding IsOverlayMode}">
+                <HorizontalStackLayout Spacing="5">
+                    <Label Text="Gaps" TextColor="#ff6b6b" FontSize="10" VerticalOptions="Center"/>
+                    <Switch IsToggled="{Binding ShowDeviation}" OnColor="#ff6b6b" Scale="0.7"/>
+                </HorizontalStackLayout>
+                <Label Text="Highlight where paths diverge" TextColor="#555" FontSize="9"/>
+            </VerticalStackLayout>
+            <VerticalStackLayout Spacing="1" IsVisible="{Binding IsOverlayMode}">
+                <HorizontalStackLayout Spacing="5">
+                    <Label Text="Range" TextColor="#74b9ff" FontSize="10" VerticalOptions="Center"/>
+                    <Switch IsToggled="{Binding ShowStatisticalBands}" OnColor="#74b9ff" Scale="0.7"/>
+                </HorizontalStackLayout>
+                <Label Text="Show confidence bands" TextColor="#555" FontSize="9"/>
+            </VerticalStackLayout>
+            <BoxView WidthRequest="1" Color="#2a2a4e" IsVisible="{Binding IsOverlayMode, Converter={StaticResource InverseBoolConverter}}"/>
+
+            <!-- Annotations toggle (side-by-side mode only) -->
+            <VerticalStackLayout Spacing="1" IsVisible="{Binding IsOverlayMode, Converter={StaticResource InverseBoolConverter}}">
+                <HorizontalStackLayout Spacing="5">
+                    <Label Text="Labels" TextColor="#a29bfe" FontSize="11" VerticalOptions="Center"/>
+                    <Switch x:Name="annotationsSwitch" IsToggled="False" OnColor="#a29bfe" Scale="0.8"/>
+                </HorizontalStackLayout>
+                <Label Text="Add text annotations" TextColor="#555" FontSize="9"/>
+            </VerticalStackLayout>
+            <BoxView WidthRequest="1" Color="#2a2a4e"/>
+            <VerticalStackLayout Spacing="1">
+                <HorizontalStackLayout Spacing="5">
+                    <Label Text="Details" TextColor="#ffd93d" FontSize="11" FontAttributes="Bold" VerticalOptions="Center"/>
+                    <Switch x:Name="analyticsSwitch" IsToggled="True" OnColor="#ffd93d" Scale="0.8"/>
+                </HorizontalStackLayout>
+                <Label Text="Show quantitative comparison" TextColor="#555" FontSize="9"/>
+            </VerticalStackLayout>
+            <BoxView WidthRequest="1" Color="#2a2a4e"/>
+            
+            <!-- Alignment Control (Phase 3) -->
+            <controls:AlignmentControl 
+                VerticalOptions="Center"
+                SelectedAlignment="{Binding SelectedAlignment}"
+                IsVisible="{Binding HasBothRuns}"/>
+            
+            <BoxView WidthRequest="1" Color="#2a2a4e"/>
+            <Label x:Name="deltaLabel"
+                   TextColor="#ffd93d"
+                   FontSize="11"
+                   FontAttributes="Bold"
+                   VerticalOptions="Center"/>
+        </HorizontalStackLayout>
+
+        <!-- Delta Zone (Phase 3: Canonical Delta Display) -->
+        <Grid Grid.Row="6" ColumnDefinitions="3*,*" Margin="10,5" IsVisible="{Binding HasBothRuns}">
+            <VerticalStackLayout Grid.Column="0" Spacing="6">
+                <!-- First-occurrence hints (Phase 4) -->
+                <controls:DeltaHints Deltas="{Binding CanonicalDeltas}"/>
+                
+                <controls:DeltaZone x:Name="deltaZone"
+                                    Deltas="{Binding CanonicalDeltas}"
+                                    AlignmentDescription="{Binding AlignmentDescription}"
+                                    HighlightedDeltaId="{Binding HighlightedDeltaId}"/>
+            </VerticalStackLayout>
+            
+            <!-- Insights Tray (Phase 4: Teaching) -->
+            <controls:InsightsTray Grid.Column="1"
+                                   x:Name="insightsTray"
+                                   Margin="8,0,0,0"/>
+        </Grid>
+
+        <!-- Interpretation Strip (Verdict) -->
+        <Border Grid.Row="7"
+                BackgroundColor="#16213e"
+                StrokeThickness="0"
+                Padding="15,10"
+                Margin="10,5"
+                StrokeShape="RoundRectangle 8"
+                IsVisible="{Binding HasBothRuns}">
+            <Grid ColumnDefinitions="*,Auto,*" RowDefinitions="Auto,Auto" ColumnSpacing="15" RowSpacing="8">
+                <!-- Path A Description -->
+                <VerticalStackLayout Grid.Row="0" Grid.Column="0" Spacing="3">
+                    <Label Text="Path A" FontAttributes="Bold" TextColor="#4ecdc4" FontSize="12"/>
+                    <Label Text="{Binding LeftDescription}" TextColor="#aaa" FontSize="11" LineBreakMode="WordWrap"/>
+                </VerticalStackLayout>
+
+                <!-- Verdict (center) -->
+                <Border Grid.Row="0" Grid.Column="1" Grid.RowSpan="2"
+                        BackgroundColor="#1a1a2e"
+                        StrokeThickness="1"
+                        Stroke="#ffd93d"
+                        Padding="12,8"
+                        StrokeShape="RoundRectangle 6"
+                        VerticalOptions="Center">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="VERDICT" FontSize="9" TextColor="#ffd93d" FontAttributes="Bold" HorizontalOptions="Center"/>
+                        <Label Text="{Binding InterpretationVerdict}" TextColor="White" FontSize="11" HorizontalTextAlignment="Center" LineBreakMode="WordWrap" MaximumWidthRequest="250"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Path B Description -->
+                <VerticalStackLayout Grid.Row="0" Grid.Column="2" Spacing="3">
+                    <Label Text="Path B" FontAttributes="Bold" TextColor="#ff6b6b" FontSize="12"/>
+                    <Label Text="{Binding RightDescription}" TextColor="#aaa" FontSize="11" LineBreakMode="WordWrap"/>
+                </VerticalStackLayout>
+            </Grid>
+        </Border>
+
+        <!-- Analytics Panel -->
+        <controls:ComparisonAnalyticsPanel Grid.Row="8"
+                                           LeftRun="{Binding LeftRun}"
+                                           RightRun="{Binding RightRun}"
+                                           CurrentTime="{Binding Player.Time}"
+                                           Margin="10,5"
+                                           IsVisible="{Binding IsToggled, Source={x:Reference analyticsSwitch}}"/>
+
+        <!-- No runs message - Designed Empty State -->
+        <Border Grid.Row="8"
+                Style="{StaticResource CardBase}"
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                Padding="40"
+                MaximumWidthRequest="450"
+                IsVisible="{Binding HasBothRuns, Converter={StaticResource InverseBoolConverter}}">
+            <VerticalStackLayout Spacing="16" HorizontalOptions="Center">
+                <!-- Icon -->
+                <Label Text="📊"
+                       FontSize="48"
+                       HorizontalOptions="Center"
+                       Opacity="0.6"/>
+                
+                <!-- Title -->
+                <Label Text="Ready to Compare"
+                       FontSize="18"
+                       FontAttributes="Bold"
+                       TextColor="White"
+                       HorizontalOptions="Center"/>
+                
+                <!-- Instructions -->
+                <Label Text="Load two inference runs to see how optimizations affect convergence, latency, and throughput."
+                       FontSize="13"
+                       TextColor="{StaticResource TextSecondary}"
+                       HorizontalTextAlignment="Center"
+                       LineBreakMode="WordWrap"/>
+                
+                <!-- Visual hint -->
+                <Grid ColumnDefinitions="*,Auto,*" ColumnSpacing="16" Margin="0,8,0,0">
+                    <Border Grid.Column="0"
+                            Style="{StaticResource Chip}"
+                            Stroke="{StaticResource PathAColor}"
+                            HorizontalOptions="End">
+                        <Label Text="Before" 
+                               FontSize="12" 
+                               TextColor="{StaticResource PathAColor}"/>
+                    </Border>
+                    
+                    <Label Grid.Column="1"
+                           Text="→"
+                           FontSize="16"
+                           TextColor="{StaticResource TextMuted}"
+                           VerticalOptions="Center"/>
+                    
+                    <Border Grid.Column="2"
+                            Style="{StaticResource Chip}"
+                            Stroke="{StaticResource PathBColor}"
+                            HorizontalOptions="Start">
+                        <Label Text="After" 
+                               FontSize="12" 
+                               TextColor="{StaticResource PathBColor}"/>
+                    </Border>
+                </Grid>
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- Playback Control -->
+        <controls:PlaybackControl Grid.Row="9"
+                                  BindingContext="{Binding Player}"/>
+    </Grid>
+</ContentPage>

@@ -1,0 +1,97 @@
+{
+  "conformsTo": [
+    "codemeta:3.0",
+    "ro-crate:1.1",
+    "mcp-prototypes:passport:1"
+  ],
+  "id": "seed:ScalarScope-Desktop:0.1.0",
+  "swhid": null,
+  "name": "scalarscope",
+  "title": "ScalarScope",
+  "description": "ASPIRE Scalar Vortex Visualizer — a .NET MAUI desktop app for comparing ML inference runs with scientific rigor.",
+  "version": "0.1.0",
+  "license": "MIT",
+  "datePublished": "2026-04-20",
+  "dateModified": "2026-10-03",
+  "codeRepository": "https://github.com/mcp-tool-shop-org/scalarscope",
+  "author": [
+    {
+      "name": "mcp-tool-shop"
+    }
+  ],
+  "keywords": [],
+  "lifecycle": {
+    "state": "active",
+    "stateSince": "2026-10-03",
+    "maturity": "beta",
+    "caretaker": null,
+    "graduatedTo": null,
+    "resurrectionNotes": null
+  },
+  "taxonomy": {
+    "category": "desktop-apps",
+    "domains": [],
+    "tags": [
+      "csharp",
+      "cli",
+      "maui"
+    ]
+  },
+  "technical": {
+    "kind": "desktop",
+    "programmingLanguages": [
+      "C#",
+      "XAML",
+      "TypeScript"
+    ],
+    "runtimes": [],
+    "operatingSystems": [
+      "win32"
+    ]
+  },
+  "health": {
+    "lineCount": null,
+    "lastCommitAt": null,
+    "commitRecencyDays": null,
+    "hasTests": null,
+    "hasReadme": null,
+    "hasLicense": null,
+    "buildable": null
+  },
+  "lineage": {
+    "sourceRepo": null,
+    "consolidatedAt": "2026-04-08",
+    "relatedSeeds": [],
+    "deprecates": [],
+    "successors": []
+  },
+  "sbom": {
+    "format": "none",
+    "url": null,
+    "hash": null
+  },
+  "discovery": {
+    "oneLiner": "A .NET MAUI desktop app for comparing ML inference runs with scientific rigor.",
+    "whyItMatters": "ScalarScope replaces eyeballing logs with structured, reproducible comparison of two inference traces side by side. It uses canonical delta analysis to fire only when differences are statistically meaningful and can export SHA-256 verified bundles your team can reproduce without recomputing."
+  },
+  "patterns": [
+    {
+      "name": "structured-comparison",
+      "category": "observability",
+      "summary": "ScalarScope enables apples-to-apples comparison of two ML inference traces side by side, using canonical delta analysis to fire only when differences are statistically meaningful."
+    }
+  ],
+  "failureModes": [],
+  "priorArt": [],
+  "agentCapsule": {
+    "insight": null,
+    "excerpt": null
+  },
+  "ingest": {
+    "method": "ollama-backfill",
+    "model": "hermes3:8b",
+    "confidence": 0.9,
+    "manualReview": false,
+    "ingestedAt": "2026-04-20T21:49:30.063Z"
+  }
+}
