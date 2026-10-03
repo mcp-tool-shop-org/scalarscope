@@ -7,7 +7,7 @@ sidebar:
 
 ## Reproducible bundles
 
-Export comparison results as `.scbundle` archives (ComparisonBundle v1.0.0). Bundles are self-contained and cryptographically verified.
+Export comparison results as `.scbundle` archives (ComparisonBundle v1.0.0). Bundles are self-contained. A matching SHA-256 is a content check, not a signature.
 
 ### Bundle contents
 
@@ -32,7 +32,7 @@ Bundles can be exported in three profiles:
 
 ### Integrity
 
-Every file in the bundle is hashed with SHA-256. A bundle-level hash (computed over all individual file hashes) enables tamper detection. If any file has been modified since export, the integrity check fails and Review Mode will flag the discrepancy.
+Every file in the bundle is hashed with SHA-256. The bundle hash is a content check, not a signature. If any file has been modified since export, the hash does not match and Review Mode flags the discrepancy.
 
 ### Privacy
 
@@ -48,7 +48,7 @@ This lets recipients understand what data the bundle contains before opening it.
 
 Open any `.scbundle` without recomputing:
 
-- Results are cryptographically verified against the embedded hashes
+- A matching SHA-256 checks the archived bytes. It is a content check, not a signature.
 - Frozen deltas are displayed exactly as they were at export time
 - A review-mode banner makes it clear results are verified, not re-derived
 - The insights tray shows frozen insight events from the bundle

@@ -12,7 +12,7 @@ export const config: SiteConfig = {
     badge: '.NET MAUI · Windows',
     headline: 'ML inference runs,',
     headlineAccent: 'compared with rigor.',
-    description: 'Stop eyeballing logs. ScalarScope loads two TFRT traces side by side, fires canonical delta analysis only when differences are statistically meaningful, and exports cryptographically verified bundles your team can reproduce.',
+    description: 'Stop eyeballing logs. ScalarScope loads two TFRT traces side by side, fires canonical delta analysis only when differences are statistically meaningful, and exports .scbundle archives. A matching SHA-256 is a content check, not a signature.',
     primaryCta: { href: '#quickstart', label: 'Get from Microsoft Store' },
     secondaryCta: { href: 'handbook/', label: 'Read the Handbook' },
     previews: [
@@ -26,7 +26,7 @@ export const config: SiteConfig = {
       },
       {
         label: 'Export bundle',
-        code: 'var exporter = new ExportService();\nawait exporter.ExportComparisonAsync(\n    baseline,\n    optimized,\n    outputPath: "results/run-42.scbundle"\n);\n// SHA-256 verified, frozen deltas,\n// full provenance metadata inside',
+        code: '// ComparisonBundleService.ExportAsync(bundle, outputPath)\n// writes a .scbundle (manifest, findings, repro).\n// SHA-256 of those bytes is a content check, not a signature.\n// VortexKit ExportService.ExportComparisonAsync writes a PNG,\n// not an .scbundle.',
       },
     ],
   },
@@ -44,26 +44,24 @@ export const config: SiteConfig = {
         },
         {
           title: 'Canonical delta analysis',
-          desc: 'Five delta types — ΔTc, ΔO, ΔF, ΔĀ, ΔTd — fire only when differences are statistically meaningful. No noise, no false signals, no manual threshold tuning.',
+          desc: 'On an inference comparison this page shows ΔTc (steps to stable latency), ΔO (runtime instability), and ΔF (failure rate). ΔĀ (average latency) and ΔTd (total duration) stay off this page.',
         },
         {
           title: 'Reproducible .scbundle exports',
-          desc: 'Export cryptographically signed bundles with SHA-256 integrity, frozen deltas, and full provenance metadata. Open in Review mode and results are verified, not re-derived.',
+          desc: 'Export .scbundle archives with a SHA-256 content check, frozen deltas, and provenance metadata. A matching hash is not a signature. Open in Review mode and the stored result is shown, not re-derived.',
         },
       ],
     },
     {
       kind: 'data-table',
       id: 'deltas',
-      title: 'Five canonical delta types',
-      subtitle: 'Each delta fires only when the difference clears its statistical threshold.',
+      title: 'Inference deltas',
+      subtitle: 'ΔĀ (average latency) and ΔTd (total duration) stay off this page.',
       columns: ['Delta', 'Measures'],
       rows: [
-        ['ΔTc', 'Compute time — wall-clock latency difference between runs'],
-        ['ΔO', 'Output divergence — numerical difference in model outputs'],
-        ['ΔF', 'Feature activation — changes in intermediate layer activations'],
-        ['ΔĀ', 'Average metric shift — mean performance across the evaluation set'],
-        ['ΔTd', 'Data throughput — tokens or samples processed per second'],
+        ['ΔTc', 'Steps to stable latency'],
+        ['ΔO', 'Runtime instability'],
+        ['ΔF', 'Failure rate'],
       ],
     },
     {
@@ -97,7 +95,7 @@ export const config: SiteConfig = {
       features: [
         {
           title: 'Review mode',
-          desc: 'Open any .scbundle and results are cryptographically verified against the embedded SHA-256 hash — not re-derived from raw data. Share bundles and know both parties see identical results.',
+          desc: 'Open any .scbundle and the stored review is shown, not re-derived. A matching SHA-256 checks the archived bytes. It is a content check, not a signature.',
         },
         {
           title: 'Privacy first',

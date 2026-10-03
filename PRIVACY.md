@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**ScalarScope** | Version 3.0.0.0 | Policy effective: January 2025
+**ScalarScope** | Version 3.0.0 | Policy effective: January 2025
 
 ## Summary
 
@@ -30,10 +30,7 @@ ScalarScope does not integrate with any third-party analytics, advertising, or t
 
 ## Network Usage
 
-ScalarScope may access the network only for:
-
-- Loading files from URLs you explicitly provide
-- Checking for updates (optional, user-initiated)
+This build does not load files from URLs and does not check for updates. It does not send analytics. Comparison data stays on the machine unless you export it.
 
 ## Your Rights
 

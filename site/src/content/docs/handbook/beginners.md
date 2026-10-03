@@ -9,9 +9,9 @@ New to ScalarScope? This page walks you through the core concepts and workflows,
 
 ## What does this tool do?
 
-ScalarScope compares two ML inference runs side by side and tells you exactly what changed. Instead of manually scrolling through logs looking for differences, ScalarScope computes five canonical delta types that fire only when the difference is statistically meaningful. You get a clear answer: "these things changed, and here's the evidence."
+ScalarScope compares two ML inference runs side by side and tells you exactly what changed. Instead of manually scrolling through logs looking for differences, an inference comparison shows three deltas, and only when the difference is statistically meaningful. You get a clear answer: "these things changed, and here's the evidence."
 
-The tool is built for TensorFlow-TRT inference workloads but the underlying delta analysis works on any pair of time-series traces. Results are exportable as cryptographically verified bundles that anyone on your team can open and see identical findings.
+The tool is built for TensorFlow-TRT inference workloads but the underlying delta analysis works on any pair of time-series traces. Results are exportable as `.scbundle` archives. A matching SHA-256 is a content check, not a signature.
 
 ## Installation
 
@@ -52,13 +52,13 @@ If you do not have your own traces yet, click **Try Example** on the Home tab. T
 
 ### Deltas
 
-A delta represents a statistically meaningful difference between two runs. ScalarScope computes five delta types:
+A delta represents a statistically meaningful difference between two runs. On an inference comparison this page shows three:
 
-- **ΔTc (Convergence Time)** — did the runs stabilize at different points?
-- **ΔO (Output Variability)** — is one run more unstable/oscillatory than the other?
-- **ΔF (Failure Rate)** — did one run experience failures the other did not?
-- **ΔĀ (Average Latency)** — do the runs have meaningfully different average values?
-- **ΔTd (Total Duration)** — did structural emergence happen at different times?
+- **ΔTc (Convergence Time)** — steps to stable latency
+- **ΔO (Output Variability)** — runtime instability
+- **ΔF (Failure Rate)** — failure rate
+
+ΔĀ (average latency) and ΔTd (total duration) stay off the inference page.
 
 Each delta includes a confidence score (0 to 1) and a human-readable explanation. Deltas that do not reach statistical significance are automatically suppressed — you never see noise.
 
@@ -68,7 +68,7 @@ The TFRT preset is designed for TensorFlow-TRT inference workloads. It maps infe
 
 ### Bundles
 
-A `.scbundle` is a self-contained archive of your comparison results. Every file inside is hashed with SHA-256, and a bundle-level hash detects tampering. When a colleague opens your bundle, Review Mode activates automatically — they see your exact results without recomputing anything.
+A `.scbundle` is a self-contained archive of your comparison results. Every file inside is hashed with SHA-256. A matching bundle hash is a content check, not a signature. When a colleague opens your bundle, Review Mode activates automatically — they see the stored results without recomputing anything.
 
 ### Alignment
 
@@ -86,12 +86,12 @@ When two runs have different lengths, ScalarScope aligns them before comparison.
 | `Down` / `-` | Decrease playback speed |
 | `0` | Reset speed to 1x |
 | `Ctrl+S` or `Ctrl+E` | Quick export (PNG saved to Documents/ScalarScope Exports) |
-| `1`–`4` | Switch tabs (Home, Compare, Guide, Settings) |
+| `1`–`6` | Request routes overview, trajectory, scalars, geometry, compare, and failures. Not Home, Compare, Guide, or Settings. Pressing 1 does not open Home. |
 | `?` | Open Guide tab |
 
 ## Configuration
 
-Open the **Settings** tab (or press `4`) to adjust:
+Open the **Settings** tab to adjust:
 
 - **Theme** — System, Light, or Dark
 - **Playback** — default speed, auto-play on load

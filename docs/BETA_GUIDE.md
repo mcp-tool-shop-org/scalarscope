@@ -78,7 +78,7 @@ During this beta period, we're looking for feedback on:
 
 ## Environment
 - OS: [e.g., Windows 11 23H2]
-- Version: [e.g., 1.0.0-rc.1]
+- Version: [e.g., 3.0.0]
 - GPU: [e.g., NVIDIA RTX 5080]
 
 ## Support Bundle
@@ -101,7 +101,7 @@ When reporting issues, include:
 
 ## Known Limitations
 
-For this RC1 release:
+For the current release (display version 3.0.0):
 - **Windows only** - macOS/Linux not yet tested
 - **Self-signed certificate** - You may need Developer Mode enabled
 - **No auto-update** - Manual download for new versions
@@ -120,7 +120,7 @@ For this RC1 release:
 |-------|-------|-------|
 | RC1 Beta | Feb 2025 | Stability, core features |
 | RC2 | TBD | Bug fixes, polish |
-| 1.0 Release | TBD | Microsoft Store submission |
+| Store | current | Display version 3.0.0 is on the Store (9P3HT1PHBKQK). Do not report 1.0.0-rc.1. |
 
 ## Thank You!
 

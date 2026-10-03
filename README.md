@@ -2,7 +2,7 @@
   <a href="README.md">English</a> | <a href="README.ja.md">日本語</a> | <a href="README.zh.md">中文</a> | <a href="README.es.md">Español</a> | <a href="README.fr.md">Français</a> | <a href="README.hi.md">हिन्दी</a> | <a href="README.it.md">Italiano</a> | <a href="README.pt-BR.md">Português (BR)</a>
 </p>
 
-The other languages are the 2.x prototype. They still name the old repository and a NuGet package. This English page is the current one.
+The other languages are older translations of the .NET app page. The retired repository name, the live Pages badge, the NuGet badge, and `dotnet add package VortexKit` are removed there. This English page is the current one.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/mcp-tool-shop-org/brand/main/logos/ScalarScope-Desktop/readme.png" alt="ScalarScope" width="400">
@@ -33,7 +33,7 @@ The bullets below describe the published .NET package. The Rust review draws an 
 - **Canonical delta analysis** — Five delta types (ΔTc, ΔO, ΔF, ΔĀ, ΔTd) fire only when differences are statistically meaningful
 - **Runtime presets** — The TFRT preset auto-suppresses irrelevant metrics so you focus on what matters for TensorFlow-TRT workloads
 - **Reproducible bundles** — Export `.scbundle` archives with SHA-256 integrity, frozen deltas, and full provenance metadata
-- **Review mode** — Open a bundle without recomputing; results are cryptographically verified, not re-derived
+- **Review mode** — Open a bundle without recomputing. A matching SHA-256 is a content check, not a signature.
 - **Privacy first** — Zero telemetry, zero analytics, all data stays local unless you explicitly export
 
 ---
@@ -146,7 +146,7 @@ Export results as `.scbundle` archives (ComparisonBundle v1.0.0):
 - **`findings/deltas.json`** — canonical deltas with confidence scores, anchors, and trigger types
 - **`findings/why.json`** — human-readable explanations, guardrails, parameter chips
 - **`findings/summary.md`** — auto-generated Markdown summary
-- **Integrity** — every file hashed with SHA-256; bundle-level hash for tamper detection
+- **Integrity** — every file hashed with SHA-256. The bundle hash is a content check, not a signature.
 
 ### Review Mode
 
@@ -288,7 +288,7 @@ dotnet test --collect:"XPlat Code Coverage"
 | `Down` / `-` | Decrease playback speed |
 | `0` | Reset speed to 1x |
 | `Ctrl+S` / `Ctrl+E` | Quick export (PNG to Documents) |
-| `1`–`4` | Switch tabs (Home, Compare, Guide, Settings) |
+| `1`–`6` | Request routes overview, trajectory, scalars, geometry, compare, and failures. Not Home, Compare, Guide, or Settings. Pressing 1 does not open Home. |
 | `?` | Open help / guide |
 
 ---

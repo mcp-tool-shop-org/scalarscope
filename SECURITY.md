@@ -4,8 +4,8 @@
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 1.0.x   | :white_check_mark: |
-| < 1.0   | :x:                |
+| 3.0.x (display version 3.0.0) | :white_check_mark: |
+| < 3.0   | :x:                |
 
 ## Reporting a Vulnerability
 
@@ -14,7 +14,7 @@ We take security seriously. If you discover a security vulnerability in ScalarSc
 ### How to Report
 
 1. **DO NOT** create a public GitHub issue for security vulnerabilities
-2. Email security concerns to: 64996768+mcp-tool-shop@users.noreply.github.com
+2. Report privately at https://github.com/mcp-tool-shop-org/scalarscope/security/advisories/new
 3. Include:
    - Description of the vulnerability
    - Steps to reproduce

@@ -17,7 +17,7 @@ Welcome to the ScalarScope handbook. This is the complete guide to comparing ML 
 
 ## What is ScalarScope?
 
-Most ML teams eyeball logs. ScalarScope replaces that with structured, reproducible comparison. Load two TFRT inference traces side by side, see which differences are statistically meaningful, and export cryptographically verified bundles your team can reproduce.
+Most ML teams eyeball logs. ScalarScope replaces that with structured, reproducible comparison. Load two TFRT inference traces side by side, see which differences are statistically meaningful, and export `.scbundle` archives. A matching SHA-256 is a content check, not a signature.
 
 The app has four tabs: **Home** (workspace and recent comparisons), **Compare** (side-by-side delta analysis), **Guide** (interpretation help), and **Settings** (theme, playback, export, accessibility).
 

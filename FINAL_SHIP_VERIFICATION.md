@@ -58,8 +58,8 @@ Generated: 2026-02-09
 - [x] **CheckpointService**: Resumable operation state
 
 ### 9. Packaging & Store Prep ✅
-- [x] **Version**: 2.0.0.0 in ScalarScope.csproj
-- [x] **InformationalVersion**: 2.0.0+7887384
+- [x] **Version (2026-02-09 snapshot)**: 2.0.0.0 was in ScalarScope.csproj for that ship. The csproj `Version` is now 3.0.0.0.
+- [x] **InformationalVersion (2026-02-09 snapshot)**: 2.0.0+7887384 was recorded for that ship. The csproj does not set InformationalVersion now.
 - [x] **MSIX**: WindowsPackageType=MSIX, SelfContained=true
 - [x] **Runtime**: win-x64, net9.0-windows10.0.19041.0
 - [x] **Release Build**: 0 errors, warnings only
@@ -96,8 +96,10 @@ Test Suite: 44/44 passed
 
 ## VERSION MATRIX
 
-| Component | Version |
-|-----------|---------|
+The table below is the 2026-02-09 snapshot of the 2.0.0 ship. It is not the current tree.
+
+| Component | 2026-02-09 snapshot |
+|-----------|---------------------|
 | ApplicationDisplayVersion | 2.0.0 |
 | ApplicationVersion | 20 |
 | Version | 2.0.0.0 |
@@ -106,6 +108,16 @@ Test Suite: 44/44 passed
 | Bundle Spec | 1.0 |
 | .NET | 9.0 |
 | Windows SDK | 10.0.19041.0 |
+
+### Current tree
+
+| Component | Current |
+|-----------|---------|
+| ApplicationDisplayVersion | 3.0.0 |
+| ApplicationVersion | 30 |
+| csproj Version | 3.0.0.0 |
+| Package.appxmanifest Identity Version | 3.0.0.0 |
+| InformationalVersion | not set |
 
 ## RECOMMENDATION
 

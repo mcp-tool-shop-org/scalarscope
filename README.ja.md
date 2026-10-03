@@ -6,16 +6,13 @@
   <img src="https://raw.githubusercontent.com/mcp-tool-shop-org/brand/main/logos/ScalarScope-Desktop/readme.png" alt="ScalarScope" width="400">
 </p>
 
-# ScalarScope-Desktop
+# ScalarScope
 
 > [MCP Tool Shop](https://mcptoolshop.com) の一部
 
 <p align="center">
-  <a href="https://github.com/mcp-tool-shop-org/ScalarScope-Desktop/actions/workflows/build.yml"><img src="https://github.com/mcp-tool-shop-org/ScalarScope-Desktop/actions/workflows/build.yml/badge.svg" alt="CI"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square" alt="License: MIT"></a>
-  <a href="https://mcp-tool-shop-org.github.io/ScalarScope-Desktop/"><img src="https://img.shields.io/badge/Landing_Page-live-blue?style=flat-square" alt="Landing Page"></a>
   <a href="https://apps.microsoft.com/detail/9P3HT1PHBKQK"><img src="https://img.shields.io/badge/Microsoft%20Store-9P3HT1PHBKQK-0078D4?style=flat-square&logo=microsoft" alt="Microsoft Store"></a>
-  <a href="https://www.nuget.org/packages/VortexKit"><img src="https://img.shields.io/nuget/v/VortexKit?label=VortexKit&logo=nuget&style=flat-square" alt="NuGet: VortexKit"></a>
 </p>
 
 **ASPIRE Scalar Vortex Visualizer** — 機械学習推論の実行結果を科学的な厳密さで比較するための、.NET MAUIデスクトップアプリケーションです。
@@ -35,15 +32,9 @@
 
 ---
 
-## NuGetパッケージ
+## VortexKit
 
-| パッケージ | バージョン | 説明 |
-| --------- | --------- | ------------- |
-| [VortexKit](https://www.nuget.org/packages/VortexKit) | [![NuGet](https://img.shields.io/nuget/v/VortexKit)](https://www.nuget.org/packages/VortexKit) | トレーニングの動態を可視化するための再利用可能なフレームワーク。タイムシンクロナイズされた再生、アニメーションSkiaSharpキャンバス、比較ビュー、注釈オーバーレイ、SVG/PNGエクスポート、およびセマンティックカラーシステムを提供します。SkiaSharp + MAUIを基盤として構築されています。 |
-
-```bash
-dotnet add package VortexKit
-```
+VortexKit はこのリポジトリの `src/VortexKit` にあります。NuGet には公開されていません。
 
 ---
 
@@ -143,7 +134,7 @@ await svgExporter.ExportSvgAsync(svgData, "trajectory.svg",
 
 ### VortexKit 可視化フレームワーク
 
-VortexKitは、抽出された可視化エンジンであり、スタンドアロンのNuGetパッケージとして公開されています。
+VortexKit はこのリポジトリの `src/VortexKit` にあります。NuGet には公開されていません。
 
 | コンポーネント | 機能 |
 | ----------- | ------------- |
@@ -175,8 +166,8 @@ Windows 10（ビルド17763）以降が必要です。
 #   Visual Studio 2022 with MAUI workload, or:
 #     dotnet workload install maui-windows
 
-git clone https://github.com/mcp-tool-shop-org/ScalarScope-Desktop.git
-cd ScalarScope-Desktop
+git clone https://github.com/mcp-tool-shop-org/scalarscope.git
+cd scalarscope
 dotnet restore
 dotnet build
 
@@ -184,18 +175,12 @@ dotnet build
 dotnet run --project src/ScalarScope
 ```
 
-### NuGet（ライブラリのみ）
-
-```bash
-dotnet add package VortexKit
-```
-
 ---
 
 ## プロジェクト構造
 
 ```
-ScalarScope-Desktop/
+scalarscope/
 ├── src/
 │   ├── ScalarScope/                    # .NET MAUI desktop app
 │   │   ├── Models/                     # GeometryRun, InsightEvent
@@ -220,7 +205,7 @@ ScalarScope-Desktop/
 │   │       ├── Styles/DesignSystem.xaml # Unified visual grammar
 │   │       └── Raw/Samples/            # Built-in example traces
 │   │
-│   └── VortexKit/                      # Standalone NuGet library
+│   └── VortexKit/                      # Visualization library in this repo; not a NuGet package
 │       ├── Core/
 │       │   ├── AnimatedCanvas.cs       # Time-synced SkiaSharp canvas base
 │       │   ├── PlaybackController.cs   # Shared playback timeline

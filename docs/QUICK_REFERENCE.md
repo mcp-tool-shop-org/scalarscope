@@ -13,9 +13,9 @@
 | `S` | Quick screenshot |
 | `Ctrl+S` | Quick screenshot |
 | `Ctrl+E` | Quick screenshot (export) |
-| `1-6` | Switch tabs |
+| `1`–`6` | Request routes overview, trajectory, scalars, geometry, compare, and failures. Not Home, Compare, Guide, or Settings. Pressing 1 does not open Home. |
 
-## Tabs (v2.0)
+## Tabs
 
 | Tab | Purpose |
 |-----|--------|
@@ -105,4 +105,4 @@ Generate with: `python -m aspire.export.geometry_export`
 
 ---
 
-*ScalarScope v1.0 | Scientific instrument for evaluative learning dynamics*
+*ScalarScope 3.0.0 | Scientific instrument for evaluative learning dynamics*
