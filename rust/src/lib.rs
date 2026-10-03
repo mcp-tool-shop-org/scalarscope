@@ -1,6 +1,7 @@
 //! The ScalarScope review. Inference traces and backpropagate training
 //! histories are different instruments, and this crate keeps them apart.
 
+pub mod bundle;
 pub mod milestones;
 pub mod open;
 pub mod readings;

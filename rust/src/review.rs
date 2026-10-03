@@ -3,6 +3,8 @@
 //! steady-state milestone is missing. ΔTd and ΔĀ stay off that page.
 //! A training page does not compute those deltas.
 
+use serde::{Deserialize, Serialize};
+
 use crate::open::{InferenceRun, Side, TrainingEntry};
 use crate::readings::{self, Band};
 
@@ -31,10 +33,28 @@ pub struct InferenceReview {
     pub right_p95: Option<f64>,
     pub right_p99: Option<f64>,
     pub fired: Vec<String>,
+    pub findings: Vec<Finding>,
     pub verdict: String,
     pub caption: String,
     pub left_text: String,
     pub right_text: String,
+}
+
+/// One delta the inference page actually fired. The numbers are the same
+/// ones the verdict sentence used. A bundle stores this record and shows it
+/// again. It does not measure a new one.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Finding {
+    pub symbol: String,
+    pub id: String,
+    pub name: String,
+    pub kind: String,
+    pub sentence: String,
+    pub left: f64,
+    pub right: f64,
+    pub delta: f64,
+    pub units: String,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -70,7 +90,8 @@ fn inference(left: &InferenceRun, right: &InferenceRun) -> InferenceReview {
     let left_finite = readings::finite_sorted(&left_values);
     let right_finite = readings::finite_sorted(&right_values);
     let (left_throughput, right_throughput) = throughput(left, right, skip_left, skip_right, count);
-    let (fired, verdict) = inference_verdict(left, right);
+    let (findings, verdict) = inference_verdict(left, right);
+    let fired = findings.iter().map(|row| row.symbol.clone()).collect();
     let caption = format!(
         "latency_ms (ms). {summary} The band is a centered 5-sample rolling mean ± population standard deviation, not a confidence interval. Marks are 3-sigma on this window. p50, p95, and p99 are nearest-rank. The distribution is the empirical CDF of these same samples. ΔTd and ΔĀ stay off this page."
     );
@@ -98,6 +119,7 @@ fn inference(left: &InferenceRun, right: &InferenceRun) -> InferenceReview {
         right_p95: readings::percentile(&right_finite, 0.95),
         right_p99: readings::percentile(&right_finite, 0.99),
         fired,
+        findings,
         verdict,
         left: left_values,
         right: right_values,
@@ -105,19 +127,31 @@ fn inference(left: &InferenceRun, right: &InferenceRun) -> InferenceReview {
     }
 }
 
-fn inference_verdict(left: &InferenceRun, right: &InferenceRun) -> (Vec<String>, String) {
-    let mut findings: Vec<(&str, String)> = Vec::new();
+fn inference_verdict(left: &InferenceRun, right: &InferenceRun) -> (Vec<Finding>, String) {
+    let mut findings = Vec::new();
     let mut withheld = Vec::new();
 
     let outliers_left = count_outliers(&left.latency_ms);
     let outliers_right = count_outliers(&right.latency_ms);
     if outliers_right > outliers_left {
         let introduced = outliers_right - outliers_left;
-        findings.push(("ΔF", format!("Introduced {introduced} new runtime anomalies")));
+        findings.push(finding(
+            "ΔF",
+            format!("Introduced {introduced} new runtime anomalies"),
+            outliers_left as f64,
+            outliers_right as f64,
+            "count",
+        ));
     }
 
     match delta_tc(left, right) {
-        Tc::Fired(text) => findings.push(("ΔTc", text)),
+        Tc::Fired { text, left_step, right_step } => findings.push(finding(
+            "ΔTc",
+            text,
+            left_step as f64,
+            right_step as f64,
+            "steps",
+        )),
         Tc::Withheld(text) => withheld.push(text),
         Tc::Quiet => {}
     }
@@ -131,22 +165,53 @@ fn inference_verdict(left: &InferenceRun, right: &InferenceRun) -> (Vec<String>,
         } else {
             "Increased runtime variability".to_string()
         };
-        findings.push(("ΔO", text));
+        findings.push(finding("ΔO", text, spread_left, spread_right, "ms"));
     }
 
     let order = ["ΔF", "ΔTc", "ΔO"];
-    findings.sort_by_key(|(symbol, _)| order.iter().position(|item| item == symbol).unwrap_or(order.len()));
-    let fired: Vec<String> = findings.iter().map(|(symbol, _)| (*symbol).to_string()).collect();
-    let mut parts: Vec<String> = findings.into_iter().map(|(symbol, text)| format!("{symbol} {text}")).collect();
+    findings.sort_by_key(|row| order.iter().position(|item| *item == row.symbol).unwrap_or(order.len()));
+    let mut parts: Vec<String> = findings.iter().map(|row| format!("{} {}", row.symbol, row.sentence)).collect();
     if parts.is_empty() {
         parts.push("No delta fired on latency_ms.".to_string());
     }
     parts.extend(withheld);
-    (fired, parts.join(" "))
+    (findings, parts.join(" "))
+}
+
+fn finding(symbol: &str, sentence: String, left: f64, right: f64, units: &str) -> Finding {
+    let (id, name, kind) = match symbol {
+        "ΔF" => ("FailurePresence", "Failure Events", "Event"),
+        "ΔTc" => ("ConvergenceTiming", "Convergence", "Timing"),
+        "ΔO" => ("StabilityOscillation", "Stability", "Behavior"),
+        _ => ("Unknown", "Delta", "Behavior"),
+    };
+    let left = stored_number(left);
+    let right = stored_number(right);
+    Finding {
+        symbol: symbol.to_string(),
+        id: id.to_string(),
+        name: name.to_string(),
+        kind: kind.to_string(),
+        sentence,
+        left,
+        right,
+        delta: stored_number(right - left),
+        units: units.to_string(),
+    }
+}
+
+/// A stored number is finite, and a zero is positive zero. Negative zero
+/// compares equal and still hashes as different text.
+fn stored_number(value: f64) -> f64 {
+    if !value.is_finite() || value == 0.0 {
+        0.0
+    } else {
+        value
+    }
 }
 
 enum Tc {
-    Fired(String),
+    Fired { text: String, left_step: i64, right_step: i64 },
     Withheld(String),
     Quiet,
 }
@@ -169,7 +234,11 @@ fn delta_tc(left: &InferenceRun, right: &InferenceRun) -> Tc {
     } else {
         format!("Stabilizes {difference} steps later")
     };
-    Tc::Fired(text)
+    Tc::Fired {
+        text,
+        left_step,
+        right_step,
+    }
 }
 
 fn last_step(run: &InferenceRun) -> i64 {

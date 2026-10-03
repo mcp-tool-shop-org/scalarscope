@@ -3,6 +3,7 @@
 use eframe::egui::{self, Color32, RichText};
 use egui_plot::{Line, Plot, PlotPoints, Points, Polygon};
 
+use crate::bundle::{self, OpenedBundle};
 use crate::open::{open_path, Loaded, Side};
 use crate::readings::Band;
 use crate::review::{self, InferenceReview, Pair, TrainingReview};
@@ -15,6 +16,7 @@ const NOTE: Color32 = Color32::from_rgb(0x9a, 0xa0, 0xb4);
 pub struct ScalarScopeApp {
     left: Option<Loaded>,
     right: Option<Loaded>,
+    opened: Option<OpenedBundle>,
     note: String,
     distribution: bool,
 }
@@ -24,6 +26,7 @@ impl Default for ScalarScopeApp {
         Self {
             left: None,
             right: None,
+            opened: None,
             note: String::new(),
             distribution: false,
         }
@@ -40,6 +43,12 @@ impl eframe::App for ScalarScopeApp {
             if ui.button("Open path B").clicked() {
                 self.load(false);
             }
+            if ui.button("Open bundle").clicked() {
+                self.open_bundle();
+            }
+            if self.opened.is_none() && ui.button("Save bundle").clicked() {
+                self.save_bundle();
+            }
         });
         ui.add_space(6.0);
         ui.horizontal(|ui| {
@@ -48,28 +57,51 @@ impl eframe::App for ScalarScopeApp {
             ui.label(RichText::new(side_name(&self.right, "Path B")).color(RIGHT));
         });
 
-        let mismatch = match (&self.left, &self.right) {
-            (Some(left), Some(right)) => review::pair(&left.side, &right.side).err(),
-            _ => None,
-        };
-        if let Some(error) = mismatch {
-            self.note = error;
+        let opened = self.opened.clone();
+        if opened.is_none() {
+            let mismatch = match (&self.left, &self.right) {
+                (Some(left), Some(right)) => review::pair(&left.side, &right.side).err(),
+                _ => None,
+            };
+            if let Some(error) = mismatch {
+                self.note = error;
+            }
         }
         if !self.note.is_empty() {
             ui.add_space(6.0);
             ui.label(RichText::new(&self.note).color(MARK));
         }
 
+        ui.add_space(8.0);
+        if let Some(opened) = opened {
+            ui.label(RichText::new(format!("Stored review · {}", &opened.bundle_hash[..16])).color(NOTE));
+            ui.label(RichText::new(bundle::CONTENT_CHECK).color(NOTE));
+            ui.add_space(6.0);
+            match bundle::stored_pair(&opened.review) {
+                Some(Pair::Inference(review)) => self.draw_inference(ui, &review),
+                Some(Pair::Training(review)) => draw_training(ui, &review),
+                None => {
+                    if !opened.review.verdict.is_empty() {
+                        ui.label(RichText::new(&opened.review.verdict).color(Color32::WHITE));
+                    }
+                    ui.label(RichText::new(&opened.review.caption).color(NOTE));
+                }
+            }
+            return;
+        }
+
         let built = match (&self.left, &self.right) {
             (Some(left), Some(right)) => review::pair(&left.side, &right.side).ok(),
             _ => None,
         };
-        ui.add_space(8.0);
         match built {
             Some(Pair::Inference(review)) => self.draw_inference(ui, &review),
             Some(Pair::Training(review)) => draw_training(ui, &review),
             None => {
-                ui.label(RichText::new("Open two inference traces, or two backpropagate run histories.").color(NOTE));
+                ui.label(
+                    RichText::new("Open two inference traces, or two backpropagate run histories. Or open a .scbundle.")
+                        .color(NOTE),
+                );
             }
         }
     }
@@ -85,6 +117,7 @@ impl ScalarScopeApp {
         };
         match open_path(&path) {
             Ok(loaded) => {
+                self.opened = None;
                 if left {
                     self.left = Some(loaded);
                 } else {
@@ -100,6 +133,56 @@ impl ScalarScopeApp {
                 }
                 self.note = error;
             }
+        }
+    }
+
+    fn open_bundle(&mut self) {
+        let Some(path) = rfd::FileDialog::new()
+            .add_filter("ScalarScope bundle", &["scbundle"])
+            .pick_file()
+        else {
+            return;
+        };
+        match bundle::open_file(&path) {
+            Ok(opened) => {
+                self.opened = Some(opened);
+                self.note.clear();
+            }
+            Err(error) => {
+                self.opened = None;
+                self.note = error;
+            }
+        }
+    }
+
+    fn save_bundle(&mut self) {
+        let (Some(left), Some(right)) = (&self.left, &self.right) else {
+            self.note = "Open both sides before saving a bundle.".to_string();
+            return;
+        };
+        let built = match review::pair(&left.side, &right.side) {
+            Ok(pair) => pair,
+            Err(error) => {
+                self.note = error;
+                return;
+            }
+        };
+        let Some(path) = rfd::FileDialog::new()
+            .add_filter("ScalarScope bundle", &["scbundle"])
+            .set_file_name("review.scbundle")
+            .save_file()
+        else {
+            return;
+        };
+        let document = bundle::document_from_pair(&built);
+        match bundle::seal(&document, &bundle::utc_now()) {
+            Ok(sealed) => match bundle::write_file(&path, &sealed) {
+                Ok(()) => {
+                    self.note = format!("Saved the stored review. Content check {}.", sealed.bundle_hash);
+                }
+                Err(error) => self.note = error,
+            },
+            Err(error) => self.note = error,
         }
     }
 
