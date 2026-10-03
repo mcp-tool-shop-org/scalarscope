@@ -233,6 +233,18 @@ public partial class BundleExportPanel : ContentView
             
             if (result.Success)
             {
+                if (!string.IsNullOrWhiteSpace(result.FilePath))
+                {
+                    try
+                    {
+                        ComparisonLog.AttachBundle(result.FilePath, result.BundleHash, ComparisonLog.DefaultDirectory);
+                    }
+                    catch (Exception logEx)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Comparison log: {logEx.Message}");
+                    }
+                }
+
                 statusLabel.Text = "Bundle exported successfully!";
                 progressIndicator.IsRunning = false;
                 

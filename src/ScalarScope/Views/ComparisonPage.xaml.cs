@@ -95,11 +95,13 @@ public partial class ComparisonPage : ContentPage, IQueryAttributable
             if (serial != _openSerial)
                 return;
 
-            if (!ViewModel.TryTakeOpenRequest(out var bundlePath, out var demo))
+            if (!ViewModel.TryTakeOpenRequest(out var bundlePath, out var demo, out var leftPath, out var rightPath))
                 return;
 
             if (!string.IsNullOrEmpty(bundlePath))
                 await LoadBundleFromPathAsync(bundlePath);
+            else if (!string.IsNullOrEmpty(leftPath) && !string.IsNullOrEmpty(rightPath))
+                await LoadRunPairAsync(leftPath, rightPath);
             else if (demo)
                 await LoadDemoFromQueryAsync();
         });
@@ -208,8 +210,6 @@ public partial class ComparisonPage : ContentPage, IQueryAttributable
             insightsTray.SetInsights(bundle.Insights);
         }
         
-        RememberOpenedBundle(bundle);
-
         // Show review mode banner
         await DisplayAlert(
             "Bundle Loaded",
@@ -220,22 +220,29 @@ public partial class ComparisonPage : ContentPage, IQueryAttributable
             "OK");
     }
 
-    private static void RememberOpenedBundle(LoadedBundle bundle)
+    private async Task LoadRunPairAsync(string leftPath, string rightPath)
     {
-        if (string.IsNullOrWhiteSpace(bundle.FilePath))
-            return;
+        openBundleButton.IsEnabled = false;
+        openBundleButton.Text = "Loading...";
 
-        var welcome = new WelcomeViewModel();
-        welcome.AddRecentComparison(new RecentComparisonItem
+        try
         {
-            Id = Guid.NewGuid().ToString(),
-            Title = Path.GetFileNameWithoutExtension(bundle.FilePath),
-            Subtitle = $"{bundle.Deltas.Count} deltas · {bundle.ReproducibilityBadge}",
-            Icon = "📦",
-            FilePath = bundle.FilePath,
-            IsBundle = true,
-            Timestamp = DateTimeOffset.UtcNow
-        });
+            await ViewModel.LoadLeftFromFileAsync(leftPath);
+            await ViewModel.LoadRightFromFileAsync(rightPath);
+            if (!ViewModel.HasBothRuns)
+            {
+                await DisplayAlert("Could not reopen", "One of the runs failed to load.", "OK");
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Could not reopen", ex.Message, "OK");
+        }
+        finally
+        {
+            openBundleButton.IsEnabled = true;
+            openBundleButton.Text = "📦 Open Bundle...";
+        }
     }
 
     private void SetupBundleHandlers()

@@ -181,7 +181,7 @@
                 <!-- Section: Recent -->
                 <VerticalStackLayout Grid.Row="3" Grid.Column="1" Spacing="12">
                     <Grid ColumnDefinitions="*,Auto">
-                        <Label Text="RECENT" Style="{StaticResource SectionHeader}"/>
+                        <Label Text="COMPARISON LOG" Style="{StaticResource SectionHeader}"/>
                         <Button Text="Clear"
                                 Grid.Column="1"
                                 BackgroundColor="Transparent"
@@ -189,19 +189,19 @@
                                 FontSize="10"
                                 HeightRequest="20"
                                 Padding="4,0"
-                                Command="{Binding ClearRecentCommand}"
-                                IsVisible="{Binding HasRecentComparisons}"/>
+                                Command="{Binding ClearLogCommand}"
+                                IsVisible="{Binding HasComparisonLog}"/>
                     </Grid>
                     
-                    <!-- Recent Items -->
-                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding RecentComparisons}"
+                    <!-- Comparison log -->
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding ComparisonLogEntries}"
                                          Spacing="8"
-                                         IsVisible="{Binding HasRecentComparisons}">
+                                         IsVisible="{Binding HasComparisonLog}">
                         <BindableLayout.ItemTemplate>
-                            <DataTemplate x:DataType="vm:RecentComparisonItem">
+                            <DataTemplate x:DataType="svc:ComparisonLogEntry">
                                 <Border Style="{StaticResource Card}" Padding="12">
                                     <Border.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WelcomeViewModel}}, Path=OpenRecentCommand}"
+                                        <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WelcomeViewModel}}, Path=OpenLogEntryCommand}"
                                                               CommandParameter="{Binding .}"/>
                                     </Border.GestureRecognizers>
                                     <Grid ColumnDefinitions="*,Auto">
@@ -218,9 +218,9 @@
                     
                     <!-- Empty State -->
                     <Border Style="{StaticResource Card}" 
-                            IsVisible="{Binding HasRecentComparisons, Converter={StaticResource InverseBoolConverter}}"
+                            IsVisible="{Binding HasComparisonLog, Converter={StaticResource InverseBoolConverter}}"
                             Opacity="0.6">
-                        <Label Text="No recent comparisons" Style="{StaticResource StatusText}" HorizontalOptions="Center"/>
+                        <Label Text="No comparisons yet" Style="{StaticResource StatusText}" HorizontalOptions="Center"/>
                     </Border>
                 </VerticalStackLayout>
 

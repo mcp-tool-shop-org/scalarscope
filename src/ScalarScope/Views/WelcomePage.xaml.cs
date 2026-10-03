@@ -17,7 +17,7 @@ public partial class WelcomePage : ContentPage
         // Refresh recent comparisons when page appears
         if (BindingContext is WelcomeViewModel vm)
         {
-            vm.RefreshRecentComparisons();
+            vm.RefreshComparisonLog();
         }
     }
 }

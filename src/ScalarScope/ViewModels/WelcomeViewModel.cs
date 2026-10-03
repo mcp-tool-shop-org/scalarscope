@@ -11,14 +11,15 @@ namespace ScalarScope.ViewModels;
 /// </summary>
 public partial class WelcomeViewModel : ObservableObject
 {
-    private const string RecentComparisonsKey = "recent_comparisons";
-    private const int MaxRecentItems = 3;
+    private const string LegacyRecentKey = "recent_comparisons";
+    private const string LegacyMigratedKey = "comparison_log_migrated";
+    private const int HomeLimit = 12;
 
     [ObservableProperty]
-    private bool _hasRecentComparisons;
+    private bool _hasComparisonLog;
 
     [ObservableProperty]
-    private List<RecentComparisonItem> _recentComparisons = [];
+    private List<ComparisonLogEntry> _comparisonLogEntries = [];
 
     [ObservableProperty]
     private string _workspaceStatus = "No runs loaded";
@@ -31,7 +32,7 @@ public partial class WelcomeViewModel : ObservableObject
 
     public WelcomeViewModel()
     {
-        RefreshRecentComparisons();
+        RefreshComparisonLog();
     }
 
     /// <summary>
@@ -87,139 +88,121 @@ public partial class WelcomeViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Open a recent comparison.
+    /// Reopen a logged review. A bundle opens the bundle. Two run files open those files.
+    /// An example loads the built-in runs.
     /// </summary>
     [RelayCommand]
-    private async Task OpenRecent(RecentComparisonItem? item)
+    private async Task OpenLogEntry(ComparisonLogEntry? entry)
     {
-        if (item == null) return;
+        if (entry == null)
+            return;
 
-        if (item.IsBundle && !string.IsNullOrEmpty(item.FilePath))
+        if (!string.IsNullOrWhiteSpace(entry.BundlePath) && File.Exists(entry.BundlePath))
         {
-            App.Comparison.RequestBundleOpen(item.FilePath);
-            await Shell.Current.GoToAsync($"//compare?bundle={Uri.EscapeDataString(item.FilePath)}");
+            App.Comparison.RequestBundleOpen(entry.BundlePath);
+            await Shell.Current.GoToAsync($"//compare?bundle={Uri.EscapeDataString(entry.BundlePath)}");
+            return;
         }
-        else
+
+        if (string.Equals(entry.Kind, "example", StringComparison.Ordinal))
         {
-            // For run comparisons, navigate to compare tab
+            App.Comparison.RequestDemoOpen();
+            await Shell.Current.GoToAsync("//compare?demo=true");
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(entry.LeftPath)
+            && !string.IsNullOrWhiteSpace(entry.RightPath)
+            && File.Exists(entry.LeftPath)
+            && File.Exists(entry.RightPath))
+        {
+            App.Comparison.RequestRunsOpen(entry.LeftPath, entry.RightPath);
             await Shell.Current.GoToAsync("//compare");
+            return;
         }
 
-        // Move this item to top of recents
-        var existing = RecentComparisons.FirstOrDefault(r => r.Id == item.Id);
-        if (existing != null)
+        if (Shell.Current != null)
         {
-            existing.Timestamp = DateTimeOffset.UtcNow;
-            SaveRecentComparisons();
-            RefreshRecentComparisons();
+            await Shell.Current.DisplayAlert(
+                "Cannot reopen",
+                "The files for this review are no longer on disk. The deltas that fired are still in the log.",
+                "OK");
         }
     }
 
     /// <summary>
-    /// Clear all recent comparisons.
+    /// Clear the local comparison log.
     /// </summary>
     [RelayCommand]
-    private void ClearRecent()
-    {
-        RecentComparisons = [];
-        HasRecentComparisons = false;
-        SaveRecentComparisons();
-    }
-
-    /// <summary>
-    /// Refresh recent comparisons from storage.
-    /// </summary>
-    public void RefreshRecentComparisons()
+    private void ClearLog()
     {
         try
         {
-            var json = Preferences.Get(RecentComparisonsKey, "[]");
-            var items = JsonSerializer.Deserialize<List<RecentComparisonItem>>(json) ?? [];
-            
-            // Filter out items with missing files
-            items = items.Where(i => 
-                string.IsNullOrEmpty(i.FilePath) || 
-                File.Exists(i.FilePath))
-                .OrderByDescending(i => i.Timestamp)
-                .Take(MaxRecentItems)
+            ComparisonLog.Clear(ComparisonLog.DefaultDirectory);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Comparison log: {ex.Message}");
+        }
+
+        ComparisonLogEntries = [];
+        HasComparisonLog = false;
+    }
+
+    /// <summary>
+    /// Reload the log Home shows.
+    /// </summary>
+    public void RefreshComparisonLog()
+    {
+        try
+        {
+            MigrateLegacyRecents();
+            var entries = ComparisonLog.Read(ComparisonLog.DefaultDirectory)
+                .Take(HomeLimit)
                 .ToList();
-
-            RecentComparisons = items;
-            HasRecentComparisons = items.Count > 0;
+            ComparisonLogEntries = entries;
+            HasComparisonLog = entries.Count > 0;
         }
         catch
         {
-            RecentComparisons = [];
-            HasRecentComparisons = false;
+            ComparisonLogEntries = [];
+            HasComparisonLog = false;
         }
     }
 
-    /// <summary>
-    /// Add a comparison to the recent list.
-    /// </summary>
-    public void AddRecentComparison(RecentComparisonItem item)
+    private static void MigrateLegacyRecents()
     {
-        var items = new List<RecentComparisonItem>(RecentComparisons);
-        
-        // Remove existing with same ID or path
-        items.RemoveAll(i => 
-            i.Id == item.Id || 
-            (!string.IsNullOrEmpty(i.FilePath) && i.FilePath == item.FilePath));
-        
-        // Add to front
-        items.Insert(0, item);
-        
-        // Trim to max
-        if (items.Count > MaxRecentItems)
-        {
-            items = items.Take(MaxRecentItems).ToList();
-        }
+        if (Preferences.Get(LegacyMigratedKey, false))
+            return;
 
-        RecentComparisons = items;
-        HasRecentComparisons = items.Count > 0;
-        SaveRecentComparisons();
+        Preferences.Set(LegacyMigratedKey, true);
+
+        var json = Preferences.Get(LegacyRecentKey, "[]");
+        var legacy = JsonSerializer.Deserialize<List<LegacyRecentItem>>(json) ?? [];
+        if (legacy.Count == 0)
+            return;
+
+        if (ComparisonLog.Read(ComparisonLog.DefaultDirectory).Count > 0)
+            return;
+
+        foreach (var item in legacy.OrderBy(item => item.Timestamp))
+        {
+            ComparisonLog.Record(new ComparisonLogEntry
+            {
+                Kind = item.IsBundle ? "bundle" : "compare",
+                LeftName = string.IsNullOrWhiteSpace(item.Title) ? "Earlier review" : item.Title,
+                BundlePath = item.IsBundle ? item.FilePath : null,
+                LeftPath = item.IsBundle ? null : item.FilePath,
+                FinishedAt = item.Timestamp
+            }, ComparisonLog.DefaultDirectory);
+        }
     }
 
-    private void SaveRecentComparisons()
+    private sealed class LegacyRecentItem
     {
-        try
-        {
-            var json = JsonSerializer.Serialize(RecentComparisons);
-            Preferences.Set(RecentComparisonsKey, json);
-        }
-        catch
-        {
-            // Ignore save failures
-        }
-    }
-}
-
-/// <summary>
-/// Represents a recent comparison or bundle for the welcome page.
-/// </summary>
-public class RecentComparisonItem
-{
-    public string Id { get; set; } = "";
-    public string Title { get; set; } = "";
-    public string Subtitle { get; set; } = "";
-    public string Icon { get; set; } = "📊";
-    public string? FilePath { get; set; }
-    public bool IsBundle { get; set; }
-    public DateTimeOffset Timestamp { get; set; }
-
-    /// <summary>
-    /// Human-readable time ago string.
-    /// </summary>
-    public string TimeAgo
-    {
-        get
-        {
-            var elapsed = DateTimeOffset.UtcNow - Timestamp;
-            if (elapsed.TotalMinutes < 1) return "Just now";
-            if (elapsed.TotalMinutes < 60) return $"{(int)elapsed.TotalMinutes}m ago";
-            if (elapsed.TotalHours < 24) return $"{(int)elapsed.TotalHours}h ago";
-            if (elapsed.TotalDays < 7) return $"{(int)elapsed.TotalDays}d ago";
-            return Timestamp.LocalDateTime.ToString("MMM d");
-        }
+        public string Title { get; set; } = "";
+        public string? FilePath { get; set; }
+        public bool IsBundle { get; set; }
+        public DateTimeOffset Timestamp { get; set; }
     }
 }

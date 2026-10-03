@@ -32,6 +32,9 @@ public partial class ComparisonViewModel : ObservableObject
     [ObservableProperty]
     private bool _hasRightRun;
 
+    private string? _leftSourcePath;
+    private string? _rightSourcePath;
+
     // Comparison state
     [ObservableProperty]
     private bool _hasBothRuns;
@@ -132,6 +135,7 @@ public partial class ComparisonViewModel : ObservableObject
         
         // Set deltas from bundle
         CanonicalDeltas = bundle.Deltas;
+        TryRecordBundle(bundle);
         
         // Set summary text from bundle
         AutoSummary = bundle.SummaryMarkdown ?? "";
@@ -211,6 +215,8 @@ public partial class ComparisonViewModel : ObservableObject
 
     // Home sets one of these, then navigates here. The page takes it once.
     private string? _pendingBundlePath;
+    private string? _pendingLeftPath;
+    private string? _pendingRightPath;
     private bool _pendingDemo;
 
     /// <summary>
@@ -219,6 +225,8 @@ public partial class ComparisonViewModel : ObservableObject
     public void RequestBundleOpen(string path)
     {
         _pendingBundlePath = path;
+        _pendingLeftPath = null;
+        _pendingRightPath = null;
         _pendingDemo = false;
     }
 
@@ -228,18 +236,37 @@ public partial class ComparisonViewModel : ObservableObject
     public void RequestDemoOpen()
     {
         _pendingBundlePath = null;
+        _pendingLeftPath = null;
+        _pendingRightPath = null;
         _pendingDemo = true;
+    }
+
+    /// <summary>
+    /// Ask Compare to reload these two run files the next time the page appears.
+    /// </summary>
+    public void RequestRunsOpen(string leftPath, string rightPath)
+    {
+        _pendingBundlePath = null;
+        _pendingLeftPath = leftPath;
+        _pendingRightPath = rightPath;
+        _pendingDemo = false;
     }
 
     /// <summary>
     /// Take the one open Home asked for. A second call returns nothing.
     /// </summary>
-    public bool TryTakeOpenRequest(out string? bundlePath, out bool demo)
+    public bool TryTakeOpenRequest(out string? bundlePath, out bool demo, out string? leftPath, out string? rightPath)
     {
         bundlePath = _pendingBundlePath;
+        leftPath = _pendingLeftPath;
+        rightPath = _pendingRightPath;
         demo = _pendingDemo && string.IsNullOrEmpty(bundlePath);
-        var hasRequest = !string.IsNullOrEmpty(bundlePath) || _pendingDemo;
+        var hasRequest = !string.IsNullOrEmpty(bundlePath)
+            || _pendingDemo
+            || (!string.IsNullOrEmpty(leftPath) && !string.IsNullOrEmpty(rightPath));
         _pendingBundlePath = null;
+        _pendingLeftPath = null;
+        _pendingRightPath = null;
         _pendingDemo = false;
         return hasRequest;
     }
@@ -292,6 +319,7 @@ public partial class ComparisonViewModel : ObservableObject
         if (HasBothRuns)
         {
             UpdateCanonicalDeltas();
+            TryRecordFinishedComparison();
         }
     }
 
@@ -385,10 +413,12 @@ public partial class ComparisonViewModel : ObservableObject
         LeftRun = null;
         LeftRunName = "Load Path A";
         HasLeftRun = false;
+        _leftSourcePath = null;
 
         RightRun = null;
         RightRunName = "Load Path B";
         HasRightRun = false;
+        _rightSourcePath = null;
 
         HasBothRuns = false;
         ComparisonSummary = "";
@@ -426,6 +456,8 @@ public partial class ComparisonViewModel : ObservableObject
         DemoAnnotationService.DemoCompleted += OnDemoCompleted;
 
         // Load Path A (orthogonal) on the left
+        _leftSourcePath = null;
+        _rightSourcePath = null;
         LeftRun = pathA;
         LeftRunName = pathA.Metadata?.Condition ?? "Path A: Orthogonal";
         HasLeftRun = true;
@@ -557,6 +589,7 @@ public partial class ComparisonViewModel : ObservableObject
 
                 LeftRun = run;
                 LeftRunName = Path.GetFileNameWithoutExtension(path);
+                _leftSourcePath = path;
                 HasLeftRun = true;
                 UpdateComparisonState();
             }
@@ -593,6 +626,7 @@ public partial class ComparisonViewModel : ObservableObject
 
                 RightRun = run;
                 RightRunName = Path.GetFileNameWithoutExtension(path);
+                _rightSourcePath = path;
                 HasRightRun = true;
                 UpdateComparisonState();
             }
@@ -601,6 +635,58 @@ public partial class ComparisonViewModel : ObservableObject
         {
             RightRunName = $"Error: {ex.Message}";
             HasRightRun = false;
+        }
+    }
+
+    /// <summary>
+    /// Write the full-run review. Playback ticks recompute the playhead and do not call this.
+    /// </summary>
+    private void TryRecordFinishedComparison()
+    {
+        if (!HasBothRuns || LeftRun == null || RightRun == null)
+            return;
+
+        try
+        {
+            var fullRun = CanonicalDeltaService.ComputeDeltas(
+                LeftRun, RightRun, SelectedAlignment, currentTime: 1.0);
+
+            ComparisonLog.Record(new ComparisonLogEntry
+            {
+                Kind = IsDemoMode ? "example" : "compare",
+                LeftName = LeftRunName,
+                RightName = RightRunName,
+                LeftPath = _leftSourcePath,
+                RightPath = _rightSourcePath,
+                LeftRunId = LeftRun.Metadata?.RunId,
+                RightRunId = RightRun.Metadata?.RunId,
+                Alignment = SelectedAlignment.ToString(),
+                DeltasFired = ComparisonLog.SymbolsFor(fullRun).ToList()
+            }, ComparisonLog.DefaultDirectory);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Comparison log: {ex.Message}");
+        }
+    }
+
+    private static void TryRecordBundle(LoadedBundle bundle)
+    {
+        try
+        {
+            ComparisonLog.Record(new ComparisonLogEntry
+            {
+                Kind = "bundle",
+                LeftName = Path.GetFileNameWithoutExtension(bundle.FilePath),
+                BundlePath = bundle.FilePath,
+                BundleHash = bundle.BundleHash,
+                Alignment = bundle.Repro?.AlignmentMode ?? "",
+                DeltasFired = ComparisonLog.SymbolsFor(bundle.Deltas).ToList()
+            }, ComparisonLog.DefaultDirectory);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Comparison log: {ex.Message}");
         }
     }
 
@@ -619,6 +705,7 @@ public partial class ComparisonViewModel : ObservableObject
             
             // Phase 3: Compute canonical deltas
             UpdateCanonicalDeltas();
+            TryRecordFinishedComparison();
             
             // Update alignment description
             var anchors = TemporalAlignmentService.GetAnchors(LeftRun, RightRun, SelectedAlignment);
