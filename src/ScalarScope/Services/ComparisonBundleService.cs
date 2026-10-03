@@ -2,6 +2,7 @@
 // Defines canonical ComparisonBundle format with versioning.
 // Central service for creating, validating, and managing bundles.
 
+using System.Globalization;
 using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text;
@@ -226,7 +227,8 @@ public sealed class ComparisonBundleService
             {
                 foreach (var asset in assets)
                 {
-                    var assetPath = $"assets/{asset.FileName}";
+                    if (!BundlePaths.TryAssetEntry(asset.FileName, out var assetPath, out var assetError))
+                        throw new InvalidOperationException(assetError);
                     if (asset.Data is not null)
                     {
                         var entry = archive.CreateEntry(assetPath);
@@ -396,8 +398,8 @@ public sealed class ComparisonBundleService
                 sb.AppendLine($"*{delta.Explanation}*");
                 sb.AppendLine();
                 sb.AppendLine($"- **Type:** {delta.DeltaType}");
-                sb.AppendLine($"- **Delta:** {delta.Delta:G6} {delta.Units ?? ""}");
-                sb.AppendLine($"- **Confidence:** {delta.Confidence:P0}");
+                sb.AppendLine($"- **Delta:** {delta.Delta.ToString("R", CultureInfo.InvariantCulture)} {delta.Units ?? ""}");
+                sb.AppendLine($"- **Confidence:** {delta.Confidence.ToString("R", CultureInfo.InvariantCulture)}");
                 sb.AppendLine();
                 if (!string.IsNullOrEmpty(delta.SummarySentence))
                 {

@@ -1,4 +1,3 @@
-using System.Reflection;
 using SkiaSharp;
 
 namespace ScalarScope.Services.Plugins;
@@ -35,56 +34,21 @@ public class PluginManager : IDisposable
     }
 
     /// <summary>
-    /// Load all plugins from the plugins directory.
+    /// Plugins on disk are not loaded or executed. The files stay where they are.
     /// </summary>
-    public async Task LoadAllPluginsAsync()
+    public Task LoadAllPluginsAsync()
     {
-        var dllFiles = Directory.GetFiles(_pluginsPath, "*.dll", SearchOption.AllDirectories);
-
-        foreach (var dll in dllFiles)
-        {
-            try
-            {
-                await LoadPluginAsync(dll);
-            }
-            catch (Exception ex)
-            {
-                PluginError?.Invoke($"Failed to load {Path.GetFileName(dll)}: {ex.Message}");
-            }
-        }
+        PluginError?.Invoke("Plugin loading is disabled. Files under plugins/ were left on disk.");
+        return Task.CompletedTask;
     }
 
     /// <summary>
-    /// Load a specific plugin assembly.
+    /// Does not load or execute a DLL. The file is left on disk.
     /// </summary>
-    public async Task<IReadOnlyList<IScalarScopePlugin>> LoadPluginAsync(string dllPath)
+    public Task<IReadOnlyList<IScalarScopePlugin>> LoadPluginAsync(string dllPath)
     {
-        var loaded = new List<IScalarScopePlugin>();
-
-        await Task.Run(() =>
-        {
-            var assembly = Assembly.LoadFrom(dllPath);
-            var pluginTypes = assembly.GetTypes()
-                .Where(t => !t.IsAbstract && typeof(IScalarScopePlugin).IsAssignableFrom(t));
-
-            foreach (var type in pluginTypes)
-            {
-                try
-                {
-                    if (Activator.CreateInstance(type) is not IScalarScopePlugin plugin)
-                        continue;
-
-                    RegisterPlugin(plugin);
-                    loaded.Add(plugin);
-                }
-                catch (Exception ex)
-                {
-                    PluginError?.Invoke($"Failed to instantiate {type.Name}: {ex.Message}");
-                }
-            }
-        });
-
-        return loaded;
+        PluginError?.Invoke($"Plugin loading is disabled. Left on disk: {Path.GetFileName(dllPath)}");
+        return Task.FromResult<IReadOnlyList<IScalarScopePlugin>>([]);
     }
 
     /// <summary>

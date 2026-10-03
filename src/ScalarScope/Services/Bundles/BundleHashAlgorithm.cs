@@ -16,14 +16,18 @@ namespace ScalarScope.Services.Bundles;
 /// 2. Sort fileEntries by path (lexicographic, ordinal)
 /// 3. Build manifestCore without integrity block
 /// 4. Canonicalize manifestCore JSON → manifestCoreHash
-/// 5. bundleHash = SHA256(manifestCoreHash + concat(sorted(fileSha256)))
+/// 5. bundleHash = SHA256(manifestCoreWithoutIntegrity + concat(fileSha256 in ordinal path order))
 /// 6. Populate integrity block with bundleHash
 /// </summary>
 public static class BundleHashAlgorithm
 {
-    /// <summary>Bundle hash definition string (stored in manifest).</summary>
-    public const string BundleHashDefinition = 
-        "sha256(manifestCoreHash + concat(sorted(fileSha256)))";
+    /// <summary>
+    /// Stored definition. File hashes are concatenated in ordinal path order, not hash order.
+    /// The integrity block is not part of the manifest core.
+    /// This is the v1 content hash. Phase 7.2 writes do not use this algorithm.
+    /// </summary>
+    public const string BundleHashDefinition =
+        "sha256(hex(sha256(manifestCoreWithoutIntegrity)) + concat(fileSha256 in ordinal path order))";
     
     /// <summary>
     /// Compute bundleHash from manifest core and file entries.
@@ -32,20 +36,39 @@ public static class BundleHashAlgorithm
         ComparisonBundleManifest manifestCore,
         IEnumerable<FileIntegrityEntry> fileEntries)
     {
-        // 1. Canonicalize manifest (without integrity block - we receive it that way)
-        var manifestCoreJson = CanonicalJson(manifestCore);
+        // Integrity is excluded even if the caller left an empty block in place.
+        var manifestCoreJson = ManifestCoreJson(manifestCore);
         var manifestCoreHash = ComputeSha256Hex(Encoding.UTF8.GetBytes(manifestCoreJson));
         
-        // 2. Sort file entries by path
+        // Path order, then the hash bytes in that order. Do not sort the hash strings.
         var sortedHashes = fileEntries
             .OrderBy(f => f.Path, StringComparer.Ordinal)
             .Select(f => f.Sha256);
         
-        // 3. Concatenate manifestCoreHash + all file hashes
         var accumulator = manifestCoreHash + string.Concat(sortedHashes);
         
-        // 4. Final hash
         return ComputeSha256Hex(Encoding.UTF8.GetBytes(accumulator));
+    }
+
+    /// <summary>
+    /// Canonical manifest JSON with the integrity property removed.
+    /// </summary>
+    private static string ManifestCoreJson(ComparisonBundleManifest manifest)
+    {
+        var json = CanonicalJson(manifest);
+        using var doc = JsonDocument.Parse(json);
+        using var stream = new MemoryStream();
+        using var writer = new Utf8JsonWriter(stream);
+        writer.WriteStartObject();
+        foreach (var prop in doc.RootElement.EnumerateObject()
+            .Where(p => !p.Name.Equals("integrity", StringComparison.OrdinalIgnoreCase))
+            .OrderBy(p => p.Name, StringComparer.Ordinal))
+        {
+            prop.WriteTo(writer);
+        }
+        writer.WriteEndObject();
+        writer.Flush();
+        return Encoding.UTF8.GetString(stream.ToArray());
     }
     
     /// <summary>
@@ -105,9 +128,8 @@ public static class BundleHashAlgorithm
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             WriteIndented = false,
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-            Converters = 
-            { 
-                new JsonStringEnumConverter(JsonNamingPolicy.CamelCase),
+            Converters =
+            {
                 new SortedDictionaryConverter()
             },
             NumberHandling = JsonNumberHandling.AllowNamedFloatingPointLiterals

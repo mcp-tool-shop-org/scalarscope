@@ -138,6 +138,12 @@ public static class IntegrityIssueCodes
     
     /// <summary>Integrity block is missing from manifest.</summary>
     public const string IntegrityBlockMissing = "INTEGRITY_BLOCK_MISSING";
+
+    /// <summary>A path leaves the bundle root.</summary>
+    public const string EscapedPath = "BUNDLE_ESCAPED_PATH";
+
+    /// <summary>VerifyAsync was asked to pass without an archive census.</summary>
+    public const string CensusRequired = "ARCHIVE_CENSUS_REQUIRED";
 }
 
 /// <summary>
@@ -169,8 +175,10 @@ public sealed class BundleIntegrityService : IBundleIntegrityService
             if (path.Equals("manifest.json", StringComparison.OrdinalIgnoreCase))
                 continue;
             
-            // Normalize path (forward slashes, no leading ./)
+            // Normalize path (forward slashes, strip only a leading ./).
             var normalizedPath = NormalizePath(path);
+            if (BundlePaths.EscapesBundleRoot(path) || BundlePaths.EscapesBundleRoot(normalizedPath))
+                continue;
             
             // For JSON files, canonicalize before hashing for determinism
             var bytesToHash = IsJsonFile(normalizedPath) 
@@ -245,6 +253,18 @@ public sealed class BundleIntegrityService : IBundleIntegrityService
         var requiredFiles = manifest.Contents?.Required ?? Array.Empty<string>();
         foreach (var required in requiredFiles)
         {
+            if (BundlePaths.EscapesBundleRoot(required))
+            {
+                issues.Add(new BundleIntegrityIssue
+                {
+                    Code = IntegrityIssueCodes.EscapedPath,
+                    Message = $"Required path escapes the bundle root: {required}",
+                    Path = required,
+                    Severity = IntegrityIssueSeverity.Error
+                });
+                continue;
+            }
+
             var normalizedRequired = NormalizePath(required);
             if (!files.Keys.Any(k => NormalizePath(k).Equals(normalizedRequired, StringComparison.OrdinalIgnoreCase)))
             {
@@ -259,10 +279,33 @@ public sealed class BundleIntegrityService : IBundleIntegrityService
         }
         
         // 4. Verify per-file hashes
-        var declaredFiles = integrity.Files?.ToDictionary(
-            f => NormalizePath(f.Path), 
-            f => f,
-            StringComparer.OrdinalIgnoreCase) ?? new Dictionary<string, FileIntegrityEntry>();
+        var declaredFiles = new Dictionary<string, FileIntegrityEntry>(StringComparer.OrdinalIgnoreCase);
+        foreach (var entry in integrity.Files ?? Array.Empty<FileIntegrityEntry>())
+        {
+            if (BundlePaths.EscapesBundleRoot(entry.Path) || BundlePaths.EscapesBundleRoot(NormalizePath(entry.Path)))
+            {
+                issues.Add(new BundleIntegrityIssue
+                {
+                    Code = IntegrityIssueCodes.EscapedPath,
+                    Message = $"Integrity entry escapes the bundle root: {entry.Path}",
+                    Path = entry.Path,
+                    Severity = IntegrityIssueSeverity.Error
+                });
+                continue;
+            }
+
+            var key = NormalizePath(entry.Path);
+            if (!declaredFiles.TryAdd(key, entry))
+            {
+                issues.Add(new BundleIntegrityIssue
+                {
+                    Code = IntegrityIssueCodes.UndeclaredFilePresent,
+                    Message = $"Duplicate integrity entry: {entry.Path}",
+                    Path = entry.Path,
+                    Severity = IntegrityIssueSeverity.Error
+                });
+            }
+        }
         
         var processedFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         
@@ -273,6 +316,18 @@ public sealed class BundleIntegrityService : IBundleIntegrityService
                 continue;
             
             var normalizedPath = NormalizePath(path);
+            if (BundlePaths.EscapesBundleRoot(path) || BundlePaths.EscapesBundleRoot(normalizedPath))
+            {
+                issues.Add(new BundleIntegrityIssue
+                {
+                    Code = IntegrityIssueCodes.EscapedPath,
+                    Message = $"Bundle entry escapes the archive root: {path}",
+                    Path = path,
+                    Severity = IntegrityIssueSeverity.Error
+                });
+                continue;
+            }
+
             processedFiles.Add(normalizedPath);
             
             if (!declaredFiles.TryGetValue(normalizedPath, out var expected))
@@ -371,11 +426,76 @@ public sealed class BundleIntegrityService : IBundleIntegrityService
     }
     
     /// <inheritdoc />
-    public async Task<BundleIntegrityReport> VerifyAsync(
+    public Task<BundleIntegrityReport> VerifyAsync(
         Func<string, Task<byte[]?>> fileReader,
         ComparisonBundleManifest manifest,
         CancellationToken cancellationToken = default)
+        => VerifyAsync(fileReader, manifest, archiveCensus: null, cancellationToken);
+
+    /// <summary>
+    /// Verify from a reader. Without an archive census the check fails closed:
+    /// declared files alone cannot see an extra zip entry.
+    /// A census that names an undeclared or escaping path is an error.
+    /// </summary>
+    public async Task<BundleIntegrityReport> VerifyAsync(
+        Func<string, Task<byte[]?>> fileReader,
+        ComparisonBundleManifest manifest,
+        IReadOnlyCollection<string>? archiveCensus,
+        CancellationToken cancellationToken = default)
     {
+        if (archiveCensus is null)
+        {
+            return BundleIntegrityReport.Invalid(new[]
+            {
+                new BundleIntegrityIssue
+                {
+                    Code = IntegrityIssueCodes.CensusRequired,
+                    Message = "Archive census is required. Undeclared entries cannot be ruled out.",
+                    Severity = IntegrityIssueSeverity.Error
+                }
+            });
+        }
+
+        var censusIssues = new List<BundleIntegrityIssue>();
+        var declared = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        if (manifest.Integrity?.Files != null)
+        {
+            foreach (var entry in manifest.Integrity.Files)
+            {
+                if (!BundlePaths.EscapesBundleRoot(entry.Path))
+                    declared.Add(NormalizePath(entry.Path));
+            }
+        }
+
+        foreach (var name in archiveCensus)
+        {
+            if (BundlePaths.EscapesBundleRoot(name) || BundlePaths.EscapesBundleRoot(NormalizePath(name)))
+            {
+                censusIssues.Add(new BundleIntegrityIssue
+                {
+                    Code = IntegrityIssueCodes.EscapedPath,
+                    Message = $"Bundle entry escapes the archive root: {name}",
+                    Path = name,
+                    Severity = IntegrityIssueSeverity.Error
+                });
+                continue;
+            }
+
+            var normalized = NormalizePath(name);
+            if (normalized.Equals("manifest.json", StringComparison.OrdinalIgnoreCase))
+                continue;
+            if (!declared.Contains(normalized))
+            {
+                censusIssues.Add(new BundleIntegrityIssue
+                {
+                    Code = IntegrityIssueCodes.UndeclaredFilePresent,
+                    Message = $"Undeclared file present: {name}",
+                    Path = name,
+                    Severity = IntegrityIssueSeverity.Error
+                });
+            }
+        }
+
         // Load all declared files
         var files = new Dictionary<string, byte[]>();
         
@@ -400,6 +520,8 @@ public sealed class BundleIntegrityService : IBundleIntegrityService
         foreach (var path in pathsToLoad)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            if (BundlePaths.EscapesBundleRoot(path))
+                continue;
             
             var content = await fileReader(path);
             if (content != null)
@@ -408,7 +530,18 @@ public sealed class BundleIntegrityService : IBundleIntegrityService
             }
         }
         
-        return Verify(files, manifest);
+        var report = Verify(files, manifest);
+        if (censusIssues.Count == 0)
+            return report;
+
+        var merged = report.Issues.Concat(censusIssues).ToList();
+        var hasErrors = merged.Any(issue => issue.Severity == IntegrityIssueSeverity.Error);
+        return new BundleIntegrityReport
+        {
+            IsValid = !hasErrors,
+            Issues = merged,
+            IsLenient = report.IsLenient
+        };
     }
     
     /// <summary>
@@ -448,13 +581,14 @@ public sealed class BundleIntegrityService : IBundleIntegrityService
     }
     
     /// <summary>
-    /// Normalize path to use forward slashes and no leading ./
+    /// Forward slashes, and a leading ./ only. Dotdot is kept so it can be rejected.
     /// </summary>
     private static string NormalizePath(string path)
     {
-        return path
-            .Replace('\\', '/')
-            .TrimStart('.', '/');
+        var normalized = path.Replace('\\', '/');
+        while (normalized.StartsWith("./", StringComparison.Ordinal))
+            normalized = normalized[2..];
+        return normalized;
     }
     
     /// <summary>

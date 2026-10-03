@@ -200,6 +200,12 @@ public sealed class BundleImporter
         // Load manifest
         var manifest = await ReadJsonAsync<ComparisonBundleManifest>(archive, "manifest.json", options);
         if (manifest == null) return null;
+
+        // A stored hash is not a verification. Recompute from the bytes just read.
+        var integrity = await VerifyIntegrityAsync(archive, manifest);
+        var recomputedHash = integrity.RecomputedBundleHash;
+        if (!integrity.IsValid || string.IsNullOrEmpty(recomputedHash))
+            return null;
         
         // Load repro
         var repro = await ReadJsonAsync<ReproPayload>(archive, "repro/repro.json", options);
@@ -244,6 +250,7 @@ public sealed class BundleImporter
             // UI-ready data
             CanonicalDeltas = canonicalDeltas,
             InsightEvents = insightEvents,
+            RecomputedBundleHash = recomputedHash,
             
             LoadedAt = DateTimeOffset.UtcNow
         };
@@ -259,11 +266,32 @@ public sealed class BundleImporter
     {
         var errors = new List<string>();
         var integrity = manifest.Integrity;
+        if (integrity is null || integrity.Files is null)
+        {
+            return new BundleValidationResult
+            {
+                IsValid = false,
+                Errors = new[] { "Manifest has no integrity block. The bundle hash was not recomputed." }
+            };
+        }
+
         var declared = new Dictionary<string, FileIntegrityEntry>(StringComparer.Ordinal);
 
         foreach (var fileEntry in integrity.Files)
         {
+            if (BundlePaths.EscapesBundleRoot(fileEntry.Path))
+            {
+                errors.Add($"Integrity entry escapes the archive root: {fileEntry.Path}");
+                continue;
+            }
+
             var path = NormalizeEntryPath(fileEntry.Path);
+            if (BundlePaths.EscapesBundleRoot(path))
+            {
+                errors.Add($"Integrity entry escapes the archive root: {fileEntry.Path}");
+                continue;
+            }
+
             if (path.Equals("manifest.json", StringComparison.OrdinalIgnoreCase))
             {
                 errors.Add("manifest.json is sealed by bundleHash and is not a listed file.");
@@ -282,6 +310,11 @@ public sealed class BundleImporter
             var path = NormalizeEntryPath(entry.FullName);
             if (path.Length == 0 || path.EndsWith('/'))
                 continue;
+            if (BundlePaths.EscapesBundleRoot(entry.FullName) || BundlePaths.EscapesBundleRoot(path))
+            {
+                errors.Add($"Bundle entry escapes the archive root: {entry.FullName}");
+                continue;
+            }
             if (path.Equals("manifest.json", StringComparison.OrdinalIgnoreCase))
                 continue;
 
@@ -348,7 +381,8 @@ public sealed class BundleImporter
         return new BundleValidationResult
         {
             IsValid = errors.Count == 0,
-            Errors = errors
+            Errors = errors,
+            RecomputedBundleHash = computed
         };
     }
 
@@ -392,7 +426,7 @@ public sealed class BundleImporter
     {
         return new CanonicalDelta
         {
-            Id = d.Id,
+            Id = Services.DeltaIds.Canonical(d.Id),
             Name = d.Name,
             Explanation = d.Explanation,
             SummarySentence = d.SummarySentence,
@@ -402,15 +436,7 @@ public sealed class BundleImporter
                 DeltaStatus.Suppressed => Services.DeltaStatus.Suppressed,
                 _ => Services.DeltaStatus.Indeterminate
             },
-            DeltaType = d.Id switch
-            {
-                "delta_f" or "failurePresence" => Services.DeltaType.Event,       // Failure = discrete event
-                "delta_tc" or "convergenceTiming" => Services.DeltaType.Timing,    // Convergence = timing
-                "delta_td" or "structuralEmergence" => Services.DeltaType.Structure, // Emergence = structural
-                "delta_a" or "evaluatorAlignment" => Services.DeltaType.Behavior,  // Alignment = behavioral
-                "delta_o" or "stabilityOscillation" => Services.DeltaType.Behavior, // Oscillation = behavioral
-                _ => Services.DeltaType.Behavior
-            },
+            DeltaType = Services.DeltaIds.ToDeltaType(d.Id),
             Confidence = d.Confidence,
             Delta = d.DeltaValue ?? 0,
             Units = d.Units,
@@ -472,9 +498,12 @@ public sealed record LoadedBundleV1
     // UI-ready conversions
     public required List<CanonicalDelta> CanonicalDeltas { get; init; }
     public List<InsightEvent>? InsightEvents { get; init; }
+
+    /// <summary>SHA-256 recomputed from the manifest core and the zip bytes just read.</summary>
+    public required string RecomputedBundleHash { get; init; }
     
-    // Convenience properties
-    public string BundleHash => Manifest.Integrity.BundleHash;
+    // Convenience properties. This is the recomputed content check, not the stored string.
+    public string BundleHash => RecomputedBundleHash;
     public BundleProfile Profile => Manifest.Profile;
     public string LabelA => Manifest.Comparison.LabelA;
     public string LabelB => Manifest.Comparison.LabelB;
@@ -504,4 +533,7 @@ public sealed record BundleValidationResult
     public IReadOnlyList<string> Errors { get; init; } = Array.Empty<string>();
     public IReadOnlyList<string> Warnings { get; init; } = Array.Empty<string>();
     public ComparisonBundleManifest? Manifest { get; init; }
+
+    /// <summary>bundleHash recomputed from the bytes just read. Empty when verification did not run.</summary>
+    public string? RecomputedBundleHash { get; init; }
 }

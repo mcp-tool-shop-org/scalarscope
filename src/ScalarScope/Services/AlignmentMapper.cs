@@ -53,12 +53,18 @@ public static class AlignmentMapper
         for (int i = 0; i < maxSteps; i++)
         {
             compareIndex[i] = i;
-            
-            // Map normalized position
+
+            // A one-step run has no span. Every compare index maps to that step.
+            if (maxSteps <= 1)
+            {
+                idxToStepA[i] = 0;
+                idxToStepB[i] = 0;
+                continue;
+            }
+
             var normalizedPos = i / (double)(maxSteps - 1);
-            
-            idxToStepA[i] = (int)(normalizedPos * (stepsA - 1));
-            idxToStepB[i] = (int)(normalizedPos * (stepsB - 1));
+            idxToStepA[i] = stepsA <= 1 ? 0 : (int)(normalizedPos * (stepsA - 1));
+            idxToStepB[i] = stepsB <= 1 ? 0 : (int)(normalizedPos * (stepsB - 1));
         }
 
         return new AlignmentMap
@@ -92,6 +98,7 @@ public static class AlignmentMapper
         var anchorB = tcB >= 0 ? tcB : stepsB / 2;
 
         return CreateAnchoredAlignment(stepsA, stepsB, anchorA, anchorB,
+            TemporalAlignment.ByConvergence,
             $"Aligned at convergence (A: step {anchorA}, B: step {anchorB})");
     }
 
@@ -115,6 +122,7 @@ public static class AlignmentMapper
         var anchorB = tiB >= 0 ? tiB : stepsB / 4;
 
         return CreateAnchoredAlignment(stepsA, stepsB, anchorA, anchorB,
+            TemporalAlignment.ByFirstInstability,
             $"Aligned at first change (A: step {anchorA}, B: step {anchorB})");
     }
 
@@ -122,7 +130,7 @@ public static class AlignmentMapper
     /// Create alignment map with specific anchor points.
     /// </summary>
     private static AlignmentMap CreateAnchoredAlignment(
-        int stepsA, int stepsB, int anchorA, int anchorB, string description)
+        int stepsA, int stepsB, int anchorA, int anchorB, TemporalAlignment mode, string description)
     {
         // Determine compare range: start at 0, anchor at same compare index, extend to max
         var preAnchorA = anchorA;
@@ -156,7 +164,7 @@ public static class AlignmentMapper
 
         return new AlignmentMap
         {
-            Mode = TemporalAlignment.ByConvergence, // or ByFirstInstability
+            Mode = mode,
             IdxToStepA = idxToStepA,
             IdxToStepB = idxToStepB,
             CompareIndex = compareIndex,

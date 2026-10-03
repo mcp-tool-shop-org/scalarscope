@@ -18,7 +18,9 @@ public static class ComparisonErrorCodes
 {
     // Fingerprint validation
     public const string CMP_FINGERPRINT_DATASET_MISMATCH = "CMP_FINGERPRINT_DATASET_MISMATCH";
+    public const string CMP_FINGERPRINT_DATASET_ABSENT = "CMP_FINGERPRINT_DATASET_ABSENT";
     public const string CMP_FINGERPRINT_CODE_MISMATCH = "CMP_FINGERPRINT_CODE_MISMATCH";
+    public const string CMP_FINGERPRINT_CODE_ABSENT = "CMP_FINGERPRINT_CODE_ABSENT";
     public const string CMP_FINGERPRINT_UNEXPECTED_CHANGE = "CMP_FINGERPRINT_UNEXPECTED_CHANGE";
     
     // Alignment
@@ -626,21 +628,54 @@ public sealed class RunTraceComparer
             });
         }
         
-        // Environment fingerprint: MAY change for optimization
-        if (metaA.EnvironmentFingerprint != metaB.EnvironmentFingerprint)
+        // Environment comes from the trace. An absent value is not an optimization change,
+        // and two absent values are not a match.
+        var envAAbsent = RuntimeMetadata.IsAbsentFingerprint(metaA.EnvironmentFingerprint);
+        var envBAbsent = RuntimeMetadata.IsAbsentFingerprint(metaB.EnvironmentFingerprint);
+        if (envAAbsent || envBAbsent)
         {
             differences.Add(new FingerprintDifference
             {
                 Category = "environment",
                 FingerprintA = metaA.EnvironmentFingerprint,
                 FingerprintB = metaB.EnvironmentFingerprint,
-                IsExpectedForOptimization = true,
-                Explanation = "Environment changed (may include optimization flags)"
+                IsExpectedForOptimization = false,
+                Explanation = "Environment fingerprint is unknown"
+            });
+        }
+        else if (metaA.EnvironmentFingerprint != metaB.EnvironmentFingerprint)
+        {
+            differences.Add(new FingerprintDifference
+            {
+                Category = "environment",
+                FingerprintA = metaA.EnvironmentFingerprint,
+                FingerprintB = metaB.EnvironmentFingerprint,
+                IsExpectedForOptimization = false,
+                Explanation = "Environment facts in the traces differ"
             });
         }
         
-        // Dataset fingerprint: MUST NOT change
-        if (metaA.DatasetFingerprint != metaB.DatasetFingerprint)
+        // Dataset fingerprint: a real mismatch is an error. Two absent hashes are not a match.
+        var datasetAAbsent = RuntimeMetadata.IsAbsentFingerprint(metaA.DatasetFingerprint);
+        var datasetBAbsent = RuntimeMetadata.IsAbsentFingerprint(metaB.DatasetFingerprint);
+        if (datasetAAbsent || datasetBAbsent)
+        {
+            differences.Add(new FingerprintDifference
+            {
+                Category = "dataset",
+                FingerprintA = metaA.DatasetFingerprint,
+                FingerprintB = metaB.DatasetFingerprint,
+                IsExpectedForOptimization = false,
+                Explanation = "Dataset hash is absent"
+            });
+            issues.Add(new ComparisonIssue
+            {
+                Code = ComparisonErrorCodes.CMP_FINGERPRINT_DATASET_ABSENT,
+                Severity = ComparisonIssueSeverity.Warning,
+                Message = "Dataset hash is absent; dataset identity was not checked"
+            });
+        }
+        else if (metaA.DatasetFingerprint != metaB.DatasetFingerprint)
         {
             differences.Add(new FingerprintDifference
             {
@@ -658,8 +693,27 @@ public sealed class RunTraceComparer
             });
         }
         
-        // Code fingerprint: SHOULD NOT change (warning only)
-        if (metaA.CodeFingerprint != metaB.CodeFingerprint)
+        // Code fingerprint: absent is not a match and is not "code changed".
+        var codeAAbsent = RuntimeMetadata.IsAbsentFingerprint(metaA.CodeFingerprint);
+        var codeBAbsent = RuntimeMetadata.IsAbsentFingerprint(metaB.CodeFingerprint);
+        if (codeAAbsent || codeBAbsent)
+        {
+            differences.Add(new FingerprintDifference
+            {
+                Category = "code",
+                FingerprintA = metaA.CodeFingerprint,
+                FingerprintB = metaB.CodeFingerprint,
+                IsExpectedForOptimization = false,
+                Explanation = "Code hash is absent"
+            });
+            issues.Add(new ComparisonIssue
+            {
+                Code = ComparisonErrorCodes.CMP_FINGERPRINT_CODE_ABSENT,
+                Severity = ComparisonIssueSeverity.Warning,
+                Message = "Code hash is absent; code identity was not checked"
+            });
+        }
+        else if (metaA.CodeFingerprint != metaB.CodeFingerprint)
         {
             differences.Add(new FingerprintDifference
             {
@@ -709,25 +763,35 @@ public sealed class RunTraceComparer
         ComparisonIntent intent,
         List<ComparisonIssue> issues)
     {
-        // Try primary anchor
-        var anchorType = intent.PrimaryAnchor ?? RuntimeMilestoneType.SteadyStateStart;
-        var anchorStepA = traceA.Milestones.OfType(anchorType).FirstOrDefault()?.Step;
-        var anchorStepB = traceB.Milestones.OfType(anchorType).FirstOrDefault()?.Step;
-        
-        // Fallback if primary not found
-        if (!anchorStepA.HasValue || !anchorStepB.HasValue)
+        // Both sides at the primary milestone when they have it.
+        // Otherwise fill only the missing side from the fallback. A side that already
+        // has the primary step keeps that step. The anchor type changes only when
+        // both sides were taken from the same milestone.
+        var primaryType = intent.PrimaryAnchor ?? RuntimeMilestoneType.SteadyStateStart;
+        var fallbackType = intent.FallbackAnchor ?? RuntimeMilestoneType.WarmupEnd;
+        var anchorStepA = traceA.Milestones.OfType(primaryType).FirstOrDefault()?.Step;
+        var anchorStepB = traceB.Milestones.OfType(primaryType).FirstOrDefault()?.Step;
+        var typeA = anchorStepA.HasValue ? primaryType : (RuntimeMilestoneType?)null;
+        var typeB = anchorStepB.HasValue ? primaryType : (RuntimeMilestoneType?)null;
+
+        if (!anchorStepA.HasValue)
         {
-            var fallbackType = intent.FallbackAnchor ?? RuntimeMilestoneType.WarmupEnd;
-            anchorStepA ??= traceA.Milestones.OfType(fallbackType).FirstOrDefault()?.Step;
-            anchorStepB ??= traceB.Milestones.OfType(fallbackType).FirstOrDefault()?.Step;
-            
-            if (anchorStepA.HasValue && anchorStepB.HasValue)
-            {
-                anchorType = fallbackType;
-            }
+            anchorStepA = traceA.Milestones.OfType(fallbackType).FirstOrDefault()?.Step;
+            if (anchorStepA.HasValue)
+                typeA = fallbackType;
         }
+
+        if (!anchorStepB.HasValue)
+        {
+            anchorStepB = traceB.Milestones.OfType(fallbackType).FirstOrDefault()?.Step;
+            if (anchorStepB.HasValue)
+                typeB = fallbackType;
+        }
+
+        RuntimeMilestoneType? anchorType = typeA.HasValue && typeA == typeB ? typeA : null;
         
-        // Last resort: first non-warmup step (step 0)
+        // Last resort only for a side that has neither milestone.
+        // A side that already has a step keeps it.
         if (!anchorStepA.HasValue || !anchorStepB.HasValue)
         {
             issues.Add(new ComparisonIssue
@@ -736,9 +800,12 @@ public sealed class RunTraceComparer
                 Severity = ComparisonIssueSeverity.Warning,
                 Message = "No milestone anchor found - using first step (may include warmup)"
             });
-            anchorStepA = traceA.Timeline.FirstStep;
-            anchorStepB = traceB.Timeline.FirstStep;
-            anchorType = RuntimeMilestoneType.Custom;
+            if (!anchorStepA.HasValue)
+                anchorStepA = traceA.Timeline.FirstStep;
+            if (!anchorStepB.HasValue)
+                anchorStepB = traceB.Timeline.FirstStep;
+            if (!typeA.HasValue && !typeB.HasValue)
+                anchorType = RuntimeMilestoneType.Custom;
         }
         
         // Calculate aligned step count
@@ -816,14 +883,21 @@ public sealed class RunTraceComparer
             return AlignByStep(traceA, traceB, issues);
         }
         
-        // Use step alignment with wall clock info
+        // Timestamps are present, but this path does not interpolate them.
+        // Do not report a step pairing as wall-clock alignment.
+        issues.Add(new ComparisonIssue
+        {
+            Code = ComparisonErrorCodes.CMP_ALIGNMENT_NO_ANCHOR,
+            Severity = ComparisonIssueSeverity.Error,
+            Message = "Wall-clock alignment requires a shared time grid; timestamps were not interpolated"
+        });
         return new AlignmentResult
         {
             Mode = AlignmentMode.WallClock,
-            AnchorStepA = 0,
-            AnchorStepB = 0,
+            AnchorStepA = null,
+            AnchorStepB = null,
             AnchorType = null,
-            AlignedStepCount = Math.Min(traceA.Timeline.Steps.Count, traceB.Timeline.Steps.Count),
+            AlignedStepCount = 0,
             SkippedStepsA = 0,
             SkippedStepsB = 0,
             Issues = issues
@@ -880,20 +954,57 @@ public sealed class RunTraceComparer
         string signal,
         ComparisonIntent intent)
     {
-        // ΔTc measures time/steps to reach stable behavior
-        var steadyStateA = traceA.Milestones.SteadyStateStartStep ?? traceA.Timeline.LastStep;
-        var steadyStateB = traceB.Milestones.SteadyStateStartStep ?? traceB.Timeline.LastStep;
-        
-        var difference = steadyStateB - steadyStateA;
-        var fired = Math.Abs(difference) > 0;
+        // ΔTc is withheld when either run never recorded a steady-state start.
+        // The last step is not a stabilization time.
+        var presetNotes = TfrtDeltaMapping.GetDeltaNotes("ΔTc");
+        if (!traceA.Milestones.SteadyStateStartStep.HasValue ||
+            !traceB.Milestones.SteadyStateStartStep.HasValue)
+        {
+            return new ComparisonDelta
+            {
+                DeltaType = "ΔTc",
+                Signal = signal,
+                ValueA = 0,
+                ValueB = 0,
+                Confidence = ComputeConfidence(traceA, traceB, alignment),
+                Fired = false,
+                IsSuppressed = TfrtDeltaMapping.IsSuppressed("ΔTc"),
+                Interpretation = "steady state not detected",
+                Notes = string.IsNullOrEmpty(presetNotes)
+                    ? "steady state not detected"
+                    : presetNotes + " steady state not detected"
+            };
+        }
+
+        var indexA = SeriesIndex(traceA, traceA.Milestones.SteadyStateStartStep.Value);
+        var indexB = SeriesIndex(traceB, traceB.Milestones.SteadyStateStartStep.Value);
+        if (!indexA.HasValue || !indexB.HasValue)
+        {
+            return new ComparisonDelta
+            {
+                DeltaType = "ΔTc",
+                Signal = signal,
+                ValueA = 0,
+                ValueB = 0,
+                Confidence = ComputeConfidence(traceA, traceB, alignment),
+                Fired = false,
+                IsSuppressed = TfrtDeltaMapping.IsSuppressed("ΔTc"),
+                Interpretation = "steady state not detected",
+                Notes = "steady state not detected"
+            };
+        }
+
+        // Indices into each run's series, not raw step ids.
+        var difference = indexB.Value - indexA.Value;
+        var fired = difference != 0;
         var confidence = ComputeConfidence(traceA, traceB, alignment);
         
         return new ComparisonDelta
         {
             DeltaType = "ΔTc",
             Signal = signal,
-            ValueA = steadyStateA,
-            ValueB = steadyStateB,
+            ValueA = indexA.Value,
+            ValueB = indexB.Value,
             Confidence = confidence,
             Fired = fired,
             IsSuppressed = TfrtDeltaMapping.IsSuppressed("ΔTc"),
@@ -902,7 +1013,7 @@ public sealed class RunTraceComparer
                 : difference > 0
                     ? $"Stabilizes {difference} steps later"
                     : "No change in stabilization time",
-            Notes = TfrtDeltaMapping.GetDeltaNotes("ΔTc")
+            Notes = presetNotes
         };
     }
     
@@ -970,7 +1081,7 @@ public sealed class RunTraceComparer
             Interpretation = outliersB > outliersA
                 ? $"Introduced {outliersB - outliersA} new runtime anomalies"
                 : outliersB < outliersA
-                    ? $"Eliminated {outliersA - outliersB} runtime anomalies"
+                    ? $"Right has {outliersA - outliersB} fewer 3-sigma outliers; an elimination does not fire ΔF"
                     : "No change in runtime anomalies",
             Notes = TfrtDeltaMapping.GetDeltaNotes("ΔF")
         };
@@ -995,6 +1106,28 @@ public sealed class RunTraceComparer
         };
     }
     
+    /// <summary>
+    /// Index of a milestone in the series. A value that appears in Timeline.Steps is a step id.
+    /// Otherwise a value inside the series is the index DetectWarmupEnd stored.
+    /// </summary>
+    private static int? SeriesIndex(RuntimeRunTrace trace, int milestone)
+    {
+        var steps = trace.Timeline.Steps;
+        if (steps.Count == 0)
+            return null;
+
+        for (int i = 0; i < steps.Count; i++)
+        {
+            if (steps[i] == milestone)
+                return i;
+        }
+
+        if (milestone >= 0 && milestone < steps.Count)
+            return milestone;
+
+        return null;
+    }
+
     private double ComputeSteadyStateVariance(RuntimeScalarSeries? series, RuntimeMilestones milestones)
     {
         if (series == null) return 0;

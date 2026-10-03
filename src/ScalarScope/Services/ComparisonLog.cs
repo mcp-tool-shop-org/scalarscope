@@ -146,13 +146,13 @@ public static class ComparisonLog
 
     public static string? SymbolForId(string? id)
     {
-        return id switch
+        return DeltaIds.Canonical(id) switch
         {
-            "FailurePresence" or "delta_f" => "ΔF",
-            "ConvergenceTiming" or "delta_tc" => "ΔTc",
-            "StructuralEmergence" or "delta_td" => "ΔTd",
-            "EvaluatorAlignment" or "delta_a" => "ΔĀ",
-            "StabilityOscillation" or "delta_o" => "ΔO",
+            DeltaIds.FailurePresence => "ΔF",
+            DeltaIds.ConvergenceTiming => "ΔTc",
+            DeltaIds.StructuralEmergence => "ΔTd",
+            DeltaIds.EvaluatorAlignment => "ΔĀ",
+            DeltaIds.StabilityOscillation => "ΔO",
             _ => null
         };
     }

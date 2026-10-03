@@ -16,7 +16,7 @@ public static class InputNormalizer
     /// </summary>
     public static double NormalizeDouble(double value, int precision = DefaultPrecision)
     {
-        if (double.IsNaN(value)) return 0.0;
+        if (double.IsNaN(value)) return double.NaN;
         if (double.IsPositiveInfinity(value)) return double.MaxValue;
         if (double.IsNegativeInfinity(value)) return double.MinValue;
         

@@ -191,9 +191,34 @@ public sealed record RuntimeMetadata
         return Convert.ToHexString(hash).ToLowerInvariant();
     }
     
-    /// <summary>Create a fingerprint for "unknown" placeholder.</summary>
+    /// <summary>
+    /// Stable placeholder when a fingerprint was not in the trace.
+    /// It does not include the clock, and it is not a match for a real hash.
+    /// </summary>
+    public const string AbsentFingerprint = "absent";
+
+    /// <summary>
+    /// True when the trace did not carry this fingerprint.
+    /// A dated unknown:* value from older imports is absent, not a dataset identity.
+    /// </summary>
+    public static bool IsAbsentFingerprint(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return true;
+        if (value.Equals(AbsentFingerprint, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return value.StartsWith("unknown:", StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Older callers asked for an unknown fingerprint. The value is the absent sentinel.
+    /// The category is not hashed, and the clock is not included.
+    /// </summary>
     public static string UnknownFingerprint(string category)
-        => CreateFingerprint($"unknown:{category}:{DateTimeOffset.UtcNow:yyyy-MM-dd}");
+    {
+        _ = category;
+        return AbsentFingerprint;
+    }
 }
 
 /// <summary>

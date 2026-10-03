@@ -1,6 +1,8 @@
+using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using ScalarScope.Models;
 
 namespace ScalarScope.Services;
 
@@ -21,7 +23,8 @@ public static class DeterminismService
     public static bool IsDeterministic => Seed.HasValue;
     
     /// <summary>
-    /// Last computed analysis fingerprint.
+    /// Not a source of truth. Fingerprints are carried on the comparison result.
+    /// Kept so older readers do not fail to compile; new comparisons do not write it.
     /// </summary>
     public static string? LastFingerprint { get; private set; }
     
@@ -92,11 +95,45 @@ public static class DeterminismService
             rightTimestepCount,
             alignmentMode);
         
-        var fingerprint = ComputeHashString(normalized.CanonicalForm);
-        LastFingerprint = fingerprint;
-        return fingerprint;
+        return ComputeHashString(normalized.CanonicalForm);
+    }
+
+    /// <summary>
+    /// SHA-256 of one run's canonical measurements. Null means the measurements are absent.
+    /// </summary>
+    public static string HashRun(GeometryRun? run)
+    {
+        return ComputeHashString(run is null ? "absent" : CanonicalRun(run));
+    }
+
+    /// <summary>
+    /// Combine two per-run fingerprints without collapsing them into one shared value.
+    /// </summary>
+    public static string CombineRunFingerprints(string leftFingerprint, string rightFingerprint)
+    {
+        return ComputeHashString(leftFingerprint + "\n" + rightFingerprint);
     }
     
+    /// <summary>
+    /// Hash the numeric delta fields the detector actually produces.
+    /// </summary>
+    public static string ComputeDeltaHash(IEnumerable<CanonicalDelta> deltas)
+    {
+        var sb = new StringBuilder();
+        foreach (var delta in deltas)
+        {
+            sb.Append("id=").Append(DeltaIds.Canonical(delta.Id));
+            sb.Append(";status=").Append(delta.Status);
+            sb.Append(";left=").Append(FormatMeasurement(delta.LeftValue));
+            sb.Append(";right=").Append(FormatMeasurement(delta.RightValue));
+            sb.Append(";delta=").Append(FormatMeasurement(delta.Delta));
+            sb.Append(";magnitude=").Append(FormatMeasurement(delta.Magnitude));
+            sb.Append(";confidence=").Append(FormatMeasurement(delta.Confidence));
+            sb.Append('\n');
+        }
+        return ComputeHashString(sb.ToString());
+    }
+
     /// <summary>
     /// Compute a deterministic hash for delta outputs.
     /// Used to verify reproducibility.
@@ -134,16 +171,66 @@ public static class DeterminismService
     /// <summary>
     /// Get reproducibility metadata for exports.
     /// </summary>
-    public static ReproducibilityMetadata GetReproducibilityMetadata()
+    public static ReproducibilityMetadata GetReproducibilityMetadata(string? inputFingerprint = null)
     {
         return new ReproducibilityMetadata
         {
             IsDeterministic = IsDeterministic,
             Seed = Seed,
-            InputFingerprint = LastFingerprint,
+            InputFingerprint = inputFingerprint,
             Version = VersionInfo.Version,
             Timestamp = DateTime.UtcNow
         };
+    }
+
+    private static string CanonicalRun(GeometryRun run)
+    {
+        var sb = new StringBuilder();
+        sb.Append("id=").Append(InputNormalizer.NormalizeRunId(run.Metadata?.RunId));
+        var steps = run.Trajectory?.Timesteps;
+        sb.Append(";n=").Append(steps?.Count ?? 0);
+        if (steps != null)
+        {
+            for (int i = 0; i < steps.Count; i++)
+            {
+                var step = steps[i];
+                sb.Append("|t=").Append(i.ToString(CultureInfo.InvariantCulture));
+                sb.Append(";x=").Append(FormatMeasurement(step.State2D.Count > 0 ? step.State2D[0] : double.NaN));
+                sb.Append(";y=").Append(FormatMeasurement(step.State2D.Count > 1 ? step.State2D[1] : double.NaN));
+                sb.Append(";v=").Append(FormatMeasurement(step.VelocityMagnitude));
+                sb.Append(";c=").Append(FormatMeasurement(step.Curvature));
+            }
+        }
+
+        var eigenvalues = run.Geometry?.Eigenvalues;
+        if (eigenvalues != null)
+        {
+            for (int i = 0; i < eigenvalues.Count; i++)
+            {
+                sb.Append("|e=").Append(i.ToString(CultureInfo.InvariantCulture));
+                var values = eigenvalues[i].Values;
+                if (values == null || values.Count == 0)
+                {
+                    sb.Append(":missing");
+                    continue;
+                }
+                foreach (var value in values)
+                    sb.Append(':').Append(FormatMeasurement(value));
+            }
+        }
+
+        return sb.ToString();
+    }
+
+    private static string FormatMeasurement(double value)
+    {
+        if (double.IsNaN(value))
+            return "missing";
+        if (double.IsPositiveInfinity(value))
+            return "inf";
+        if (double.IsNegativeInfinity(value))
+            return "-inf";
+        return value.ToString("R", CultureInfo.InvariantCulture);
     }
     
     private static byte[] ComputeHash(string input)
@@ -154,7 +241,7 @@ public static class DeterminismService
     private static string ComputeHashString(string input)
     {
         var hash = ComputeHash(input);
-        return Convert.ToHexString(hash)[..16]; // 16-char truncated hash
+        return Convert.ToHexString(hash).ToLowerInvariant();
     }
 }
 

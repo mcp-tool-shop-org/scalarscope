@@ -108,6 +108,12 @@ public sealed record TfrtFolderContext
     
     /// <summary>Explicit warmup_steps from config.</summary>
     public int? WarmupSteps { get; init; }
+
+    /// <summary>
+    /// Environment facts copied from the export (environment object, or gpu/host/os/device).
+    /// Null when the trace did not record them. The importer process is not a substitute.
+    /// </summary>
+    public string? EnvironmentFacts { get; init; }
 }
 
 #endregion
@@ -301,6 +307,7 @@ public sealed partial class TensorFlowRTOfflineConnector : IRunConnector
         string? savedModelPath = null;
         string? configPath = null;
         int? warmupSteps = null;
+        string? environmentFacts = null;
         
         await Task.Run(() =>
         {
@@ -326,20 +333,56 @@ public sealed partial class TensorFlowRTOfflineConnector : IRunConnector
                     {
                         warmupSteps = warmupProp.GetInt32();
                     }
+
+                    environmentFacts = ReadEnvironmentFacts(doc.RootElement);
                 }
                 catch { }
             }
         }, ct);
         
-        if (savedModelPath == null && configPath == null && warmupSteps == null)
+        if (savedModelPath == null && configPath == null && warmupSteps == null && environmentFacts == null)
             return null;
         
         return new TfrtFolderContext
         {
             SavedModelPath = savedModelPath,
             ConfigPath = configPath,
-            WarmupSteps = warmupSteps
+            WarmupSteps = warmupSteps,
+            EnvironmentFacts = environmentFacts
         };
+    }
+
+    /// <summary>
+    /// Environment facts belong to the exported trace. A missing block stays absent.
+    /// </summary>
+    private static string? ReadEnvironmentFacts(JsonElement root)
+    {
+        if (root.TryGetProperty("environment", out var env))
+        {
+            if (env.ValueKind == JsonValueKind.String)
+            {
+                var text = env.GetString();
+                if (!string.IsNullOrWhiteSpace(text))
+                    return text;
+            }
+            else if (env.ValueKind == JsonValueKind.Object)
+            {
+                return env.GetRawText();
+            }
+        }
+
+        var parts = new List<string>();
+        foreach (var key in new[] { "gpu", "host", "os", "device" })
+        {
+            if (root.TryGetProperty(key, out var value) && value.ValueKind == JsonValueKind.String)
+            {
+                var text = value.GetString();
+                if (!string.IsNullOrWhiteSpace(text))
+                    parts.Add(key + "=" + text);
+            }
+        }
+
+        return parts.Count == 0 ? null : string.Join(";", parts);
     }
     
     private TfrtSource? ClassifyFile(string path, TfrtFolderContext? context)
@@ -472,9 +515,10 @@ public sealed partial class TensorFlowRTOfflineConnector : IRunConnector
         // Set context from folder structure
         raw.WarmupStepsFromConfig = source.Context?.WarmupSteps;
         raw.SavedModelPath = source.Context?.SavedModelPath;
+        raw.EnvironmentFacts = source.Context?.EnvironmentFacts;
         
-        // Validate: must have latency signal
-        if (raw.LatencyMs.Count == 0)
+        // Validate: must have latency signal. Missing cells stay null on their step.
+        if (!raw.Samples.Any(sample => sample.LatencyMs.HasValue))
         {
             // For logs, this is a warning → expect lower quality
             if (source.Type == TfrtSourceType.RuntimeLog)
@@ -486,14 +530,6 @@ public sealed partial class TensorFlowRTOfflineConnector : IRunConnector
                 throw new InvalidOperationException(
                     $"[{TfrtErrorCodes.TFRT_NO_LATENCY_SIGNAL}] Cannot extract latency signal from {source.Type}");
             }
-        }
-        
-        // Validate: series lengths must match
-        var stepCount = raw.Steps.Count;
-        if (raw.LatencyMs.Count > 0 && raw.LatencyMs.Count != stepCount)
-        {
-            throw new InvalidOperationException(
-                $"[{TfrtErrorCodes.TFRT_INCONSISTENT_LENGTHS}] Latency length ({raw.LatencyMs.Count}) != steps ({stepCount})");
         }
         
         return raw;
@@ -551,33 +587,28 @@ public sealed partial class TensorFlowRTOfflineConnector : IRunConnector
             
             var name = nameProp.GetString() ?? "";
             
-            // Extract timing events
+            // Extract timing events. One event is one sample; a missing field stays null.
             if (name.Contains("TensorRT", StringComparison.OrdinalIgnoreCase) ||
                 name.Contains("inference", StringComparison.OrdinalIgnoreCase))
             {
+                double? latencyMs = null;
+                double? wallSeconds = null;
                 if (evt.TryGetProperty("dur", out var dur))
-                {
-                    var durationUs = dur.GetDouble();
-                    raw.LatencyMs.Add(durationUs / 1000.0); // Convert us to ms
-                }
+                    latencyMs = dur.GetDouble() / 1000.0;
                 
                 if (evt.TryGetProperty("ts", out var ts))
-                {
-                    var timestampUs = ts.GetDouble();
-                    raw.WallTimeSeconds.Add(timestampUs / 1_000_000.0); // Convert us to s
-                }
-                
-                raw.Steps.Add(step++);
+                    wallSeconds = ts.GetDouble() / 1_000_000.0;
+
+                if (latencyMs.HasValue || wallSeconds.HasValue)
+                    raw.AddSample(step++, latencyMs: latencyMs, wallTimeSeconds: wallSeconds);
             }
             
-            // Extract memory events
+            // Memory-only events fill the open sample, or start a new one.
             if (name.Contains("memory", StringComparison.OrdinalIgnoreCase) &&
                 evt.TryGetProperty("args", out var args))
             {
                 if (args.TryGetProperty("bytes", out var bytes))
-                {
-                    raw.MemoryBytes.Add(bytes.GetInt64());
-                }
+                    raw.AttachMemory(bytes.GetInt64());
             }
         }
     }
@@ -595,28 +626,16 @@ public sealed partial class TensorFlowRTOfflineConnector : IRunConnector
             using var doc = JsonDocument.Parse(json);
             var root = doc.RootElement;
             
-            // Overview typically has summary stats, not per-iteration
-            // Try to extract available metrics
-            int step = 0;
-            
+            // Overview typically has summary stats, not per-iteration.
+            // Summary fields share one sample so a lone throughput cannot shift later rows.
             if (root.TryGetProperty("inference_stats", out var stats) ||
                 root.TryGetProperty("run_stats", out stats))
             {
-                if (stats.TryGetProperty("avg_latency_ms", out var avgLat))
-                {
-                    raw.LatencyMs.Add(avgLat.GetDouble());
-                    raw.Steps.Add(step++);
-                }
-                
-                if (stats.TryGetProperty("throughput", out var thr))
-                {
-                    raw.ThroughputItemsPerSec.Add(thr.GetDouble());
-                }
-                
-                if (stats.TryGetProperty("peak_memory_bytes", out var mem))
-                {
-                    raw.MemoryBytes.Add(mem.GetInt64());
-                }
+                double? latencyMs = stats.TryGetProperty("avg_latency_ms", out var avgLat) ? avgLat.GetDouble() : null;
+                double? throughput = stats.TryGetProperty("throughput", out var thr) ? thr.GetDouble() : null;
+                long? memoryBytes = stats.TryGetProperty("peak_memory_bytes", out var mem) ? mem.GetInt64() : null;
+                if (latencyMs.HasValue || throughput.HasValue || memoryBytes.HasValue)
+                    raw.AddSample(raw.Samples.Count, latencyMs: latencyMs, throughput: throughput, memoryBytes: memoryBytes);
             }
             
             // Try to get per-iteration data if available
@@ -625,10 +644,7 @@ public sealed partial class TensorFlowRTOfflineConnector : IRunConnector
                 foreach (var iter in iterations.EnumerateArray())
                 {
                     if (iter.TryGetProperty("latency_ms", out var lat))
-                    {
-                        raw.LatencyMs.Add(lat.GetDouble());
-                        raw.Steps.Add(raw.Steps.Count);
-                    }
+                        raw.AddSample(raw.Samples.Count, latencyMs: lat.GetDouble());
                 }
             }
         }
@@ -663,40 +679,34 @@ public sealed partial class TensorFlowRTOfflineConnector : IRunConnector
                 int step = 0;
                 foreach (var item in results.EnumerateArray())
                 {
-                    // Latency
+                    double? latencyMs = null;
                     if (item.TryGetProperty("latency_ms", out var lat) ||
                         item.TryGetProperty("latency", out lat))
                     {
-                        raw.LatencyMs.Add(lat.GetDouble());
+                        latencyMs = lat.GetDouble();
                     }
                     
-                    // Throughput
+                    double? throughput = null;
                     if (item.TryGetProperty("throughput", out var thr) ||
                         item.TryGetProperty("items_per_sec", out thr))
                     {
-                        raw.ThroughputItemsPerSec.Add(thr.GetDouble());
+                        throughput = thr.GetDouble();
                     }
                     
-                    // Memory
+                    long? memoryBytes = null;
                     if (item.TryGetProperty("memory_mb", out var memMb))
-                    {
-                        raw.MemoryBytes.Add((long)(memMb.GetDouble() * 1_000_000));
-                    }
+                        memoryBytes = (long)(memMb.GetDouble() * 1_000_000);
                     else if (item.TryGetProperty("memory_bytes", out var mem))
-                    {
-                        raw.MemoryBytes.Add(mem.GetInt64());
-                    }
+                        memoryBytes = mem.GetInt64();
                     
-                    // Step
+                    var sampleStep = step;
                     if (item.TryGetProperty("step", out var stepVal) ||
                         item.TryGetProperty("iteration", out stepVal))
                     {
-                        raw.Steps.Add(stepVal.GetInt32());
+                        sampleStep = stepVal.GetInt32();
                     }
-                    else
-                    {
-                        raw.Steps.Add(step);
-                    }
+
+                    raw.AddSample(sampleStep, latencyMs: latencyMs, throughput: throughput, memoryBytes: memoryBytes);
                     step++;
                 }
             }
@@ -734,7 +744,7 @@ public sealed partial class TensorFlowRTOfflineConnector : IRunConnector
             var memoryIdx = FindColumnIndex(header, "memory_bytes", "memory_mb", "memory");
             var wallTimeIdx = FindColumnIndex(header, "wall_time", "timestamp", "time_sec");
             
-            // Parse data rows
+            // Parse data rows. Each row is one sample. A blank metric stays null at that step.
             int autoStep = 0;
             for (int i = 1; i < lines.Length; i++)
             {
@@ -743,48 +753,49 @@ public sealed partial class TensorFlowRTOfflineConnector : IRunConnector
                 
                 var values = lines[i].Split(',');
                 
-                // Step
+                int sampleStep;
                 if (stepIdx >= 0 && stepIdx < values.Length &&
                     int.TryParse(values[stepIdx], out var step))
                 {
-                    raw.Steps.Add(step);
+                    sampleStep = step;
                 }
                 else
                 {
-                    raw.Steps.Add(autoStep);
+                    sampleStep = autoStep;
                 }
                 autoStep++;
                 
-                // Latency
+                double? latencyMs = null;
                 if (latencyIdx >= 0 && latencyIdx < values.Length &&
                     double.TryParse(values[latencyIdx], NumberStyles.Float, CultureInfo.InvariantCulture, out var lat))
                 {
-                    raw.LatencyMs.Add(lat);
+                    latencyMs = lat;
                 }
                 
-                // Throughput
+                double? throughput = null;
                 if (throughputIdx >= 0 && throughputIdx < values.Length &&
                     double.TryParse(values[throughputIdx], NumberStyles.Float, CultureInfo.InvariantCulture, out var thr))
                 {
-                    raw.ThroughputItemsPerSec.Add(thr);
+                    throughput = thr;
                 }
                 
-                // Memory
+                long? memoryBytes = null;
                 if (memoryIdx >= 0 && memoryIdx < values.Length &&
                     long.TryParse(values[memoryIdx], out var mem))
                 {
-                    // Normalize to bytes if needed
-                    if (header[memoryIdx].Contains("mb"))
+                    if (header[memoryIdx] == "memory_mb")
                         mem *= 1_000_000;
-                    raw.MemoryBytes.Add(mem);
+                    memoryBytes = mem;
                 }
                 
-                // Wall time
+                double? wallSeconds = null;
                 if (wallTimeIdx >= 0 && wallTimeIdx < values.Length &&
                     double.TryParse(values[wallTimeIdx], NumberStyles.Float, CultureInfo.InvariantCulture, out var wt))
                 {
-                    raw.WallTimeSeconds.Add(wt);
+                    wallSeconds = wt;
                 }
+
+                raw.AddSample(sampleStep, latencyMs: latencyMs, throughput: throughput, memoryBytes: memoryBytes, wallTimeSeconds: wallSeconds);
             }
         }
         catch (InvalidOperationException)
@@ -804,7 +815,7 @@ public sealed partial class TensorFlowRTOfflineConnector : IRunConnector
     {
         foreach (var candidate in candidates)
         {
-            var idx = header.FindIndex(h => h.Contains(candidate, StringComparison.OrdinalIgnoreCase));
+            var idx = header.FindIndex(h => string.Equals(h, candidate, StringComparison.OrdinalIgnoreCase));
             if (idx >= 0)
                 return idx;
         }
@@ -829,37 +840,38 @@ public sealed partial class TensorFlowRTOfflineConnector : IRunConnector
         
         foreach (var line in lines)
         {
-            // Try to extract step
             var stepMatch = stepRegex.Match(line);
-            if (stepMatch.Success && int.TryParse(stepMatch.Groups[1].Value, out var step))
-            {
-                raw.Steps.Add(step);
-            }
+            int? step = stepMatch.Success && int.TryParse(stepMatch.Groups[1].Value, out var parsedStep)
+                ? parsedStep
+                : null;
             
-            // Extract latency
+            double? latencyMs = null;
             var latMatch = latencyRegex.Match(line);
             if (latMatch.Success && double.TryParse(latMatch.Groups[1].Value, NumberStyles.Float, 
                 CultureInfo.InvariantCulture, out var lat))
             {
-                raw.LatencyMs.Add(lat);
-                if (!stepMatch.Success)
-                    raw.Steps.Add(autoStep++);
+                latencyMs = lat;
             }
             
-            // Extract throughput
+            double? throughput = null;
             var thrMatch = throughputRegex.Match(line);
             if (thrMatch.Success && double.TryParse(thrMatch.Groups[1].Value, NumberStyles.Float,
                 CultureInfo.InvariantCulture, out var thr))
             {
-                raw.ThroughputItemsPerSec.Add(thr);
+                throughput = thr;
             }
             
-            // Extract memory
+            long? memoryBytes = null;
             var memMatch = memoryRegex.Match(line);
             if (memMatch.Success && long.TryParse(memMatch.Groups[1].Value, out var mem))
-            {
-                raw.MemoryBytes.Add(mem);
-            }
+                memoryBytes = mem;
+
+            if (step is null && latencyMs is null && throughput is null && memoryBytes is null)
+                continue;
+
+            var sampleStep = step ?? autoStep;
+            autoStep = step is null ? autoStep + 1 : step.Value + 1;
+            raw.AddSample(sampleStep, latencyMs: latencyMs, throughput: throughput, memoryBytes: memoryBytes);
         }
         
         return raw;
@@ -884,56 +896,56 @@ public sealed partial class TensorFlowRTOfflineConnector : IRunConnector
     private async Task<RuntimeRunTrace> BuildRuntimeTraceAsync(TfrtRawData raw, string source, CancellationToken ct)
     {
         // Validate timeline
-        if (raw.Steps.Count == 0)
+        if (raw.Samples.Count == 0)
         {
             throw new InvalidOperationException(
                 $"[{TfrtErrorCodes.TFRT_TIMELINE_INCONSISTENT}] No timeline data extracted from source");
         }
         
         // Ensure steps are monotonic
-        for (int i = 1; i < raw.Steps.Count; i++)
+        for (int i = 1; i < raw.Samples.Count; i++)
         {
-            if (raw.Steps[i] < raw.Steps[i - 1])
+            if (raw.Samples[i].Step < raw.Samples[i - 1].Step)
             {
                 throw new InvalidOperationException(
-                    $"[{TfrtErrorCodes.TFRT_TIMELINE_INCONSISTENT}] Non-monotonic step at index {i}: {raw.Steps[i]} < {raw.Steps[i - 1]}");
+                    $"[{TfrtErrorCodes.TFRT_TIMELINE_INCONSISTENT}] Non-monotonic step at index {i}: {raw.Samples[i].Step} < {raw.Samples[i - 1].Step}");
             }
         }
         
-        // Build scalar series
+        // Build scalar series. Each list is one value per sample, null where that row omitted the metric.
         var series = new List<RuntimeScalarSeries>();
         
-        if (raw.LatencyMs.Count > 0)
+        if (raw.Samples.Any(sample => sample.LatencyMs.HasValue))
         {
             series.Add(new RuntimeScalarSeries
             {
                 Name = "latency_ms",
                 Unit = ScalarUnit.Milliseconds,
-                Values = PadToStepCount(raw.LatencyMs, raw.Steps.Count),
+                Values = raw.Samples.Select(sample => sample.LatencyMs).ToList(),
                 Description = "Inference latency per step",
                 SourceKey = "latency_ms"
             });
         }
         
-        if (raw.ThroughputItemsPerSec.Count > 0)
+        if (raw.Samples.Any(sample => sample.ThroughputItemsPerSec.HasValue))
         {
             series.Add(new RuntimeScalarSeries
             {
                 Name = "throughput_items_per_sec",
                 Unit = ScalarUnit.ItemsPerSecond,
-                Values = PadToStepCount(raw.ThroughputItemsPerSec, raw.Steps.Count),
+                Values = raw.Samples.Select(sample => sample.ThroughputItemsPerSec).ToList(),
                 Description = "Inference throughput",
                 SourceKey = "throughput"
             });
         }
         
-        if (raw.MemoryBytes.Count > 0)
+        if (raw.Samples.Any(sample => sample.MemoryBytes.HasValue))
         {
             series.Add(new RuntimeScalarSeries
             {
                 Name = "memory_bytes",
                 Unit = ScalarUnit.Bytes,
-                Values = PadToStepCount(raw.MemoryBytes.Select(m => (double)m).ToList(), raw.Steps.Count),
+                Values = raw.Samples.Select(sample => sample.MemoryBytes.HasValue ? (double?)sample.MemoryBytes.Value : null).ToList(),
                 Description = "Memory usage",
                 SourceKey = "memory"
             });
@@ -961,8 +973,10 @@ public sealed partial class TensorFlowRTOfflineConnector : IRunConnector
             Metadata = metadata,
             Timeline = new RuntimeTimeline
             {
-                Steps = raw.Steps,
-                WallTimeSeconds = raw.WallTimeSeconds.Count > 0 ? raw.WallTimeSeconds : null,
+                Steps = raw.Samples.Select(sample => sample.Step).ToList(),
+                WallTimeSeconds = raw.Samples.All(sample => sample.WallTimeSeconds.HasValue)
+                    ? raw.Samples.Select(sample => sample.WallTimeSeconds!.Value).ToList()
+                    : null,
                 Epoch = null // Not applicable to inference
             },
             Scalars = scalars,
@@ -976,16 +990,6 @@ public sealed partial class TensorFlowRTOfflineConnector : IRunConnector
                 IngestedUtc = DateTimeOffset.UtcNow
             }
         };
-    }
-    
-    private static IReadOnlyList<double?> PadToStepCount(List<double> values, int stepCount)
-    {
-        var result = new double?[stepCount];
-        for (int i = 0; i < Math.Min(values.Count, stepCount); i++)
-        {
-            result[i] = values[i];
-        }
-        return result;
     }
     
     private static RuntimeMilestones DetectMilestones(TfrtRawData raw, RuntimeScalars scalars)
@@ -1060,14 +1064,14 @@ public sealed partial class TensorFlowRTOfflineConnector : IRunConnector
         // Try to find SavedModel for model fingerprint
         var modelFingerprint = await ComputeModelFingerprintAsync(source, ct);
         
-        // Environment fingerprint from system info
-        var envFingerprint = ComputeEnvironmentFingerprint();
+        // Environment comes from the export. The importer process is not hashed.
+        var envFingerprint = string.IsNullOrWhiteSpace(raw.EnvironmentFacts)
+            ? RuntimeMetadata.AbsentFingerprint
+            : RuntimeMetadata.CreateFingerprint(raw.EnvironmentFacts);
         
-        // Code fingerprint (placeholder - would need git integration)
-        var codeFingerprint = RuntimeMetadata.UnknownFingerprint("code");
-        
-        // Dataset fingerprint (placeholder - not available from TFRT exports)
-        var datasetFingerprint = RuntimeMetadata.UnknownFingerprint("dataset");
+        // Code and dataset are not in a TFRT export. Absent is not a shared identity.
+        var codeFingerprint = RuntimeMetadata.AbsentFingerprint;
+        var datasetFingerprint = RuntimeMetadata.AbsentFingerprint;
         
         return new RuntimeMetadata
         {
@@ -1116,19 +1120,8 @@ public sealed partial class TensorFlowRTOfflineConnector : IRunConnector
         }
         catch
         {
-            return RuntimeMetadata.UnknownFingerprint("model");
+            return RuntimeMetadata.AbsentFingerprint;
         }
-    }
-    
-    private static string ComputeEnvironmentFingerprint()
-    {
-        var sb = new StringBuilder();
-        sb.Append(Environment.OSVersion.Platform);
-        sb.Append(Environment.OSVersion.Version);
-        sb.Append(Environment.ProcessorCount);
-        sb.Append(Environment.Is64BitOperatingSystem);
-        
-        return RuntimeMetadata.CreateFingerprint(sb.ToString());
     }
     
     #endregion
@@ -1234,19 +1227,55 @@ internal sealed class TfrtRawData
     public required string SourcePath { get; init; }
     public required TfrtSourceType SourceType { get; init; }
     
-    public List<int> Steps { get; } = [];
-    public List<double> LatencyMs { get; } = [];
-    public List<double> ThroughputItemsPerSec { get; } = [];
-    public List<long> MemoryBytes { get; } = [];
-    public List<double> WallTimeSeconds { get; } = [];
-    
-    // CPU/GPU load (optional)
-    public List<double> CpuPercent { get; } = [];
-    public List<double> GpuPercent { get; } = [];
+    /// <summary>One row per step. Missing metrics stay null on that row.</summary>
+    public List<TfrtSample> Samples { get; } = [];
     
     // Folder context
     public int? WarmupStepsFromConfig { get; set; }
     public string? SavedModelPath { get; set; }
+    public string? EnvironmentFacts { get; set; }
+
+    public void AddSample(
+        int step,
+        double? latencyMs = null,
+        double? throughput = null,
+        long? memoryBytes = null,
+        double? wallTimeSeconds = null)
+    {
+        Samples.Add(new TfrtSample
+        {
+            Step = step,
+            LatencyMs = latencyMs,
+            ThroughputItemsPerSec = throughput,
+            MemoryBytes = memoryBytes,
+            WallTimeSeconds = wallTimeSeconds
+        });
+    }
+
+    /// <summary>
+    /// A memory-only event fills the latest sample when that sample has no memory yet.
+    /// Otherwise it is its own sample and does not shift earlier metrics.
+    /// </summary>
+    public void AttachMemory(long bytes)
+    {
+        if (Samples.Count > 0 && Samples[^1].MemoryBytes is null)
+        {
+            Samples[^1].MemoryBytes = bytes;
+            return;
+        }
+
+        AddSample(Samples.Count, memoryBytes: bytes);
+    }
+}
+
+/// <summary>One TFRT observation keyed by step.</summary>
+internal sealed class TfrtSample
+{
+    public int Step { get; init; }
+    public double? LatencyMs { get; init; }
+    public double? ThroughputItemsPerSec { get; init; }
+    public long? MemoryBytes { get; set; }
+    public double? WallTimeSeconds { get; init; }
 }
 
 #endregion

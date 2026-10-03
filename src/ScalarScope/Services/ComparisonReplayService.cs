@@ -63,7 +63,7 @@ public sealed class ComparisonReplayService
             // Determinism data from result
             InputFingerprint = result.InputFingerprint ?? "",
             DeltaHash = result.DeltaHash ?? "",
-            DeterminismSeed = DeterminismService.Seed ?? 0,
+            DeterminismSeed = DeterminismService.Seed,
             DeltaSpecVersion = DeltaSpecVersion,
             
             // Preset settings
@@ -251,10 +251,14 @@ public sealed class ComparisonReplayService
             return result;
         }
         
+        var previousSeed = DeterminismService.Seed;
         try
         {
-            // Set determinism seed for reproduction
-            DeterminismService.EnableDeterminism(spec.DeterminismSeed);
+            // A null seed stays non-deterministic. Do not force seed 0.
+            if (spec.DeterminismSeed.HasValue)
+                DeterminismService.EnableDeterminism(spec.DeterminismSeed.Value);
+            else
+                DeterminismService.DisableDeterminism();
             
             // Get preset if available
             ImportPreset? preset = null;
@@ -280,7 +284,8 @@ public sealed class ComparisonReplayService
             result.TimestepCountMatch = replayedResult.Alignment.CompareIndex.Length == spec.TimestepCount;
             result.TotalDeltaMatch = Math.Abs(replayedTotalDelta - (spec.TotalDelta ?? 0)) < 1e-10;
             
-            result.Success = result.FingerprintMatch && result.DeltaHashMatch;
+            result.Success = result.FingerprintMatch && result.DeltaHashMatch
+                && result.TimestepCountMatch && result.TotalDeltaMatch;
             
             if (!result.Success)
             {
@@ -300,6 +305,13 @@ public sealed class ComparisonReplayService
             result.Exception = ex;
             
             ErrorLoggingService.Instance.Log(ex, "ComparisonReplay");
+        }
+        finally
+        {
+            if (previousSeed.HasValue)
+                DeterminismService.EnableDeterminism(previousSeed.Value);
+            else
+                DeterminismService.DisableDeterminism();
         }
         
         return result;
@@ -346,7 +358,7 @@ public record ComparisonReplaySpec
     // Determinism info
     public required string InputFingerprint { get; init; }
     public required string DeltaHash { get; init; }
-    public int DeterminismSeed { get; init; }
+    public int? DeterminismSeed { get; init; }
     public required string DeltaSpecVersion { get; init; }
     
     // Preset info
