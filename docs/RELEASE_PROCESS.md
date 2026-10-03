@@ -16,11 +16,13 @@ MAJOR.MINOR.PATCH[-PRERELEASE]
 - `alpha.N` - Alpha release (e.g., `1.0.0-alpha.1`)
 
 ### Current Version
-- **3.0.0.0** - Next Partner Center update of store `9P3HT1PHBKQK`
-  - Package name `mcp-tool-shop.ScalarScope`
-  - Publisher `CN=5305D976-6952-4F00-9C21-3A5DB090359F`
-  - Publisher display name `mcp-tool-shop`
-  - Unsigned MSIX. Partner Center signs it on ingestion.
+- **Display version 3.0.0** — `ApplicationDisplayVersion` in `ScalarScope.csproj`. Settings > About shows this string.
+- **ApplicationVersion 30** — the package integer in the same csproj. It is not the About string.
+- **csproj `Version` 3.0.0.0**
+- **`Package.appxmanifest` Identity Version 3.0.0.0**
+- These are four fields. Read each one. Do not collapse them into a single label.
+- Store `9P3HT1PHBKQK`. Package name `mcp-tool-shop.ScalarScope`. Publisher `CN=5305D976-6952-4F00-9C21-3A5DB090359F`. Publisher display name `mcp-tool-shop`.
+- Unsigned MSIX. Partner Center signs it on ingestion.
 - **2.0.0** - Previous Microsoft Store release
   - New Welcome experience (Phase H)
   - Unified design system
@@ -114,5 +116,7 @@ If a release has critical issues:
 
 | Version | Status | Support Until |
 |---------|--------|---------------|
-| 1.0.x   | Active | TBD           |
-| 0.x     | EOL    | -             |
+| 3.0.x   | Active (display version 3.0.0) | Current line |
+| 2.0.x   | Previous Store release | — |
+| 1.0.x   | Not the current line | — |
+| 0.x     | EOL | — |

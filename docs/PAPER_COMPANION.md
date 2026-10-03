@@ -94,8 +94,8 @@ All exports are available at full resolution (up to 4K) with configurable option
 
 ### Requirements
 
-- .NET 9.0 SDK and the `maui-windows` workload
-- Windows 10 (build 17763) or later, x64
+- .NET 9 SDK (`global.json` pins 9.0.100) and the `maui-windows` workload
+- Windows 10 (build 17763) or later, x64. Windows only. Not macOS or Linux.
 
 ### Quick Start
 
@@ -135,13 +135,13 @@ export_geometry(
 | `Home` `End` | Jump to start/end |
 | `+` `-` | Adjust playback speed |
 | `S` | Quick screenshot |
-| `1-6` | Switch tabs |
+| `1`–`6` | Request routes overview, trajectory, scalars, geometry, compare, and failures. Not Home, Compare, Guide, or Settings. Pressing 1 does not open Home. |
 
 ## Source Code and Data Availability
 
 - **ScalarScope**: https://github.com/mcp-tool-shop-org/scalarscope
 - **ASPIRE Engine**: https://github.com/mcp-tool-shop-org/aspire-engine
-- **Sample Data**: Included in repository under `data/sample_runs/`
+- **Sample Data**: `src/ScalarScope/Resources/Raw/Samples/`
 
 ## Citation
 

@@ -222,8 +222,14 @@ public record DeltaComputationResult
     /// <summary>Phase 6.1: Hash of delta outputs for reproducibility verification.</summary>
     public string? DeltaHash { get; init; }
     
-    /// <summary>Phase 6.1: Input fingerprint for determinism tracking.</summary>
+    /// <summary>Phase 6.1: Combined fingerprint of the two run measurements.</summary>
     public string? InputFingerprint { get; init; }
+
+    /// <summary>Canonical measurement hash of the left run. Not a copy of the other side.</summary>
+    public string? LeftRunFingerprint { get; init; }
+
+    /// <summary>Canonical measurement hash of the right run.</summary>
+    public string? RightRunFingerprint { get; init; }
     
     /// <summary>Phase 6.1: Reproducibility metadata for exports.</summary>
     public ReproducibilityMetadata? Reproducibility { get; init; }

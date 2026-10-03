@@ -20,6 +20,19 @@ jobs:
     steps:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
+    - name: Reject a tag that is not the Store identity
+      shell: pwsh
+      run: |
+        $ref = $env:GITHUB_REF
+        if ($ref -like 'refs/tags/*') {
+          $tag = $ref.Substring('refs/tags/'.Length)
+          $version = $tag
+          if ($version.StartsWith('v')) { $version = $version.Substring(1) }
+          if ($version -ne '3.0.0.0') {
+            throw "Tag $tag is not 3.0.0.0. The Store identity stays 3.0.0.0 and is not rewritten from the tag."
+          }
+        }
+
     - name: Setup Rust
       uses: dtolnay/rust-toolchain@stable
 
@@ -34,7 +47,7 @@ jobs:
       run: ./packaging/pack.ps1
 
     - name: Create Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
       with:
         files: release/*
         body_path: CHANGELOG.md

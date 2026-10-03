@@ -32,7 +32,7 @@ The name, publisher, and version in that line are the Store update key. A differ
 
 ## Checksum
 
-The release workflow writes `checksums.txt` next to the MSIX. Compare it with the file you have:
+The release workflow writes `checksums.txt` next to the MSIX. Compare it with the file you have. A matching SHA-256 is a content check, not a signature.
 
 ```powershell
 Get-FileHash .\ScalarScope_3.0.0.0_x64.msix -Algorithm SHA256
@@ -54,3 +54,7 @@ dotnet publish src/ScalarScope/ScalarScope.csproj -c Release -f net9.0-windows10
 ```
 
 The MSIX lands under `src/ScalarScope/bin/Release/net9.0-windows10.0.19041.0/win-x64/AppPackages/`.
+
+## If the hash does not match
+
+Do not install that file. Report it privately at https://github.com/mcp-tool-shop-org/scalarscope/security/advisories/new. Do not open a public issue for a tamper report. Issues and discussions for everything else are https://github.com/mcp-tool-shop-org/scalarscope/issues and https://github.com/mcp-tool-shop-org/scalarscope/discussions.

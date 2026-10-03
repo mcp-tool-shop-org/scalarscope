@@ -1,6 +1,7 @@
 // ComparisonBundle v1.0.0 Builder
 // Constructs bundle payloads from delta computation results.
 
+using System.Globalization;
 using System.Text;
 using ScalarScope.Models;
 
@@ -144,7 +145,7 @@ public static class BundleBuilder
     {
         var deltas = result.Deltas?.Select(d => new DeltaEntry
         {
-            Id = d.Id,
+            Id = Services.DeltaIds.Canonical(d.Id),
             Status = MapDeltaStatus(d.Status),
             Name = d.Name,
             Explanation = d.Explanation,
@@ -215,8 +216,8 @@ public static class BundleBuilder
                 {
                     SourceType = RunSourceType.File,
                     SchemaVersion = "1.0.0",
-                    Fingerprint = result.InputFingerprint ?? "",
-                    NormalizedFingerprint = result.InputFingerprint ?? "",
+                    Fingerprint = result.LeftRunFingerprint ?? "",
+                    NormalizedFingerprint = result.LeftRunFingerprint ?? "",
                     FileName = null,
                     Bytes = null
                 },
@@ -224,8 +225,8 @@ public static class BundleBuilder
                 {
                     SourceType = RunSourceType.File,
                     SchemaVersion = "1.0.0",
-                    Fingerprint = result.InputFingerprint ?? "",
-                    NormalizedFingerprint = result.InputFingerprint ?? "",
+                    Fingerprint = result.RightRunFingerprint ?? "",
+                    NormalizedFingerprint = result.RightRunFingerprint ?? "",
                     FileName = null,
                     Bytes = null
                 }
@@ -239,7 +240,7 @@ public static class BundleBuilder
                 Normalization = new NormalizationInfo
                 {
                     InputNormalizerVersion = "1.0.0",
-                    Rules = new[] { "stable_sort_keys", "float_rounding", "nan_normalization" }
+                    Rules = Array.Empty<string>()
                 },
                 AlignmentDefaults = new AlignmentDefaultsInfo
                 {
@@ -336,13 +337,13 @@ public static class BundleBuilder
     
     private static IReadOnlyList<string> GetGuardrails(CanonicalDelta d)
     {
-        return d.Id switch
+        return Services.DeltaIds.Canonical(d.Id) switch
         {
-            "delta_a" => new[] { "Agreement ≠ correctness", "Persistence varies by domain" },
-            "delta_td" => new[] { "Dominance ≠ collapse", "Factor emergence is expected" },
-            "delta_tc" => new[] { "Speed ≠ quality", "Convergence timing varies" },
-            "delta_o" => new[] { "Instability ≠ failure", "Some oscillation is normal" },
-            "delta_f" => new[] { "Failure detection is heuristic", "Check underlying metrics" },
+            Services.DeltaIds.EvaluatorAlignment => new[] { "Agreement ≠ correctness", "Persistence varies by domain" },
+            Services.DeltaIds.StructuralEmergence => new[] { "Dominance ≠ collapse", "Factor emergence is expected" },
+            Services.DeltaIds.ConvergenceTiming => new[] { "Speed ≠ quality", "Convergence timing varies" },
+            Services.DeltaIds.StabilityOscillation => new[] { "Instability ≠ failure", "Some oscillation is normal" },
+            Services.DeltaIds.FailurePresence => new[] { "Failure detection is heuristic", "Check underlying metrics" },
             _ => new[] { "Interpret in context" }
         };
     }
@@ -351,9 +352,9 @@ public static class BundleBuilder
     {
         var chips = new List<ParameterChip>
         {
-            new() { Key = "Left", Value = d.LeftValue.ToString("G4") },
-            new() { Key = "Right", Value = d.RightValue.ToString("G4") },
-            new() { Key = "Delta", Value = d.Delta.ToString("G4") }
+            new() { Key = "Left", Value = d.LeftValue.ToString("R", CultureInfo.InvariantCulture) },
+            new() { Key = "Right", Value = d.RightValue.ToString("R", CultureInfo.InvariantCulture) },
+            new() { Key = "Delta", Value = d.Delta.ToString("R", CultureInfo.InvariantCulture) }
         };
         
         if (!string.IsNullOrEmpty(d.Units))
@@ -367,15 +368,15 @@ public static class BundleBuilder
     private static IReadOnlyList<ConfidenceComponent>? GetConfidenceComponents(CanonicalDelta d)
     {
         // Add delta-specific confidence components
-        return d.Id switch
+        return Services.DeltaIds.Canonical(d.Id) switch
         {
-            "delta_tc" when d.TcA.HasValue && d.TcB.HasValue => new[]
+            Services.DeltaIds.ConvergenceTiming when d.TcA.HasValue && d.TcB.HasValue => new[]
             {
                 new ConfidenceComponent { Key = "TcA", Value = d.TcA.Value },
                 new ConfidenceComponent { Key = "TcB", Value = d.TcB.Value },
                 new ConfidenceComponent { Key = "DeltaSteps", Value = (double)(d.DeltaTcSteps ?? 0) }
             },
-            "delta_td" when d.DominanceRatioK > 0 => new[]
+            Services.DeltaIds.StructuralEmergence when d.DominanceRatioK > 0 => new[]
             {
                 new ConfidenceComponent { Key = "DominanceK", Value = d.DominanceRatioK ?? 0.0 },
                 new ConfidenceComponent { Key = "Window", Value = d.WindowUsed ?? 0.0 }
@@ -461,13 +462,13 @@ public static class BundleBuilder
     
     private static TriggerType MapTriggerType(CanonicalDelta d)
     {
-        return d.Id switch
+        return Services.DeltaIds.Canonical(d.Id) switch
         {
-            "delta_f" => TriggerType.DesignVerified,
-            "delta_td" => d.DominanceRatioK > 0.5 ? TriggerType.Sustained : TriggerType.Recurrence,
-            "delta_a" => TriggerType.PersistenceWeighted,
-            "delta_o" => TriggerType.AreaEpisode,
-            "delta_tc" => TriggerType.ConfidenceHeuristic,
+            Services.DeltaIds.FailurePresence => TriggerType.DesignVerified,
+            Services.DeltaIds.StructuralEmergence => d.DominanceRatioK > 0.5 ? TriggerType.Sustained : TriggerType.Recurrence,
+            Services.DeltaIds.EvaluatorAlignment => TriggerType.PersistenceWeighted,
+            Services.DeltaIds.StabilityOscillation => TriggerType.AreaEpisode,
+            Services.DeltaIds.ConvergenceTiming => TriggerType.ConfidenceHeuristic,
             _ => TriggerType.None
         };
     }
@@ -549,10 +550,10 @@ public static class BundleBuilder
                 sb.AppendLine();
                 sb.AppendLine($"*{delta.Explanation}*");
                 sb.AppendLine();
-                sb.AppendLine($"- **Confidence:** {delta.Confidence:P0}");
+                sb.AppendLine($"- **Confidence:** {delta.Confidence.ToString("R", CultureInfo.InvariantCulture)}");
                 if (delta.DeltaValue.HasValue)
                 {
-                    sb.AppendLine($"- **Delta:** {delta.DeltaValue:G4} {delta.Units ?? ""}");
+                    sb.AppendLine($"- **Delta:** {delta.DeltaValue.Value.ToString("R", CultureInfo.InvariantCulture)} {delta.Units ?? ""}");
                 }
                 sb.AppendLine($"- **Trigger:** {delta.TriggerType}");
                 sb.AppendLine();
@@ -572,7 +573,7 @@ public static class BundleBuilder
         
         sb.AppendLine("## Reproducibility");
         sb.AppendLine();
-        sb.AppendLine($"- **Status:** {repro.Results.DeltaHash[..Math.Min(12, repro.Results.DeltaHash.Length)]}...");
+        sb.AppendLine($"- **Status:** {manifest.Reproducibility.Status}");
         sb.AppendLine($"- **Determinism:** {(repro.Determinism.Seed.HasValue ? $"Seed {repro.Determinism.Seed}" : "Disabled")}");
         sb.AppendLine();
         

@@ -24,6 +24,10 @@ public class ComparisonAnalyticsPanel : SKCanvasView
         BindableProperty.Create(nameof(CurrentTime), typeof(double), typeof(ComparisonAnalyticsPanel), 0.0,
             propertyChanged: OnPropertyChangedInvalidate);
 
+    public static readonly BindableProperty AllowDemoFallbackProperty =
+        BindableProperty.Create(nameof(AllowDemoFallback), typeof(bool), typeof(ComparisonAnalyticsPanel), true,
+            propertyChanged: OnPropertyChangedInvalidate);
+
     public GeometryRun? LeftRun
     {
         get => (GeometryRun?)GetValue(LeftRunProperty);
@@ -40,6 +44,15 @@ public class ComparisonAnalyticsPanel : SKCanvasView
     {
         get => (double)GetValue(CurrentTimeProperty);
         set => SetValue(CurrentTimeProperty, value);
+    }
+
+    /// <summary>
+    /// Demo metrics are for the empty instrument only. A loaded review keeps this panel empty.
+    /// </summary>
+    public bool AllowDemoFallback
+    {
+        get => (bool)GetValue(AllowDemoFallbackProperty);
+        set => SetValue(AllowDemoFallbackProperty, value);
     }
 
     private static new readonly SKColor BackgroundColor = SKColor.Parse("#16213e");
@@ -64,7 +77,7 @@ public class ComparisonAnalyticsPanel : SKCanvasView
     private void OnDemoAnimationFrame()
     {
         // Only repaint if we're showing demo data
-        if (LeftRun is null || RightRun is null)
+        if (AllowDemoFallback && (LeftRun is null || RightRun is null))
         {
             MainThread.BeginInvokeOnMainThread(InvalidateSurface);
         }
@@ -88,7 +101,7 @@ public class ComparisonAnalyticsPanel : SKCanvasView
         _currentRightRun = RightRun;
         _isRenderingDemo = false;
         
-        if (_currentLeftRun == null || _currentRightRun == null)
+        if (AllowDemoFallback && (_currentLeftRun == null || _currentRightRun == null))
         {
             _currentLeftRun = DemoStateService.Instance.DemoPathA;
             _currentRightRun = DemoStateService.Instance.DemoPathB;

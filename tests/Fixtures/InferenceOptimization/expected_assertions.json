@@ -109,11 +109,11 @@
     "bundleExport": {
       "shouldSucceed": true,
       "mustInclude": [
-        "DeltaSpecVersion",
-        "bundleHash",
-        "comparisonId",
-        "fingerprintSummary",
-        "alignmentResult"
+        "Version",
+        "BundleHash",
+        "Comparison",
+        "FingerprintSummary",
+        "RecomputeDisabled"
       ],
       "reviewModeEnabled": true,
       "recomputeDisabled": true

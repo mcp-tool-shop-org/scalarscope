@@ -944,13 +944,13 @@ public class EvidenceExportService
 
     private (string name, double value) GetThresholdForDelta(CanonicalDelta delta)
     {
-        return delta.Id switch
+        return DeltaIds.Canonical(delta.Id) switch
         {
-            "ConvergenceTiming" => ("convergence_resolution", _config.Convergence.ResolutionSteps),
-            "StructuralEmergence" => ("emergence_resolution", _config.Emergence.ResolutionSteps),
-            "EvaluatorAlignment" => ("alignment_floor", _config.Alignment.DeltaFloor),
-            "StabilityOscillation" => ("stability_floor", _config.Stability.DeltaFloor),
-            "FailurePresence" => ("failure_persistence", 1.0),
+            DeltaIds.ConvergenceTiming => ("convergence_resolution", _config.Convergence.ResolutionSteps),
+            DeltaIds.StructuralEmergence => ("emergence_resolution", _config.Emergence.ResolutionSteps),
+            DeltaIds.EvaluatorAlignment => ("alignment_floor", _config.Alignment.DeltaFloor),
+            DeltaIds.StabilityOscillation => ("stability_floor", _config.Stability.DeltaFloor),
+            DeltaIds.FailurePresence => ("failure_persistence", 1.0),
             _ => ("unknown", 0.1)
         };
     }

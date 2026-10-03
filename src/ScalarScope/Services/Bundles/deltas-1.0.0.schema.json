@@ -35,7 +35,9 @@
         "sustained",
         "recurrence",
         "persistence_weighted",
-        "area_episode"
+        "area_episode",
+        "confidence_heuristic",
+        "event"
       ]
     },
     "targetView": {

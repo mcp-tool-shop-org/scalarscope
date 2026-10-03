@@ -65,7 +65,7 @@ public sealed class ReproAuditExportService
             {
                 IsEnabled = DeterminismService.IsDeterministic,
                 Seed = DeterminismService.Seed,
-                LastFingerprint = DeterminismService.LastFingerprint
+                LastFingerprint = result.InputFingerprint
             },
             
             // Versioning section

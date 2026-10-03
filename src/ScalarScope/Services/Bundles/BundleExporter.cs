@@ -74,12 +74,13 @@ public sealed class BundleExporter
                 fileEntries.Add(BundleHashAlgorithm.CreateFileEntry("insights/insights.json", insightsBytes, "application/json"));
             }
             
-            // assets/ (optional)
+            // assets/ (optional). A name that leaves assets/ fails the export.
             if (payload.Assets != null)
             {
                 foreach (var asset in payload.Assets)
                 {
-                    var assetPath = $"assets/{asset.FileName}";
+                    if (!BundlePaths.TryAssetEntry(asset.FileName, out var assetPath, out var assetError))
+                        throw new InvalidOperationException(assetError);
                     zipEntries[assetPath] = asset.Data;
                     fileEntries.Add(BundleHashAlgorithm.CreateFileEntry(assetPath, asset.Data, asset.ContentType));
                 }
@@ -263,9 +264,11 @@ public sealed class BundleExporter
         
         sb.AppendLine("## Verification");
         sb.AppendLine();
-        sb.AppendLine($"Bundle hash: `{manifest.Integrity.BundleHash}`");
+        sb.AppendLine("The bundle hash is written in `manifest.json` after this file is sealed.");
+        sb.AppendLine("This README does not print that hash, because the hash covers this file.");
         sb.AppendLine();
-        sb.AppendLine("All file hashes are listed in `manifest.json` → `integrity.files`.");
+        sb.AppendLine("File hashes are listed in `manifest.json` → `integrity.files`.");
+        sb.AppendLine("A matching bundle hash is a content check, not a signature.");
         sb.AppendLine();
         
         sb.AppendLine("## Privacy");

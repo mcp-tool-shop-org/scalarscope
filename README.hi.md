@@ -6,16 +6,13 @@
   <img src="https://raw.githubusercontent.com/mcp-tool-shop-org/brand/main/logos/ScalarScope-Desktop/readme.png" alt="ScalarScope" width="400">
 </p>
 
-# ScalarScope-Desktop
+# ScalarScope
 
 > [MCP Tool Shop](https://mcptoolshop.com) का एक हिस्सा
 
 <p align="center">
-  <a href="https://github.com/mcp-tool-shop-org/ScalarScope-Desktop/actions/workflows/build.yml"><img src="https://github.com/mcp-tool-shop-org/ScalarScope-Desktop/actions/workflows/build.yml/badge.svg" alt="CI"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square" alt="License: MIT"></a>
-  <a href="https://mcp-tool-shop-org.github.io/ScalarScope-Desktop/"><img src="https://img.shields.io/badge/Landing_Page-live-blue?style=flat-square" alt="Landing Page"></a>
   <a href="https://apps.microsoft.com/detail/9P3HT1PHBKQK"><img src="https://img.shields.io/badge/Microsoft%20Store-9P3HT1PHBKQK-0078D4?style=flat-square&logo=microsoft" alt="Microsoft Store"></a>
-  <a href="https://www.nuget.org/packages/VortexKit"><img src="https://img.shields.io/nuget/v/VortexKit?label=VortexKit&logo=nuget&style=flat-square" alt="NuGet: VortexKit"></a>
 </p>
 
 **ASPIRE Scalar Vortex Visualizer — एक .NET MAUI डेस्कटॉप एप्लिकेशन, जो वैज्ञानिक सटीकता के साथ मशीन लर्निंग (एमएल) के निष्पादन परिणामों की तुलना करने के लिए बनाया गया है।**
@@ -35,15 +32,9 @@
 
 ---
 
-## NuGet पैकेज
+## VortexKit
 
-| पैकेज | संस्करण | विवरण |
-| --------- | --------- | ------------- |
-| [VortexKit](https://www.nuget.org/packages/VortexKit) | [![NuGet](https://img.shields.io/nuget/v/VortexKit)](https://www.nuget.org/packages/VortexKit) | प्रशिक्षण गतिशीलता के लिए पुन: प्रयोज्य विज़ुअलाइज़ेशन ढांचा - समय-सिंक्रनाइज़ प्लेबैक, एनिमेटेड SkiaSharp कैनवस, तुलना दृश्य, एनोटेशन ओवरले, SVG/PNG निर्यात और एक सिमेंटिक रंग प्रणाली। SkiaSharp + MAUI पर आधारित। |
-
-```bash
-dotnet add package VortexKit
-```
+VortexKit इस रिपॉजिटरी में `src/VortexKit` पर है। यह NuGet पर प्रकाशित नहीं है।
 
 ---
 
@@ -143,7 +134,7 @@ await svgExporter.ExportSvgAsync(svgData, "trajectory.svg",
 
 ### वॉर्टेक्सकिट विज़ुअलाइज़ेशन फ्रेमवर्क
 
-वॉर्टेक्सकिट एक निकाला गया विज़ुअलाइज़ेशन इंजन है, जिसे एक स्टैंडअलोन NuGet पैकेज के रूप में प्रकाशित किया गया है:
+VortexKit इस रिपॉजिटरी में `src/VortexKit` पर है। यह NuGet पर प्रकाशित नहीं है।
 
 | घटक | यह क्या करता है |
 | ----------- | ------------- |
@@ -175,8 +166,8 @@ await svgExporter.ExportSvgAsync(svgData, "trajectory.svg",
 #   Visual Studio 2022 with MAUI workload, or:
 #     dotnet workload install maui-windows
 
-git clone https://github.com/mcp-tool-shop-org/ScalarScope-Desktop.git
-cd ScalarScope-Desktop
+git clone https://github.com/mcp-tool-shop-org/scalarscope.git
+cd scalarscope
 dotnet restore
 dotnet build
 
@@ -184,18 +175,12 @@ dotnet build
 dotnet run --project src/ScalarScope
 ```
 
-### NuGet (केवल लाइब्रेरी)
-
-```bash
-dotnet add package VortexKit
-```
-
 ---
 
 ## परियोजना संरचना
 
 ```
-ScalarScope-Desktop/
+scalarscope/
 ├── src/
 │   ├── ScalarScope/                    # .NET MAUI desktop app
 │   │   ├── Models/                     # GeometryRun, InsightEvent
@@ -220,7 +205,7 @@ ScalarScope-Desktop/
 │   │       ├── Styles/DesignSystem.xaml # Unified visual grammar
 │   │       └── Raw/Samples/            # Built-in example traces
 │   │
-│   └── VortexKit/                      # Standalone NuGet library
+│   └── VortexKit/                      # Visualization library in this repo; not a NuGet package
 │       ├── Core/
 │       │   ├── AnimatedCanvas.cs       # Time-synced SkiaSharp canvas base
 │       │   ├── PlaybackController.cs   # Shared playback timeline

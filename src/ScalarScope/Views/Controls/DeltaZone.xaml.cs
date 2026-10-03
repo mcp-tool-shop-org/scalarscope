@@ -47,6 +47,11 @@ public partial class DeltaZone : ContentView
             defaultBindingMode: BindingMode.TwoWay,
             propertyChanged: OnIsWhyPanelExpandedChanged);
 
+    public static readonly BindableProperty CanExportProperty =
+        BindableProperty.Create(nameof(CanExport), typeof(bool), typeof(DeltaZone),
+            defaultValue: false,
+            propertyChanged: OnCanExportChanged);
+
     public IReadOnlyList<CanonicalDelta> Deltas
     {
         get => (IReadOnlyList<CanonicalDelta>)GetValue(DeltasProperty);
@@ -81,6 +86,15 @@ public partial class DeltaZone : ContentView
     {
         get => (bool)GetValue(IsWhyPanelExpandedProperty);
         set => SetValue(IsWhyPanelExpandedProperty, value);
+    }
+
+    /// <summary>
+    /// The page sets this when a bundle can actually be built. Otherwise the button stays hidden.
+    /// </summary>
+    public bool CanExport
+    {
+        get => (bool)GetValue(CanExportProperty);
+        set => SetValue(CanExportProperty, value);
     }
 
     // Computed properties for binding
@@ -147,8 +161,32 @@ public partial class DeltaZone : ContentView
 
     private void OnExportBundleClicked(object? sender, EventArgs e)
     {
-        // Raise event to parent to show export panel
-        ExportBundleRequested?.Invoke();
+        if (ExportBundleRequested == null)
+        {
+            exportButton.IsVisible = false;
+            return;
+        }
+
+        ExportBundleRequested.Invoke();
+    }
+
+    private static void OnCanExportChanged(BindableObject bindable, object oldValue, object newValue)
+    {
+        if (bindable is DeltaZone zone)
+            zone.UpdateExportButton();
+    }
+
+    /// <summary>
+    /// Call after a page subscribes so the button can appear.
+    /// </summary>
+    public void NotifyExportHandler() => UpdateExportButton();
+
+    private void UpdateExportButton()
+    {
+        if (exportButton is null)
+            return;
+
+        exportButton.IsVisible = HasDeltas && CanExport && ExportBundleRequested != null;
     }
 
     /// <summary>
@@ -278,6 +316,7 @@ public partial class DeltaZone : ContentView
             zone.OnPropertyChanged(nameof(DeltaCount));
             zone.OnPropertyChanged(nameof(HasNoDeltas));
             zone.OnPropertyChanged(nameof(HasDeltas));
+            zone.UpdateExportButton();
             
             // Reset selection when deltas change
             zone.SelectedDelta = null;

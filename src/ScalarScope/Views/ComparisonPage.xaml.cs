@@ -258,6 +258,34 @@ public partial class ComparisonPage : ContentPage, IQueryAttributable
         
         // Wire up review mode banner exit
         reviewModeBanner.ExitRequested += OnExitReviewModeRequested;
+
+        deltaZone.ExportBundleRequested += OnExportBundleRequested;
+        deltaZone.NotifyExportHandler();
+    }
+
+    private async void OnExportBundleRequested()
+    {
+        if (ViewModel.LeftRun == null || ViewModel.RightRun == null || !ViewModel.CanExportBundle)
+            return;
+
+        try
+        {
+            var result = CanonicalDeltaService.ComputeDeltasWithAlignment(
+                ViewModel.LeftRun,
+                ViewModel.RightRun,
+                ViewModel.SelectedAlignment,
+                currentTime: 1.0);
+            bundleExportPanel.Initialize(
+                result,
+                ViewModel.LeftSourcePath,
+                ViewModel.RightSourcePath,
+                insights: insightsTray.CopyInsights());
+            bundleExportPanel.Show();
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Export unavailable", ex.Message, "OK");
+        }
     }
 
     /// <summary>
@@ -323,57 +351,104 @@ public partial class ComparisonPage : ContentPage, IQueryAttributable
 
     private async void OnShowMeRequested(CanonicalDelta delta)
     {
-        // Phase 5.5: Wrap navigation in error boundary
-        await ErrorBoundary.TrySafeAsync(async () =>
+        try
         {
-            // Phase 5.2: Use choreographed navigation with smooth seek and highlight pulse
             var startTime = ViewModel.Player.Time;
-            var targetTime = delta.VisualAnchorTime > 0 ? delta.VisualAnchorTime : startTime;
-            
+            var targetTime = double.IsFinite(delta.VisualAnchorTime)
+                ? Math.Clamp(delta.VisualAnchorTime, 0, 1)
+                : startTime;
+
             await TransitionService.NavigateToAnchor(
                 targetTime: targetTime,
                 highlightElementId: delta.Id,
-                onSeek: t =>
-                {
-                    // Lerp from current position to target
-                    var interpolated = startTime + (targetTime - startTime) * (t / targetTime);
-                    ViewModel.Player.Time = Math.Min(interpolated, targetTime);
-                },
+                onSeek: t => SeekToward(startTime, targetTime, t),
                 onHighlight: id => ViewModel.HighlightedDeltaId = id
             );
-        }, "ShowMe navigation");
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Could not show that moment", ex.Message, "OK");
+        }
     }
 
     private async void OnInsightShowMeRequested(Models.InsightEvent insight)
     {
-        // Phase 5.5: Wrap navigation in error boundary
-        await ErrorBoundary.TrySafeAsync(async () =>
+        try
         {
-            // Navigate to target view if needed
-            if (insight.TargetView != null && insight.TargetView != "compare")
+            var target = ShellDestinations.Name(insight.TargetView);
+            if (!string.IsNullOrEmpty(target) && target != "compare")
             {
-                await Shell.Current.GoToAsync($"//{insight.TargetView}");
-                return;
+                if (!ShellDestinations.IsTab(target))
+                {
+                    await DisplayAlert(
+                        "That view is not open",
+                        $"Compare does not have a {insight.TargetView} page. Showing the moment here.",
+                        "OK");
+                }
+                else
+                {
+                    try
+                    {
+                        await Shell.Current.GoToAsync($"//{target}");
+                        return;
+                    }
+                    catch (Exception ex)
+                    {
+                        await DisplayAlert("Could not open that page", ex.Message, "OK");
+                        return;
+                    }
+                }
             }
 
-            // Phase 5.2: Use choreographed navigation
             var startTime = ViewModel.Player.Time;
-            var targetTime = insight.AnchorTime ?? startTime;
-            
+            var anchor = insight.AnchorTime ?? startTime;
+            var targetTime = double.IsFinite(anchor) ? Math.Clamp(anchor, 0, 1) : startTime;
             await TransitionService.NavigateToAnchor(
                 targetTime: targetTime,
                 highlightElementId: insight.DeltaId,
-                onSeek: t =>
-                {
-                    var interpolated = startTime + (targetTime - startTime) * (t / targetTime);
-                    ViewModel.Player.Time = Math.Min(interpolated, targetTime);
-                },
+                onSeek: t => SeekToward(startTime, targetTime, t),
                 onHighlight: id =>
                 {
                     if (id != null) ViewModel.HighlightedDeltaId = id;
                 }
             );
-        }, "Insight navigation");
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Could not show that moment", ex.Message, "OK");
+        }
+    }
+
+    /// <summary>
+    /// NavigateToAnchor reports easedProgress * targetTime. Recover the ease and lerp, including backward.
+    /// An anchor at 0 is valid. The reported value is 0 for that anchor, so land on it instead of dividing.
+    /// </summary>
+    private void SeekToward(double startTime, double targetTime, double reported)
+    {
+        if (!double.IsFinite(targetTime))
+            targetTime = 0;
+        targetTime = Math.Clamp(targetTime, 0, 1);
+        if (!double.IsFinite(startTime))
+            startTime = 0;
+        startTime = Math.Clamp(startTime, 0, 1);
+
+        double eased;
+        if (targetTime <= double.Epsilon)
+        {
+            eased = 1;
+        }
+        else
+        {
+            eased = reported / targetTime;
+            if (!double.IsFinite(eased))
+                eased = 1;
+            eased = Math.Clamp(eased, 0, 1);
+        }
+
+        var next = startTime + ((targetTime - startTime) * eased);
+        if (!double.IsFinite(next))
+            next = targetTime;
+        ViewModel.Player.Time = Math.Clamp(next, 0, 1);
     }
 
     private void PublishDeltaInsights()

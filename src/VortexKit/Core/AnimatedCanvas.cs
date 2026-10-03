@@ -70,6 +70,12 @@ public abstract class AnimatedCanvas : SKCanvasView
     /// </summary>
     public event Action<SKPoint, SKPoint>? Dragged;
 
+    private const float TapSlop = 10f;
+
+    private SKPoint? _pressPoint;
+    private bool _dragged;
+    private long? _activePointerId;
+
     protected SKPoint? LastTouchPoint { get; private set; }
 
     protected AnimatedCanvas()
@@ -174,33 +180,65 @@ public abstract class AnimatedCanvas : SKCanvasView
         switch (e.ActionType)
         {
             case SKTouchAction.Pressed:
+                if (_activePointerId.HasValue && e.Id != _activePointerId.Value)
+                    break;
+
+                _activePointerId = e.Id;
+                _pressPoint = e.Location;
                 LastTouchPoint = e.Location;
+                _dragged = false;
                 e.Handled = true;
                 break;
 
             case SKTouchAction.Moved:
-                if (LastTouchPoint.HasValue)
-                {
+                if (!IsActivePointer(e) || !_pressPoint.HasValue)
+                    break;
+
+                if (!_dragged && SKPoint.Distance(_pressPoint.Value, e.Location) >= TapSlop)
+                    _dragged = true;
+
+                if (_dragged && LastTouchPoint.HasValue)
                     Dragged?.Invoke(LastTouchPoint.Value, e.Location);
-                    LastTouchPoint = e.Location;
-                }
+
+                LastTouchPoint = e.Location;
                 e.Handled = true;
                 break;
 
             case SKTouchAction.Released:
-                if (LastTouchPoint.HasValue)
+                if (!IsActivePointer(e))
+                    break;
+
+                if (_pressPoint.HasValue && !_dragged &&
+                    SKPoint.Distance(_pressPoint.Value, e.Location) < TapSlop)
                 {
-                    var distance = SKPoint.Distance(LastTouchPoint.Value, e.Location);
-                    if (distance < 10) // Tap threshold
-                    {
-                        Tapped?.Invoke(e.Location);
-                        OnTapped(e.Location);
-                    }
+                    Tapped?.Invoke(e.Location);
+                    OnTapped(e.Location);
                 }
-                LastTouchPoint = null;
+
+                ClearGesture();
+                e.Handled = true;
+                break;
+
+            case SKTouchAction.Cancelled:
+            case SKTouchAction.Exited:
+                if (_activePointerId.HasValue && e.Id != _activePointerId.Value)
+                    break;
+
+                ClearGesture();
                 e.Handled = true;
                 break;
         }
+    }
+
+    private bool IsActivePointer(SKTouchEventArgs e) =>
+        _activePointerId.HasValue && e.Id == _activePointerId.Value;
+
+    private void ClearGesture()
+    {
+        _pressPoint = null;
+        LastTouchPoint = null;
+        _dragged = false;
+        _activePointerId = null;
     }
 
     /// <summary>

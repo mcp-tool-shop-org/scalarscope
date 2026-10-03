@@ -238,6 +238,34 @@ public partial class ComparisonViewModel : ObservableObject
     // Collection of runs for overlay view
     public List<GeometryRun> OverlayRuns => [.. (new[] { LeftRun, RightRun }).OfType<GeometryRun>()];
 
+    public string? LeftSourcePath => _leftSourcePath;
+
+    public string? RightSourcePath => _rightSourcePath;
+
+    /// <summary>
+    /// Geometry export needs both runs and is not a frozen trace or bundle review.
+    /// </summary>
+    public bool CanExportBundle => LeftRun != null && RightRun != null && !ShowTraceReview && !IsReviewMode;
+
+    /// <summary>
+    /// Demo drawings are only for an empty Compare. A loaded run, trace, or bundle turns them off.
+    /// </summary>
+    public bool UseDemoFallback =>
+        LeftRun == null
+        && RightRun == null
+        && _leftTrace == null
+        && _rightTrace == null
+        && !ShowTraceReview
+        && !IsReviewMode;
+
+    partial void OnLeftRunChanged(GeometryRun? value) => RaiseRunDerivedProperties();
+
+    partial void OnRightRunChanged(GeometryRun? value) => RaiseRunDerivedProperties();
+
+    partial void OnShowTraceReviewChanged(bool value) => RaiseRunDerivedProperties();
+
+    partial void OnIsReviewModeChanged(bool value) => RaiseRunDerivedProperties();
+
     // Shared playback controller
     public TrajectoryPlayerViewModel Player { get; } = new();
 
@@ -403,7 +431,14 @@ public partial class ComparisonViewModel : ObservableObject
         OnPropertyChanged(nameof(RightCurrentTrajectory));
         OnPropertyChanged(nameof(RightCurrentScalars));
         OnPropertyChanged(nameof(RightCurrentEigenvalues));
+        RaiseRunDerivedProperties();
+    }
+
+    private void RaiseRunDerivedProperties()
+    {
         OnPropertyChanged(nameof(OverlayRuns));
+        OnPropertyChanged(nameof(CanExportBundle));
+        OnPropertyChanged(nameof(UseDemoFallback));
     }
 
     /// <summary>
@@ -754,18 +789,21 @@ public partial class ComparisonViewModel : ObservableObject
             TraceNote = "One side is a geometry run and the other is an inference trace. Load two of the same kind.";
             HasTraceNote = true;
             SyncChrome();
+            RaiseRunDerivedProperties();
             return;
         }
 
         if (_leftTrace != null && _rightTrace != null)
         {
             PublishTraceReview();
+            RaiseRunDerivedProperties();
             return;
         }
 
         ShowTraceReview = false;
         TraceReview = null;
         UpdateComparisonState();
+        RaiseRunDerivedProperties();
     }
 
     private void PublishTraceReview()
@@ -925,6 +963,7 @@ public partial class ComparisonViewModel : ObservableObject
         }
 
         SyncChrome();
+        RaiseRunDerivedProperties();
     }
 
     private void GenerateComparisonSummary()

@@ -101,7 +101,9 @@ public static class TemporalAlignmentService
         var sourceConvergence = FindConvergenceTime(source);
         var targetConvergence = FindConvergenceTime(target);
 
-        // If neither converges, fall back to step alignment
+        // Fall back only when both anchors are missing. One missing side is not aligned.
+        if (sourceConvergence < 0 && targetConvergence < 0)
+            return time;
         if (sourceConvergence < 0 || targetConvergence < 0)
             return time;
 
@@ -121,7 +123,9 @@ public static class TemporalAlignmentService
         var sourceInstability = FindFirstInstabilityTime(source);
         var targetInstability = FindFirstInstabilityTime(target);
 
-        // If neither has instability, fall back to step alignment
+        // Fall back only when both anchors are missing. One missing side is not aligned.
+        if (sourceInstability < 0 && targetInstability < 0)
+            return time;
         if (sourceInstability < 0 || targetInstability < 0)
             return time;
 
@@ -147,23 +151,14 @@ public static class TemporalAlignmentService
             };
         }
 
-        if (leftConvergence < 0)
+        if (leftConvergence < 0 || rightConvergence < 0)
         {
+            var missing = leftConvergence < 0 ? "Path A did not converge" : "Path B did not converge";
             return new AlignmentAnchors
             {
-                LeftAnchor = rightConvergence,
-                RightAnchor = rightConvergence,
-                AnchorDescription = $"Path B converges at {rightConvergence:P0}; Path A did not converge"
-            };
-        }
-
-        if (rightConvergence < 0)
-        {
-            return new AlignmentAnchors
-            {
-                LeftAnchor = leftConvergence,
-                RightAnchor = leftConvergence,
-                AnchorDescription = $"Path A converges at {leftConvergence:P0}; Path B did not converge"
+                LeftAnchor = leftConvergence < 0 ? 0 : leftConvergence,
+                RightAnchor = rightConvergence < 0 ? 0 : rightConvergence,
+                AnchorDescription = $"{missing}; times are not aligned"
             };
         }
 
@@ -190,23 +185,14 @@ public static class TemporalAlignmentService
             };
         }
 
-        if (leftInstability < 0)
+        if (leftInstability < 0 || rightInstability < 0)
         {
+            var missing = leftInstability < 0 ? "Path A remained stable" : "Path B remained stable";
             return new AlignmentAnchors
             {
-                LeftAnchor = rightInstability,
-                RightAnchor = rightInstability,
-                AnchorDescription = $"Path B shifts at {rightInstability:P0}; Path A remained stable"
-            };
-        }
-
-        if (rightInstability < 0)
-        {
-            return new AlignmentAnchors
-            {
-                LeftAnchor = leftInstability,
-                RightAnchor = leftInstability,
-                AnchorDescription = $"Path A shifts at {leftInstability:P0}; Path B remained stable"
+                LeftAnchor = leftInstability < 0 ? 0 : leftInstability,
+                RightAnchor = rightInstability < 0 ? 0 : rightInstability,
+                AnchorDescription = $"{missing}; times are not aligned"
             };
         }
 
@@ -223,32 +209,8 @@ public static class TemporalAlignmentService
     /// </summary>
     private static double FindConvergenceTime(GeometryRun run)
     {
-        var steps = run.Trajectory?.Timesteps;
-        if (steps == null || steps.Count < 10)
-            return -1;
-
-        const double velocityThreshold = 0.05;
-        const int stableWindowSize = 5;
-        int stableCount = 0;
-
-        for (int i = 0; i < steps.Count; i++)
-        {
-            // Use velocity magnitude, not the vector
-            if (steps[i].VelocityMagnitude < velocityThreshold)
-            {
-                stableCount++;
-                if (stableCount >= stableWindowSize)
-                {
-                    return (i - stableWindowSize + 1) / (double)(steps.Count - 1);
-                }
-            }
-            else
-            {
-                stableCount = 0;
-            }
-        }
-
-        return -1;
+        // Same detector that produces ΔTc. A fixed 0.05 band is a different event.
+        return CanonicalDeltaService.DetectConvergenceAnchor(run).Time;
     }
 
     /// <summary>

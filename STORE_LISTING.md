@@ -6,7 +6,9 @@
 **Publisher display name:** mcp-tool-shop  
 **Package Family Name:** mcp-tool-shop.ScalarScope_yn6b8xqrexa5j  
 **Package SID:** S-1-15-2-850189134-3642041993-2632034504-2327210781-2703906947-3194312410-3859322172  
-**Version:** 3.0.0.0
+**Display version:** 3.0.0 (`ApplicationDisplayVersion`. Settings > About shows 3.0.0.)
+**ApplicationVersion:** 30 (package integer, not the About string)
+**Package identity version:** 3.0.0.0 (`Package.appxmanifest` Identity Version and csproj `Version`)
 
 Packages already in the Partner Center submission:
 
@@ -35,7 +37,7 @@ ScalarScope is a precision instrument for comparing machine learning inference r
 
 - **Runtime Presets**: TFRT Runtime Preset automatically suppresses metrics that don't apply to inference workloads, so you only see what matters.
 
-- **Reproducible Bundles**: Export your comparison as a cryptographic bundle (SHA-256 hash). Anyone can verify the results haven't been tampered with. Perfect for audits and peer review.
+- **Reproducible Bundles**: Export your comparison as an `.scbundle`. A matching SHA-256 checks the file bytes. It is a content check, not a signature.
 
 - **Review Mode**: Open bundles from colleagues without recomputing. The entire analysis is frozen and verified against the original hash.
 
@@ -49,7 +51,7 @@ ScalarScope collects no telemetry, sends no analytics, and stores all data local
 1. Compare inference runs with scientific rigor and confidence intervals
 2. Canonical delta analysis (ΔTc convergence, ΔO variability, ΔF failures)
 3. TFRT Runtime Preset for TensorFlow-RT optimization workflows
-4. Reproducible bundles with cryptographic integrity verification
+4. Reproducible bundles with a SHA-256 content check
 5. 100% offline—no telemetry, no cloud, no sign-in required
 
 ---
@@ -96,7 +98,7 @@ ScalarScope collects no telemetry, sends no analytics, and stores all data local
 1. [ ] Download from Microsoft Store (9P3HT1PHBKQK)
 2. [ ] Launch ScalarScope
 3. [ ] Verify Welcome page appears with CTAs
-4. [ ] Check Settings > About shows 3.0.0. The package identity version is 3.0.0.0.
+4. [ ] Check Settings > About shows 3.0.0. The package identity version is 3.0.0.0. ApplicationVersion is 30.
 
 ### Core Workflow
 5. [ ] Click "Compare Two Runs"
@@ -144,7 +146,7 @@ ScalarScope collects no telemetry, sends no analytics, and stores all data local
 
 ## System Requirements
 
-- **OS:** Windows 10 (19041) or later
+- **OS:** Windows 10 version 1809 (build 17763) or later. That is the package `MinVersion` and `TargetPlatformMinVersion` (`10.0.17763.0`).
 - **Architecture:** x64
 - **RAM:** 4 GB minimum
 - **Disk:** 100 MB

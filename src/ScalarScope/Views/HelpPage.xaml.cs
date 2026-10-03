@@ -1,4 +1,5 @@
 using ScalarScope.Services;
+using ScalarScope.ViewModels;
 
 namespace ScalarScope.Views;
 
@@ -163,7 +164,7 @@ public partial class HelpPage : ContentPage
         var info = $"""
             ScalarScope System Information
             ==================================
-            Version: 1.0.3.0
+            Version: {VersionInfo.Version}
             OS: {Environment.OSVersion}
             .NET: {Environment.Version}
             64-bit: {Environment.Is64BitProcess}
@@ -181,19 +182,11 @@ public partial class HelpPage : ContentPage
 
     private async void OnGitHubClicked(object sender, EventArgs e)
     {
-        try
-        {
-            await Launcher.OpenAsync("https://github.com/mcp-tool-shop-org/scalarscope-desktop");
-        }
-        catch { }
+        await ProductLinks.OpenRepository();
     }
 
     private async void OnReportIssueClicked(object sender, EventArgs e)
     {
-        try
-        {
-            await Launcher.OpenAsync("https://github.com/mcp-tool-shop-org/scalarscope-desktop/issues/new/choose");
-        }
-        catch { }
+        await ProductLinks.OpenNewIssue();
     }
 }

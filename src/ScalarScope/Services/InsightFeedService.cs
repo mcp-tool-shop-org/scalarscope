@@ -176,13 +176,13 @@ public class InsightFeedService
 
     private static InsightEvent CreateInsightFromDelta(CanonicalDelta delta, string? triggerType)
     {
-        var category = delta.Id switch
+        var category = DeltaIds.Canonical(delta.Id) switch
         {
-            "delta_f" => InsightCategory.DeltaFailure,
-            "delta_tc" => InsightCategory.DeltaConvergence,
-            "delta_td" => InsightCategory.DeltaEmergence,
-            "delta_a" => InsightCategory.DeltaAlignment,
-            "delta_o" => InsightCategory.DeltaStability,
+            DeltaIds.FailurePresence => InsightCategory.DeltaFailure,
+            DeltaIds.ConvergenceTiming => InsightCategory.DeltaConvergence,
+            DeltaIds.StructuralEmergence => InsightCategory.DeltaEmergence,
+            DeltaIds.EvaluatorAlignment => InsightCategory.DeltaAlignment,
+            DeltaIds.StabilityOscillation => InsightCategory.DeltaStability,
             _ => InsightCategory.TrainingEvent
         };
 
@@ -210,13 +210,13 @@ public class InsightFeedService
 
     private static string BuildWhyFired(CanonicalDelta delta, string? triggerType, Dictionary<string, string> parameters)
     {
-        return delta.Id switch
+        return DeltaIds.Canonical(delta.Id) switch
         {
-            "delta_f" => BuildFailureWhy(delta, triggerType, parameters),
-            "delta_tc" => BuildConvergenceWhy(delta, triggerType, parameters),
-            "delta_td" => BuildEmergenceWhy(delta, triggerType, parameters),
-            "delta_a" => BuildAlignmentWhy(delta, triggerType, parameters),
-            "delta_o" => BuildStabilityWhy(delta, triggerType, parameters),
+            DeltaIds.FailurePresence => BuildFailureWhy(delta, triggerType, parameters),
+            DeltaIds.ConvergenceTiming => BuildConvergenceWhy(delta, triggerType, parameters),
+            DeltaIds.StructuralEmergence => BuildEmergenceWhy(delta, triggerType, parameters),
+            DeltaIds.EvaluatorAlignment => BuildAlignmentWhy(delta, triggerType, parameters),
+            DeltaIds.StabilityOscillation => BuildStabilityWhy(delta, triggerType, parameters),
             _ => delta.Explanation
         };
     }
@@ -378,24 +378,24 @@ public class InsightFeedService
 
     private static string GetVisualHint(CanonicalDelta delta)
     {
-        return delta.Id switch
+        return DeltaIds.Canonical(delta.Id) switch
         {
-            "delta_f" => "Look for the failure marker (⚠) on the trajectory",
-            "delta_tc" => "Compare convergence markers (◆) on both paths",
-            "delta_td" => "Watch for dominance bands in the Geometry view",
-            "delta_a" => "Check the alignment drift segments on the overlay",
-            "delta_o" => "Notice oscillation episodes highlighted on the path",
+            DeltaIds.FailurePresence => "Look for the failure marker (⚠) on the trajectory",
+            DeltaIds.ConvergenceTiming => "Compare convergence markers (◆) on both paths",
+            DeltaIds.StructuralEmergence => "Watch for dominance bands in the Geometry view",
+            DeltaIds.EvaluatorAlignment => "Check the alignment drift segments on the overlay",
+            DeltaIds.StabilityOscillation => "Notice oscillation episodes highlighted on the path",
             _ => "Hover over highlighted regions for details"
         };
     }
 
     private static string? GetGuardrail(string deltaId)
     {
-        return deltaId switch
+        return DeltaIds.Canonical(deltaId) switch
         {
-            "delta_a" => "Agreement ≠ correctness.",
-            "delta_td" => "Dominance ≠ collapse.",
-            "delta_o" => "Instability ≠ failure.",
+            DeltaIds.EvaluatorAlignment => "Agreement ≠ correctness.",
+            DeltaIds.StructuralEmergence => "Dominance ≠ collapse.",
+            DeltaIds.StabilityOscillation => "Instability ≠ failure.",
             _ => null
         };
     }

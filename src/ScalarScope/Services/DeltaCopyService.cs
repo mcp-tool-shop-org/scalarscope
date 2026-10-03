@@ -150,25 +150,25 @@ public static class DeltaCopyService
         var winner = delta.Delta > 0 ? pathB : pathA;
         var loser = delta.Delta > 0 ? pathA : pathB;
         
-        return delta.Id switch
+        return DeltaIds.Canonical(delta.Id) switch
         {
-            "delta_tc" => delta.Delta > 0
+            DeltaIds.ConvergenceTiming => delta.Delta > 0
                 ? $"{loser} converged {Math.Abs((int)(delta.Delta * 100))} steps faster than {winner}"
                 : $"{winner} converged {Math.Abs((int)(delta.Delta * 100))} steps faster than {loser}",
                 
-            "delta_td" => delta.Delta > 0
+            DeltaIds.StructuralEmergence => delta.Delta > 0
                 ? $"{winner} showed stronger emergence of shared structure"
                 : $"{loser} showed stronger emergence of shared structure",
                 
-            "delta_a" => delta.Delta > 0
+            DeltaIds.EvaluatorAlignment => delta.Delta > 0
                 ? $"{winner} had better final alignment (professors agreed more)"
                 : $"{loser} had better final alignment (professors agreed more)",
                 
-            "delta_o" => delta.Delta > 0
+            DeltaIds.StabilityOscillation => delta.Delta > 0
                 ? $"{winner} was less stable during training (more oscillation)"
                 : $"{loser} was less stable during training (more oscillation)",
                 
-            "delta_f" => $"Only {winner} completed without failure",
+            DeltaIds.FailurePresence => $"Only {winner} completed without failure",
                 
             _ => delta.Explanation
         };
@@ -177,7 +177,7 @@ public static class DeltaCopyService
     private static string GenerateBottomLine(List<CanonicalDelta> deltas, string pathA, string pathB)
     {
         // Check for failure delta
-        var failure = deltas.FirstOrDefault(d => d.Id == "delta_f");
+        var failure = deltas.FirstOrDefault(d => DeltaIds.Canonical(d.Id) == DeltaIds.FailurePresence);
         if (failure != null)
         {
             var failedPath = failure.FailedA == true ? pathA : pathB;
@@ -187,8 +187,8 @@ public static class DeltaCopyService
         }
         
         // Check dominance (emergence) delta
-        var dominance = deltas.FirstOrDefault(d => d.Id == "delta_td");
-        var convergence = deltas.FirstOrDefault(d => d.Id == "delta_tc");
+        var dominance = deltas.FirstOrDefault(d => DeltaIds.Canonical(d.Id) == DeltaIds.StructuralEmergence);
+        var convergence = deltas.FirstOrDefault(d => DeltaIds.Canonical(d.Id) == DeltaIds.ConvergenceTiming);
         
         if (dominance != null && dominance.Confidence >= 0.95)
         {

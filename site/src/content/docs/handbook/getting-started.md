@@ -37,7 +37,7 @@ ScalarScope uses four tabs:
 | **Guide** | Interpretation help and onboarding |
 | **Settings** | Theme, playback, export, and accessibility preferences |
 
-Switch tabs by clicking the tab bar or pressing `1`–`4` on your keyboard.
+Switch tabs by clicking the tab bar. Number keys `1`–`6` request the routes overview, trajectory, scalars, geometry, compare, and failures. They do not open Home, Compare, Guide, or Settings. Pressing 1 does not open Home.
 
 ## Build from source
 

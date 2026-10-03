@@ -32,11 +32,12 @@ public static class CanonicalDeltaService
         var deltas = ComputeDeltas(leftRun, rightRun, alignment, currentTime, config, alignmentMap);
         var summary = GenerateAutoSummary(deltas);
 
-        // Phase 6.1: Compute delta hash for reproducibility verification
-        var deltaHash = DeterminismService.ComputeDeltaHash(
-            deltas.Select(d => new { d.Id, d.Status, d.Confidence, d.Explanation }));
-        var inputFingerprint = DeterminismService.LastFingerprint;
-        var reproducibility = DeterminismService.GetReproducibilityMetadata();
+        // Fingerprints live on this result. A null run must not reuse the previous call.
+        var leftFingerprint = DeterminismService.HashRun(leftRun);
+        var rightFingerprint = DeterminismService.HashRun(rightRun);
+        var inputFingerprint = DeterminismService.CombineRunFingerprints(leftFingerprint, rightFingerprint);
+        var deltaHash = DeterminismService.ComputeDeltaHash(deltas);
+        var reproducibility = DeterminismService.GetReproducibilityMetadata(inputFingerprint);
 
         return new DeltaComputationResult
         {
@@ -45,6 +46,8 @@ public static class CanonicalDeltaService
             ComparativeSummary = summary,
             DeltaHash = deltaHash,
             InputFingerprint = inputFingerprint,
+            LeftRunFingerprint = leftFingerprint,
+            RightRunFingerprint = rightFingerprint,
             Reproducibility = reproducibility
         };
     }
@@ -74,14 +77,6 @@ public static class CanonicalDeltaService
         var leftSteps = leftRun.Trajectory?.Timesteps?.Count ?? 100;
         var rightSteps = rightRun.Trajectory?.Timesteps?.Count ?? 100;
 
-        // Phase 6.1: Compute input fingerprint for determinism verification
-        DeterminismService.ComputeInputFingerprint(
-            leftRun.Metadata?.RunId,
-            rightRun.Metadata?.RunId,
-            (int)alignment,
-            leftSteps,
-            rightSteps);
-
         // Order by causal salience (most impactful first)
         
         // Δ1. Failure / Collapse Presence (highest priority - did something break?)
@@ -100,12 +95,12 @@ public static class CanonicalDeltaService
             deltas.Add(emergenceDelta);
 
         // Δ4. Evaluator Alignment Divergence (did evaluators agree differently?)
-        var evalAlignmentDelta = DetectEvaluatorAlignment(leftRun, rightRun, config.Alignment, currentTime);
+        var evalAlignmentDelta = DetectEvaluatorAlignment(leftRun, rightRun, config.Alignment, currentTime, alignmentMap);
         if (evalAlignmentDelta.Status != DeltaStatus.Suppressed)
             deltas.Add(evalAlignmentDelta);
 
         // Δ5. Stability / Oscillation Difference (did one run wobble more?)
-        var stabilityDelta = DetectStabilityOscillation(leftRun, rightRun, config.Stability, currentTime);
+        var stabilityDelta = DetectStabilityOscillation(leftRun, rightRun, config.Stability, currentTime, alignmentMap);
         if (stabilityDelta.Status != DeltaStatus.Suppressed)
             deltas.Add(stabilityDelta);
 
@@ -137,7 +132,7 @@ public static class CanonicalDeltaService
         {
             return new CanonicalDelta
             {
-                Id = "FailurePresence",
+                Id = DeltaIds.FailurePresence,
                 Name = "Failure Events",
                 Explanation = "No failure detected",
                 Status = DeltaStatus.Suppressed,
@@ -152,8 +147,15 @@ public static class CanonicalDeltaService
 
         if (leftHasFailure && rightHasFailure)
         {
-            var earlier = leftFailureTime < rightFailureTime ? "Path A" : "Path B";
-            explanation = $"Both paths experienced instability; {earlier} first";
+            if (Math.Abs(leftFailureTime - rightFailureTime) <= 1e-12)
+            {
+                explanation = "Both paths experienced instability; the failures were simultaneous";
+            }
+            else
+            {
+                var earlier = leftFailureTime < rightFailureTime ? "Path A" : "Path B";
+                explanation = $"Both paths experienced instability; {earlier} first";
+            }
             visualAnchorTime = Math.Min(leftFailureTime, rightFailureTime);
         }
         else if (leftHasFailure)
@@ -180,7 +182,7 @@ public static class CanonicalDeltaService
 
         return new CanonicalDelta
         {
-            Id = "FailurePresence",
+            Id = DeltaIds.FailurePresence,
             Name = "Failure Events",
             Explanation = explanation,
             Status = DeltaStatus.Present,
@@ -221,7 +223,7 @@ public static class CanonicalDeltaService
         {
             return new CanonicalDelta
             {
-                Id = "ConvergenceTiming",
+                Id = DeltaIds.ConvergenceTiming,
                 Name = "Convergence",
                 Explanation = "No convergence detected",
                 Status = DeltaStatus.Suppressed,
@@ -262,7 +264,7 @@ public static class CanonicalDeltaService
             
             return new CanonicalDelta
             {
-                Id = "ConvergenceTiming",
+                Id = DeltaIds.ConvergenceTiming,
                 Name = "Convergence",
                 Explanation = $"{converged} stabilized; {notConverged} did not within observed steps",
                 Status = DeltaStatus.Present,
@@ -298,7 +300,7 @@ public static class CanonicalDeltaService
         {
             return new CanonicalDelta
             {
-                Id = "ConvergenceTiming",
+                Id = DeltaIds.ConvergenceTiming,
                 Name = "Convergence",
                 Explanation = "Similar convergence timing",
                 Status = DeltaStatus.Suppressed,
@@ -325,7 +327,7 @@ public static class CanonicalDeltaService
 
         return new CanonicalDelta
         {
-            Id = "ConvergenceTiming",
+            Id = DeltaIds.ConvergenceTiming,
             Name = "Convergence",
             Explanation = explanation,
             SummarySentence = $"{faster} settled {absStepDiff} steps before the other path",
@@ -370,7 +372,7 @@ public static class CanonicalDeltaService
         {
             return new CanonicalDelta
             {
-                Id = "StructuralEmergence",
+                Id = DeltaIds.StructuralEmergence,
                 Name = "Structure",
                 Explanation = "No structural dominance",
                 Status = DeltaStatus.Suppressed,
@@ -391,7 +393,7 @@ public static class CanonicalDeltaService
             var triggerNote = rightTrigger == "recurrence" ? " (detected via recurrence)" : "";
             return new CanonicalDelta
             {
-                Id = "StructuralEmergence",
+                Id = DeltaIds.StructuralEmergence,
                 Name = "Structure",
                 Explanation = $"Path B developed dominant direction; Path A remained distributed{triggerNote}",
                 Status = DeltaStatus.Present,
@@ -418,7 +420,7 @@ public static class CanonicalDeltaService
             var triggerNote = leftTrigger == "recurrence" ? " (detected via recurrence)" : "";
             return new CanonicalDelta
             {
-                Id = "StructuralEmergence",
+                Id = DeltaIds.StructuralEmergence,
                 Name = "Structure",
                 Explanation = $"Path A developed dominant direction; Path B remained distributed{triggerNote}",
                 Status = DeltaStatus.Present,
@@ -446,7 +448,7 @@ public static class CanonicalDeltaService
         {
             return new CanonicalDelta
             {
-                Id = "StructuralEmergence",
+                Id = DeltaIds.StructuralEmergence,
                 Name = "Structure",
                 Explanation = "Similar emergence timing",
                 Status = DeltaStatus.Suppressed,
@@ -471,7 +473,7 @@ public static class CanonicalDeltaService
 
         return new CanonicalDelta
         {
-            Id = "StructuralEmergence",
+            Id = DeltaIds.StructuralEmergence,
             Name = "Structure",
             Explanation = explanation,
             SummarySentence = $"{earlier} achieved structural dominance {stepDiff} steps before the other",
@@ -503,11 +505,23 @@ public static class CanonicalDeltaService
         GeometryRun leftRun,
         GeometryRun rightRun,
         AlignmentDetectionConfig config,
-        double currentTime)
+        double currentTime,
+        AlignmentMap alignment)
     {
-        // Phase 3.2: Compute persistence-weighted alignment delta
-        var (persistenceScore, sustainedSegment, leftMean, rightMean) = 
-            ComputePersistenceWeightedAlignmentDelta(leftRun, rightRun, currentTime, config);
+        // Phase 3.2: Compute persistence-weighted alignment delta on the alignment map.
+        var (persistenceScore, sustainedSegment, leftMean, rightMean, rangeA, rangeB, paired) = 
+            ComputePersistenceWeightedAlignmentDelta(leftRun, rightRun, currentTime, config, alignment);
+        if (paired == 0)
+        {
+            return new CanonicalDelta
+            {
+                Id = DeltaIds.EvaluatorAlignment,
+                Name = "Agreement",
+                Explanation = "No aligned samples",
+                Status = DeltaStatus.Suppressed,
+                Notes = ["Agreement was not compared where either side of a compare index is null"]
+            };
+        }
 
         var delta = rightMean - leftMean;
         var magnitude = persistenceScore; // Use persistence score as magnitude
@@ -518,7 +532,7 @@ public static class CanonicalDeltaService
         {
             return new CanonicalDelta
             {
-                Id = "EvaluatorAlignment",
+                Id = DeltaIds.EvaluatorAlignment,
                 Name = "Agreement",
                 Explanation = "Similar evaluator alignment",
                 Status = DeltaStatus.Suppressed,
@@ -538,7 +552,7 @@ public static class CanonicalDeltaService
         {
             return new CanonicalDelta
             {
-                Id = "EvaluatorAlignment",
+                Id = DeltaIds.EvaluatorAlignment,
                 Name = "Agreement",
                 Explanation = "Brief alignment difference",
                 Status = DeltaStatus.Suppressed,
@@ -557,7 +571,7 @@ public static class CanonicalDeltaService
 
         return new CanonicalDelta
         {
-            Id = "EvaluatorAlignment",
+            Id = DeltaIds.EvaluatorAlignment,
             Name = "Agreement",
             Explanation = explanation,
             SummarySentence = $"{higher} showed stronger internal alignment (sustained {sustainedSegment.Duration} steps)",
@@ -566,14 +580,14 @@ public static class CanonicalDeltaService
             RightValue = rightMean,
             Delta = delta,
             Magnitude = magnitude,
-            VisualAnchorTime = sustainedSegment.Start / (double)Math.Max(1, sustainedSegment.Start + sustainedSegment.Duration),
+            VisualAnchorTime = sustainedSegment.Start / (double)Math.Max(1, alignment.IdxToStepA.Length),
             DeltaType = DeltaType.Structure,
-            // Phase 3.2: Visual anchor highlights sustained segment, not max-diff peak
+            // Anchor time is a fraction of the aligned series, and each range is that run's steps.
             Anchors = [new VisualAnchor
             {
                 TargetView = "eigenvalues",
-                RangeA = (sustainedSegment.Start, sustainedSegment.Start + sustainedSegment.Duration),
-                RangeB = (sustainedSegment.Start, sustainedSegment.Start + sustainedSegment.Duration)
+                RangeA = rangeA,
+                RangeB = rangeB
             }],
             MeanAlignA = leftMean,
             MeanAlignB = rightMean
@@ -588,10 +602,29 @@ public static class CanonicalDeltaService
         GeometryRun leftRun,
         GeometryRun rightRun,
         StabilityConfig config,
-        double currentTime)
+        double currentTime,
+        AlignmentMap alignment)
     {
-        var (leftScore, leftEpisodes, leftTheta, leftPeakEpisode) = ComputeOscillationScoreWithArea(leftRun, currentTime, config);
-        var (rightScore, rightEpisodes, rightTheta, rightPeakEpisode) = ComputeOscillationScoreWithArea(rightRun, currentTime, config);
+        var leftLength = leftRun.Trajectory?.Timesteps?.Count ?? 0;
+        var rightLength = rightRun.Trajectory?.Timesteps?.Count ?? 0;
+        var pairedA = PairedSteps(alignment.IdxToStepA, alignment.IdxToStepB, leftLength, currentTime);
+        var pairedB = PairedSteps(alignment.IdxToStepB, alignment.IdxToStepA, rightLength, currentTime);
+        if (pairedA.Count == 0 || pairedB.Count == 0)
+        {
+            return new CanonicalDelta
+            {
+                Id = DeltaIds.StabilityOscillation,
+                Name = "Stability",
+                Explanation = "No aligned samples",
+                Status = DeltaStatus.Suppressed,
+                Notes = ["Oscillation was not compared where either side of a compare index is null"]
+            };
+        }
+
+        var leftSlice = SliceToSteps(leftRun, pairedA);
+        var rightSlice = SliceToSteps(rightRun, pairedB);
+        var (leftScore, leftEpisodes, leftTheta, leftPeakEpisode) = ComputeOscillationScoreWithArea(leftSlice, 1, config);
+        var (rightScore, rightEpisodes, rightTheta, rightPeakEpisode) = ComputeOscillationScoreWithArea(rightSlice, 1, config);
 
         var delta = rightScore - leftScore;
         var magnitude = Math.Abs(delta);
@@ -601,7 +634,7 @@ public static class CanonicalDeltaService
         {
             return new CanonicalDelta
             {
-                Id = "StabilityOscillation",
+                Id = DeltaIds.StabilityOscillation,
                 Name = "Stability",
                 Explanation = "Both runs stable",
                 Status = DeltaStatus.Suppressed,
@@ -622,7 +655,7 @@ public static class CanonicalDeltaService
         {
             return new CanonicalDelta
             {
-                Id = "StabilityOscillation",
+                Id = DeltaIds.StabilityOscillation,
                 Name = "Stability",
                 Explanation = "Similar oscillation levels",
                 Status = DeltaStatus.Suppressed,
@@ -658,12 +691,25 @@ public static class CanonicalDeltaService
             explanation += $" ({peakEpisode.Duration} steps)";
         }
 
-        var steps = leftRun.Trajectory?.Timesteps?.Count ?? 100;
-        var visualTime = peakEpisode.Start >= 0 ? peakEpisode.Start / (double)steps : 0.5;
+        var ownerIsLeft = leftScore >= rightScore;
+        var ownerPaired = ownerIsLeft ? pairedA : pairedB;
+        var ownerLength = Math.Max(1, ownerIsLeft ? leftLength : rightLength);
+        var ownerEpisode = ownerIsLeft ? leftPeakEpisode : rightPeakEpisode;
+        var ownerStep = ownerEpisode.Start >= 0 && ownerEpisode.Start < ownerPaired.Count
+            ? ownerPaired[ownerEpisode.Start]
+            : -1;
+        var visualTime = ownerStep >= 0 ? ownerStep / (double)ownerLength : 0.5;
+        (int, int)? RangeFor(List<int> paired, (int Start, int Duration, double Score) episode)
+        {
+            if (episode.Start < 0 || episode.Start >= paired.Count || episode.Duration <= 0)
+                return null;
+            var end = Math.Min(paired.Count - 1, episode.Start + episode.Duration - 1);
+            return (paired[episode.Start], paired[end]);
+        }
 
         return new CanonicalDelta
         {
-            Id = "StabilityOscillation",
+            Id = DeltaIds.StabilityOscillation,
             Name = "Stability",
             Explanation = explanation,
             SummarySentence = $"{(leftScore > rightScore ? "Path A" : "Path B")} showed {magnitude:F2} more oscillation",
@@ -677,12 +723,8 @@ public static class CanonicalDeltaService
             Anchors = [new VisualAnchor
             {
                 TargetView = "curvature",
-                RangeA = leftScore > rightScore && leftPeakEpisode.Start >= 0 
-                    ? (leftPeakEpisode.Start, leftPeakEpisode.Start + leftPeakEpisode.Duration) 
-                    : null,
-                RangeB = rightScore > leftScore && rightPeakEpisode.Start >= 0 
-                    ? (rightPeakEpisode.Start, rightPeakEpisode.Start + rightPeakEpisode.Duration) 
-                    : null
+                RangeA = leftScore > rightScore ? RangeFor(pairedA, leftPeakEpisode) : null,
+                RangeB = rightScore > leftScore ? RangeFor(pairedB, rightPeakEpisode) : null
             }],
             ScoreA = leftScore,
             ScoreB = rightScore,
@@ -703,13 +745,13 @@ public static class CanonicalDeltaService
         failureTime = 0;
         failureType = "instability";
 
-        // Check explicit failures
-        if (run.Failures?.Count > 0)
+        // Annotated events use the same persistence bar as inferred spikes:
+        // one event is not enough. Three recorded failures count as persistent.
+        if (run.Failures is { Count: >= 3 })
         {
-            var firstFailure = run.Failures.First();
-            var totalSteps = run.Trajectory?.Timesteps?.Count ?? 100;
-            failureTime = firstFailure.T;  // T is normalized time
-            failureType = firstFailure.Category ?? "instability";
+            var ordered = run.Failures.OrderBy(f => f.T).ToList();
+            failureTime = ordered[2].T;
+            failureType = string.IsNullOrEmpty(ordered[0].Category) ? "instability" : ordered[0].Category;
             return true;
         }
 
@@ -983,32 +1025,41 @@ public static class CanonicalDeltaService
     /// Instead of mean(B) - mean(A), computes ∫|A_B(t) - A_A(t)| dt over longest sustained segment.
     /// Rewards duration + consistency, not just amplitude.
     /// </summary>
-    private static (double Score, (int Start, int Duration) Segment, double LeftMean, double RightMean) 
+    private static (double Score, (int Start, int Duration) Segment, double LeftMean, double RightMean, (int, int)? RangeA, (int, int)? RangeB, int Paired) 
         ComputePersistenceWeightedAlignmentDelta(
             GeometryRun leftRun, 
             GeometryRun rightRun, 
             double currentTime, 
-            AlignmentDetectionConfig config)
+            AlignmentDetectionConfig config,
+            AlignmentMap alignment)
     {
         var leftEigen = leftRun.Geometry?.Eigenvalues;
         var rightEigen = rightRun.Geometry?.Eigenvalues;
         
         if (leftEigen == null || rightEigen == null || leftEigen.Count == 0 || rightEigen.Count == 0)
-            return (0, (0, 0), 0, 0);
+            return (0, (0, 0), 0, 0, null, null, 0);
 
-        var minCount = Math.Min(leftEigen.Count, rightEigen.Count);
-        var maxIdx = (int)(currentTime * (minCount - 1));
-        maxIdx = Math.Clamp(maxIdx, 0, minCount - 1);
+        var compareCount = Math.Min(alignment.IdxToStepA.Length, alignment.IdxToStepB.Length);
+        var limit = compareCount <= 1 ? 0 : (int)(currentTime * (compareCount - 1));
+        limit = Math.Clamp(limit, 0, Math.Max(0, compareCount - 1));
 
-        // Compute alignment series D(t) = |A_B(t) - A_A(t)|
+        // D(t) only where both sides of the compare index exist.
         var leftAlignments = new List<double>();
         var rightAlignments = new List<double>();
         var differences = new List<double>();
+        var pairedCompare = new List<int>();
 
-        for (int i = 0; i <= maxIdx; i++)
+        for (int i = 0; i <= limit && i < compareCount; i++)
         {
-            var leftValues = leftEigen[i].Values;
-            var rightValues = rightEigen[i].Values;
+            var stepA = alignment.IdxToStepA[i];
+            var stepB = alignment.IdxToStepB[i];
+            if (stepA is null || stepB is null)
+                continue;
+            if (stepA.Value < 0 || stepA.Value >= leftEigen.Count || stepB.Value < 0 || stepB.Value >= rightEigen.Count)
+                continue;
+
+            var leftValues = leftEigen[stepA.Value].Values;
+            var rightValues = rightEigen[stepB.Value].Values;
             
             double leftAlignment = 0, rightAlignment = 0;
             
@@ -1029,10 +1080,11 @@ public static class CanonicalDeltaService
             leftAlignments.Add(leftAlignment);
             rightAlignments.Add(rightAlignment);
             differences.Add(Math.Abs(rightAlignment - leftAlignment));
+            pairedCompare.Add(i);
         }
 
         if (differences.Count == 0)
-            return (0, (0, 0), 0, 0);
+            return (0, (0, 0), 0, 0, null, null, 0);
 
         // Find longest sustained segment where D(t) > SegmentEpsilon
         int longestStart = 0;
@@ -1074,7 +1126,63 @@ public static class CanonicalDeltaService
         var leftMean = leftAlignments.Count > 0 ? leftAlignments.Average() : 0;
         var rightMean = rightAlignments.Count > 0 ? rightAlignments.Average() : 0;
 
-        return (persistenceScore, (longestStart, longestDuration), leftMean, rightMean);
+        var compareStart = pairedCompare[longestStart];
+        var compareEnd = pairedCompare[Math.Min(pairedCompare.Count - 1, longestStart + Math.Max(longestDuration, 1) - 1)];
+        (int, int)? rangeA = null;
+        (int, int)? rangeB = null;
+        if (longestDuration > 0)
+        {
+            var a0 = alignment.IdxToStepA[compareStart];
+            var a1 = alignment.IdxToStepA[compareEnd];
+            var b0 = alignment.IdxToStepB[compareStart];
+            var b1 = alignment.IdxToStepB[compareEnd];
+            if (a0 is int startA && a1 is int endA)
+                rangeA = (startA, endA);
+            if (b0 is int startB && b1 is int endB)
+                rangeB = (startB, endB);
+        }
+
+        return (persistenceScore, (compareStart, longestDuration), leftMean, rightMean, rangeA, rangeB, pairedCompare.Count);
+    }
+
+    /// <summary>
+    /// Convergence anchor used by ΔTc and by temporal alignment.
+    /// Time is -1 when the run never settles.
+    /// </summary>
+    public static (int Step, double Time) DetectConvergenceAnchor(GeometryRun run)
+    {
+        var (step, time, _) = EstimateConvergenceTime(run, DefaultConfig.Convergence);
+        return (step, time);
+    }
+
+    private static List<int> PairedSteps(int?[] mine, int?[] other, int ownerLength, double upToTime)
+    {
+        var paired = new List<int>();
+        var count = Math.Min(mine.Length, other.Length);
+        var maxStep = ownerLength <= 1 ? 0 : (int)(Math.Clamp(upToTime, 0, 1) * (ownerLength - 1));
+        for (int i = 0; i < count; i++)
+        {
+            if (mine[i] is not int step || other[i] is null)
+                continue;
+            if (step < 0 || step > maxStep)
+                continue;
+            paired.Add(step);
+        }
+        return paired;
+    }
+
+    private static GeometryRun SliceToSteps(GeometryRun run, List<int> steps)
+    {
+        var source = run.Trajectory?.Timesteps;
+        if (source == null)
+            return run;
+        var chosen = new List<TrajectoryTimestep>();
+        foreach (var step in steps)
+        {
+            if (step >= 0 && step < source.Count)
+                chosen.Add(source[step]);
+        }
+        return run with { Trajectory = run.Trajectory! with { Timesteps = chosen } };
     }
 
     /// <summary>
@@ -1237,13 +1345,13 @@ public static class CanonicalDeltaService
 
         // Add modifier from second delta
         var secondary = deltas[1];
-        var modifier = secondary.Id switch
+        var modifier = DeltaIds.Canonical(secondary.Id) switch
         {
-            "ConvergenceTiming" => " with different convergence timing",
-            "StabilityOscillation" => " alongside stability differences",
-            "StructuralEmergence" => " and distinct structural emergence",
-            "EvaluatorAlignment" => " while evaluator alignment differed",
-            "FailurePresence" => " compounded by failure events",
+            DeltaIds.ConvergenceTiming => " with different convergence timing",
+            DeltaIds.StabilityOscillation => " alongside stability differences",
+            DeltaIds.StructuralEmergence => " and distinct structural emergence",
+            DeltaIds.EvaluatorAlignment => " while evaluator alignment differed",
+            DeltaIds.FailurePresence => " compounded by failure events",
             _ => ""
         };
 

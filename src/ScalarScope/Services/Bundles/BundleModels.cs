@@ -9,119 +9,119 @@ namespace ScalarScope.Services.Bundles;
 #region Enums
 
 /// <summary>Bundle export profile (share|review|audit).</summary>
-[JsonConverter(typeof(JsonStringEnumConverter))]
+[JsonConverter(typeof(JsonStringEnumConverter<BundleProfile>))]
 public enum BundleProfile
 {
-    [JsonPropertyName("share")] Share,
-    [JsonPropertyName("review")] Review,
-    [JsonPropertyName("audit")] Audit
+    [JsonStringEnumMemberName("share")] Share,
+    [JsonStringEnumMemberName("review")] Review,
+    [JsonStringEnumMemberName("audit")] Audit
 }
 
 /// <summary>Build channel.</summary>
-[JsonConverter(typeof(JsonStringEnumConverter))]
+[JsonConverter(typeof(JsonStringEnumConverter<BuildChannel>))]
 public enum BuildChannel
 {
-    [JsonPropertyName("stable")] Stable,
-    [JsonPropertyName("dev")] Dev,
-    [JsonPropertyName("ci")] Ci
+    [JsonStringEnumMemberName("stable")] Stable,
+    [JsonStringEnumMemberName("dev")] Dev,
+    [JsonStringEnumMemberName("ci")] Ci
 }
 
 /// <summary>Temporal alignment mode.</summary>
-[JsonConverter(typeof(JsonStringEnumConverter))]
+[JsonConverter(typeof(JsonStringEnumConverter<AlignmentMode>))]
 public enum AlignmentMode
 {
-    [JsonPropertyName("step")] Step,
-    [JsonPropertyName("convergenceOnset")] ConvergenceOnset,
-    [JsonPropertyName("firstInstability")] FirstInstability
+    [JsonStringEnumMemberName("step")] Step,
+    [JsonStringEnumMemberName("convergenceOnset")] ConvergenceOnset,
+    [JsonStringEnumMemberName("firstInstability")] FirstInstability
 }
 
 /// <summary>Reproducibility status.</summary>
-[JsonConverter(typeof(JsonStringEnumConverter))]
+[JsonConverter(typeof(JsonStringEnumConverter<ReproStatus>))]
 public enum ReproStatus
 {
-    [JsonPropertyName("reproducible")] Reproducible,
-    [JsonPropertyName("modified")] Modified,
-    [JsonPropertyName("nondeterministic")] Nondeterministic
+    [JsonStringEnumMemberName("reproducible")] Reproducible,
+    [JsonStringEnumMemberName("modified")] Modified,
+    [JsonStringEnumMemberName("nondeterministic")] Nondeterministic
 }
 
 /// <summary>Reproducibility reason flags.</summary>
-[JsonConverter(typeof(JsonStringEnumConverter))]
+[JsonConverter(typeof(JsonStringEnumConverter<ReproReason>))]
 public enum ReproReason
 {
-    [JsonPropertyName("inputs_changed")] InputsChanged,
-    [JsonPropertyName("preset_changed")] PresetChanged,
-    [JsonPropertyName("seed_changed")] SeedChanged,
-    [JsonPropertyName("delta_spec_changed")] DeltaSpecChanged,
-    [JsonPropertyName("unknown")] Unknown
+    [JsonStringEnumMemberName("inputs_changed")] InputsChanged,
+    [JsonStringEnumMemberName("preset_changed")] PresetChanged,
+    [JsonStringEnumMemberName("seed_changed")] SeedChanged,
+    [JsonStringEnumMemberName("delta_spec_changed")] DeltaSpecChanged,
+    [JsonStringEnumMemberName("unknown")] Unknown
 }
 
 /// <summary>Hash algorithm (currently only SHA-256).</summary>
-[JsonConverter(typeof(JsonStringEnumConverter))]
+[JsonConverter(typeof(JsonStringEnumConverter<HashAlgorithm>))]
 public enum HashAlgorithm
 {
-    [JsonPropertyName("SHA-256")] Sha256
+    [JsonStringEnumMemberName("SHA-256")] Sha256
 }
 
 /// <summary>Privacy redaction types.</summary>
-[JsonConverter(typeof(JsonStringEnumConverter))]
+[JsonConverter(typeof(JsonStringEnumConverter<PrivacyRedaction>))]
 public enum PrivacyRedaction
 {
-    [JsonPropertyName("none")] None,
-    [JsonPropertyName("labels_only")] LabelsOnly,
-    [JsonPropertyName("paths_removed")] PathsRemoved,
-    [JsonPropertyName("other")] Other
+    [JsonStringEnumMemberName("none")] None,
+    [JsonStringEnumMemberName("labels_only")] LabelsOnly,
+    [JsonStringEnumMemberName("paths_removed")] PathsRemoved,
+    [JsonStringEnumMemberName("other")] Other
 }
 
 /// <summary>Run source type.</summary>
-[JsonConverter(typeof(JsonStringEnumConverter))]
+[JsonConverter(typeof(JsonStringEnumConverter<RunSourceType>))]
 public enum RunSourceType
 {
-    [JsonPropertyName("file")] File,
-    [JsonPropertyName("bundle")] Bundle,
-    [JsonPropertyName("demo")] Demo,
-    [JsonPropertyName("unknown")] Unknown
+    [JsonStringEnumMemberName("file")] File,
+    [JsonStringEnumMemberName("bundle")] Bundle,
+    [JsonStringEnumMemberName("demo")] Demo,
+    [JsonStringEnumMemberName("unknown")] Unknown
 }
 
 /// <summary>Delta status.</summary>
-[JsonConverter(typeof(JsonStringEnumConverter))]
+[JsonConverter(typeof(JsonStringEnumConverter<DeltaStatus>))]
 public enum DeltaStatus
 {
-    [JsonPropertyName("present")] Present,
-    [JsonPropertyName("suppressed")] Suppressed,
-    [JsonPropertyName("indeterminate")] Indeterminate
+    [JsonStringEnumMemberName("present")] Present,
+    [JsonStringEnumMemberName("suppressed")] Suppressed,
+    [JsonStringEnumMemberName("indeterminate")] Indeterminate
 }
 
 /// <summary>Delta trigger type (Phase 3.2 spec).</summary>
-[JsonConverter(typeof(JsonStringEnumConverter))]
+[JsonConverter(typeof(JsonStringEnumConverter<TriggerType>))]
 public enum TriggerType
 {
-    [JsonPropertyName("design_verified")] DesignVerified,
-    [JsonPropertyName("sustained")] Sustained,
-    [JsonPropertyName("recurrence")] Recurrence,
-    [JsonPropertyName("persistence_weighted")] PersistenceWeighted,
-    [JsonPropertyName("area_episode")] AreaEpisode,
-    [JsonPropertyName("confidence_heuristic")] ConfidenceHeuristic,
-    [JsonPropertyName("event")] Event,
-    [JsonPropertyName("none")] None
+    [JsonStringEnumMemberName("design_verified")] DesignVerified,
+    [JsonStringEnumMemberName("sustained")] Sustained,
+    [JsonStringEnumMemberName("recurrence")] Recurrence,
+    [JsonStringEnumMemberName("persistence_weighted")] PersistenceWeighted,
+    [JsonStringEnumMemberName("area_episode")] AreaEpisode,
+    [JsonStringEnumMemberName("confidence_heuristic")] ConfidenceHeuristic,
+    [JsonStringEnumMemberName("event")] Event,
+    [JsonStringEnumMemberName("none")] None
 }
 
-/// <summary>Target view for anchors.</summary>
-[JsonConverter(typeof(JsonStringEnumConverter))]
+/// <summary>Target view for anchors. Schema tokens are PascalCase, not camelCase.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter<TargetView>))]
 public enum TargetView
 {
-    [JsonPropertyName("ComparePaths")] ComparePaths,
-    [JsonPropertyName("LearningPath")] LearningPath,
-    [JsonPropertyName("PerformanceSignals")] PerformanceSignals,
-    [JsonPropertyName("EvaluatorAlignment")] EvaluatorAlignment,
-    [JsonPropertyName("Global")] Global
+    [JsonStringEnumMemberName("ComparePaths")] ComparePaths,
+    [JsonStringEnumMemberName("LearningPath")] LearningPath,
+    [JsonStringEnumMemberName("PerformanceSignals")] PerformanceSignals,
+    [JsonStringEnumMemberName("EvaluatorAlignment")] EvaluatorAlignment,
+    [JsonStringEnumMemberName("Global")] Global
 }
 
 /// <summary>Insight event type.</summary>
-[JsonConverter(typeof(JsonStringEnumConverter))]
+[JsonConverter(typeof(JsonStringEnumConverter<InsightEventType>))]
 public enum InsightEventType
 {
-    [JsonPropertyName("delta")] Delta,
-    [JsonPropertyName("training_event")] TrainingEvent
+    [JsonStringEnumMemberName("delta")] Delta,
+    [JsonStringEnumMemberName("training_event")] TrainingEvent
 }
 
 #endregion

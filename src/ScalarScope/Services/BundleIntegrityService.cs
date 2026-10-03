@@ -131,7 +131,19 @@ public static class BundleIntegrityService
             var listed = new Dictionary<string, string>(StringComparer.Ordinal);
             foreach (var (path, expectedHash) in integrityInfo.FileHashes)
             {
+                if (BundlePaths.EscapesBundleRoot(path))
+                {
+                    verification.AddError("EscapedPath", $"Integrity entry escapes the bundle root: {path}");
+                    continue;
+                }
+
                 var key = NormalizeEntryPath(path);
+                if (BundlePaths.EscapesBundleRoot(key))
+                {
+                    verification.AddError("EscapedPath", $"Integrity entry escapes the bundle root: {path}");
+                    continue;
+                }
+
                 if (key.Equals("integrity.json", StringComparison.OrdinalIgnoreCase))
                 {
                     verification.AddError("SealedFileListed", "integrity.json stores the hash and cannot be one of the hashed files");
@@ -155,6 +167,11 @@ public static class BundleIntegrityService
                 var path = NormalizeEntryPath(entry.FullName);
                 if (path.Length == 0 || path.EndsWith('/'))
                     continue;
+                if (BundlePaths.EscapesBundleRoot(entry.FullName) || BundlePaths.EscapesBundleRoot(path))
+                {
+                    verification.AddError("EscapedPath", $"Bundle entry escapes the archive root: {entry.FullName}");
+                    continue;
+                }
                 if (path.Equals("integrity.json", StringComparison.OrdinalIgnoreCase))
                     continue;
 
