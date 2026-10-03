@@ -9,6 +9,16 @@ namespace ScalarScope.Services;
 /// </summary>
 public class ComparativeAnalysisService
 {
+    /// <summary>
+    /// Largest DTW or discrete Fréchet table this overlay will allocate.
+    /// A pair over the budget is refused before the array exists.
+    /// A pair that fits keeps the same distance as the recurrence below.
+    /// </summary>
+    public const int DistanceCellBudget = 2_000_000;
+
+    public const string DistanceBudgetReason = "trajectory pair exceeds the distance-table budget";
+    public const string NonFiniteLinkReason = "non-finite link distance";
+
     #region Distance Metrics
 
     /// <summary>
@@ -26,7 +36,9 @@ public class ComparativeAnalysisService
         int n = traj1.Count;
         int m = traj2.Count;
 
-        // DTW matrix
+        if (ExceedsDistanceCellBudget(n + 1, m + 1))
+            return InvalidDtw(DistanceBudgetReason);
+
         var dtw = new double[n + 1, m + 1];
         for (int i = 0; i <= n; i++) dtw[i, 0] = double.PositiveInfinity;
         for (int j = 0; j <= m; j++) dtw[0, j] = double.PositiveInfinity;
@@ -37,25 +49,31 @@ public class ComparativeAnalysisService
             for (int j = 1; j <= m; j++)
             {
                 var cost = EuclideanDistance(traj1[i - 1], traj2[j - 1]);
+                if (!double.IsFinite(cost))
+                    return InvalidDtw(NonFiniteLinkReason);
+
                 dtw[i, j] = cost + Math.Min(Math.Min(dtw[i - 1, j], dtw[i, j - 1]), dtw[i - 1, j - 1]);
             }
         }
 
-        // Backtrack to find warping path
-        var path = BacktrackDtw(dtw, n, m);
+        var distance = dtw[n, m];
+        if (!double.IsFinite(distance))
+            return InvalidDtw(NonFiniteLinkReason);
 
         return new DtwResult
         {
-            Distance = dtw[n, m],
-            NormalizedDistance = dtw[n, m] / (n + m),
-            WarpingPath = path,
+            Distance = distance,
+            NormalizedDistance = distance / (n + m),
+            WarpingPath = BacktrackDtw(dtw, n, m),
             IsValid = true
         };
     }
 
     /// <summary>
-    /// Compute Fréchet distance between two trajectories.
-    /// The "dog walking" distance - minimum leash length needed.
+    /// Compute discrete Fréchet distance between two trajectories.
+    /// The leash length is the classic recurrence, filled iteratively:
+    /// ca(0,0) = d(0,0); an edge is the running max; every other cell is
+    /// max(d(i,j), min of the three predecessors).
     /// </summary>
     public FrechetResult ComputeFrechet(GeometryRun run1, GeometryRun run2)
     {
@@ -68,44 +86,32 @@ public class ComparativeAnalysisService
         int n = traj1.Count;
         int m = traj2.Count;
 
-        // Memoization table for recursive Fréchet computation
-        var memo = new double[n, m];
+        if (ExceedsDistanceCellBudget(n, m))
+            return InvalidFrechet(DistanceBudgetReason);
+
+        var ca = new double[n, m];
         for (int i = 0; i < n; i++)
-            for (int j = 0; j < m; j++)
-                memo[i, j] = -1;
-
-        double ComputeRecursive(int i, int j)
         {
-            if (memo[i, j] >= 0) return memo[i, j];
+            for (int j = 0; j < m; j++)
+            {
+                var dist = EuclideanDistance(traj1[i], traj2[j]);
+                if (!double.IsFinite(dist))
+                    return InvalidFrechet(NonFiniteLinkReason);
 
-            var dist = EuclideanDistance(traj1[i], traj2[j]);
-
-            if (i == 0 && j == 0)
-            {
-                memo[i, j] = dist;
+                if (i == 0 && j == 0)
+                    ca[i, j] = dist;
+                else if (i == 0)
+                    ca[i, j] = Math.Max(ca[0, j - 1], dist);
+                else if (j == 0)
+                    ca[i, j] = Math.Max(ca[i - 1, 0], dist);
+                else
+                    ca[i, j] = Math.Max(dist, Math.Min(ca[i - 1, j], Math.Min(ca[i, j - 1], ca[i - 1, j - 1])));
             }
-            else if (i == 0)
-            {
-                memo[i, j] = Math.Max(ComputeRecursive(0, j - 1), dist);
-            }
-            else if (j == 0)
-            {
-                memo[i, j] = Math.Max(ComputeRecursive(i - 1, 0), dist);
-            }
-            else
-            {
-                memo[i, j] = Math.Max(
-                    Math.Min(Math.Min(
-                        ComputeRecursive(i - 1, j),
-                        ComputeRecursive(i, j - 1)),
-                        ComputeRecursive(i - 1, j - 1)),
-                    dist);
-            }
-
-            return memo[i, j];
         }
 
-        var distance = ComputeRecursive(n - 1, m - 1);
+        var distance = ca[n - 1, m - 1];
+        if (!double.IsFinite(distance))
+            return InvalidFrechet(NonFiniteLinkReason);
 
         return new FrechetResult
         {
@@ -113,6 +119,24 @@ public class ComparativeAnalysisService
             IsValid = true
         };
     }
+
+    private static bool ExceedsDistanceCellBudget(int rows, int cols)
+        => rows < 1 || cols < 1 || (long)rows * cols > DistanceCellBudget;
+
+    private static DtwResult InvalidDtw(string reason) => new()
+    {
+        Distance = double.NaN,
+        NormalizedDistance = double.NaN,
+        IsValid = false,
+        Reason = reason
+    };
+
+    private static FrechetResult InvalidFrechet(string reason) => new()
+    {
+        Distance = double.NaN,
+        IsValid = false,
+        Reason = reason
+    };
 
     /// <summary>
     /// Compute point-wise deviation between two trajectories at each timestep.
@@ -466,12 +490,14 @@ public record DtwResult
     public double NormalizedDistance { get; init; }
     public List<(int i, int j)> WarpingPath { get; init; } = [];
     public bool IsValid { get; init; }
+    public string? Reason { get; init; }
 }
 
 public record FrechetResult
 {
     public double Distance { get; init; }
     public bool IsValid { get; init; }
+    public string? Reason { get; init; }
 }
 
 public record DeviationAnalysis

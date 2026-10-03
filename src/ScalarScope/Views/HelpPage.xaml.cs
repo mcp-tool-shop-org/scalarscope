@@ -52,10 +52,10 @@ public partial class HelpPage : ContentPage
             return;
         }
 
-        // Filter sections based on search query
+        // Every token must appear. "failure rate" is not a contiguous substring of the bag.
         foreach (var kvp in _searchableSections)
         {
-            kvp.Value.IsVisible = kvp.Key.Contains(query);
+            kvp.Value.IsVisible = GuideSearch.Matches(kvp.Key, query);
         }
 
         // Show parent sections if any children are visible

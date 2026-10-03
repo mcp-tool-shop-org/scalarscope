@@ -294,6 +294,7 @@
             <controls:AlignmentControl 
                 VerticalOptions="Center"
                 SelectedAlignment="{Binding SelectedAlignment}"
+                AlignmentDescription="{Binding AlignmentDescription}"
                 IsVisible="{Binding HasBothRuns}"/>
             
             <BoxView WidthRequest="1" Color="#2a2a4e"/>

@@ -18,7 +18,8 @@ public partial class AlignmentControl : ContentView
 
     public static readonly BindableProperty AlignmentDescriptionProperty =
         BindableProperty.Create(nameof(AlignmentDescription), typeof(string), typeof(AlignmentControl),
-            defaultValue: "Aligned by training step");
+            defaultValue: "Aligned by training step",
+            propertyChanged: OnAlignmentDescriptionChanged);
 
     public TemporalAlignment SelectedAlignment
     {
@@ -49,6 +50,12 @@ public partial class AlignmentControl : ContentView
         {
             control.UpdateButtonStates();
         }
+    }
+
+    private static void OnAlignmentDescriptionChanged(BindableObject bindable, object oldValue, object newValue)
+    {
+        if (bindable is AlignmentControl control && control.alignmentDescriptionLabel != null)
+            control.alignmentDescriptionLabel.Text = newValue as string ?? "";
     }
 
     private void UpdateButtonStates()
@@ -82,6 +89,7 @@ public partial class AlignmentControl : ContentView
         if (SelectedAlignment == TemporalAlignment.ByStep) return;
         
         await AnimateTransition();
+        AlignmentDescription = AlignmentCaption.For(TemporalAlignment.ByStep);
         SelectedAlignment = TemporalAlignment.ByStep;
         AlignmentChanged?.Invoke(SelectedAlignment);
     }
@@ -91,6 +99,7 @@ public partial class AlignmentControl : ContentView
         if (SelectedAlignment == TemporalAlignment.ByConvergence) return;
         
         await AnimateTransition();
+        AlignmentDescription = AlignmentCaption.For(TemporalAlignment.ByConvergence);
         SelectedAlignment = TemporalAlignment.ByConvergence;
         AlignmentChanged?.Invoke(SelectedAlignment);
     }
@@ -100,6 +109,7 @@ public partial class AlignmentControl : ContentView
         if (SelectedAlignment == TemporalAlignment.ByFirstInstability) return;
         
         await AnimateTransition();
+        AlignmentDescription = AlignmentCaption.For(TemporalAlignment.ByFirstInstability);
         SelectedAlignment = TemporalAlignment.ByFirstInstability;
         AlignmentChanged?.Invoke(SelectedAlignment);
     }

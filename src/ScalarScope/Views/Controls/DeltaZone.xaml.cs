@@ -18,6 +18,10 @@ namespace ScalarScope.Views.Controls;
 /// </summary>
 public partial class DeltaZone : ContentView
 {
+    public const int InfoButtonColumn = 4;
+    public const int CopyButtonColumn = 5;
+    public const int AnchorColumn = 6;
+
     public static readonly BindableProperty DeltasProperty =
         BindableProperty.Create(nameof(Deltas), typeof(IReadOnlyList<CanonicalDelta>), typeof(DeltaZone),
             defaultValue: Array.Empty<CanonicalDelta>(),
@@ -118,10 +122,14 @@ public partial class DeltaZone : ContentView
         zone.OnPropertyChanged(nameof(SelectedDeltaColor));
     }
 
+    private readonly Dictionary<string, Border> _rows = new();
+
     private void UpdateHighlight(string? deltaId)
     {
-        // Visually highlight the specified delta item
-        // Implementation would update visual states on delta item views
+        var normal = Color.FromArgb("#2a2a4e");
+        var highlight = Color.FromArgb("#4ecdc4");
+        foreach (var (id, row) in _rows)
+            row.Stroke = string.Equals(id, deltaId, StringComparison.Ordinal) ? highlight : normal;
     }
 
     /// <summary>
@@ -342,6 +350,7 @@ public partial class DeltaZone : ContentView
     private void UpdateDeltaItems()
     {
         deltaItemsContainer.Children.Clear();
+        _rows.Clear();
 
         if (Deltas == null || Deltas.Count == 0)
             return;
@@ -351,6 +360,8 @@ public partial class DeltaZone : ContentView
             var item = CreateDeltaItem(delta);
             deltaItemsContainer.Children.Add(item);
         }
+
+        UpdateHighlight(HighlightedDeltaId);
     }
 
     private View CreateDeltaItem(CanonicalDelta delta)
@@ -391,9 +402,9 @@ public partial class DeltaZone : ContentView
                 new ColumnDefinition { Width = GridLength.Star },  // 1: Name/Explanation
                 new ColumnDefinition { Width = GridLength.Auto },  // 2: Status badge
                 new ColumnDefinition { Width = GridLength.Auto },  // 3: Confidence badge
-                new ColumnDefinition { Width = GridLength.Auto },  // 4: Info button
-                new ColumnDefinition { Width = GridLength.Auto },  // 5: Show me button
-                new ColumnDefinition { Width = GridLength.Auto }   // 6: Magnitude
+                new ColumnDefinition { Width = GridLength.Auto },  // 4: Why
+                new ColumnDefinition { Width = GridLength.Auto },  // 5: Copy
+                new ColumnDefinition { Width = GridLength.Auto }   // 6: Anchor
             },
             RowDefinitions =
             {
@@ -508,7 +519,7 @@ public partial class DeltaZone : ContentView
             SelectedDelta = delta;
             IsWhyPanelExpanded = true;
         };
-        Grid.SetColumn(infoButton, 4);
+        Grid.SetColumn(infoButton, InfoButtonColumn);
         Grid.SetRowSpan(infoButton, 2);
         grid.Children.Add(infoButton);
         
@@ -532,7 +543,7 @@ public partial class DeltaZone : ContentView
             await Task.Delay(1000);
             copyButton.Text = "📋";
         };
-        Grid.SetColumn(copyButton, 4);
+        Grid.SetColumn(copyButton, CopyButtonColumn);
         Grid.SetRowSpan(copyButton, 2);
         grid.Children.Add(copyButton);
 
@@ -544,8 +555,11 @@ public partial class DeltaZone : ContentView
             FontSize = 9,
             VerticalOptions = LayoutOptions.Center
         };
-        Grid.SetColumn(anchorLabel, 5);
+        Grid.SetColumn(anchorLabel, AnchorColumn);
         Grid.SetRowSpan(anchorLabel, 2);
+        var anchorTap = new TapGestureRecognizer();
+        anchorTap.Tapped += (s, e) => DeltaClicked?.Invoke(delta);
+        anchorLabel.GestureRecognizers.Add(anchorTap);
         grid.Children.Add(anchorLabel);
 
         container.Content = grid;
@@ -567,6 +581,9 @@ public partial class DeltaZone : ContentView
             container.BackgroundColor = Color.FromArgb("#1a1a2e");
         };
         container.GestureRecognizers.Add(pointerGesture);
+
+        if (!string.IsNullOrEmpty(delta.Id))
+            _rows[delta.Id] = container;
 
         return container;
     }

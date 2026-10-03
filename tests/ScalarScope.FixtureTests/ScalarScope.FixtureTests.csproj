@@ -26,6 +26,15 @@
     <ProjectReference Include="..\..\src\ScalarScope\ScalarScope.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.9" />
+  </ItemGroup>
+
+  <!-- The soak project is a self-contained exe. Link the in-memory runner so verify runs the floors. -->
+  <ItemGroup>
+    <Compile Include="..\ScalarScope.SoakTests\Phase32ValidationRunner.cs" Link="Phase32ValidationRunner.cs" />
+  </ItemGroup>
+
   <!-- Include fixture files as content -->
   <ItemGroup>
     <Content Include="..\Fixtures\**\*.json">

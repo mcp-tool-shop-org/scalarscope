@@ -146,6 +146,8 @@ public abstract class AnimatedCanvas : SKCanvasView
     {
         var center = new SKPoint(info.Width / 2f, info.Height / 2f);
 
+        // Declared before the paint so the paint releases the effect, then the dash is freed.
+        using var dash = SKPathEffect.CreateDash([5, 5], 0);
         using var paint = new SKPaint
         {
             Color = VortexColors.Grid,
@@ -153,12 +155,11 @@ public abstract class AnimatedCanvas : SKCanvasView
             IsAntialias = true
         };
 
-        // Center axes
+        // Center axes stay solid. The dash is only the grid.
         canvas.DrawLine(0, center.Y, info.Width, center.Y, paint);
         canvas.DrawLine(center.X, 0, center.X, info.Height, paint);
 
-        // Grid lines
-        paint.PathEffect = SKPathEffect.CreateDash([5, 5], 0);
+        paint.PathEffect = dash;
         var gridSpacing = Math.Min(info.Width, info.Height) / 8f;
 
         for (int i = 1; i <= 4; i++)

@@ -329,7 +329,8 @@ public partial class ComparisonPage : ContentPage, IQueryAttributable
 
     private void SetupInsightHandlers()
     {
-        // DeltaZone "Show me" navigates to anchor
+        // A row tap or its time anchor seeks that delta. "Show me" is the Why panel.
+        deltaZone.DeltaClicked += delta => ViewModel.JumpToDeltaAnchor(delta);
         deltaZone.ShowMeRequested += OnShowMeRequested;
         
         // InsightsTray "Show me" navigates to insight source
