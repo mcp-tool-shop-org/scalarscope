@@ -71,6 +71,35 @@ fn profiler_and_benchmark_keep_their_latency() {
 }
 
 #[test]
+fn a_profiler_step_is_one_inference_and_nested_ops_are_not() {
+    let trace = r#"{"traceEvents":[
+        {"name":"ProfilerStep#0","ph":"X","dur":5000,"ts":0},
+        {"name":"aten::linear","ph":"X","dur":9000,"ts":1},
+        {"name":"cudaLaunchKernel","ph":"X","dur":100,"ts":2},
+        {"name":"TensorRT inference","ph":"X","dur":2500,"ts":3},
+        {"name":"ProfilerStep#1","ph":"X","ts":10000},
+        {"name":"ProfilerStep#2","ph":"B","dur":8000,"ts":20000},
+        {"name":"ProfilerStep#3","ph":"X","dur":6000,"ts":30000}
+    ]}"#;
+    let Side::Inference(run) = open_text(trace, "pytorch").unwrap() else {
+        panic!("a profiler step trace is inference");
+    };
+    assert_eq!(run.latency_ms, vec![5.0, 6.0]);
+}
+
+#[test]
+fn an_incomplete_profiler_step_does_not_hide_a_named_inference_event() {
+    let trace = r#"{"traceEvents":[
+        {"name":"ProfilerStep#0","ph":"B","dur":5000},
+        {"name":"inference","ph":"X","dur":4000}
+    ]}"#;
+    let Side::Inference(run) = open_text(trace, "capture").unwrap() else {
+        panic!("a named inference event is still a sample");
+    };
+    assert_eq!(run.latency_ms, vec![4.0]);
+}
+
+#[test]
 fn a_trace_whose_names_are_not_inference_is_refused() {
     let trace = r#"{"traceEvents":[{"name":"aten::linear","dur":1000}]}"#;
     let error = open_text(trace, "pytorch").unwrap_err();

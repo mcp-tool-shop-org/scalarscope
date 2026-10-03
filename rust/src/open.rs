@@ -93,26 +93,68 @@ fn open_trace(map: &serde_json::Map<String, Value>, label: &str) -> Result<Side,
         .get("traceEvents")
         .and_then(Value::as_array)
         .ok_or_else(|| "The profiler file has no traceEvents array.".to_string())?;
-    let mut latency = Vec::new();
-    for event in events {
-        let Some(name) = event.get("name").and_then(Value::as_str) else {
-            continue;
-        };
-        let lowered = name.to_ascii_lowercase();
-        if !lowered.contains("tensorrt") && !lowered.contains("inference") {
-            continue;
-        }
-        if let Some(duration) = event.get("dur").and_then(Value::as_f64).filter(|value| value.is_finite()) {
-            latency.push(duration / 1000.0);
-        }
-    }
+    // A complete ProfilerStep is one inference. Nested ops, including a
+    // TensorRT event inside that step, are not more samples. A trace with
+    // no such step still uses the TensorRT or inference name filter.
+    let steps = step_durations(events);
+    let latency = if steps.is_empty() {
+        named_inference_durations(events)
+    } else {
+        steps
+    };
     if latency.is_empty() {
         return Err(
-            "This profiler trace has no numeric latency. Event names have to contain TensorRT or inference."
+            "This profiler trace has no numeric latency. A complete ProfilerStep is one inference. Without one, event names have to contain TensorRT or inference."
                 .to_string(),
         );
     }
     Ok(Side::Inference(series(label, latency, Vec::new())))
+}
+
+fn step_durations(events: &[Value]) -> Vec<f64> {
+    events
+        .iter()
+        .filter(|event| is_complete(event) && event_name(event).is_some_and(is_profiler_step))
+        .filter_map(duration_ms)
+        .collect()
+}
+
+fn named_inference_durations(events: &[Value]) -> Vec<f64> {
+    events
+        .iter()
+        .filter(|event| {
+            event_name(event).is_some_and(|name| {
+                let lowered = name.to_ascii_lowercase();
+                lowered.contains("tensorrt") || lowered.contains("inference")
+            })
+        })
+        .filter_map(duration_ms)
+        .collect()
+}
+
+fn is_complete(event: &Value) -> bool {
+    match event.get("ph") {
+        None => true,
+        Some(Value::String(phase)) => phase == "X",
+        Some(_) => false,
+    }
+}
+
+fn is_profiler_step(name: &str) -> bool {
+    let lowered = name.to_ascii_lowercase();
+    lowered == "profilerstep" || lowered.starts_with("profilerstep#")
+}
+
+fn event_name(event: &Value) -> Option<&str> {
+    event.get("name").and_then(Value::as_str)
+}
+
+fn duration_ms(event: &Value) -> Option<f64> {
+    event
+        .get("dur")
+        .and_then(Value::as_f64)
+        .filter(|value| value.is_finite())
+        .map(|microseconds| microseconds / 1000.0)
 }
 
 fn open_benchmark(value: &Value, label: &str) -> Result<Side, String> {
