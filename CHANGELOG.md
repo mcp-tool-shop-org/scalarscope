@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Home keeps a local comparison log. A review is written when both runs are loaded: the two names, the deltas that fired across the full run (ΔF, ΔTc, ΔTd, ΔĀ, ΔO), and the bundle hash once a bundle is saved or opened. The file stays in app data.
 
 ### Fixed
+- A bundle's hash is recomputed from the files in the archive. A stated hash that does not match those bytes is rejected, including a file that was left out of the hash list. The exporter writes the same UTF-8 bytes it hashes.
 - Home opens a `.scbundle`. Compare imports that bundle, and Try Example loads the built-in runs. The comparison log records a bundle when it loads.
 - Playback advances on the UI thread. A tick that is already queued is dropped.
 - Recovery resumes to Home, Compare, Help, or Settings. Start fresh returns to Home.

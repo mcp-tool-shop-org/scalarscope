@@ -118,48 +118,92 @@ public static class BundleIntegrityService
                 return verification;
             }
             
+            if (integrityInfo.FileHashes is null)
+            {
+                verification.IsValid = false;
+                verification.AddError("InvalidIntegrity", "integrity.json has no file hashes");
+                return verification;
+            }
+
             verification.ExpectedBundleHash = integrityInfo.BundleHash;
             verification.ExpectedFileCount = integrityInfo.FileHashes.Count;
-            
-            // Verify each file
-            var actualHashes = new Dictionary<string, string>();
-            var missingFiles = new List<string>();
-            var modifiedFiles = new List<string>();
-            
+
+            var listed = new Dictionary<string, string>(StringComparer.Ordinal);
             foreach (var (path, expectedHash) in integrityInfo.FileHashes)
             {
-                var entry = archive.GetEntry(path);
-                if (entry is null)
+                var key = NormalizeEntryPath(path);
+                if (key.Equals("integrity.json", StringComparison.OrdinalIgnoreCase))
                 {
-                    missingFiles.Add(path);
+                    verification.AddError("SealedFileListed", "integrity.json stores the hash and cannot be one of the hashed files");
                     continue;
                 }
-                
-                using var stream = entry.Open();
+
+                if (!listed.TryAdd(key, expectedHash))
+                {
+                    verification.AddError("DuplicateEntry", $"Duplicate integrity entry: {key}");
+                }
+            }
+
+            // Hash every content file in the archive. integrity.json is the seal, so it is not part of the preimage.
+            var actualHashes = new Dictionary<string, string>(StringComparer.Ordinal);
+            var missingFiles = new List<string>();
+            var modifiedFiles = new List<string>();
+            var undeclaredFiles = new List<string>();
+
+            foreach (var entry in archive.Entries)
+            {
+                var path = NormalizeEntryPath(entry.FullName);
+                if (path.Length == 0 || path.EndsWith('/'))
+                    continue;
+                if (path.Equals("integrity.json", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                if (actualHashes.ContainsKey(path))
+                {
+                    verification.AddError("DuplicateEntry", $"Duplicate bundle entry: {path}");
+                    continue;
+                }
+
+                await using var stream = entry.Open();
                 using var memStream = new MemoryStream();
                 await stream.CopyToAsync(memStream);
                 var actualHash = ComputeHash(memStream.ToArray());
                 actualHashes[path] = actualHash;
-                
-                if (actualHash != expectedHash)
+
+                if (!listed.TryGetValue(path, out var expectedHash))
+                {
+                    undeclaredFiles.Add(path);
+                    continue;
+                }
+
+                if (!string.Equals(actualHash, expectedHash, StringComparison.OrdinalIgnoreCase))
                 {
                     modifiedFiles.Add(path);
-                    verification.AddWarning("HashMismatch", $"File modified: {path}");
                 }
             }
-            
+
+            foreach (var path in listed.Keys)
+            {
+                if (!actualHashes.ContainsKey(path))
+                    missingFiles.Add(path);
+            }
+
             verification.ActualFileCount = actualHashes.Count;
             verification.MissingFiles = missingFiles;
             verification.ModifiedFiles = modifiedFiles;
-            
-            // Compute actual bundle hash
+
+            // Recompute from the bytes in the archive, not from the hash string stored beside them.
             verification.ActualBundleHash = ComputeBundleHash(actualHashes);
-            verification.BundleHashMatch = verification.ActualBundleHash == integrityInfo.BundleHash;
-            
-            // Set overall validity
-            verification.IsValid = missingFiles.Count == 0 && 
-                                   modifiedFiles.Count == 0 && 
-                                   verification.BundleHashMatch;
+            verification.BundleHashMatch = string.Equals(
+                verification.ActualBundleHash,
+                integrityInfo.BundleHash,
+                StringComparison.OrdinalIgnoreCase);
+
+            verification.IsValid = missingFiles.Count == 0
+                && modifiedFiles.Count == 0
+                && undeclaredFiles.Count == 0
+                && verification.BundleHashMatch
+                && !verification.HasErrors;
             
             if (!verification.IsValid && !verification.HasErrors)
             {
@@ -171,9 +215,15 @@ public static class BundleIntegrityService
                 {
                     verification.AddError("ModifiedFiles", $"{modifiedFiles.Count} file(s) have been modified");
                 }
+                if (undeclaredFiles.Count > 0)
+                {
+                    verification.AddError("UndeclaredFile", $"{undeclaredFiles.Count} file(s) are in the bundle and not in the hash");
+                }
                 if (!verification.BundleHashMatch)
                 {
-                    verification.AddError("BundleHashMismatch", "Bundle hash does not match expected value");
+                    verification.AddError(
+                        "BundleHashMismatch",
+                        "Bundle hash does not match the recomputed hash of the bundle contents.");
                 }
             }
         }
@@ -211,6 +261,14 @@ public static class BundleIntegrityService
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         };
+    }
+
+    private static string NormalizeEntryPath(string path)
+    {
+        var normalized = path.Replace('\\', '/');
+        while (normalized.StartsWith("./", StringComparison.Ordinal))
+            normalized = normalized[2..];
+        return normalized;
     }
 }
 

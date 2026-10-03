@@ -154,8 +154,8 @@ public sealed class BundleImporter
                 errors.Add($"Unsupported bundle version: {manifest.BundleVersion}");
             }
             
-            // Verify integrity
-            var integrityResult = await VerifyIntegrityAsync(archive, manifest.Integrity);
+            // Verify integrity. The stated bundleHash has to be the hash of these bytes.
+            var integrityResult = await VerifyIntegrityAsync(archive, manifest);
             if (!integrityResult.IsValid)
             {
                 errors.AddRange(integrityResult.Errors);
@@ -250,39 +250,121 @@ public sealed class BundleImporter
     }
     
     /// <summary>
-    /// Verify bundle integrity hashes.
+    /// Verify listed file hashes, then recompute bundleHash from the manifest core and those bytes.
+    /// manifest.json is not a listed file. It is sealed by the manifest-core half of bundleHash.
     /// </summary>
     private async Task<BundleValidationResult> VerifyIntegrityAsync(
         ZipArchive archive,
-        IntegrityInfo integrity)
+        ComparisonBundleManifest manifest)
     {
         var errors = new List<string>();
-        
+        var integrity = manifest.Integrity;
+        var declared = new Dictionary<string, FileIntegrityEntry>(StringComparer.Ordinal);
+
         foreach (var fileEntry in integrity.Files)
         {
-            var entry = archive.GetEntry(fileEntry.Path);
-            if (entry == null)
+            var path = NormalizeEntryPath(fileEntry.Path);
+            if (path.Equals("manifest.json", StringComparison.OrdinalIgnoreCase))
             {
-                errors.Add($"Missing file in bundle: {fileEntry.Path}");
+                errors.Add("manifest.json is sealed by bundleHash and is not a listed file.");
                 continue;
             }
-            
-            using var stream = entry.Open();
+
+            if (!declared.TryAdd(path, fileEntry))
+                errors.Add($"Duplicate integrity entry: {path}");
+        }
+
+        var actualEntries = new List<FileIntegrityEntry>();
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+
+        foreach (var entry in archive.Entries)
+        {
+            var path = NormalizeEntryPath(entry.FullName);
+            if (path.Length == 0 || path.EndsWith('/'))
+                continue;
+            if (path.Equals("manifest.json", StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            if (!seen.Add(path))
+            {
+                errors.Add($"Duplicate bundle entry: {path}");
+                continue;
+            }
+
+            await using var stream = entry.Open();
             using var ms = new MemoryStream();
             await stream.CopyToAsync(ms);
-            
-            var actualHash = BundleHashAlgorithm.ComputeSha256Hex(ms.ToArray());
-            if (!string.Equals(actualHash, fileEntry.Sha256, StringComparison.OrdinalIgnoreCase))
+            var bytes = ms.ToArray();
+            var actualHash = BundleHashAlgorithm.ComputeSha256Hex(bytes);
+
+            if (!declared.TryGetValue(path, out var expected))
             {
-                errors.Add($"Hash mismatch for {fileEntry.Path}: expected {fileEntry.Sha256[..12]}..., got {actualHash[..12]}...");
+                errors.Add($"Undeclared file in bundle: {path}");
+                actualEntries.Add(new FileIntegrityEntry
+                {
+                    Path = path,
+                    Sha256 = actualHash,
+                    Bytes = bytes.Length,
+                    ContentType = BundleHashAlgorithm.GuessContentType(path)
+                });
+                continue;
             }
+
+            if (!string.Equals(actualHash, expected.Sha256, StringComparison.OrdinalIgnoreCase))
+            {
+                errors.Add($"Hash mismatch for {path}: expected {Prefix(expected.Sha256)}, got {Prefix(actualHash)}.");
+            }
+
+            actualEntries.Add(new FileIntegrityEntry
+            {
+                Path = path,
+                Sha256 = actualHash,
+                Bytes = bytes.Length,
+                ContentType = expected.ContentType
+            });
         }
-        
+
+        foreach (var path in declared.Keys)
+        {
+            if (!seen.Contains(path))
+                errors.Add($"Missing file in bundle: {path}");
+        }
+
+        var manifestCore = manifest with
+        {
+            Integrity = integrity with
+            {
+                Files = Array.Empty<FileIntegrityEntry>(),
+                BundleHash = ""
+            }
+        };
+        var computed = BundleHashAlgorithm.ComputeBundleHash(manifestCore, actualEntries);
+        if (!string.Equals(computed, integrity.BundleHash, StringComparison.OrdinalIgnoreCase))
+        {
+            errors.Add(
+                $"Bundle hash does not match the recomputed hash of the bundle contents. Stated {Prefix(integrity.BundleHash)}, recomputed {Prefix(computed)}.");
+        }
+
         return new BundleValidationResult
         {
             IsValid = errors.Count == 0,
             Errors = errors
         };
+    }
+
+    private static string NormalizeEntryPath(string path)
+    {
+        var normalized = path.Replace('\\', '/');
+        while (normalized.StartsWith("./", StringComparison.Ordinal))
+            normalized = normalized[2..];
+        return normalized;
+    }
+
+    private static string Prefix(string? value)
+    {
+        if (string.IsNullOrEmpty(value))
+            return "(empty)";
+        return value.Length <= 12 ? value : value[..12];
     }
     
     #region Helpers

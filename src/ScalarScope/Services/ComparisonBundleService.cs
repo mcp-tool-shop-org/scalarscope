@@ -497,12 +497,17 @@ public sealed class ComparisonBundleService
         return sb.ToString();
     }
     
+    private static readonly Encoding Utf8NoBom = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+
+    /// <summary>
+    /// Write the exact UTF-8 bytes that were hashed. A byte-order mark would make the archive disagree with the hash.
+    /// </summary>
     private static async Task WriteEntryAsync(ZipArchive archive, string path, string content)
     {
         var entry = archive.CreateEntry(path);
-        using var stream = entry.Open();
-        using var writer = new StreamWriter(stream, Encoding.UTF8);
-        await writer.WriteAsync(content);
+        await using var stream = entry.Open();
+        var bytes = Utf8NoBom.GetBytes(content);
+        await stream.WriteAsync(bytes);
     }
     
     private static JsonSerializerOptions GetJsonOptions()
