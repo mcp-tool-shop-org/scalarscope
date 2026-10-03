@@ -228,7 +228,7 @@
             <Label Text="Series" TextColor="#4ecdc4" FontSize="11" VerticalOptions="Center"/>
             <Switch IsToggled="{Binding ShowTraceDistribution}" OnColor="#ffd93d" Scale="0.8" VerticalOptions="Center"
                     AutomationProperties.Name="Trace drawing"
-                    AutomationProperties.HelpText="Off draws the aligned series. On draws the distribution of those same samples."/>
+                    AutomationProperties.HelpText="Off draws the series, its spread band, anomaly marks, and throughput when both traces have it. On draws the distribution of those same samples."/>
             <Label Text="Distribution" TextColor="#ffd93d" FontSize="11" VerticalOptions="Center"/>
             <Label Text="{Binding TraceReview.Caption}" TextColor="#888" FontSize="11" VerticalOptions="Center" LineBreakMode="TailTruncation"/>
         </HorizontalStackLayout>

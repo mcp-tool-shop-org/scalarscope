@@ -28,8 +28,13 @@ public class TraceReviewTests
         review.RightValues.Should().Equal(5d, 5d, 6d, 5d, 5d, 5d, 7d, 5d);
         review.LeftP50.Should().Be(10);
         review.LeftP95.Should().Be(13);
+        review.LeftP99.Should().Be(13);
         review.RightP50.Should().Be(5);
         review.RightP95.Should().Be(7);
+        review.RightP99.Should().Be(7);
+        review.LeftSteadyIndex.Should().BeNull();
+        review.LeftThroughput.Should().BeEmpty();
+        review.Caption.Should().Contain("not a confidence interval");
         review.LeftDistribution.Should().HaveCount(8);
         review.LeftDistribution[^1].Probability.Should().Be(1);
         review.LeftDistribution.Select(point => point.Value).Should().BeInAscendingOrder();
@@ -102,6 +107,53 @@ public class TraceReviewTests
         var act = async () => await new TensorFlowRTOfflineConnector().ImportRuntimeAsync(path);
         await act.Should().ThrowAsync<InvalidOperationException>()
             .WithMessage("*TFRT_NO_LATENCY_SIGNAL*");
+    }
+
+    [Fact]
+    public void DeviationBand_IsCenteredPopulationSpread()
+    {
+        double?[] values = [0, 0, 0, 0, 10, 0, 0, 0];
+        var band = TraceReviewBuilder.DeviationBand(values);
+
+        band[4].Should().NotBeNull();
+        band[4]!.Value.Low.Should().BeApproximately(-2, 1e-9);
+        band[4]!.Value.High.Should().BeApproximately(6, 1e-9);
+    }
+
+    [Fact]
+    public void ThreeSigmaIndices_MarksOnlyAPointBeyondTheWindowSpread()
+    {
+        var values = Enumerable.Repeat((double?)10, 19).Append(100).ToList();
+        TraceReviewBuilder.ThreeSigmaIndices(values).Should().Equal(19);
+    }
+
+    [Fact]
+    public void SteadyIndex_FollowsTheMilestone()
+    {
+        var steps = Enumerable.Range(0, 8).ToList();
+        TraceReviewBuilder.SteadyIndex(steps, 0, 8, null).Should().BeNull();
+        TraceReviewBuilder.SteadyIndex(steps, 0, 8, 5).Should().Be(5);
+        TraceReviewBuilder.SteadyIndex(steps, 2, 6, 5).Should().Be(3);
+    }
+
+    [Fact]
+    public async Task Throughput_StaysBesideLatency()
+    {
+        var path = Path.Combine(NewDirectory(), "both.csv");
+        await File.WriteAllTextAsync(path, "step,latency_ms,throughput\n0,10,100\n1,10,110\n2,12,90\n3,11,100\n4,10,100\n5,10,100\n6,13,80\n7,10,100\n");
+        var other = Path.Combine(Path.GetDirectoryName(path)!, "other.csv");
+        await File.WriteAllTextAsync(other, "step,latency_ms,throughput\n0,5,200\n1,5,200\n2,6,180\n3,5,200\n4,5,200\n5,5,200\n6,7,160\n7,5,200\n");
+
+        var connector = new TensorFlowRTOfflineConnector();
+        var left = await connector.ImportRuntimeAsync(path);
+        var right = await connector.ImportRuntimeAsync(other);
+        var comparison = new RunTraceComparer().Compare(left, right, ComparisonIntent.TfrtOptimization());
+        var review = TraceReviewBuilder.Build(left, right, comparison, path, other);
+
+        review.Signal.Should().Be("latency_ms");
+        review.LeftValues.Should().Equal(10d, 10d, 12d, 11d, 10d, 10d, 13d, 10d);
+        review.LeftThroughput.Should().Equal(100d, 110d, 90d, 100d, 100d, 100d, 80d, 100d);
+        review.RightThroughput.Should().Equal(200d, 200d, 180d, 200d, 200d, 200d, 160d, 200d);
     }
 
     private static string NewDirectory()

@@ -792,8 +792,8 @@ public partial class ComparisonViewModel : ObservableObject
         AutoSummary = review.Verdict;
         ComparisonSummary = review.Caption;
         InterpretationVerdict = review.Verdict;
-        LeftDescription = DescribeSide(review.LeftLabel, review, review.LeftP50, review.LeftP95, review.LeftValues.Count);
-        RightDescription = DescribeSide(review.RightLabel, review, review.RightP50, review.RightP95, review.RightValues.Count);
+        LeftDescription = DescribeSide(review.LeftLabel, review, review.LeftP50, review.LeftP95, review.LeftP99, review.LeftAnomalies.Count, review.LeftValues.Count);
+        RightDescription = DescribeSide(review.RightLabel, review, review.RightP50, review.RightP95, review.RightP99, review.RightAnomalies.Count, review.RightValues.Count);
         FrameworkName = "TFRT";
         PresetName = "TFRT Runtime";
         HasPreset = true;
@@ -803,11 +803,12 @@ public partial class ComparisonViewModel : ObservableObject
         SyncChrome();
     }
 
-    private static string DescribeSide(string label, TraceReview review, double? p50, double? p95, int count)
+    private static string DescribeSide(string label, TraceReview review, double? p50, double? p95, double? p99, int anomalies, int count)
     {
         var mid = p50 is double median ? median.ToString("0.###", CultureInfo.InvariantCulture) : "none";
         var tail = p95 is double high ? high.ToString("0.###", CultureInfo.InvariantCulture) : "none";
-        return $"{label} · {review.Signal} · {count} samples · p50 {mid} {review.Unit} · p95 {tail} {review.Unit}";
+        var far = p99 is double extreme ? extreme.ToString("0.###", CultureInfo.InvariantCulture) : "none";
+        return $"{label} · {review.Signal} · {count} samples · p50 {mid} {review.Unit} · p95 {tail} {review.Unit} · p99 {far} {review.Unit} · {anomalies} anomaly marks";
     }
 
     private void TryRecordTrace(TraceReview review)

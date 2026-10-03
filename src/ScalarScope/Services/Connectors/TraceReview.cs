@@ -34,6 +34,11 @@ public static class TraceOpen
 /// </summary>
 public readonly record struct TraceDistributionPoint(double Value, double Probability);
 
+/// <summary>
+/// Rolling mean ± population standard deviation. This is a spread band, not a confidence interval.
+/// </summary>
+public readonly record struct TraceBandPoint(double Low, double High);
+
 public sealed record TraceFinding
 {
     public required string Symbol { get; init; }
@@ -58,10 +63,20 @@ public sealed record TraceReview
     public required IReadOnlyList<double?> RightValues { get; init; }
     public required IReadOnlyList<TraceDistributionPoint> LeftDistribution { get; init; }
     public required IReadOnlyList<TraceDistributionPoint> RightDistribution { get; init; }
+    public required IReadOnlyList<TraceBandPoint?> LeftBand { get; init; }
+    public required IReadOnlyList<TraceBandPoint?> RightBand { get; init; }
+    public required IReadOnlyList<int> LeftAnomalies { get; init; }
+    public required IReadOnlyList<int> RightAnomalies { get; init; }
+    public int? LeftSteadyIndex { get; init; }
+    public int? RightSteadyIndex { get; init; }
+    public required IReadOnlyList<double?> LeftThroughput { get; init; }
+    public required IReadOnlyList<double?> RightThroughput { get; init; }
     public double? LeftP50 { get; init; }
     public double? LeftP95 { get; init; }
+    public double? LeftP99 { get; init; }
     public double? RightP50 { get; init; }
     public double? RightP95 { get; init; }
+    public double? RightP99 { get; init; }
     public required string Caption { get; init; }
     public required string Verdict { get; init; }
     public required IReadOnlyList<TraceFinding> Findings { get; init; }
@@ -118,8 +133,9 @@ public static class TraceReviewBuilder
                 fired.Add(finding.Symbol);
         }
 
+        var throughput = ThroughputWindows(left, right, signal, alignment);
         var unit = UnitLabel(leftSeries?.Unit ?? rightSeries?.Unit ?? ScalarUnit.None);
-        var caption = string.Create(CultureInfo.InvariantCulture, $"{signal} ({unit}). {alignment.Summary}. p50 and p95 are nearest-rank on this window. The distribution is the empirical CDF of these same samples.");
+        var caption = string.Create(CultureInfo.InvariantCulture, $"{signal} ({unit}). {alignment.Summary}. The band is a centered 5-sample rolling mean ± population standard deviation, not a confidence interval. Marks are 3-sigma on this window. p50, p95, and p99 are nearest-rank. The distribution is the empirical CDF of these same samples.");
         var verdictParts = findings.Select(finding => $"{finding.Symbol} {finding.Text}").ToList();
         if (verdictParts.Count == 0)
             verdictParts.Add($"No delta fired on {signal}.");
@@ -139,10 +155,20 @@ public static class TraceReviewBuilder
             RightValues = rightValues,
             LeftDistribution = EmpiricalCdf(leftFinite),
             RightDistribution = EmpiricalCdf(rightFinite),
+            LeftBand = DeviationBand(leftValues),
+            RightBand = DeviationBand(rightValues),
+            LeftAnomalies = ThreeSigmaIndices(leftValues),
+            RightAnomalies = ThreeSigmaIndices(rightValues),
+            LeftSteadyIndex = SteadyIndex(left.Timeline.Steps, alignment.SkippedStepsA, alignment.AlignedStepCount, left.Milestones.SteadyStateStartStep),
+            RightSteadyIndex = SteadyIndex(right.Timeline.Steps, alignment.SkippedStepsB, alignment.AlignedStepCount, right.Milestones.SteadyStateStartStep),
+            LeftThroughput = throughput.Left,
+            RightThroughput = throughput.Right,
             LeftP50 = Percentile(leftFinite, 0.50),
             LeftP95 = Percentile(leftFinite, 0.95),
+            LeftP99 = Percentile(leftFinite, 0.99),
             RightP50 = Percentile(rightFinite, 0.50),
             RightP95 = Percentile(rightFinite, 0.95),
+            RightP99 = Percentile(rightFinite, 0.99),
             Caption = caption,
             Verdict = string.Join(" ", verdictParts),
             Findings = findings,
@@ -165,6 +191,79 @@ public static class TraceReviewBuilder
         if (rank >= sortedAscending.Count)
             rank = sortedAscending.Count - 1;
         return sortedAscending[rank];
+    }
+
+    public const int DeviationRadius = 2;
+
+    /// <summary>
+    /// Centered window of five samples, clipped at the ends. Population standard deviation, divide by the count.
+    /// A window with fewer than two numbers has no band.
+    /// </summary>
+    public static IReadOnlyList<TraceBandPoint?> DeviationBand(IReadOnlyList<double?> values)
+    {
+        var result = new TraceBandPoint?[values.Count];
+        for (var index = 0; index < values.Count; index++)
+        {
+            var window = new List<double>();
+            var start = Math.Max(0, index - DeviationRadius);
+            var end = Math.Min(values.Count - 1, index + DeviationRadius);
+            for (var cursor = start; cursor <= end; cursor++)
+            {
+                if (values[cursor] is double number && double.IsFinite(number))
+                    window.Add(number);
+            }
+
+            if (window.Count < 2)
+                continue;
+
+            var mean = window.Average();
+            var standardDeviation = Math.Sqrt(window.Sum(value => Math.Pow(value - mean, 2)) / window.Count);
+            result[index] = new TraceBandPoint(mean - standardDeviation, mean + standardDeviation);
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Indices whose value sits more than three population standard deviations from the window mean.
+    /// Fewer than three numbers produces no marks. This is the same rule ΔF uses.
+    /// </summary>
+    public static IReadOnlyList<int> ThreeSigmaIndices(IReadOnlyList<double?> values)
+    {
+        var finite = new List<(int Index, double Value)>();
+        for (var index = 0; index < values.Count; index++)
+        {
+            if (values[index] is double number && double.IsFinite(number))
+                finite.Add((index, number));
+        }
+
+        if (finite.Count < 3)
+            return [];
+
+        var mean = finite.Average(sample => sample.Value);
+        var standardDeviation = Math.Sqrt(finite.Sum(sample => Math.Pow(sample.Value - mean, 2)) / finite.Count);
+        var threshold = 3 * standardDeviation;
+        return finite.Where(sample => Math.Abs(sample.Value - mean) > threshold)
+            .Select(sample => sample.Index)
+            .ToList();
+    }
+
+    /// <summary>
+    /// Index of the first aligned step at or after the steady-state milestone. Missing milestone means no span.
+    /// </summary>
+    public static int? SteadyIndex(IReadOnlyList<int> steps, int skip, int count, int? steadyStep)
+    {
+        if (steadyStep is not int steady || count <= 0)
+            return null;
+
+        var window = steps.Skip(Math.Max(0, skip)).Take(count).ToList();
+        for (var index = 0; index < window.Count; index++)
+        {
+            if (window[index] >= steady)
+                return index;
+        }
+
+        return null;
     }
 
     public static IReadOnlyList<TraceDistributionPoint> EmpiricalCdf(IReadOnlyList<double> sortedAscending)
@@ -194,6 +293,25 @@ public static class TraceReviewBuilder
             return names.First(name => name.Equals(fromDelta, StringComparison.OrdinalIgnoreCase));
 
         return names.FirstOrDefault() ?? "latency_ms";
+    }
+
+    private static (IReadOnlyList<double?> Left, IReadOnlyList<double?> Right) ThroughputWindows(
+        RuntimeRunTrace left,
+        RuntimeRunTrace right,
+        string signal,
+        AlignmentResult alignment)
+    {
+        if (signal.Equals("throughput_items_per_sec", StringComparison.OrdinalIgnoreCase))
+            return ([], []);
+
+        var leftSeries = left.Scalars.GetByName("throughput_items_per_sec");
+        var rightSeries = right.Scalars.GetByName("throughput_items_per_sec");
+        if (leftSeries == null || rightSeries == null)
+            return ([], []);
+
+        return (
+            Window(leftSeries, alignment.SkippedStepsA, alignment.AlignedStepCount),
+            Window(rightSeries, alignment.SkippedStepsB, alignment.AlignedStepCount));
     }
 
     private static IReadOnlyList<double?> Window(RuntimeScalarSeries? series, int skip, int count)

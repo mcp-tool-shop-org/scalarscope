@@ -86,23 +86,64 @@ public class TraceReviewCanvas : SKCanvasView
     {
         var count = Math.Max(review.LeftValues.Count, review.RightValues.Count);
         var finite = Finite(review.LeftValues).Concat(Finite(review.RightValues)).ToList();
+        foreach (var band in review.LeftBand.Concat(review.RightBand))
+        {
+            if (band is TraceBandPoint point)
+            {
+                finite.Add(point.Low);
+                finite.Add(point.High);
+            }
+        }
+
         if (finite.Count == 0 || count == 0)
             return;
+
+        var hasThroughput = review.LeftThroughput.Count > 0 && review.RightThroughput.Count > 0;
+        var seriesPlot = plot;
+        SKRect throughputPlot = default;
+        if (hasThroughput)
+        {
+            var split = plot.Top + plot.Height * 0.72f;
+            seriesPlot = new SKRect(plot.Left, plot.Top, plot.Right, split - 8);
+            throughputPlot = new SKRect(plot.Left, split + 4, plot.Right, plot.Bottom);
+        }
 
         var min = finite.Min();
         var max = finite.Max();
         Pad(ref min, ref max);
-        DrawFrame(canvas, plot, paint);
-        DrawPolyline(canvas, plot, review.LeftValues, count, min, max, LeftColor);
-        DrawPolyline(canvas, plot, review.RightValues, count, min, max, RightColor);
+        DrawSteadySpan(canvas, seriesPlot, review.LeftSteadyIndex, count, LeftColor.WithAlpha(36));
+        DrawSteadySpan(canvas, seriesPlot, review.RightSteadyIndex, count, RightColor.WithAlpha(36));
+        DrawFrame(canvas, seriesPlot, paint);
+        DrawBand(canvas, seriesPlot, review.LeftBand, count, min, max, LeftColor.WithAlpha(48));
+        DrawBand(canvas, seriesPlot, review.RightBand, count, min, max, RightColor.WithAlpha(48));
+        DrawPolyline(canvas, seriesPlot, review.LeftValues, count, min, max, LeftColor);
+        DrawPolyline(canvas, seriesPlot, review.RightValues, count, min, max, RightColor);
+        DrawAnomalies(canvas, seriesPlot, review.LeftValues, review.LeftAnomalies, count, min, max, LeftColor);
+        DrawAnomalies(canvas, seriesPlot, review.RightValues, review.RightAnomalies, count, min, max, RightColor);
 
         var index = IndexAt(CurrentTime, count);
-        var x = plot.Left + (count == 1 ? plot.Width / 2f : (float)index / (count - 1) * plot.Width);
+        var x = XAt(seriesPlot, index, count);
         paint.Color = Playhead;
         paint.StrokeWidth = 2;
-        canvas.DrawLine(x, plot.Top, x, plot.Bottom, paint);
+        canvas.DrawLine(x, seriesPlot.Top, x, hasThroughput ? throughputPlot.Bottom : seriesPlot.Bottom, paint);
         paint.Color = CaptionColor;
-        canvas.DrawText($"step {index + 1} of {count}", plot.Left, 24, font, paint);
+        var marks = review.LeftAnomalies.Count + review.RightAnomalies.Count;
+        canvas.DrawText($"step {index + 1} of {count} · {marks} anomaly marks", seriesPlot.Left, 24, font, paint);
+
+        if (!hasThroughput)
+            return;
+
+        var throughput = Finite(review.LeftThroughput).Concat(Finite(review.RightThroughput)).ToList();
+        if (throughput.Count == 0)
+            return;
+
+        var throughputMin = throughput.Min();
+        var throughputMax = throughput.Max();
+        Pad(ref throughputMin, ref throughputMax);
+        DrawSteadySpan(canvas, throughputPlot, review.LeftSteadyIndex, count, LeftColor.WithAlpha(28));
+        DrawFrame(canvas, throughputPlot, paint);
+        DrawPolyline(canvas, throughputPlot, review.LeftThroughput, count, throughputMin, throughputMax, LeftColor);
+        DrawPolyline(canvas, throughputPlot, review.RightThroughput, count, throughputMin, throughputMax, RightColor);
     }
 
     private static void DrawDistribution(SKCanvas canvas, SKRect plot, TraceReview review, double time, SKFont font, SKPaint paint)
@@ -119,6 +160,8 @@ public class TraceReviewCanvas : SKCanvasView
         DrawFrame(canvas, plot, paint);
         DrawCdf(canvas, plot, review.LeftDistribution, min, max, LeftColor);
         DrawCdf(canvas, plot, review.RightDistribution, min, max, RightColor);
+        DrawPercentileTick(canvas, plot, review.LeftP99, min, max, LeftColor);
+        DrawPercentileTick(canvas, plot, review.RightP99, min, max, RightColor);
         paint.Color = CaptionColor;
         canvas.DrawText("empirical CDF", plot.Left, 24, font, paint);
         MarkPlayhead(canvas, plot, review.LeftValues, review.LeftDistribution, time, min, max, LeftColor);
@@ -144,6 +187,97 @@ public class TraceReviewCanvas : SKCanvasView
         var y = plot.Bottom - (float)rank * plot.Height;
         using var paint = new SKPaint { IsAntialias = true, Color = color, Style = SKPaintStyle.Fill };
         canvas.DrawCircle(x, y, 6, paint);
+    }
+
+    private static void DrawSteadySpan(SKCanvas canvas, SKRect plot, int? start, int count, SKColor color)
+    {
+        if (start is not int index || count <= 0 || index >= count)
+            return;
+
+        var left = XAt(plot, index, count);
+        using var paint = new SKPaint { Color = color, Style = SKPaintStyle.Fill, IsAntialias = true };
+        canvas.DrawRect(new SKRect(left, plot.Top, plot.Right, plot.Bottom), paint);
+    }
+
+    private static void DrawBand(
+        SKCanvas canvas,
+        SKRect plot,
+        IReadOnlyList<TraceBandPoint?> band,
+        int count,
+        double min,
+        double max,
+        SKColor color)
+    {
+        using var paint = new SKPaint { Color = color, Style = SKPaintStyle.Fill, IsAntialias = true };
+        using var path = new SKPath();
+        var run = new List<(float X, float Low, float High)>();
+        void Flush()
+        {
+            if (run.Count == 0)
+                return;
+            path.MoveTo(run[0].X, run[0].High);
+            foreach (var point in run)
+                path.LineTo(point.X, point.High);
+            for (var index = run.Count - 1; index >= 0; index--)
+                path.LineTo(run[index].X, run[index].Low);
+            path.Close();
+            run.Clear();
+        }
+
+        for (var index = 0; index < band.Count; index++)
+        {
+            if (band[index] is not TraceBandPoint point)
+            {
+                Flush();
+                continue;
+            }
+
+            var x = XAt(plot, index, count);
+            var high = plot.Bottom - (float)((point.High - min) / (max - min)) * plot.Height;
+            var low = plot.Bottom - (float)((point.Low - min) / (max - min)) * plot.Height;
+            run.Add((x, low, high));
+        }
+
+        Flush();
+        canvas.DrawPath(path, paint);
+    }
+
+    private static void DrawAnomalies(
+        SKCanvas canvas,
+        SKRect plot,
+        IReadOnlyList<double?> values,
+        IReadOnlyList<int> indices,
+        int count,
+        double min,
+        double max,
+        SKColor color)
+    {
+        using var fill = new SKPaint { Color = Playhead, Style = SKPaintStyle.Fill, IsAntialias = true };
+        using var ring = new SKPaint { Color = color, Style = SKPaintStyle.Stroke, StrokeWidth = 2, IsAntialias = true };
+        foreach (var index in indices)
+        {
+            if (index < 0 || index >= values.Count || values[index] is not double value || !double.IsFinite(value))
+                continue;
+            var x = XAt(plot, index, count);
+            var y = plot.Bottom - (float)((value - min) / (max - min)) * plot.Height;
+            canvas.DrawCircle(x, y, 6, fill);
+            canvas.DrawCircle(x, y, 6, ring);
+        }
+    }
+
+    private static void DrawPercentileTick(SKCanvas canvas, SKRect plot, double? percentile, double min, double max, SKColor color)
+    {
+        if (percentile is not double value || !double.IsFinite(value))
+            return;
+
+        var x = MapRange(value, min, max, plot.Left, plot.Right);
+        using var paint = new SKPaint { Color = color, StrokeWidth = 2, IsAntialias = true };
+        canvas.DrawLine(x, plot.Bottom, x, plot.Bottom - 14, paint);
+    }
+
+    private static float XAt(SKRect plot, int index, int count)
+    {
+        return plot.Left + (count <= 1 ? plot.Width / 2f : (float)index / (count - 1) * plot.Width);
     }
 
     private static void DrawPolyline(
