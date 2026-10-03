@@ -272,6 +272,10 @@ dotnet test --filter Category=Determinism
 
 # With coverage
 dotnet test --collect:"XPlat Code Coverage"
+
+# Rust review. Line coverage has to stay above 90%.
+cd rust
+cargo llvm-cov --offline --locked --all-targets --fail-under-lines 90
 ```
 
 ---

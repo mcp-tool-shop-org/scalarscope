@@ -2,6 +2,8 @@
 bin/
 obj/
 rust/target/
+rust/lcov.info
+lcov.info
 .vs/
 *.user
 *.suo

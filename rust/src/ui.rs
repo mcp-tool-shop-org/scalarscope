@@ -12,6 +12,68 @@ use crate::prefs::{self, SavedView};
 use crate::readings::Band;
 use crate::review::{self, InferenceReview, Pair, TrainingReview};
 
+#[cfg(test)]
+thread_local! {
+    static NEXT_PICK: std::cell::RefCell<Option<Option<std::path::PathBuf>>> = const { std::cell::RefCell::new(None) };
+    static NEXT_SAVE: std::cell::RefCell<Option<Option<std::path::PathBuf>>> = const { std::cell::RefCell::new(None) };
+}
+
+#[cfg(test)]
+fn take_pick() -> Option<Option<std::path::PathBuf>> {
+    NEXT_PICK.with(|slot| slot.borrow_mut().take())
+}
+
+#[cfg(test)]
+fn take_save() -> Option<Option<std::path::PathBuf>> {
+    NEXT_SAVE.with(|slot| slot.borrow_mut().take())
+}
+
+#[cfg(not(test))]
+fn take_pick() -> Option<Option<std::path::PathBuf>> {
+    None
+}
+
+#[cfg(not(test))]
+fn take_save() -> Option<Option<std::path::PathBuf>> {
+    None
+}
+
+#[cfg(test)]
+fn queue_pick(path: Option<std::path::PathBuf>) {
+    NEXT_PICK.with(|slot| *slot.borrow_mut() = Some(path));
+}
+
+#[cfg(test)]
+fn queue_save(path: Option<std::path::PathBuf>) {
+    NEXT_SAVE.with(|slot| *slot.borrow_mut() = Some(path));
+}
+
+fn pick_run() -> Option<std::path::PathBuf> {
+    if let Some(queued) = take_pick() {
+        return queued;
+    }
+    rfd::FileDialog::new().add_filter("Run", &["json", "csv", "log"]).pick_file()
+}
+
+fn pick_bundle() -> Option<std::path::PathBuf> {
+    if let Some(queued) = take_pick() {
+        return queued;
+    }
+    rfd::FileDialog::new()
+        .add_filter("ScalarScope bundle", &["scbundle"])
+        .pick_file()
+}
+
+fn pick_save_path() -> Option<std::path::PathBuf> {
+    if let Some(queued) = take_save() {
+        return queued;
+    }
+    rfd::FileDialog::new()
+        .add_filter("ScalarScope bundle", &["scbundle"])
+        .set_file_name("review.scbundle")
+        .save_file()
+}
+
 
 
 pub struct ScalarScopeApp {
@@ -153,10 +215,7 @@ impl eframe::App for ScalarScopeApp {
 
 impl ScalarScopeApp {
     fn load(&mut self, left: bool) {
-        let Some(path) = rfd::FileDialog::new()
-            .add_filter("Run", &["json", "csv", "log"])
-            .pick_file()
-        else {
+        let Some(path) = pick_run() else {
             return;
         };
         match open_path(&path) {
@@ -184,10 +243,7 @@ impl ScalarScopeApp {
     }
 
     fn open_bundle(&mut self) {
-        let Some(path) = rfd::FileDialog::new()
-            .add_filter("ScalarScope bundle", &["scbundle"])
-            .pick_file()
-        else {
+        let Some(path) = pick_bundle() else {
             return;
         };
         match bundle::open_file(&path) {
@@ -217,11 +273,7 @@ impl ScalarScopeApp {
                 return;
             }
         };
-        let Some(path) = rfd::FileDialog::new()
-            .add_filter("ScalarScope bundle", &["scbundle"])
-            .set_file_name("review.scbundle")
-            .save_file()
-        else {
+        let Some(path) = pick_save_path() else {
             return;
         };
         let document = bundle::document_from_pair(&built);
@@ -651,3 +703,7 @@ pub fn install_style(cc: &eframe::CreationContext<'_>) {
     visuals.window_fill = Color32::from_rgb(0x12, 0x12, 0x1f);
     cc.egui_ctx.set_visuals(visuals);
 }
+
+#[cfg(test)]
+#[path = "ui_tests.rs"]
+mod tests;

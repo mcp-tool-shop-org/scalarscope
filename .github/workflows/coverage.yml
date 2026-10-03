@@ -1,0 +1,70 @@
+name: Coverage
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: rust
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dtolnay/rust-toolchain@7e38f4b43b4db5c8dd498af069a4f6196df1d067
+        with:
+          toolchain: 1.98.1
+          components: llvm-tools
+      - uses: taiki-e/install-action@861a07ce7084f55488e375df125cdc99bba60eb7
+        with:
+          tool: cargo-llvm-cov
+      - name: Test
+        run: cargo llvm-cov --locked --all-targets --lcov --output-path lcov.info --remap-path-prefix --fail-under-lines 90
+      - name: Point the report at the Rust crate
+        shell: pwsh
+        run: |
+          $lines = [System.IO.File]::ReadAllLines("$pwd\lcov.info") | ForEach-Object {
+            if ($_.StartsWith("SF:")) {
+              ($_ -replace '\\','/') -replace '^SF:src/','SF:rust/src/'
+            } else {
+              $_
+            }
+          }
+          $utf8 = New-Object System.Text.UTF8Encoding $false
+          [System.IO.File]::WriteAllLines("$pwd\lcov.info", $lines, $utf8)
+      - name: Save coverage for Codecov
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: codecov-coverage
+          path: rust/lcov.info
+          if-no-files-found: error
+          retention-days: 3
+          overwrite: true
+
+  codecov:
+    needs: test
+    if: ${{ needs.test.result == 'success' && (github.event_name == 'pull_request' || github.ref == format('refs/heads/{0}', github.event.repository.default_branch)) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Download coverage
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: codecov-coverage
+          path: coverage
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          version: v11.3.1
+          use_oidc: true
+          fail_ci_if_error: true
+          disable_search: true
+          files: coverage/lcov.info
