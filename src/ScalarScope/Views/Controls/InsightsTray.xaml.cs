@@ -60,6 +60,14 @@ public partial class InsightsTray : ContentView
         RefreshInsightsList();
     }
 
+    public List<InsightEvent> CopyInsights()
+    {
+        if (_bundleInsights != null)
+            return [.. _bundleInsights];
+
+        return [.. InsightFeedService.Instance.Insights];
+    }
+
     /// <summary>
     /// Phase 7.2: Clear bundle insights (exit review mode).
     /// </summary>

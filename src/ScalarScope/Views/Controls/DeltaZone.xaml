@@ -47,7 +47,7 @@
                         BackgroundColor="Transparent"
                         Padding="6,4"
                         CornerRadius="4"
-                        IsVisible="{Binding HasDeltas, Source={x:Reference deltaZoneRoot}}"
+                        IsVisible="False"
                         Clicked="OnExportBundleClicked"/>
                 <Button Grid.Column="4"
                         x:Name="copyButton"

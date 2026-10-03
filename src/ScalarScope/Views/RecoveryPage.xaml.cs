@@ -91,22 +91,7 @@ public partial class RecoveryPage : ContentPage
             && !string.IsNullOrEmpty(sessionState.LoadedFilePath)
             && File.Exists(sessionState.LoadedFilePath);
 
-        await Shell.Current.GoToAsync(ResumeDestination(sessionState?.CurrentPage, hasFile));
-    }
-
-    /// <summary>
-    /// Only the four shell tabs exist. A restored file opens Compare. Anything else opens Home.
-    /// </summary>
-    private static string ResumeDestination(string? currentPage, bool hasFile)
-    {
-        return currentPage?.Trim().ToLowerInvariant() switch
-        {
-            "welcome" => "//welcome",
-            "compare" => "//compare",
-            "help" => "//help",
-            "settings" => "//settings",
-            _ => hasFile ? "//compare" : "//welcome"
-        };
+        await GoToTab(ShellDestinations.Resume(sessionState?.CurrentPage, hasFile), hasFile);
     }
 
     private async void OnStartFreshClicked(object sender, EventArgs e)
@@ -115,7 +100,40 @@ public partial class RecoveryPage : ContentPage
         CrashReportingService.AcknowledgeCrash();
         CrashReportingService.ClearSessionState();
 
-        await Shell.Current.GoToAsync("//welcome");
+        await GoToTab(ShellDestinations.Welcome, fileStillOnDisk: false);
+    }
+
+    /// <summary>
+    /// Only welcome, compare, help, and settings are registered tabs.
+    /// A failed route falls back to one of those. If that also fails, stay here.
+    /// </summary>
+    private async Task GoToTab(string route, bool fileStillOnDisk)
+    {
+        if (!ShellDestinations.IsTab(route))
+            route = fileStillOnDisk ? ShellDestinations.Compare : ShellDestinations.Welcome;
+
+        try
+        {
+            await Shell.Current.GoToAsync(route);
+        }
+        catch (Exception ex)
+        {
+            var fallback = fileStillOnDisk ? ShellDestinations.Compare : ShellDestinations.Welcome;
+            if (!string.Equals(route, fallback, StringComparison.Ordinal))
+            {
+                try
+                {
+                    await Shell.Current.GoToAsync(fallback);
+                    return;
+                }
+                catch (Exception fallbackEx)
+                {
+                    ex = fallbackEx;
+                }
+            }
+
+            await DisplayAlert("Could not leave recovery", ex.Message, "OK");
+        }
     }
 
     private async void OnSupportBundleClicked(object sender, EventArgs e)

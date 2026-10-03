@@ -317,32 +317,11 @@ public partial class SettingsViewModel : ObservableObject
     // --- About Section Commands ---
 
     [RelayCommand]
-    private async Task OpenDocumentation()
-    {
-        try
-        {
-            await Launcher.OpenAsync(new Uri("https://github.com/mcp-tool-shop/ScalarScope/blob/main/docs/README.md"));
-        }
-        catch { }
-    }
+    private Task OpenDocumentation() => ProductLinks.OpenDocumentation();
 
     [RelayCommand]
-    private async Task OpenGitHub()
-    {
-        try
-        {
-            await Launcher.OpenAsync(new Uri("https://github.com/mcp-tool-shop/ScalarScope"));
-        }
-        catch { }
-    }
+    private Task OpenGitHub() => ProductLinks.OpenRepository();
 
     [RelayCommand]
-    private async Task OpenIssue()
-    {
-        try
-        {
-            await Launcher.OpenAsync(new Uri("https://github.com/mcp-tool-shop/ScalarScope/issues/new"));
-        }
-        catch { }
-    }
+    private Task OpenIssue() => ProductLinks.OpenNewIssue();
 }

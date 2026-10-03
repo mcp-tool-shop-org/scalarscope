@@ -19,6 +19,10 @@ public class OverlayComparisonCanvas : SKCanvasView
         BindableProperty.Create(nameof(Runs), typeof(IList<GeometryRun>), typeof(OverlayComparisonCanvas),
             propertyChanged: OnRunsChanged);
 
+    public static readonly BindableProperty AllowDemoFallbackProperty =
+        BindableProperty.Create(nameof(AllowDemoFallback), typeof(bool), typeof(OverlayComparisonCanvas), true,
+            propertyChanged: OnInvalidate);
+
     public static readonly BindableProperty CurrentTimeProperty =
         BindableProperty.Create(nameof(CurrentTime), typeof(double), typeof(OverlayComparisonCanvas), 0.0,
             propertyChanged: OnInvalidate);
@@ -43,6 +47,15 @@ public class OverlayComparisonCanvas : SKCanvasView
     {
         get => (IList<GeometryRun>?)GetValue(RunsProperty);
         set => SetValue(RunsProperty, value);
+    }
+
+    /// <summary>
+    /// An empty list after a real load is missing data, not a request to draw the demo pair.
+    /// </summary>
+    public bool AllowDemoFallback
+    {
+        get => (bool)GetValue(AllowDemoFallbackProperty);
+        set => SetValue(AllowDemoFallbackProperty, value);
     }
 
     public double CurrentTime
@@ -124,7 +137,7 @@ public class OverlayComparisonCanvas : SKCanvasView
     private void OnDemoAnimationFrame()
     {
         // Only repaint if we're showing demo data
-        if (Runs is null || Runs.Count == 0)
+        if (AllowDemoFallback && (Runs is null || Runs.Count == 0))
         {
             MainThread.BeginInvokeOnMainThread(InvalidateSurface);
         }
@@ -193,7 +206,7 @@ public class OverlayComparisonCanvas : SKCanvasView
         _currentRenderRuns = Runs;
         _isRenderingDemo = false;
         
-        if (_currentRenderRuns is null || _currentRenderRuns.Count == 0)
+        if (AllowDemoFallback && (_currentRenderRuns is null || _currentRenderRuns.Count == 0))
         {
             var demoA = DemoStateService.Instance.DemoPathA;
             var demoB = DemoStateService.Instance.DemoPathB;

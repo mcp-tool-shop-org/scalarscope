@@ -25,6 +25,14 @@ public class ComparisonTrajectoryCanvas : SKCanvasView
     public static readonly BindableProperty LabelProperty =
         BindableProperty.Create(nameof(Label), typeof(string), typeof(ComparisonTrajectoryCanvas), "");
 
+    public static readonly BindableProperty IsPathAProperty =
+        BindableProperty.Create(nameof(IsPathA), typeof(bool), typeof(ComparisonTrajectoryCanvas), false,
+            propertyChanged: OnHighlightChanged);
+
+    public static readonly BindableProperty AllowDemoFallbackProperty =
+        BindableProperty.Create(nameof(AllowDemoFallback), typeof(bool), typeof(ComparisonTrajectoryCanvas), true,
+            propertyChanged: OnHighlightChanged);
+
     public static readonly BindableProperty AccentColorProperty =
         BindableProperty.Create(nameof(AccentColor), typeof(Color), typeof(ComparisonTrajectoryCanvas), Colors.Cyan);
 
@@ -61,6 +69,24 @@ public class ComparisonTrajectoryCanvas : SKCanvasView
     {
         get => (string)GetValue(LabelProperty);
         set => SetValue(LabelProperty, value);
+    }
+
+    /// <summary>
+    /// True for the left canvas. Do not infer this from letters inside the label.
+    /// </summary>
+    public bool IsPathA
+    {
+        get => (bool)GetValue(IsPathAProperty);
+        set => SetValue(IsPathAProperty, value);
+    }
+
+    /// <summary>
+    /// When false, a missing run stays empty. A loaded trace must not draw the demo path.
+    /// </summary>
+    public bool AllowDemoFallback
+    {
+        get => (bool)GetValue(AllowDemoFallbackProperty);
+        set => SetValue(AllowDemoFallbackProperty, value);
     }
 
     public Color AccentColor
@@ -132,7 +158,7 @@ public class ComparisonTrajectoryCanvas : SKCanvasView
     private void OnDemoAnimationFrame()
     {
         // Only repaint if we're showing demo data
-        if (Run is null)
+        if (Run is null && AllowDemoFallback)
         {
             MainThread.BeginInvokeOnMainThread(InvalidateSurface);
         }
@@ -170,12 +196,11 @@ public class ComparisonTrajectoryCanvas : SKCanvasView
         _currentRenderRun = Run;
         _isRenderingDemo = false;
 
-        if (_currentRenderRun is null)
+        if (_currentRenderRun is null && AllowDemoFallback)
         {
-            // Use demo data: Path A for "A", Path B for "B" or anything else
-            var isPathA = Label?.ToUpperInvariant().Contains('A') == true;
+            var isPathA = IsPathA || string.Equals(Label?.Trim(), "Path A", StringComparison.OrdinalIgnoreCase);
             _currentRenderRun = isPathA ? DemoStateService.Instance.DemoPathA : DemoStateService.Instance.DemoPathB;
-            _isRenderingDemo = true;
+            _isRenderingDemo = _currentRenderRun != null;
         }
 
         // Apply dimming overlay if this run is weaker

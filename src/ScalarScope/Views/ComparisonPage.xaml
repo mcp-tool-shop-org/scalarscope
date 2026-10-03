@@ -186,6 +186,8 @@
                                                   Run="{Binding LeftRun}"
                                                   CurrentTime="{Binding Player.Time}"
                                                   Label="Path A"
+                                                  IsPathA="True"
+                                                  AllowDemoFallback="{Binding UseDemoFallback}"
                                                   AccentColor="#4ecdc4"
                                                   IsDominant="{Binding IsLeftDominant}"
                                                   ShowAnnotations="{Binding IsToggled, Source={x:Reference annotationsSwitch}}"/>
@@ -199,6 +201,8 @@
                                                   Run="{Binding RightRun}"
                                                   CurrentTime="{Binding Player.Time}"
                                                   Label="Path B"
+                                                  IsPathA="False"
+                                                  AllowDemoFallback="{Binding UseDemoFallback}"
                                                   AccentColor="#ff6b6b"
                                                   IsDominant="{Binding IsRightDominant}"
                                                   ShowAnnotations="{Binding IsToggled, Source={x:Reference annotationsSwitch}}"/>
@@ -207,6 +211,7 @@
         <!-- Overlay Canvas (overlay mode) -->
         <controls:OverlayComparisonCanvas Grid.Row="4"
                                           Runs="{Binding OverlayRuns}"
+                                          AllowDemoFallback="{Binding UseDemoFallback}"
                                           CurrentTime="{Binding Player.Time}"
                                           ShowDeviation="{Binding ShowDeviation}"
                                           ShowStatisticalBands="{Binding ShowStatisticalBands}"
@@ -308,7 +313,9 @@
                 <controls:DeltaZone x:Name="deltaZone"
                                     Deltas="{Binding CanonicalDeltas}"
                                     AlignmentDescription="{Binding AlignmentDescription}"
-                                    HighlightedDeltaId="{Binding HighlightedDeltaId}"/>
+                                    HighlightedDeltaId="{Binding HighlightedDeltaId}"
+                                    CanExport="{Binding CanExportBundle}"/>
+                <controls:BundleExportPanel x:Name="bundleExportPanel"/>
             </VerticalStackLayout>
             
             <!-- Insights Tray (Phase 4: Teaching) -->
@@ -358,6 +365,7 @@
         <controls:ComparisonAnalyticsPanel Grid.Row="8"
                                            LeftRun="{Binding LeftRun}"
                                            RightRun="{Binding RightRun}"
+                                           AllowDemoFallback="{Binding UseDemoFallback}"
                                            CurrentTime="{Binding Player.Time}"
                                            Margin="10,5">
             <controls:ComparisonAnalyticsPanel.IsVisible>

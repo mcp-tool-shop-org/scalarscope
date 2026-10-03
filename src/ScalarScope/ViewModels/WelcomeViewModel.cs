@@ -83,8 +83,16 @@ public partial class WelcomeViewModel : ObservableObject
     [RelayCommand]
     private async Task TryExample()
     {
-        App.Comparison.RequestDemoOpen();
-        await Shell.Current.GoToAsync("//compare?demo=true");
+        try
+        {
+            App.Comparison.RequestDemoOpen();
+            await Shell.Current.GoToAsync("//compare?demo=true");
+        }
+        catch (Exception ex)
+        {
+            if (Shell.Current != null)
+                await Shell.Current.DisplayAlert("Could not open the example", ex.Message, "OK");
+        }
     }
 
     /// <summary>
@@ -97,36 +105,44 @@ public partial class WelcomeViewModel : ObservableObject
         if (entry == null)
             return;
 
-        if (!string.IsNullOrWhiteSpace(entry.BundlePath) && File.Exists(entry.BundlePath))
+        try
         {
-            App.Comparison.RequestBundleOpen(entry.BundlePath);
-            await Shell.Current.GoToAsync($"//compare?bundle={Uri.EscapeDataString(entry.BundlePath)}");
-            return;
-        }
+            if (!string.IsNullOrWhiteSpace(entry.BundlePath) && File.Exists(entry.BundlePath))
+            {
+                App.Comparison.RequestBundleOpen(entry.BundlePath);
+                await Shell.Current.GoToAsync($"//compare?bundle={Uri.EscapeDataString(entry.BundlePath)}");
+                return;
+            }
 
-        if (string.Equals(entry.Kind, "example", StringComparison.Ordinal))
-        {
-            App.Comparison.RequestDemoOpen();
-            await Shell.Current.GoToAsync("//compare?demo=true");
-            return;
-        }
+            if (string.Equals(entry.Kind, "example", StringComparison.Ordinal))
+            {
+                App.Comparison.RequestDemoOpen();
+                await Shell.Current.GoToAsync("//compare?demo=true");
+                return;
+            }
 
-        if (!string.IsNullOrWhiteSpace(entry.LeftPath)
-            && !string.IsNullOrWhiteSpace(entry.RightPath)
-            && File.Exists(entry.LeftPath)
-            && File.Exists(entry.RightPath))
-        {
-            App.Comparison.RequestRunsOpen(entry.LeftPath, entry.RightPath);
-            await Shell.Current.GoToAsync("//compare");
-            return;
-        }
+            if (!string.IsNullOrWhiteSpace(entry.LeftPath)
+                && !string.IsNullOrWhiteSpace(entry.RightPath)
+                && File.Exists(entry.LeftPath)
+                && File.Exists(entry.RightPath))
+            {
+                App.Comparison.RequestRunsOpen(entry.LeftPath, entry.RightPath);
+                await Shell.Current.GoToAsync("//compare");
+                return;
+            }
 
-        if (Shell.Current != null)
+            if (Shell.Current != null)
+            {
+                await Shell.Current.DisplayAlert(
+                    "Cannot reopen",
+                    "The files for this review are no longer on disk. The deltas that fired are still in the log.",
+                    "OK");
+            }
+        }
+        catch (Exception ex)
         {
-            await Shell.Current.DisplayAlert(
-                "Cannot reopen",
-                "The files for this review are no longer on disk. The deltas that fired are still in the log.",
-                "OK");
+            if (Shell.Current != null)
+                await Shell.Current.DisplayAlert("Cannot reopen", ex.Message, "OK");
         }
     }
 
