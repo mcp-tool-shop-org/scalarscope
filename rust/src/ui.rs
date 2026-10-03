@@ -8,13 +8,11 @@ use egui_plot::{Line, Plot, PlotPoints, Points, Polygon, VLine};
 use crate::bundle::{self, OpenedBundle};
 use crate::history::{self, LogEntry};
 use crate::open::{open_path, Loaded, Side};
+use crate::prefs::{self, SavedView};
 use crate::readings::Band;
 use crate::review::{self, InferenceReview, Pair, TrainingReview};
 
-const LEFT: Color32 = Color32::from_rgb(0x4e, 0xcd, 0xc4);
-const RIGHT: Color32 = Color32::from_rgb(0xff, 0x6b, 0x6b);
-const MARK: Color32 = Color32::from_rgb(0xff, 0xd9, 0x3d);
-const NOTE: Color32 = Color32::from_rgb(0x9a, 0xa0, 0xb4);
+
 
 pub struct ScalarScopeApp {
     left: Option<Loaded>,
@@ -25,6 +23,10 @@ pub struct ScalarScopeApp {
     /// Set only when this process is the Store package. An unpackaged run leaves LocalState alone.
     history_dir: Option<std::path::PathBuf>,
     recent: Vec<LogEntry>,
+    files: Vec<prefs::RecentFile>,
+    views: Vec<SavedView>,
+    paint: Paint,
+    text_scale: f32,
     sitting_key: String,
 }
 
@@ -33,6 +35,9 @@ impl Default for ScalarScopeApp {
         let history_dir = history::package_local_state();
         let mut recent = history_dir.as_ref().map(|dir| history::read(dir)).unwrap_or_default();
         recent.truncate(history::HOME_COUNT);
+        let saved = history_dir.as_ref().map(|dir| prefs::read(dir)).unwrap_or_default();
+        let mut views = history_dir.as_ref().map(|dir| prefs::saved_views(dir)).unwrap_or_default();
+        views.truncate(12);
         Self {
             left: None,
             right: None,
@@ -41,6 +46,10 @@ impl Default for ScalarScopeApp {
             distribution: false,
             history_dir,
             recent,
+            files: saved.recent,
+            views,
+            paint: Paint::from_palette(prefs::series_palette(saved.color_vision, saved.high_contrast)),
+            text_scale: saved.text_scale,
             sitting_key: String::new(),
         }
     }
@@ -48,8 +57,17 @@ impl Default for ScalarScopeApp {
 
 impl eframe::App for ScalarScopeApp {
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
+        ui.ctx().set_zoom_factor(self.text_scale);
+        if self.paint.background != Color32::from_rgb(0x12, 0x12, 0x1f) {
+            let mut visuals = egui::Visuals::dark();
+            visuals.panel_fill = self.paint.background;
+            visuals.window_fill = self.paint.background;
+            visuals.extreme_bg_color = self.paint.background;
+            ui.ctx().set_visuals(visuals);
+        }
+        let paint = self.paint;
         ui.horizontal(|ui| {
-            ui.heading(RichText::new("ScalarScope").color(MARK));
+            ui.heading(RichText::new("ScalarScope").color(paint.mark));
             if ui.button("Open path A").clicked() {
                 self.load(true);
             }
@@ -65,10 +83,13 @@ impl eframe::App for ScalarScopeApp {
         });
         ui.add_space(6.0);
         ui.horizontal(|ui| {
-            ui.label(RichText::new(side_name(&self.left, "Path A")).color(LEFT));
+            ui.label(RichText::new(side_name(&self.left, "Path A")).color(paint.left));
             ui.label("vs");
-            ui.label(RichText::new(side_name(&self.right, "Path B")).color(RIGHT));
+            ui.label(RichText::new(side_name(&self.right, "Path B")).color(paint.right));
         });
+        if let Some(label) = paint.label {
+            ui.label(RichText::new(format!("Series colors follow the saved {label} palette.")).color(paint.note));
+        }
 
         let opened = self.opened.clone();
         if opened.is_none() {
@@ -82,7 +103,7 @@ impl eframe::App for ScalarScopeApp {
         }
         if !self.note.is_empty() {
             ui.add_space(6.0);
-            ui.label(RichText::new(&self.note).color(MARK));
+            ui.label(RichText::new(&self.note).color(paint.mark));
         }
 
         let built = if self.opened.is_none() {
@@ -101,27 +122,27 @@ impl eframe::App for ScalarScopeApp {
 
         ui.add_space(8.0);
         if let Some(opened) = opened {
-            ui.label(RichText::new(format!("Stored review · {}", &opened.bundle_hash[..16])).color(NOTE));
-            ui.label(RichText::new(bundle::CONTENT_CHECK).color(NOTE));
+            ui.label(RichText::new(format!("Stored review · {}", &opened.bundle_hash[..16])).color(paint.note));
+            ui.label(RichText::new(bundle::CONTENT_CHECK).color(paint.note));
             ui.add_space(6.0);
             match bundle::stored_pair(&opened.review) {
                 Some(Pair::Inference(review)) => self.draw_inference(ui, &review),
-                Some(Pair::Training(review)) => draw_training(ui, &review),
+                Some(Pair::Training(review)) => draw_training(ui, &review, paint),
                 None => {
                     if !opened.review.verdict.is_empty() {
                         ui.label(RichText::new(&opened.review.verdict).color(Color32::WHITE));
                     }
-                    ui.label(RichText::new(&opened.review.caption).color(NOTE));
+                    ui.label(RichText::new(&opened.review.caption).color(paint.note));
                 }
             }
         } else {
             match built {
                 Some(Pair::Inference(review)) => self.draw_inference(ui, &review),
-                Some(Pair::Training(review)) => draw_training(ui, &review),
+                Some(Pair::Training(review)) => draw_training(ui, &review, paint),
                 None => {
                     ui.label(
                         RichText::new("Open two inference traces, or two backpropagate run histories. Or open a .scbundle.")
-                            .color(NOTE),
+                            .color(paint.note),
                     );
                 }
             }
@@ -141,12 +162,15 @@ impl ScalarScopeApp {
         match open_path(&path) {
             Ok(loaded) => {
                 self.opened = None;
+                let remembered = self.remember_opened_file(&loaded);
                 if left {
                     self.left = Some(loaded);
                 } else {
                     self.right = Some(loaded);
                 }
-                self.note.clear();
+                if remembered {
+                    self.note.clear();
+                }
             }
             Err(error) => {
                 if left {
@@ -219,12 +243,13 @@ impl ScalarScopeApp {
     }
 
     fn draw_inference(&mut self, ui: &mut egui::Ui, review: &InferenceReview) {
+        let paint = self.paint;
         ui.horizontal(|ui| {
-            ui.label(RichText::new("Series").color(LEFT));
+            ui.label(RichText::new("Series").color(paint.left));
             ui.toggle_value(&mut self.distribution, "Distribution");
         });
-        ui.label(RichText::new(&review.left_text).color(NOTE));
-        ui.label(RichText::new(&review.right_text).color(NOTE));
+        ui.label(RichText::new(&review.left_text).color(paint.note));
+        ui.label(RichText::new(&review.right_text).color(paint.note));
         ui.add_space(4.0);
         ui.label(RichText::new(&review.verdict).color(Color32::WHITE));
         let distribution = self.distribution;
@@ -235,56 +260,56 @@ impl ScalarScopeApp {
             .y_axis_label(if distribution { "empirical CDF" } else { "ms" })
             .show(ui, |plot| {
                 if distribution {
-                    plot.line(series_line("A distribution", LEFT, cdf_points(&review.left_cdf)));
-                    plot.line(series_line("B distribution", RIGHT, cdf_points(&review.right_cdf)));
+                    plot.line(series_line("A distribution", paint.left, cdf_points(&review.left_cdf)));
+                    plot.line(series_line("B distribution", paint.right, cdf_points(&review.right_cdf)));
                 } else {
-                    for (name, color, band) in [("A spread", LEFT, &review.left_band), ("B spread", RIGHT, &review.right_band)] {
+                    for (name, color, band) in [("A spread", paint.left, &review.left_band), ("B spread", paint.right, &review.right_band)] {
                         for (index, polygon) in band_polygons(band).into_iter().enumerate() {
                             let fill = Color32::from_rgba_unmultiplied(color.r(), color.g(), color.b(), 72);
                             plot.polygon(Polygon::new(format!("{name} {index}"), PlotPoints::new(polygon)).fill_color(fill).width(0.0));
                         }
                     }
-                    plot.line(series_line("A", LEFT, value_points(&review.left)));
-                    plot.line(series_line("B", RIGHT, value_points(&review.right)));
-                    plot.points(mark_points("A marks", &review.left, &review.left_marks));
-                    plot.points(mark_points("B marks", &review.right, &review.right_marks));
+                    plot.line(series_line("A", paint.left, value_points(&review.left)));
+                    plot.line(series_line("B", paint.right, value_points(&review.right)));
+                    plot.points(mark_points("A marks", &review.left, &review.left_marks, paint.mark));
+                    plot.points(mark_points("B marks", &review.right, &review.right_marks, paint.mark));
                     if let Some(step) = review.left_steady {
-                        plot.vline(VLine::new("A steady", step as f64).color(NOTE).width(1.0));
+                        plot.vline(VLine::new("A steady", step as f64).color(paint.note).width(1.0));
                     }
                     if let Some(step) = review.right_steady {
-                        plot.vline(VLine::new("B steady", step as f64).color(NOTE).width(1.0));
+                        plot.vline(VLine::new("B steady", step as f64).color(paint.note).width(1.0));
                     }
                 }
             });
         if !distribution && !review.left_throughput.is_empty() && !review.right_throughput.is_empty() {
-            ui.label(RichText::new("Throughput, items/s, same steps, own scale.").color(NOTE));
+            ui.label(RichText::new("Throughput, items/s, same steps, own scale.").color(paint.note));
             Plot::new("throughput")
                 .height(140.0)
                 .y_axis_label("items/s")
                 .show(ui, |plot| {
-                    plot.line(series_line("A throughput", LEFT, plain_points(&review.left_throughput)));
-                    plot.line(series_line("B throughput", RIGHT, plain_points(&review.right_throughput)));
+                    plot.line(series_line("A throughput", paint.left, plain_points(&review.left_throughput)));
+                    plot.line(series_line("B throughput", paint.right, plain_points(&review.right_throughput)));
                 });
         }
         ui.add_space(6.0);
-        ui.label(RichText::new(&review.caption).color(NOTE));
+        ui.label(RichText::new(&review.caption).color(paint.note));
     }
 }
 
-fn draw_training(ui: &mut egui::Ui, review: &TrainingReview) {
-    ui.label(RichText::new(&review.left_text).color(LEFT));
-    ui.label(RichText::new(&review.right_text).color(RIGHT));
+fn draw_training(ui: &mut egui::Ui, review: &TrainingReview, paint: Paint) {
+    ui.label(RichText::new(&review.left_text).color(paint.left));
+    ui.label(RichText::new(&review.right_text).color(paint.right));
     Plot::new("training-loss")
         .height(420.0)
         .legend(egui_plot::Legend::default())
         .x_axis_label("stored sample")
         .y_axis_label("training loss")
         .show(ui, |plot| {
-            plot.line(series_line(&review.left.run_id, LEFT, plain_points(&review.left.loss)));
-            plot.line(series_line(&review.right.run_id, RIGHT, plain_points(&review.right.loss)));
+            plot.line(series_line(&review.left.run_id, paint.left, plain_points(&review.left.loss)));
+            plot.line(series_line(&review.right.run_id, paint.right, plain_points(&review.right.loss)));
         });
     ui.add_space(6.0);
-    ui.label(RichText::new(&review.caption).color(NOTE));
+    ui.label(RichText::new(&review.caption).color(paint.note));
 }
 
 fn series_line(name: &str, color: Color32, points: Vec<[f64; 2]>) -> Line<'static> {
@@ -307,12 +332,12 @@ fn cdf_points(points: &[(f64, f64)]) -> Vec<[f64; 2]> {
     points.iter().map(|(value, probability)| [*value, *probability]).collect()
 }
 
-fn mark_points(name: &str, values: &[Option<f64>], marks: &[usize]) -> Points<'static> {
+fn mark_points(name: &str, values: &[Option<f64>], marks: &[usize], color: Color32) -> Points<'static> {
     let points = marks
         .iter()
         .filter_map(|index| values.get(*index).copied().flatten().map(|sample| [*index as f64, sample]))
         .collect::<Vec<_>>();
-    Points::new(name, PlotPoints::new(points)).color(MARK).radius(4.0)
+    Points::new(name, PlotPoints::new(points)).color(color).radius(4.0)
 }
 
 fn band_polygons(band: &[Option<Band>]) -> Vec<Vec<[f64; 2]>> {
@@ -444,20 +469,107 @@ impl ScalarScopeApp {
         if self.history_dir.is_none() {
             ui.label(
                 RichText::new("Recent reviews stay in the Store package folder. This unpackaged run leaves that file alone.")
-                    .color(NOTE),
+                    .color(self.paint.note),
             );
             return;
         }
-        ui.label(RichText::new("Recent").color(MARK));
+        ui.label(RichText::new("Recent").color(self.paint.mark));
         if self.recent.is_empty() {
-            ui.label(RichText::new("No reviews in this package folder yet.").color(NOTE));
+            ui.label(RichText::new("No reviews in this package folder yet.").color(self.paint.note));
+        } else {
+            let recent = self.recent.clone();
+            for entry in recent {
+                let label = format!("{}   {}", entry.title(), entry.subtitle());
+                if ui.button(label).clicked() {
+                    self.reopen(&entry);
+                }
+            }
+        }
+        self.draw_files(ui);
+        self.draw_views(ui);
+    }
+
+    fn draw_files(&mut self, ui: &mut egui::Ui) {
+        let present: Vec<_> = self.files.iter().filter(|file| Path::new(&file.path).is_file()).cloned().collect();
+        let missing = self.files.len().saturating_sub(present.len());
+        if present.is_empty() && missing == 0 {
             return;
         }
-        let recent = self.recent.clone();
-        for entry in recent {
-            let label = format!("{}   {}", entry.title(), entry.subtitle());
-            if ui.button(label).clicked() {
-                self.reopen(&entry);
+        ui.add_space(8.0);
+        ui.label(RichText::new("Files").color(self.paint.mark));
+        if missing > 0 {
+            ui.label(RichText::new(format!("{missing} saved files are not on this machine.")).color(self.paint.note));
+        }
+        for file in present {
+            let path = file.path.clone();
+            if ui.button(file.name).clicked() {
+                self.open_saved_path(&path);
+            }
+        }
+    }
+
+    fn draw_views(&mut self, ui: &mut egui::Ui) {
+        if self.views.is_empty() {
+            return;
+        }
+        ui.add_space(8.0);
+        ui.label(RichText::new("Saved views").color(self.paint.mark));
+        let views = self.views.clone();
+        for view in views {
+            if ui.button(view.title).clicked() {
+                match view.source {
+                    Some(path) => self.open_saved_path(&path),
+                    None => self.note = "That saved view has no file.".to_string(),
+                }
+            }
+        }
+    }
+
+    fn open_saved_path(&mut self, path: &str) {
+        match open_path(Path::new(path)) {
+            Ok(loaded) => {
+                self.opened = None;
+                let name = match &loaded.side {
+                    Side::Inference(run) => run.label.clone(),
+                    Side::Training(entry) => entry.run_id.clone(),
+                };
+                let slot = if self.left.is_none() { "A" } else { "B" };
+                let preferences_note = if self.remember_opened_file(&loaded) {
+                    None
+                } else {
+                    Some(self.note.clone())
+                };
+                if self.left.is_none() {
+                    self.left = Some(loaded);
+                } else {
+                    self.right = Some(loaded);
+                }
+                self.sitting_key.clear();
+                self.note = match preferences_note {
+                    Some(error) => format!("Opened {name} as path {slot}. {error}"),
+                    None => format!("Opened {name} as path {slot}."),
+                };
+            }
+            Err(error) => self.note = error,
+        }
+    }
+
+    fn remember_opened_file(&mut self, loaded: &Loaded) -> bool {
+        let Some(dir) = self.history_dir.clone() else {
+            return true;
+        };
+        let name = match &loaded.side {
+            Side::Inference(run) => run.label.clone(),
+            Side::Training(entry) => entry.run_id.clone(),
+        };
+        match prefs::remember_file(&dir, &loaded.path, &name) {
+            Ok(()) => {
+                self.files = prefs::read(&dir).recent;
+                true
+            }
+            Err(error) => {
+                self.note = error;
+                false
             }
         }
     }
@@ -477,10 +589,13 @@ impl ScalarScopeApp {
             match (open_path(Path::new(left)), open_path(Path::new(right))) {
                 (Ok(left_loaded), Ok(right_loaded)) => {
                     self.opened = None;
+                    let remembered = self.remember_opened_file(&left_loaded) && self.remember_opened_file(&right_loaded);
                     self.left = Some(left_loaded);
                     self.right = Some(right_loaded);
                     self.sitting_key.clear();
-                    self.note.clear();
+                    if remembered {
+                        self.note.clear();
+                    }
                 }
                 (Err(error), _) | (_, Err(error)) => self.note = error,
             }
@@ -490,6 +605,34 @@ impl ScalarScopeApp {
             self.note = "That review has no file to reopen.".to_string();
         }
     }
+}
+
+#[derive(Clone, Copy)]
+struct Paint {
+    left: Color32,
+    right: Color32,
+    mark: Color32,
+    note: Color32,
+    background: Color32,
+    label: Option<&'static str>,
+}
+
+impl Paint {
+    fn from_palette(palette: prefs::SeriesPalette) -> Self {
+        Self {
+            left: hex_color(palette.left),
+            right: hex_color(palette.right),
+            mark: hex_color(palette.mark),
+            note: hex_color(palette.note),
+            background: hex_color(palette.background),
+            label: palette.label,
+        }
+    }
+}
+
+fn hex_color(hex: &str) -> Color32 {
+    let number = u32::from_str_radix(hex, 16).unwrap_or(0);
+    Color32::from_rgb((number >> 16) as u8, (number >> 8) as u8, number as u8)
 }
 
 fn side_name(loaded: &Option<Loaded>, empty: &str) -> String {

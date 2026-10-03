@@ -5,6 +5,7 @@ pub mod bundle;
 pub mod history;
 pub mod milestones;
 pub mod open;
+pub mod prefs;
 pub mod readings;
 pub mod review;
 pub mod ui;
