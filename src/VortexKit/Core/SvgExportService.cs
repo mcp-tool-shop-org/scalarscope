@@ -65,14 +65,14 @@ public class SvgExportService
 
         // Definitions (gradients, markers, filters)
         sb.AppendLine("  <defs>");
-        BuildDefs(sb, data, options, palette);
+        BuildDefs(sb, options, palette);
         sb.AppendLine("  </defs>");
 
         // Background layer
         if (options.IncludeBackground)
         {
             sb.AppendLine($"  <g id=\"layer-background\" inkscape:groupmode=\"layer\" inkscape:label=\"Background\">");
-            sb.AppendLine($"    <rect x=\"{F(data.ViewBox.X)}\" y=\"{F(data.ViewBox.Y)}\" width=\"{F(data.ViewBox.Width)}\" height=\"{F(data.ViewBox.Height)}\" fill=\"{palette.Background}\" />");
+            sb.AppendLine($"    <rect x=\"{F(data.ViewBox.X)}\" y=\"{F(data.ViewBox.Y)}\" width=\"{F(data.ViewBox.Width)}\" height=\"{F(data.ViewBox.Height)}\" fill=\"{ColorAttr(palette.Background)}\" />");
             sb.AppendLine("  </g>");
         }
 
@@ -134,7 +134,7 @@ public class SvgExportService
         return sb.ToString();
     }
 
-    private void BuildDefs(StringBuilder sb, SvgExportData data, SvgExportOptions options, SvgColorPalette palette)
+    private void BuildDefs(StringBuilder sb, SvgExportOptions options, SvgColorPalette palette)
     {
         // Glow filter
         if (options.EnableGlow)
@@ -149,32 +149,21 @@ public class SvgExportService
         }
 
         // Arrow marker for vector field
+        var vectorField = ColorAttr(palette.VectorField);
         sb.AppendLine($"    <marker id=\"arrow\" viewBox=\"0 0 10 10\" refX=\"9\" refY=\"5\" markerWidth=\"4\" markerHeight=\"4\" orient=\"auto-start-reverse\">");
-        sb.AppendLine($"      <path d=\"M 0 0 L 10 5 L 0 10 z\" fill=\"{palette.VectorField}\" />");
+        sb.AppendLine($"      <path d=\"M 0 0 L 10 5 L 0 10 z\" fill=\"{vectorField}\" />");
         sb.AppendLine("    </marker>");
 
         // Failure marker
+        var failure = ColorAttr(palette.Failure);
         sb.AppendLine($"    <symbol id=\"failure-marker\" viewBox=\"0 0 20 20\">");
-        sb.AppendLine($"      <circle cx=\"10\" cy=\"10\" r=\"8\" fill=\"none\" stroke=\"{palette.Failure}\" stroke-width=\"2\" />");
-        sb.AppendLine($"      <line x1=\"6\" y1=\"6\" x2=\"14\" y2=\"14\" stroke=\"{palette.Failure}\" stroke-width=\"2\" />");
-        sb.AppendLine($"      <line x1=\"14\" y1=\"6\" x2=\"6\" y2=\"14\" stroke=\"{palette.Failure}\" stroke-width=\"2\" />");
+        sb.AppendLine($"      <circle cx=\"10\" cy=\"10\" r=\"8\" fill=\"none\" stroke=\"{failure}\" stroke-width=\"2\" />");
+        sb.AppendLine($"      <line x1=\"6\" y1=\"6\" x2=\"14\" y2=\"14\" stroke=\"{failure}\" stroke-width=\"2\" />");
+        sb.AppendLine($"      <line x1=\"14\" y1=\"6\" x2=\"6\" y2=\"14\" stroke=\"{failure}\" stroke-width=\"2\" />");
         sb.AppendLine("    </symbol>");
 
-        // Trajectory gradients for time/velocity coloring
-        if (options.ColorMode == SvgColorMode.Time || options.ColorMode == SvgColorMode.Velocity)
-        {
-            for (int i = 0; i < data.Trajectories.Count; i++)
-            {
-                var colors = options.ColorMode == SvgColorMode.Time
-                    ? new[] { palette.TrajectoryStart, palette.TrajectoryEnd }
-                    : new[] { palette.LowVelocity, palette.HighVelocity };
-
-                sb.AppendLine($"    <linearGradient id=\"traj-gradient-{i}\" gradientUnits=\"userSpaceOnUse\">");
-                sb.AppendLine($"      <stop offset=\"0%\" stop-color=\"{colors[0]}\" />");
-                sb.AppendLine($"      <stop offset=\"100%\" stop-color=\"{colors[1]}\" />");
-                sb.AppendLine("    </linearGradient>");
-            }
-        }
+        // Time, velocity, and curvature are painted per segment. A userSpaceOnUse
+        // gradient without x1, y1, x2, and y2 is not that mode, so none is emitted.
     }
 
     private void BuildGridLayer(StringBuilder sb, SvgGridData grid, SvgExportOptions options, SvgColorPalette palette)
@@ -184,21 +173,22 @@ public class SvgExportService
         // Major grid lines
         foreach (var line in grid.MajorLines)
         {
-            sb.AppendLine($"    <line x1=\"{F(line.X1)}\" y1=\"{F(line.Y1)}\" x2=\"{F(line.X2)}\" y2=\"{F(line.Y2)}\" stroke=\"{palette.GridMajor}\" stroke-width=\"{strokeWidth}\" />");
+            sb.AppendLine($"    <line x1=\"{F(line.X1)}\" y1=\"{F(line.Y1)}\" x2=\"{F(line.X2)}\" y2=\"{F(line.Y2)}\" stroke=\"{ColorAttr(palette.GridMajor)}\" stroke-width=\"{strokeWidth}\" />");
         }
 
         // Minor grid lines
         foreach (var line in grid.MinorLines)
         {
-            sb.AppendLine($"    <line x1=\"{F(line.X1)}\" y1=\"{F(line.Y1)}\" x2=\"{F(line.X2)}\" y2=\"{F(line.Y2)}\" stroke=\"{palette.GridMinor}\" stroke-width=\"{F(options.GridStrokeWidth * 0.5)}\" stroke-dasharray=\"2,2\" />");
+            sb.AppendLine($"    <line x1=\"{F(line.X1)}\" y1=\"{F(line.Y1)}\" x2=\"{F(line.X2)}\" y2=\"{F(line.Y2)}\" stroke=\"{ColorAttr(palette.GridMinor)}\" stroke-width=\"{F(options.GridStrokeWidth * 0.5)}\" stroke-dasharray=\"2,2\" />");
         }
 
         // Axis labels
         if (options.IncludeAxisLabels)
         {
+            var font = FontAttr(options.FontFamily);
             foreach (var label in grid.Labels)
             {
-                sb.AppendLine($"    <text x=\"{F(label.X)}\" y=\"{F(label.Y)}\" fill=\"{palette.Text}\" font-size=\"{options.LabelFontSize}\" font-family=\"{options.FontFamily}\" text-anchor=\"middle\">{EscapeXml(label.Text)}</text>");
+                sb.AppendLine($"    <text x=\"{F(label.X)}\" y=\"{F(label.Y)}\" fill=\"{ColorAttr(palette.Text)}\" font-size=\"{options.LabelFontSize}\" font-family=\"{font}\" text-anchor=\"middle\">{EscapeXml(label.Text)}</text>");
             }
         }
     }
@@ -208,57 +198,31 @@ public class SvgExportService
         foreach (var arrow in vectorField.Arrows)
         {
             var opacity = F(Math.Min(1.0, arrow.Magnitude * options.VectorFieldOpacityScale));
-            sb.AppendLine($"    <line x1=\"{F(arrow.X)}\" y1=\"{F(arrow.Y)}\" x2=\"{F(arrow.X + arrow.Dx)}\" y2=\"{F(arrow.Y + arrow.Dy)}\" stroke=\"{palette.VectorField}\" stroke-width=\"{F(options.VectorFieldStrokeWidth)}\" marker-end=\"url(#arrow)\" opacity=\"{opacity}\" />");
+            sb.AppendLine($"    <line x1=\"{F(arrow.X)}\" y1=\"{F(arrow.Y)}\" x2=\"{F(arrow.X + arrow.Dx)}\" y2=\"{F(arrow.Y + arrow.Dy)}\" stroke=\"{ColorAttr(palette.VectorField)}\" stroke-width=\"{F(options.VectorFieldStrokeWidth)}\" marker-end=\"url(#arrow)\" opacity=\"{opacity}\" />");
         }
     }
 
     private void BuildTrajectoryLayer(StringBuilder sb, SvgTrajectoryData traj, SvgExportOptions options, SvgColorPalette palette, int index)
     {
+        _ = index;
         if (traj.Points.Count < 2) return;
 
-        var pathData = new StringBuilder();
-
-        // Choose path type based on options
-        if (options.UseCatmullRomSplines && traj.Points.Count >= 4)
-        {
-            pathData.Append(BuildCatmullRomPath(traj.Points));
-        }
-        else
-        {
-            // Simple polyline
-            pathData.Append($"M {F(traj.Points[0].X)} {F(traj.Points[0].Y)}");
-            for (int i = 1; i < traj.Points.Count; i++)
-            {
-                pathData.Append($" L {F(traj.Points[i].X)} {F(traj.Points[i].Y)}");
-            }
-        }
-
-        // Determine stroke style
-        string stroke;
         if (options.ColorMode == SvgColorMode.Solid)
         {
-            stroke = traj.Color ?? palette.Trajectory;
+            var stroke = ColorAttr(traj.Color, palette.Trajectory);
+            var pathData = options.UseCatmullRomSplines && traj.Points.Count >= 4
+                ? BuildCatmullRomPath(traj.Points)
+                : BuildPolylinePath(traj.Points);
+            AppendStrokePath(sb, pathData, stroke, options);
+            if (options.IncludeTrailMarkers)
+                AppendTrailMarkers(sb, traj.Points, _ => stroke, options);
         }
         else
         {
-            stroke = $"url(#traj-gradient-{index})";
-        }
-
-        var strokeWidth = F(options.TrajectoryStrokeWidth);
-        var filter = options.EnableGlow ? " filter=\"url(#glow)\"" : "";
-
-        sb.AppendLine($"    <path d=\"{pathData}\" fill=\"none\" stroke=\"{stroke}\" stroke-width=\"{strokeWidth}\" stroke-linecap=\"round\" stroke-linejoin=\"round\"{filter} />");
-
-        // Trail markers (optional dots along path)
-        if (options.IncludeTrailMarkers)
-        {
-            var interval = Math.Max(1, traj.Points.Count / options.TrailMarkerCount);
-            for (int i = 0; i < traj.Points.Count; i += interval)
-            {
-                var pt = traj.Points[i];
-                var radius = F(options.TrailMarkerRadius);
-                sb.AppendLine($"    <circle cx=\"{F(pt.X)}\" cy=\"{F(pt.Y)}\" r=\"{radius}\" fill=\"{stroke}\" opacity=\"0.6\" />");
-            }
+            var colors = VertexColors(traj, options, palette);
+            AppendColoredSegments(sb, traj.Points, colors, options);
+            if (options.IncludeTrailMarkers)
+                AppendTrailMarkers(sb, traj.Points, i => colors[i], options);
         }
 
         // Start/end markers
@@ -266,9 +230,117 @@ public class SvgExportService
         {
             var start = traj.Points[0];
             var end = traj.Points[^1];
-            sb.AppendLine($"    <circle cx=\"{F(start.X)}\" cy=\"{F(start.Y)}\" r=\"{F(options.TrajectoryStrokeWidth * 2)}\" fill=\"{palette.TrajectoryStart}\" />");
-            sb.AppendLine($"    <circle cx=\"{F(end.X)}\" cy=\"{F(end.Y)}\" r=\"{F(options.TrajectoryStrokeWidth * 2)}\" fill=\"{palette.TrajectoryEnd}\" />");
+            sb.AppendLine($"    <circle cx=\"{F(start.X)}\" cy=\"{F(start.Y)}\" r=\"{F(options.TrajectoryStrokeWidth * 2)}\" fill=\"{ColorAttr(palette.TrajectoryStart)}\" />");
+            sb.AppendLine($"    <circle cx=\"{F(end.X)}\" cy=\"{F(end.Y)}\" r=\"{F(options.TrajectoryStrokeWidth * 2)}\" fill=\"{ColorAttr(palette.TrajectoryEnd)}\" />");
         }
+    }
+
+    private static string BuildPolylinePath(List<SvgPoint> points)
+    {
+        var pathData = new StringBuilder();
+        pathData.Append($"M {F(points[0].X)} {F(points[0].Y)}");
+        for (var i = 1; i < points.Count; i++)
+            pathData.Append($" L {F(points[i].X)} {F(points[i].Y)}");
+        return pathData.ToString();
+    }
+
+    private static void AppendStrokePath(StringBuilder sb, string pathData, string stroke, SvgExportOptions options)
+    {
+        var filter = options.EnableGlow ? " filter=\"url(#glow)\"" : "";
+        sb.AppendLine($"    <path d=\"{pathData}\" fill=\"none\" stroke=\"{stroke}\" stroke-width=\"{F(options.TrajectoryStrokeWidth)}\" stroke-linecap=\"round\" stroke-linejoin=\"round\"{filter} />");
+    }
+
+    private void AppendColoredSegments(StringBuilder sb, List<SvgPoint> points, string[] colors, SvgExportOptions options)
+    {
+        var useSpline = options.UseCatmullRomSplines && points.Count >= 4;
+        for (var i = 0; i < points.Count - 1; i++)
+        {
+            string pathData;
+            if (!useSpline)
+            {
+                pathData = $"M {F(points[i].X)} {F(points[i].Y)} L {F(points[i + 1].X)} {F(points[i + 1].Y)}";
+            }
+            else
+            {
+                var p0 = i > 0 ? points[i - 1] : points[i];
+                var p1 = points[i];
+                var p2 = points[i + 1];
+                var p3 = i + 2 < points.Count ? points[i + 2] : points[i + 1];
+                var cp1x = p1.X + (p2.X - p0.X) / 6.0;
+                var cp1y = p1.Y + (p2.Y - p0.Y) / 6.0;
+                var cp2x = p2.X - (p3.X - p1.X) / 6.0;
+                var cp2y = p2.Y - (p3.Y - p1.Y) / 6.0;
+                pathData = $"M {F(p1.X)} {F(p1.Y)} C {F(cp1x)} {F(cp1y)}, {F(cp2x)} {F(cp2y)}, {F(p2.X)} {F(p2.Y)}";
+            }
+
+            AppendStrokePath(sb, pathData, colors[i], options);
+        }
+    }
+
+    private static void AppendTrailMarkers(StringBuilder sb, List<SvgPoint> points, Func<int, string> colorAt, SvgExportOptions options)
+    {
+        var interval = Math.Max(1, points.Count / Math.Max(1, options.TrailMarkerCount));
+        var radius = F(options.TrailMarkerRadius);
+        for (var i = 0; i < points.Count; i += interval)
+        {
+            var pt = points[i];
+            sb.AppendLine($"    <circle cx=\"{F(pt.X)}\" cy=\"{F(pt.Y)}\" r=\"{radius}\" fill=\"{colorAt(i)}\" opacity=\"0.6\" />");
+        }
+    }
+
+    private string[] VertexColors(SvgTrajectoryData traj, SvgExportOptions options, SvgColorPalette palette)
+    {
+        var count = traj.Points.Count;
+        return options.ColorMode switch
+        {
+            SvgColorMode.Time => TimeColors(count, palette),
+            SvgColorMode.Velocity => ColorsFromSamples(RequireSamples(traj.Velocities, count, nameof(traj.Velocities)), palette.LowVelocity, palette.HighVelocity),
+            SvgColorMode.Curvature => ColorsFromSamples(RequireSamples(traj.Curvatures, count, nameof(traj.Curvatures)), palette.LowVelocity, palette.Curvature),
+            _ => throw new ArgumentOutOfRangeException(nameof(options), "Unsupported trajectory color mode.")
+        };
+    }
+
+    private static List<double> RequireSamples(List<double>? samples, int count, string name)
+    {
+        if (samples == null || samples.Count != count)
+            throw new ArgumentException(name + " must contain one value per trajectory point.", name);
+        return samples;
+    }
+
+    private string[] TimeColors(int count, SvgColorPalette palette)
+    {
+        var colors = new string[count];
+        var denom = count - 1;
+        for (var i = 0; i < count; i++)
+        {
+            var t = denom <= 0 ? 0.0 : (double)i / denom;
+            colors[i] = ColorAttr(LerpHex(palette.TrajectoryStart, palette.TrajectoryEnd, t));
+        }
+        return colors;
+    }
+
+    private string[] ColorsFromSamples(List<double> samples, string low, string high)
+    {
+        var min = double.PositiveInfinity;
+        var max = double.NegativeInfinity;
+        foreach (var sample in samples)
+        {
+            if (!double.IsFinite(sample))
+                continue;
+            if (sample < min) min = sample;
+            if (sample > max) max = sample;
+        }
+
+        var span = max - min;
+        var canScale = double.IsFinite(span) && span > 0;
+        var colors = new string[samples.Count];
+        for (var i = 0; i < samples.Count; i++)
+        {
+            var sample = samples[i];
+            var t = canScale && double.IsFinite(sample) ? (sample - min) / span : 0;
+            colors[i] = ColorAttr(LerpHex(low, high, t));
+        }
+        return colors;
     }
 
     private string BuildCatmullRomPath(List<SvgPoint> points)
@@ -301,7 +373,7 @@ public class SvgExportService
         foreach (var cell in heatMap.Cells)
         {
             var color = InterpolateHeatColor(cell.Intensity, palette);
-            sb.AppendLine($"    <rect x=\"{F(cell.X)}\" y=\"{F(cell.Y)}\" width=\"{F(cell.Width)}\" height=\"{F(cell.Height)}\" fill=\"{color}\" />");
+            sb.AppendLine($"    <rect x=\"{F(cell.X)}\" y=\"{F(cell.Y)}\" width=\"{F(cell.Width)}\" height=\"{F(cell.Height)}\" fill=\"{ColorAttr(color)}\" />");
         }
     }
 
@@ -310,8 +382,9 @@ public class SvgExportService
         foreach (var ann in annotations)
         {
             // Background rect for readability
-            sb.AppendLine($"    <rect x=\"{F(ann.X - 2)}\" y=\"{F(ann.Y - options.AnnotationFontSize)}\" width=\"{F(ann.Text.Length * options.AnnotationFontSize * 0.6)}\" height=\"{F(options.AnnotationFontSize * 1.2)}\" fill=\"{palette.AnnotationBackground}\" rx=\"2\" />");
-            sb.AppendLine($"    <text x=\"{F(ann.X)}\" y=\"{F(ann.Y)}\" fill=\"{palette.Annotation}\" font-size=\"{options.AnnotationFontSize}\" font-family=\"{options.FontFamily}\">{EscapeXml(ann.Text)}</text>");
+            var font = FontAttr(options.FontFamily);
+            sb.AppendLine($"    <rect x=\"{F(ann.X - 2)}\" y=\"{F(ann.Y - options.AnnotationFontSize)}\" width=\"{F(ann.Text.Length * options.AnnotationFontSize * 0.6)}\" height=\"{F(options.AnnotationFontSize * 1.2)}\" fill=\"{ColorAttr(palette.AnnotationBackground)}\" rx=\"2\" />");
+            sb.AppendLine($"    <text x=\"{F(ann.X)}\" y=\"{F(ann.Y)}\" fill=\"{ColorAttr(palette.Annotation)}\" font-size=\"{options.AnnotationFontSize}\" font-family=\"{font}\">{EscapeXml(ann.Text)}</text>");
         }
     }
 
@@ -319,13 +392,13 @@ public class SvgExportService
     {
         foreach (var marker in markers)
         {
-            var color = marker.Type switch
+            var color = ColorAttr(marker.Type switch
             {
                 SvgMarkerType.Failure => palette.Failure,
                 SvgMarkerType.Eigenvalue => palette.Eigenvalue,
                 SvgMarkerType.Curvature => palette.Curvature,
                 _ => palette.Marker
-            };
+            });
 
             if (marker.Type == SvgMarkerType.Failure)
             {
@@ -338,7 +411,7 @@ public class SvgExportService
 
             if (!string.IsNullOrEmpty(marker.Label))
             {
-                sb.AppendLine($"    <text x=\"{F(marker.X + marker.Radius + 4)}\" y=\"{F(marker.Y + 4)}\" fill=\"{palette.Text}\" font-size=\"{options.MarkerLabelFontSize}\" font-family=\"{options.FontFamily}\">{EscapeXml(marker.Label)}</text>");
+                sb.AppendLine($"    <text x=\"{F(marker.X + marker.Radius + 4)}\" y=\"{F(marker.Y + 4)}\" fill=\"{ColorAttr(palette.Text)}\" font-size=\"{options.MarkerLabelFontSize}\" font-family=\"{FontAttr(options.FontFamily)}\">{EscapeXml(marker.Label)}</text>");
             }
         }
     }
@@ -351,35 +424,72 @@ public class SvgExportService
         if (intensity < 0.5)
         {
             var t = intensity * 2;
-            return InterpolateColor(palette.HeatLow, palette.HeatMid, t);
+            return LerpHex(palette.HeatLow, palette.HeatMid, t);
         }
-        else
-        {
-            var t = (intensity - 0.5) * 2;
-            return InterpolateColor(palette.HeatMid, palette.HeatHigh, t);
-        }
+
+        var highT = (intensity - 0.5) * 2;
+        return LerpHex(palette.HeatMid, palette.HeatHigh, highT);
     }
 
-    private static string InterpolateColor(string c1, string c2, double t)
+    private static string LerpHex(string c1, string c2, double t)
     {
-        var (r1, g1, b1) = ParseHexColor(c1);
-        var (r2, g2, b2) = ParseHexColor(c2);
+        var (r1, g1, b1) = ParseHexColor(c1, 30, 30, 46);
+        var (r2, g2, b2) = ParseHexColor(c2, 243, 139, 168);
+        if (!double.IsFinite(t))
+            t = 0;
+        t = Math.Clamp(t, 0, 1);
 
-        var r = (int)(r1 + (r2 - r1) * t);
-        var g = (int)(g1 + (g2 - g1) * t);
-        var b = (int)(b1 + (b2 - b1) * t);
+        var r = (int)Math.Round(r1 + (r2 - r1) * t);
+        var g = (int)Math.Round(g1 + (g2 - g1) * t);
+        var b = (int)Math.Round(b1 + (b2 - b1) * t);
 
         return $"#{r:X2}{g:X2}{b:X2}";
     }
 
-    private static (int r, int g, int b) ParseHexColor(string hex)
+    private static (int r, int g, int b) ParseHexColor(string hex, int fallbackR, int fallbackG, int fallbackB)
     {
-        hex = hex.TrimStart('#');
+        if (!IsHexColor(hex))
+            return (fallbackR, fallbackG, fallbackB);
+
+        var body = hex.AsSpan(1);
         return (
-            int.Parse(hex.Substring(0, 2), NumberStyles.HexNumber),
-            int.Parse(hex.Substring(2, 2), NumberStyles.HexNumber),
-            int.Parse(hex.Substring(4, 2), NumberStyles.HexNumber)
+            int.Parse(body[..2], NumberStyles.HexNumber, CultureInfo.InvariantCulture),
+            int.Parse(body.Slice(2, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture),
+            int.Parse(body.Slice(4, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture)
         );
+    }
+
+    private static string ColorAttr(string? color, string? fallback = null)
+    {
+        if (IsHexColor(color))
+            return EscapeXml(color!);
+        if (IsHexColor(fallback))
+            return EscapeXml(fallback!);
+        return "#000000";
+    }
+
+    private static bool IsHexColor(string? color)
+    {
+        if (color is not { Length: 7 or 9 } || color[0] != '#')
+            return false;
+
+        for (var i = 1; i < color.Length; i++)
+        {
+            if (!IsHexDigit(color[i]))
+                return false;
+        }
+
+        return true;
+    }
+
+    private static bool IsHexDigit(char c) =>
+        c is >= '0' and <= '9' or >= 'a' and <= 'f' or >= 'A' and <= 'F';
+
+    private static string FontAttr(string? fontFamily)
+    {
+        if (string.IsNullOrWhiteSpace(fontFamily))
+            return "sans-serif";
+        return EscapeXml(fontFamily);
     }
 
     private static string F(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);

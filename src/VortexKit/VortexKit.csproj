@@ -14,11 +14,10 @@
     <Authors>mcp-tool-shop</Authors>
     <Company>MCP Tool Shop</Company>
     <Copyright>Copyright (c) 2025-2026 MCP Tool Shop</Copyright>
-    <Description>Reusable visualization framework for training dynamics. Provides time-synchronized playback, comparison views, annotation overlays, and export functionality.</Description>
+    <Description>ScalarScope visualization helpers for playback, SkiaSharp canvases, and PNG/SVG export.</Description>
     <PackageProjectUrl>https://github.com/mcp-tool-shop-org/scalarscope</PackageProjectUrl>
     <RepositoryUrl>https://github.com/mcp-tool-shop-org/scalarscope</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>visualization;training;machine-learning;skiasharp;maui</PackageTags>
 
     <!-- Enable XML documentation -->
@@ -29,10 +28,6 @@
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="SkiaSharp.Views.Maui.Controls" Version="3.116.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
 </Project>

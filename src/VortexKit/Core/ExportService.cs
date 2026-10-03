@@ -23,8 +23,8 @@ public class ExportService
     {
         options ??= new ExportOptions();
 
-        var width = options.Width ?? DefaultWidth;
-        var height = options.Height ?? DefaultHeight;
+        var width = RequirePositive(options.Width ?? DefaultWidth, nameof(options.Width));
+        var height = RequirePositive(options.Height ?? DefaultHeight, nameof(options.Height));
 
         var info = new SKImageInfo(width, height);
         var bitmap = new SKBitmap(info);
@@ -50,8 +50,7 @@ public class ExportService
         using var image = SKImage.FromBitmap(bitmap);
         using var data = image.Encode(SKEncodedImageFormat.Png, 100);
 
-        await using var stream = File.OpenWrite(outputPath);
-        data.SaveTo(stream);
+        await SavePngAsync(data, outputPath);
 
         return outputPath;
     }
@@ -66,16 +65,15 @@ public class ExportService
     {
         options ??= new ExportOptions();
 
-        Directory.CreateDirectory(outputDir);
-
         var fps = options.Fps ?? 30;
         var duration = options.Duration ?? 5.0;
-        var totalFrames = (int)(fps * duration);
+        var width = RequirePositive(options.Width ?? DefaultWidth, nameof(options.Width));
+        var height = RequirePositive(options.Height ?? DefaultHeight, nameof(options.Height));
+        var totalFrames = ResolveFrameCount(fps, duration);
+
+        Directory.CreateDirectory(outputDir);
 
         var paths = new List<string>();
-
-        var width = options.Width ?? DefaultWidth;
-        var height = options.Height ?? DefaultHeight;
         var info = new SKImageInfo(width, height);
 
         using var bitmap = new SKBitmap(info);
@@ -83,7 +81,7 @@ public class ExportService
 
         for (int frame = 0; frame < totalFrames; frame++)
         {
-            var t = (double)frame / (totalFrames - 1);
+            var t = totalFrames > 1 ? (double)frame / (totalFrames - 1) : 0.0;
 
             canvas.Clear(options.BackgroundColor ?? VortexColors.Background);
             renderAction(canvas, info, t);
@@ -92,8 +90,7 @@ public class ExportService
             using var data = image.Encode(SKEncodedImageFormat.Png, 100);
 
             var framePath = Path.Combine(outputDir, $"frame_{frame:D5}.png");
-            await using var stream = File.OpenWrite(framePath);
-            data.SaveTo(stream);
+            await SavePngAsync(data, framePath);
 
             paths.Add(framePath);
 
@@ -130,8 +127,8 @@ public class ExportService
     {
         options ??= new ComparisonExportOptions();
 
-        var width = options.Width ?? DefaultWidth;
-        var height = options.Height ?? DefaultHeight;
+        var width = RequirePositive(options.Width ?? DefaultWidth, nameof(options.Width));
+        var height = RequirePositive(options.Height ?? DefaultHeight, nameof(options.Height));
         var dividerWidth = options.DividerWidth ?? 4;
         var halfWidth = (width - dividerWidth) / 2;
 
@@ -172,8 +169,7 @@ public class ExportService
         using var image = SKImage.FromBitmap(bitmap);
         using var data = image.Encode(SKEncodedImageFormat.Png, 100);
 
-        await using var stream = File.OpenWrite(outputPath);
-        data.SaveTo(stream);
+        await SavePngAsync(data, outputPath);
 
         return outputPath;
     }
@@ -198,6 +194,40 @@ public class ExportService
         // Right label
         paint.Color = options.RightColor ?? VortexColors.CompareRight;
         canvas.DrawText(rightLabel, width / 2 + 20, 30, paint);
+    }
+
+    /// <summary>
+    /// FileMode.Create truncates a previous PNG so a shorter frame cannot leave a stale tail.
+    /// </summary>
+    private static async Task SavePngAsync(SKData data, string outputPath)
+    {
+        await using var stream = new FileStream(outputPath, FileMode.Create, FileAccess.Write, FileShare.Read);
+        data.SaveTo(stream);
+    }
+
+    private static int RequirePositive(int value, string name)
+    {
+        if (value <= 0)
+            throw new ArgumentOutOfRangeException(name, value, name + " must be positive.");
+        return value;
+    }
+
+    private static int ResolveFrameCount(int fps, double duration)
+    {
+        if (fps <= 0)
+            throw new ArgumentOutOfRangeException(nameof(fps), fps, "Fps must be positive.");
+        if (duration <= 0 || !double.IsFinite(duration))
+            throw new ArgumentOutOfRangeException(nameof(duration), duration, "Duration must be positive.");
+
+        var product = fps * duration;
+        if (!double.IsFinite(product) || product < 1.0 || product > int.MaxValue)
+            throw new ArgumentOutOfRangeException(nameof(duration), duration, "Fps and Duration must produce at least one frame.");
+
+        var totalFrames = (int)product;
+        if (totalFrames < 1)
+            throw new ArgumentOutOfRangeException(nameof(duration), duration, "Fps and Duration must produce at least one frame.");
+
+        return totalFrames;
     }
 }
 
