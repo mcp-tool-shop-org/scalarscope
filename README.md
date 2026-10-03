@@ -17,7 +17,7 @@ The other languages are the 2.x prototype. They still name the old repository an
   <a href="https://apps.microsoft.com/detail/9P3HT1PHBKQK"><img src="https://img.shields.io/badge/Microsoft%20Store-9P3HT1PHBKQK-0078D4?style=flat-square&logo=microsoft" alt="Microsoft Store"></a>
 </p>
 
-**ASPIRE Scalar Vortex Visualizer — a .NET MAUI desktop app for comparing ML inference runs with scientific rigor.**
+**A review of two machine-learning runs.** The app you build from this repo is the Rust program in `rust/`. The Microsoft Store package is still the .NET app until that Rust binary ships as the update. The package name and publisher stay the same.
 
 Package version **3.0.0.0**. Store updates of [9P3HT1PHBKQK](https://apps.microsoft.com/detail/9P3HT1PHBKQK) keep the name `mcp-tool-shop.ScalarScope` and the publisher `CN=5305D976-6952-4F00-9C21-3A5DB090359F`.
 
@@ -26,6 +26,8 @@ Package version **3.0.0.0**. Store updates of [9P3HT1PHBKQK](https://apps.micros
 ## Why ScalarScope?
 
 Most ML teams eyeball logs. ScalarScope replaces that with structured, reproducible comparison.
+
+The bullets below describe the published .NET package. The Rust review draws an inference series or a backpropagate training-loss curve. It does not yet fire the canonical deltas or write a `.scbundle`.
 
 - **Apples-to-apples comparison** — Load two inference traces side by side and see exactly what changed
 - **Canonical delta analysis** — Five delta types (ΔTc, ΔO, ΔF, ΔĀ, ΔTd) fire only when differences are statistically meaningful
@@ -45,6 +47,18 @@ It covers time-synced playback, animated SkiaSharp canvases, comparison views, a
 ---
 
 ## Quick Start
+
+### Rust review
+
+From this repo:
+
+```
+cargo run --manifest-path rust/Cargo.toml
+```
+
+Open two inference files, or two backpropagate `run_history.json` files. An inference file is a latency CSV, a benchmark JSON, or a Chrome trace whose events are named inference or TensorRT. A training file is drawn as training loss. Held-out loss, perplexity, and task metrics sit with that curve. `final_loss` is shown as its own number. Inference deltas are not computed on a training history.
+
+The published Store build does not open a run history yet. It remains the .NET package until this Rust program is the update.
 
 ### From the Microsoft Store
 

@@ -1,6 +1,7 @@
 # Build
 bin/
 obj/
+rust/target/
 .vs/
 *.user
 *.suo

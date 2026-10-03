@@ -1,0 +1,10 @@
+//! The ScalarScope review. Inference traces and backpropagate training
+//! histories are different instruments, and this crate keeps them apart.
+
+pub mod open;
+pub mod readings;
+pub mod review;
+pub mod ui;
+
+pub use open::{open_path, open_text, Loaded, Side};
+pub use review::{pair, Pair};
