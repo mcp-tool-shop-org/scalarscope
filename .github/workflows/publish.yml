@@ -11,6 +11,8 @@ concurrency:
 
 jobs:
   publish:
+    # VortexKit is not published to NuGet. This job does not run.
+    if: ${{ false }}
     runs-on: windows-latest
     environment: nuget
     permissions:
@@ -36,11 +38,7 @@ jobs:
         run: dotnet pack src/VortexKit/VortexKit.csproj --configuration Release --no-build --output ./nupkg
 
       - name: Login to NuGet (Trusted Publishing)
-        uses: nuget/login@v1
+        uses: nuget/login@8d196754b4036150537f80ac539e15c2f1028841 # v1
         id: nuget-login
         with:
           user: mcp-tool-shop
-
-      - name: Push to NuGet
-        shell: bash
-        run: dotnet nuget push ./nupkg/*.nupkg --api-key "${{ steps.nuget-login.outputs.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
