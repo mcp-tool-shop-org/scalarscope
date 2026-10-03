@@ -27,7 +27,7 @@ Package version **3.0.0.0**. Store updates of [9P3HT1PHBKQK](https://apps.micros
 
 Most ML teams eyeball logs. ScalarScope replaces that with structured, reproducible comparison.
 
-The bullets below describe the published .NET package. The Rust review draws an inference series or a backpropagate training-loss curve. It does not yet fire the canonical deltas or write a `.scbundle`.
+The bullets below describe the published .NET package. The Rust review draws an inference series or a backpropagate training-loss curve. On an inference pair it reports ΔF and ΔO, and ΔTc only when both sides have a steady-state milestone. It does not yet write a `.scbundle`.
 
 - **Apples-to-apples comparison** — Load two inference traces side by side and see exactly what changed
 - **Canonical delta analysis** — Five delta types (ΔTc, ΔO, ΔF, ΔĀ, ΔTd) fire only when differences are statistically meaningful
@@ -56,7 +56,7 @@ From this repo:
 cargo run --manifest-path rust/Cargo.toml
 ```
 
-Open two inference files, or two backpropagate `run_history.json` files. An inference file is a latency CSV, a benchmark JSON, or a Chrome trace whose events are named inference or TensorRT. A training file is drawn as training loss. Held-out loss, perplexity, and task metrics sit with that curve. `final_loss` is shown as its own number. Inference deltas are not computed on a training history.
+Open two inference files, or two backpropagate `run_history.json` files. An inference file is a latency CSV, a benchmark JSON, or a Chrome trace whose events are named inference or TensorRT. A training file is drawn as training loss. Held-out loss, perplexity, and task metrics sit with that curve. `final_loss` is shown as its own number. An inference pair reports ΔF and ΔO from the latency series. ΔTc is reported only when both files have a steady-state milestone. Without that milestone the last step is not called a stabilization time. ΔTd and ΔĀ stay off the inference page. Inference deltas are not computed on a training history.
 
 The published Store build does not open a run history yet. It remains the .NET package until this Rust program is the update.
 

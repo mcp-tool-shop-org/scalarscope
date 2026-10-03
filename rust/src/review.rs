@@ -1,7 +1,7 @@
 //! A pair is either two inference runs or two training entries.
-//! The inference drawing reads the aligned latency window. The training
-//! drawing reads the stored loss samples. Canonical inference deltas are
-//! not computed on either page in this shell.
+//! The inference page reports ΔF, ΔO, and ΔTc. ΔTc is withheld when a
+//! steady-state milestone is missing. ΔTd and ΔĀ stay off that page.
+//! A training page does not compute those deltas.
 
 use crate::open::{InferenceRun, Side, TrainingEntry};
 use crate::readings::{self, Band};
@@ -30,6 +30,8 @@ pub struct InferenceReview {
     pub right_p50: Option<f64>,
     pub right_p95: Option<f64>,
     pub right_p99: Option<f64>,
+    pub fired: Vec<String>,
+    pub verdict: String,
     pub caption: String,
     pub left_text: String,
     pub right_text: String,
@@ -68,8 +70,9 @@ fn inference(left: &InferenceRun, right: &InferenceRun) -> InferenceReview {
     let left_finite = readings::finite_sorted(&left_values);
     let right_finite = readings::finite_sorted(&right_values);
     let (left_throughput, right_throughput) = throughput(left, right, skip_left, skip_right, count);
+    let (fired, verdict) = inference_verdict(left, right);
     let caption = format!(
-        "latency_ms (ms). {summary} The band is a centered 5-sample rolling mean ± population standard deviation, not a confidence interval. Marks are 3-sigma on this window. p50, p95, and p99 are nearest-rank. The distribution is the empirical CDF of these same samples. Canonical deltas are not computed in this shell."
+        "latency_ms (ms). {summary} The band is a centered 5-sample rolling mean ± population standard deviation, not a confidence interval. Marks are 3-sigma on this window. p50, p95, and p99 are nearest-rank. The distribution is the empirical CDF of these same samples. ΔTd and ΔĀ stay off this page."
     );
     InferenceReview {
         left_text: describe(&left.label, &left_values, &left_finite),
@@ -94,10 +97,107 @@ fn inference(left: &InferenceRun, right: &InferenceRun) -> InferenceReview {
         right_p50: readings::percentile(&right_finite, 0.50),
         right_p95: readings::percentile(&right_finite, 0.95),
         right_p99: readings::percentile(&right_finite, 0.99),
+        fired,
+        verdict,
         left: left_values,
         right: right_values,
         caption,
     }
+}
+
+fn inference_verdict(left: &InferenceRun, right: &InferenceRun) -> (Vec<String>, String) {
+    let mut findings: Vec<(&str, String)> = Vec::new();
+    let mut withheld = Vec::new();
+
+    let outliers_left = count_outliers(&left.latency_ms);
+    let outliers_right = count_outliers(&right.latency_ms);
+    if outliers_right > outliers_left {
+        let introduced = outliers_right - outliers_left;
+        findings.push(("ΔF", format!("Introduced {introduced} new runtime anomalies")));
+    }
+
+    match delta_tc(left, right) {
+        Tc::Fired(text) => findings.push(("ΔTc", text)),
+        Tc::Withheld(text) => withheld.push(text),
+        Tc::Quiet => {}
+    }
+
+    let spread_left = population_std_from(&left.latency_ms, left.steady_step.unwrap_or(0).max(0) as usize);
+    let spread_right = population_std_from(&right.latency_ms, right.steady_step.unwrap_or(0).max(0) as usize);
+    let scale = spread_left.max(spread_right);
+    if (spread_right - spread_left).abs() > 0.01 * scale {
+        let text = if spread_right < spread_left {
+            "Reduced runtime variability".to_string()
+        } else {
+            "Increased runtime variability".to_string()
+        };
+        findings.push(("ΔO", text));
+    }
+
+    let order = ["ΔF", "ΔTc", "ΔO"];
+    findings.sort_by_key(|(symbol, _)| order.iter().position(|item| item == symbol).unwrap_or(order.len()));
+    let fired: Vec<String> = findings.iter().map(|(symbol, _)| (*symbol).to_string()).collect();
+    let mut parts: Vec<String> = findings.into_iter().map(|(symbol, text)| format!("{symbol} {text}")).collect();
+    if parts.is_empty() {
+        parts.push("No delta fired on latency_ms.".to_string());
+    }
+    parts.extend(withheld);
+    (fired, parts.join(" "))
+}
+
+enum Tc {
+    Fired(String),
+    Withheld(String),
+    Quiet,
+}
+
+fn delta_tc(left: &InferenceRun, right: &InferenceRun) -> Tc {
+    let both = left.steady_step.is_some() && right.steady_step.is_some();
+    let left_step = left.steady_step.unwrap_or_else(|| last_step(left));
+    let right_step = right.steady_step.unwrap_or_else(|| last_step(right));
+    let difference = right_step - left_step;
+    if difference == 0 {
+        return Tc::Quiet;
+    }
+    if !both {
+        return Tc::Withheld(
+            "ΔTc is withheld. A steady-state milestone is missing, so the last step is not a stabilization time.".to_string(),
+        );
+    }
+    let text = if difference < 0 {
+        format!("Stabilizes {} steps earlier", difference.abs())
+    } else {
+        format!("Stabilizes {difference} steps later")
+    };
+    Tc::Fired(text)
+}
+
+fn last_step(run: &InferenceRun) -> i64 {
+    if run.steps.len() == run.latency_ms.len() {
+        run.steps.last().copied().unwrap_or(0)
+    } else {
+        run.latency_ms.len().saturating_sub(1) as i64
+    }
+}
+
+fn count_outliers(values: &[f64]) -> usize {
+    let finite: Vec<f64> = values.iter().copied().filter(|value| value.is_finite()).collect();
+    if finite.len() < 3 {
+        return 0;
+    }
+    let mean = finite.iter().sum::<f64>() / finite.len() as f64;
+    let standard_deviation = (finite.iter().map(|value| (value - mean).powi(2)).sum::<f64>() / finite.len() as f64).sqrt();
+    let threshold = 3.0 * standard_deviation;
+    finite.iter().filter(|value| (*value - mean).abs() > threshold).count()
+}
+
+fn population_std_from(values: &[f64], start: usize) -> f64 {
+    let tail: Vec<f64> = values.iter().skip(start).copied().filter(|value| value.is_finite()).collect();
+    if tail.len() < 2 {
+        return 0.0;
+    }
+    let mean = tail.iter().sum::<f64>() / tail.len() as f64;
+    (tail.iter().map(|value| (value - mean).powi(2)).sum::<f64>() / tail.len() as f64).sqrt()
 }
 
 fn training(left: &TrainingEntry, right: &TrainingEntry) -> TrainingReview {
@@ -114,11 +214,23 @@ fn training(left: &TrainingEntry, right: &TrainingEntry) -> TrainingReview {
 fn align(left: &InferenceRun, right: &InferenceRun) -> (usize, usize, usize, String) {
     let left_steps = steps_of(left);
     let right_steps = steps_of(right);
-    if let (Some(left_anchor), Some(right_anchor)) = (left.steady_step, right.steady_step) {
-        let after_left = left_steps.iter().filter(|step| **step >= left_anchor).count();
-        let after_right = right_steps.iter().filter(|step| **step >= right_anchor).count();
+    let both_steady = left.steady_step.is_some() && right.steady_step.is_some();
+    let mut left_anchor = left.steady_step;
+    let mut right_anchor = right.steady_step;
+    if left_anchor.is_none() || right_anchor.is_none() {
+        if left_anchor.is_none() {
+            left_anchor = left.warmup_end;
+        }
+        if right_anchor.is_none() {
+            right_anchor = right.warmup_end;
+        }
+    }
+    if let (Some(left_at), Some(right_at)) = (left_anchor, right_anchor) {
+        let after_left = left_steps.iter().filter(|step| **step >= left_at).count();
+        let after_right = right_steps.iter().filter(|step| **step >= right_at).count();
         let count = after_left.min(after_right);
-        let summary = format!("Aligned {count} steps from the steady-state milestone.");
+        let kind = if both_steady { "steady-state milestone" } else { "warmup milestone" };
+        let summary = format!("Aligned {count} steps from the {kind}.");
         return (left_steps.len() - after_left, right_steps.len() - after_right, count, summary);
     }
     let count = left_steps.len().min(right_steps.len());

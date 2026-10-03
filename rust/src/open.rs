@@ -9,12 +9,15 @@ use std::path::Path;
 
 use serde_json::Value;
 
+use crate::milestones::{detect_steady_start, detect_warmup_end};
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct InferenceRun {
     pub label: String,
     pub steps: Vec<i64>,
     pub latency_ms: Vec<f64>,
     pub throughput: Vec<f64>,
+    pub warmup_end: Option<i64>,
     pub steady_step: Option<i64>,
 }
 
@@ -195,13 +198,14 @@ fn open_csv(text: &str, label: &str) -> Result<Side, String> {
     if throughput.len() != latency.len() {
         throughput.clear();
     }
-    Ok(Side::Inference(InferenceRun {
+    Ok(Side::Inference(finish(InferenceRun {
         label: label.to_string(),
         steps,
         latency_ms: latency,
         throughput,
+        warmup_end: None,
         steady_step: None,
-    }))
+    })))
 }
 
 fn open_training(value: &Value, label: &str) -> Result<Side, String> {
@@ -266,13 +270,23 @@ fn open_training(value: &Value, label: &str) -> Result<Side, String> {
 
 fn series(label: &str, latency: Vec<f64>, throughput: Vec<f64>) -> InferenceRun {
     let steps = (0..latency.len() as i64).collect();
-    InferenceRun {
+    finish(InferenceRun {
         label: label.to_string(),
         steps,
         latency_ms: latency,
         throughput,
+        warmup_end: None,
         steady_step: None,
-    }
+    })
+}
+
+fn finish(mut run: InferenceRun) -> InferenceRun {
+    let warmup = detect_warmup_end(&run.latency_ms);
+    run.warmup_end = warmup.map(|step| step as i64);
+    run.steady_step = warmup
+        .and_then(|step| detect_steady_start(&run.latency_ms, step))
+        .map(|step| step as i64);
+    run
 }
 
 fn bench_array(map: &serde_json::Map<String, Value>) -> Option<&Vec<Value>> {

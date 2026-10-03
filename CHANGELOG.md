@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.0.0] - 2026-10-03
 
 ### Added
-- The review app in `rust/` is the ScalarScope being built. It opens two inference traces, or two backpropagate `run_history.json` files. Training loss stays training loss, and the eval numbers sit beside that curve. The Store package is still the .NET app until this binary is the update.
+- The review app in `rust/` is the ScalarScope being built. It opens two inference traces, or two backpropagate `run_history.json` files. Training loss stays training loss, and the eval numbers sit beside that curve. An inference pair reports ΔF and ΔO. ΔTc is reported only when both traces have a steady-state milestone, and a missing milestone is not called a stabilization time. ΔTd and ΔĀ stay off that page. The Store package is still the .NET app until this binary is the update.
 - Compare opens a real inference trace. A latency CSV, a benchmark JSON, or a profiler trace loads as the series it measured. The same samples can be drawn as a series or as their distribution. The series drawing adds a rolling spread band, 3-sigma marks, a steady-state span when that milestone exists, and throughput when both traces have it. A geometry JSON still opens the path view.
 - Home keeps a local comparison log. A review is written when both runs are loaded: the two names, the deltas that fired across the full run (ΔF, ΔTc, ΔTd, ΔĀ, ΔO), and the bundle hash once a bundle is saved or opened. The file stays in app data.
 

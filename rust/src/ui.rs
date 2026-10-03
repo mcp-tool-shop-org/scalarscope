@@ -110,6 +110,8 @@ impl ScalarScopeApp {
         });
         ui.label(RichText::new(&review.left_text).color(NOTE));
         ui.label(RichText::new(&review.right_text).color(NOTE));
+        ui.add_space(4.0);
+        ui.label(RichText::new(&review.verdict).color(Color32::WHITE));
         let distribution = self.distribution;
         Plot::new("review")
             .height(360.0)

@@ -1,4 +1,5 @@
-use scalarscope::open::{open_text, Side};
+use scalarscope::milestones::{detect_steady_start, detect_warmup_end};
+use scalarscope::open::{open_text, InferenceRun, Side};
 use scalarscope::readings::{deviation_band, percentile, steady_index, three_sigma_indices};
 use scalarscope::review::{pair, Pair};
 
@@ -134,6 +135,78 @@ fn a_training_file_beside_a_trace_is_refused() {
     )
     .unwrap_err();
     assert!(error.contains("same kind"));
+}
+
+#[test]
+fn a_flat_series_of_twenty_finds_steady_state_at_the_first_stable_window() {
+    let values = vec![10.0; 20];
+    assert_eq!(detect_warmup_end(&values), Some(3));
+    assert_eq!(detect_steady_start(&values, 3), Some(3));
+    assert_eq!(detect_warmup_end(&[10.0; 8]), None);
+}
+
+#[test]
+fn delta_tc_uses_the_milestone_and_is_withheld_without_one() {
+    let later = pair(&marked("a", vec![10.0; 8], Some(2)), &marked("b", vec![10.0; 8], Some(5))).unwrap();
+    let Pair::Inference(review) = later else { panic!("inference") };
+    assert_eq!(review.fired, vec!["ΔTc".to_string()]);
+    assert!(review.verdict.contains("Stabilizes 3 steps later"));
+
+    let earlier = pair(&marked("a", vec![10.0; 8], Some(5)), &marked("b", vec![10.0; 8], Some(2))).unwrap();
+    let Pair::Inference(review) = earlier else { panic!("inference") };
+    assert!(review.verdict.contains("Stabilizes 3 steps earlier"));
+
+    let left = "step,latency_ms\n0,10\n1,10\n2,10\n3,10\n";
+    let right = "step,latency_ms\n0,10\n1,10\n2,10\n3,10\n4,10\n5,10\n6,10\n7,10\n";
+    let Pair::Inference(review) = pair(&open_text(left, "short").unwrap(), &open_text(right, "longer").unwrap()).unwrap() else {
+        panic!("inference");
+    };
+    assert!(!review.fired.iter().any(|symbol| symbol == "ΔTc"));
+    assert!(review.verdict.contains("not a stabilization time"));
+}
+
+#[test]
+fn delta_f_fires_only_when_the_right_side_has_more_outliers() {
+    let calm = vec![10.0; 20];
+    let mut spiked = vec![10.0; 19];
+    spiked.push(100.0);
+    let Pair::Inference(review) = pair(&marked("a", calm.clone(), None), &marked("b", spiked.clone(), None)).unwrap() else {
+        panic!("inference");
+    };
+    assert_eq!(review.fired, vec!["ΔF".to_string(), "ΔO".to_string()]);
+    assert!(review.verdict.contains("Introduced 1 new runtime anomalies"));
+
+    let Pair::Inference(review) = pair(&marked("a", spiked, None), &marked("b", calm, None)).unwrap() else {
+        panic!("inference");
+    };
+    assert_eq!(review.fired, vec!["ΔO".to_string()]);
+    assert!(review.verdict.contains("Reduced runtime variability"));
+}
+
+#[test]
+fn delta_o_ignores_a_change_inside_one_percent_of_the_larger_spread() {
+    let Pair::Inference(review) = pair(&marked("a", vec![1.0, -1.0], None), &marked("b", vec![1.005, -1.005], None)).unwrap() else {
+        panic!("inference");
+    };
+    assert!(!review.fired.iter().any(|symbol| symbol == "ΔO"));
+
+    let Pair::Inference(review) = pair(&marked("a", vec![1.0, -1.0], None), &marked("b", vec![1.02, -1.02], None)).unwrap() else {
+        panic!("inference");
+    };
+    assert_eq!(review.fired, vec!["ΔO".to_string()]);
+    assert!(review.verdict.contains("Increased runtime variability"));
+}
+
+fn marked(label: &str, latency: Vec<f64>, steady: Option<i64>) -> Side {
+    let steps = (0..latency.len() as i64).collect();
+    Side::Inference(InferenceRun {
+        label: label.to_string(),
+        steps,
+        latency_ms: latency,
+        throughput: Vec::new(),
+        warmup_end: None,
+        steady_step: steady,
+    })
 }
 
 fn finite(values: &[Option<f64>]) -> Vec<f64> {
