@@ -35,6 +35,10 @@ fn blank(history: Option<PathBuf>) -> ScalarScopeApp {
         view: super::View::Series,
         threshold: None,
         elapsed_axis: false,
+        why: None,
+        highlight: None,
+        built: None,
+        saved_hash: None,
         history_dir: history,
         recent: Vec::new(),
         files: Vec::new(),
@@ -173,6 +177,36 @@ fn the_series_draws_on_elapsed_seconds_with_utilization() {
 }
 
 #[test]
+fn tiles_open_why_and_show_me_moves_to_the_anchor() {
+    let mut app = blank(None);
+    app.left = Some(loaded("baseline.csv", &long_csv(12.0, 1)));
+    app.right = Some(loaded("optimized.csv", &long_csv(8.0, 2)));
+    show(&mut app);
+    let Some((_, Ok(crate::review::Pair::Inference(review)))) = app.built.clone() else { panic!("built") };
+    let symbols: Vec<&str> = review.explanations.iter().map(|tile| tile.symbol.as_str()).collect();
+    assert_eq!(symbols, vec!["ΔF", "ΔTc", "ΔO"]);
+    app.why = Some("ΔTc".to_string());
+    show(&mut app);
+    let anchor = review.explanations[1].anchor.clone().expect("ΔTc anchors on the series");
+    app.highlight = Some((anchor.from, anchor.to));
+    show(&mut app);
+}
+
+#[test]
+fn the_review_is_built_once_per_pair_of_inputs() {
+    let mut app = blank(None);
+    app.left = Some(loaded("baseline.csv", &long_csv(12.0, 1)));
+    app.right = Some(loaded("optimized.csv", &long_csv(8.0, 2)));
+    show(&mut app);
+    let first = app.built.clone().unwrap().0;
+    show(&mut app);
+    assert_eq!(app.built.clone().unwrap().0, first);
+    app.right = Some(loaded("other.csv", &long_csv(9.0, 3)));
+    show(&mut app);
+    assert_ne!(app.built.clone().unwrap().0, first);
+}
+
+#[test]
 fn percentile_labels_name_the_nines() {
     assert_eq!(super::percentile_label(0.0), "p0");
     assert_eq!(super::percentile_label(1.0), "p90");
@@ -236,6 +270,7 @@ fn a_stored_review_draws_inference_training_and_findings_text() {
             kind: "findings".to_string(),
             notices: Vec::new(),
             headline: String::new(),
+            explanations: Vec::new(),
             verdict: "ΔF Introduced 1 new runtime anomalies".to_string(),
             fired: vec!["ΔF".to_string()],
             caption: "The series was not stored.".to_string(),

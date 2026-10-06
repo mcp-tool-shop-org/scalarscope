@@ -256,3 +256,18 @@ fn a_csv_milestone_is_a_step_number_not_an_index() {
     let steady = run.steady_step.expect("a steady state");
     assert!(steady >= 100, "{steady} should be a step from the file");
 }
+
+#[test]
+fn the_golden_pair_explains_each_delta() {
+    let (baseline, optimized) = (run("baseline_tfrt_runtrace.json"), run("optimized_tfrt_runtrace.json"));
+    let Pair::Inference(review) = pair(&Side::Inference(baseline), &Side::Inference(optimized)).unwrap() else { panic!("inference") };
+    let status = |symbol: &str| review.explanations.iter().find(|tile| tile.symbol == symbol).map(|tile| tile.status.clone());
+    assert_eq!(status("ΔTc").as_deref(), Some("fired"));
+    assert_eq!(status("ΔF").as_deref(), Some("quiet"));
+    assert_eq!(status("ΔO").as_deref(), Some("quiet"));
+    let tc = review.explanations.iter().find(|tile| tile.symbol == "ΔTc").unwrap();
+    assert!(tc.why.contains("state their steady-state step"), "{}", tc.why);
+    // ΔF is quiet with too few steady samples, and says so.
+    let f = review.explanations.iter().find(|tile| tile.symbol == "ΔF").unwrap();
+    assert!(f.why.contains("needs 20 steady samples"), "{}", f.why);
+}
