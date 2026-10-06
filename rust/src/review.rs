@@ -130,11 +130,22 @@ pub enum Pair {
     Training(TrainingReview),
 }
 
+/// Choices that change how a review reads its samples. Recorded in the caption, so a stored
+/// review says how it was made.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct Options {
+    pub anomaly: stats::AnomalyRule,
+}
+
 pub fn pair(left: &Side, right: &Side) -> Result<Pair, String> {
+    pair_with(left, right, Options::default())
+}
+
+pub fn pair_with(left: &Side, right: &Side, options: Options) -> Result<Pair, String> {
     match (left, right) {
         (Side::Inference(left), Side::Inference(right)) => {
             blocked(left, right)?;
-            Ok(Pair::Inference(inference(left, right)))
+            Ok(Pair::Inference(inference(left, right, options.anomaly)))
         }
         (Side::Training(left), Side::Training(right)) => Ok(Pair::Training(training(left, right))),
         _ => Err(
@@ -144,7 +155,7 @@ pub fn pair(left: &Side, right: &Side) -> Result<Pair, String> {
     }
 }
 
-fn inference(left: &InferenceRun, right: &InferenceRun) -> InferenceReview {
+fn inference(left: &InferenceRun, right: &InferenceRun, rule: stats::AnomalyRule) -> InferenceReview {
     let (skip_left, skip_right, count, summary) = align(left, right);
     let left_values = window(&left.latency_ms, skip_left, count);
     let right_values = window(&right.latency_ms, skip_right, count);
@@ -156,20 +167,20 @@ fn inference(left: &InferenceRun, right: &InferenceRun) -> InferenceReview {
     let (left_cpu, right_cpu) = beside(&left.cpu_percent, &right.cpu_percent, left, right, skip_left, skip_right, count);
     let (left_gpu, right_gpu) = beside(&left.gpu_percent, &right.gpu_percent, left, right, skip_left, skip_right, count);
     let shapes = (shape::run_shape(&left.latency_ms), shape::run_shape(&right.latency_ms));
-    let (findings, verdict) = inference_verdict(left, right, &shapes);
-    let explanations = explain(left, right, &shapes, &findings, (skip_left, skip_right, count));
+    let (findings, verdict) = inference_verdict(left, right, &shapes, rule);
+    let explanations = explain(left, right, &shapes, &findings, (skip_left, skip_right, count), rule);
     let fired = findings.iter().map(|row| row.symbol.clone()).collect();
     let mut caption = format!(
-        "Preset tensorflowrt-runtime-v1 (inference runtime). latency_ms (ms). {summary} The band is the p10–p90 of an 11-sample centred window, the spread of the samples, not a confidence interval. Marks are samples more than {limit} robust deviations (1.4826 × MAD) from the median of this window. Ratios and their 95% intervals come from {replicates} moving-block bootstrap resamples (block length the cube root of the sample count, seed fixed); they cover the variation within each run, not between runs. A percentile is printed only when enough samples bound it. p50, p95, and p99 are nearest-rank. The distribution is the empirical CDF of these same samples. ΔTd and ΔĀ stay off this page.",
-        limit = stats::MAD_LIMIT,
+        "Preset tensorflowrt-runtime-v1 (inference runtime). latency_ms (ms). {summary} The band is the p10–p90 of an 11-sample centred window, the spread of the samples, not a confidence interval. Marks are samples {marks_rule} in this window. Ratios and their 95% intervals come from {replicates} moving-block bootstrap resamples (block length the cube root of the sample count, seed fixed); they cover the variation within each run, not between runs. A percentile is printed only when enough samples bound it. p50, p95, and p99 are nearest-rank. The distribution is the empirical CDF of these same samples. ΔTd and ΔĀ stay off this page.",
+        marks_rule = rule.describe(),
         replicates = stats::BOOTSTRAP_REPLICATES,
     );
     if left.steady_step.is_some() && right.steady_step.is_some() {
         caption.push_str(" The vertical line is the steady-state milestone.");
     }
     InferenceReview {
-        left_text: describe(left, &left_values, &left_finite, &shapes.0),
-        right_text: describe(right, &right_values, &right_finite, &shapes.1),
+        left_text: describe(left, &left_values, &left_finite, &shapes.0, rule),
+        right_text: describe(right, &right_values, &right_finite, &shapes.1, rule),
         headline: headline(left, right),
         difference: {
             let (a, b) = (steady_tails(left), steady_tails(right));
@@ -183,8 +194,8 @@ fn inference(left: &InferenceRun, right: &InferenceRun) -> InferenceReview {
         unit: "ms".to_string(),
         left_band: stats::quantile_band(&left_values),
         right_band: stats::quantile_band(&right_values),
-        left_marks: stats::mad_indices(&left_values),
-        right_marks: stats::mad_indices(&right_values),
+        left_marks: stats::anomalies(rule, &left_values),
+        right_marks: stats::anomalies(rule, &right_values),
         left_steady: readings::steady_index(&left.steps, skip_left, count, left.steady_step.filter(|_| right.steady_step.is_some())),
         right_steady: readings::steady_index(&right.steps, skip_right, count, right.steady_step.filter(|_| left.steady_step.is_some())),
         left_throughput,
@@ -241,6 +252,7 @@ fn explain(
     shapes: &(RunShape, RunShape),
     findings: &[Finding],
     (_skip_left, skip_right, count): (usize, usize, usize),
+    rule: stats::AnomalyRule,
 ) -> Vec<Explanation> {
     let fired = |symbol: &str| findings.iter().find(|row| row.symbol == symbol);
     let (tail_left, tail_right) = (steady_tail(left), steady_tail(right));
@@ -248,7 +260,7 @@ fn explain(
     let mut tiles = Vec::new();
 
     // ΔF
-    let anomalies = |tail: &[f64]| stats::mad_indices(&tail.iter().map(|value| Some(*value)).collect::<Vec<_>>()).len();
+    let anomalies = |tail: &[f64]| stats::anomalies(rule, &tail.iter().map(|value| Some(*value)).collect::<Vec<_>>()).len();
     let (a, b) = (anomalies(&tail_left), anomalies(&tail_right));
     let (na, nb) = (tail_left.len(), tail_right.len());
     let p_value = stats::more_anomalies(a, na, b, nb);
@@ -264,14 +276,14 @@ fn explain(
             format!("B has {b} anomalies in {nb} steady samples and A has {a} in {na}. With equal rates, a split at least this lopsided has probability {p:.3}, which is not below {ANOMALY_LEVEL}, so it is within chance."),
         ),
     };
-    let right_marks = stats::mad_indices(&window(&right.latency_ms, skip_right, count));
+    let right_marks = stats::anomalies(rule, &window(&right.latency_ms, skip_right, count));
     tiles.push(Explanation {
         symbol: "ΔF".to_string(),
         status: status.to_string(),
         headline: fired("ΔF").map_or_else(|| "No new runtime anomalies beyond chance".to_string(), |row| row.sentence.clone()),
-        why: format!("{why} An anomaly is a sample more than {} robust deviations (1.4826 × MAD) from its run's median. Warmup samples are not counted.", stats::MAD_LIMIT),
+        why: format!("{why} An anomaly is a sample {}. Warmup samples are not counted.", rule.describe()),
         parameters: vec![
-            param("Rule", format!("beyond {} × 1.4826 × MAD of the median", stats::MAD_LIMIT)),
+            param("Rule", rule.describe()),
             param("Samples", "steady samples only"),
             param("Level", format!("one-sided p < {ANOMALY_LEVEL}")),
             param("A", format!("{a} in {na}")),
@@ -532,7 +544,7 @@ fn notices_rest(left: &InferenceRun, right: &InferenceRun, shapes: &(RunShape, R
 /// The one-sided level at which ΔF calls an excess of anomalies more than chance.
 pub const ANOMALY_LEVEL: f64 = 0.05;
 
-fn inference_verdict(left: &InferenceRun, right: &InferenceRun, shapes: &(RunShape, RunShape)) -> (Vec<Finding>, String) {
+fn inference_verdict(left: &InferenceRun, right: &InferenceRun, shapes: &(RunShape, RunShape), rule: stats::AnomalyRule) -> (Vec<Finding>, String) {
     let mut findings = Vec::new();
     let mut withheld = Vec::new();
     let (tail_left, tail_right) = (steady_tail(left), steady_tail(right));
@@ -541,7 +553,7 @@ fn inference_verdict(left: &InferenceRun, right: &InferenceRun, shapes: &(RunSha
 
     // ΔF counts anomalies in the steady samples only: a warmup sample is startup cost, not a
     // runtime anomaly (C3). It fires when B's excess is beyond chance given both sample counts.
-    let anomalies = |tail: &[f64]| stats::mad_indices(&tail.iter().map(|value| Some(*value)).collect::<Vec<_>>()).len();
+    let anomalies = |tail: &[f64]| stats::anomalies(rule, &tail.iter().map(|value| Some(*value)).collect::<Vec<_>>()).len();
     let (outliers_left, outliers_right) = (anomalies(&tail_left), anomalies(&tail_right));
     if let Some(p_value) = stats::more_anomalies(outliers_left, tail_left.len(), outliers_right, tail_right.len()).filter(|_| enough) {
         if p_value < ANOMALY_LEVEL {
@@ -788,8 +800,8 @@ fn beside(
     )
 }
 
-fn describe(run: &InferenceRun, values: &[Option<f64>], sorted: &[f64], shape: &RunShape) -> String {
-    let marks = stats::mad_indices(values).len();
+fn describe(run: &InferenceRun, values: &[Option<f64>], sorted: &[f64], shape: &RunShape, rule: stats::AnomalyRule) -> String {
+    let marks = stats::anomalies(rule, values).len();
     let percentile = |probability: f64| match stats::quantile_support(sorted.len(), probability) {
         Support::Ranks { .. } => format!("{} ms", fmt(readings::percentile(sorted, probability))),
         Support::TooFew { needed } => format!("needs {needed} samples"),

@@ -196,7 +196,7 @@ The band became the p10–p90 of an 11-sample centred window and the marks becam
 
 **The golden pair.** 2.0's `expected_assertions.json` says ΔF fires, because the optimized run's first sample (40 ms) is a 3-sigma outlier of the whole series. That sample is warmup. Under the 3.0 rule ΔF is quiet. `rust/tests/runtrace_tests.rs` asserts the 2.0 oracle still says "fired" and that 3.0 does not. Every other golden assertion holds.
 
-**Deferred to phase 3.** S3 keeps the 2.0 3-sigma rule as a setting that bundles record. The setting needs the Settings page, so it lands there.
+**Phase 3.** S3 keeps the 2.0 3-sigma rule as a setting that bundles record. It is on the Settings page (`AnomalyRule` in `preferences.json`), and the caption names the rule a review used.
 
 ## Corrections
 

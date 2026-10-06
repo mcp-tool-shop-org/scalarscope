@@ -13,6 +13,18 @@ use crate::readings::Band;
 use crate::review::{self, InferenceReview, Pair, TrainingReview};
 use crate::views;
 
+/// The app's pages, as 2.0's tabs.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Page {
+    Compare,
+    Settings,
+}
+
+/// The issue tracker "Report an issue" opens.
+pub const ISSUES_URL: &str = "https://github.com/mcp-tool-shop-org/scalarscope/issues";
+pub const PRIVACY_URL: &str = "https://github.com/mcp-tool-shop-org/scalarscope/blob/main/PRIVACY.md";
+pub const SOURCE_URL: &str = "https://github.com/mcp-tool-shop-org/scalarscope";
+
 /// The inference views. Each answers one reading question; none animates.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum View {
@@ -132,6 +144,9 @@ pub struct ScalarScopeApp {
     built: Option<(String, Result<Pair, String>)>,
     /// The hash of the bundle saved last, for "Copy hash".
     saved_hash: Option<String>,
+    page: Page,
+    /// What the Settings page edits, under 2.0's `preferences.json` keys.
+    settings: prefs::ReviewPrefs,
     /// Set only when this process is the Store package. An unpackaged run leaves LocalState alone.
     history_dir: Option<std::path::PathBuf>,
     recent: Vec<LogEntry>,
@@ -162,6 +177,8 @@ impl Default for ScalarScopeApp {
             highlight: None,
             built: None,
             saved_hash: None,
+            page: Page::Compare,
+            settings: saved.clone(),
             history_dir,
             recent,
             files: saved.recent,
@@ -174,6 +191,12 @@ impl Default for ScalarScopeApp {
 }
 
 impl eframe::App for ScalarScopeApp {
+    /// eframe clears to a fixed near-black by default; the page has no panel of its own, so the
+    /// theme's panel color is the background.
+    fn clear_color(&self, visuals: &egui::Visuals) -> [f32; 4] {
+        visuals.panel_fill.to_normalized_gamma_f32()
+    }
+
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
         // The page is taller than the window once throughput and memory are drawn.
         egui::ScrollArea::vertical().auto_shrink([false, false]).show(ui, |ui| self.page(ui));
@@ -183,17 +206,19 @@ impl eframe::App for ScalarScopeApp {
 impl ScalarScopeApp {
     fn page(&mut self, ui: &mut egui::Ui) {
         ui.ctx().set_zoom_factor(self.text_scale);
-        if self.paint.background != Color32::from_rgb(0x12, 0x12, 0x1f) {
-            let mut visuals = egui::Visuals::dark();
-            visuals.panel_fill = self.paint.background;
-            visuals.window_fill = self.paint.background;
-            visuals.extreme_bg_color = self.paint.background;
-            ui.ctx().set_visuals(visuals);
-        }
+        self.apply_theme(ui.ctx());
         let paint = self.paint;
-        let reviewing = self.opened.is_some();
         ui.horizontal(|ui| {
             ui.heading(RichText::new("ScalarScope").color(paint.mark));
+            ui.selectable_value(&mut self.page, Page::Compare, "Compare");
+            ui.selectable_value(&mut self.page, Page::Settings, "Settings");
+        });
+        ui.add_space(4.0);
+        if self.page == Page::Settings {
+            return self.draw_settings(ui);
+        }
+        let reviewing = self.opened.is_some();
+        ui.horizontal(|ui| {
             if ui.add_enabled(!reviewing, egui::Button::new("Open path A")).clicked() {
                 self.load(true, false);
             }
@@ -269,7 +294,7 @@ impl ScalarScopeApp {
                 Some(Pair::Training(review)) => draw_training(ui, &review, paint),
                 None => {
                     if !opened.review.verdict.is_empty() {
-                        ui.label(RichText::new(&opened.review.verdict).color(Color32::WHITE));
+                        ui.label(RichText::new(&opened.review.verdict).color(self.paint.text));
                     }
                     ui.label(RichText::new(&opened.review.caption).color(paint.note));
                 }
@@ -386,9 +411,9 @@ impl ScalarScopeApp {
         ui.label(RichText::new(&review.right_text).color(paint.note));
         ui.add_space(4.0);
         if !review.headline.is_empty() {
-            ui.label(RichText::new(&review.headline).color(Color32::WHITE).strong());
+            ui.label(RichText::new(&review.headline).color(self.paint.text).strong());
         }
-        ui.label(RichText::new(&review.verdict).color(Color32::WHITE));
+        ui.label(RichText::new(&review.verdict).color(self.paint.text));
         for line in &review.notices {
             ui.label(RichText::new(line).color(paint.note));
         }
@@ -504,11 +529,122 @@ impl ScalarScopeApp {
             self.built = None;
             return None;
         };
-        let key = format!("{}|{}|{:?}|{:?}", left.path, right.path, side_name(&self.left, ""), side_name(&self.right, ""));
+        let options = self.options();
+        let key = format!("{}|{}|{:?}|{:?}|{options:?}", left.path, right.path, side_name(&self.left, ""), side_name(&self.right, ""));
         if self.built.as_ref().map(|(cached, _)| cached) != Some(&key) {
-            self.built = Some((key, review::pair(&left.side, &right.side)));
+            self.built = Some((key, review::pair_with(&left.side, &right.side, options)));
         }
         self.built.as_ref().map(|(_, pair)| pair.clone())
+    }
+
+    fn options(&self) -> review::Options {
+        review::Options {
+            anomaly: crate::stats::AnomalyRule::from_code(self.settings.anomaly_rule),
+        }
+    }
+
+    /// Light or dark, from the setting or from Windows, with the matching chart colors.
+    /// egui keeps one look per theme and picks by its theme preference, so the preference is set
+    /// from the setting and each theme gets its own panel colors.
+    fn apply_theme(&mut self, ctx: &egui::Context) {
+        let preference = match self.settings.theme {
+            1 => egui::ThemePreference::Light,
+            2 => egui::ThemePreference::Dark,
+            _ => egui::ThemePreference::System,
+        };
+        ctx.set_theme(preference);
+        let palette = prefs::series_palette(self.settings.color_vision, self.settings.high_contrast);
+        for theme in [egui::Theme::Light, egui::Theme::Dark] {
+            let light = theme == egui::Theme::Light;
+            let paint = Paint::themed(palette, light);
+            let mut visuals = if light { egui::Visuals::light() } else { egui::Visuals::dark() };
+            visuals.panel_fill = paint.background;
+            visuals.window_fill = paint.background;
+            if !light {
+                visuals.extreme_bg_color = paint.background;
+            }
+            ctx.set_visuals_of(theme, visuals);
+        }
+        self.paint = Paint::themed(palette, ctx.theme() == egui::Theme::Light);
+    }
+
+    /// Save the settings and rebuild what depends on them.
+    fn settings_changed(&mut self) {
+        self.text_scale = self.settings.text_scale;
+        self.built = None;
+        if let Some(dir) = self.history_dir.clone() {
+            if let Err(error) = prefs::write_settings(&dir, &self.settings) {
+                self.note = error;
+            }
+        }
+    }
+
+    fn draw_settings(&mut self, ui: &mut egui::Ui) {
+        let paint = self.paint;
+        let before = self.settings.clone();
+        ui.heading("Appearance");
+        ui.horizontal(|ui| {
+            ui.label("Theme");
+            ui.radio_value(&mut self.settings.theme, 0, "Follow Windows");
+            ui.radio_value(&mut self.settings.theme, 1, "Light");
+            ui.radio_value(&mut self.settings.theme, 2, "Dark");
+        });
+        ui.horizontal(|ui| {
+            ui.label("Series colors");
+            let names = ["Default", "Deuteranopia", "Protanopia", "Tritanopia", "High contrast", "Monochrome"];
+            egui::ComboBox::from_id_salt("color-vision")
+                .selected_text(names[usize::from(self.settings.color_vision.min(5))])
+                .show_ui(ui, |ui| {
+                    for (code, name) in names.iter().enumerate() {
+                        ui.selectable_value(&mut self.settings.color_vision, code as u8, *name);
+                    }
+                });
+        });
+        ui.checkbox(&mut self.settings.high_contrast, "High contrast (when the series colors are Default)");
+        ui.add(egui::Slider::new(&mut self.settings.text_scale, 0.75..=2.0).text("Text scale"));
+        ui.add_space(8.0);
+        ui.heading("Analysis");
+        ui.label(RichText::new("Which samples count as anomalies, for the marks and ΔF. A stored review's caption says which rule made it.").color(paint.note));
+        ui.radio_value(&mut self.settings.anomaly_rule, 0, "More than 5 robust deviations (1.4826 × MAD) from the median (recommended)");
+        ui.radio_value(&mut self.settings.anomaly_rule, 1, "More than 3 standard deviations from the mean (the 2.0 rule; the spikes inflate the standard deviation)");
+        ui.add_space(8.0);
+        ui.heading("Recent files");
+        ui.horizontal(|ui| {
+            let mut limit = self.settings.recent_limit as u32;
+            ui.label("Keep");
+            if ui.add(egui::DragValue::new(&mut limit).range(1..=40)).changed() {
+                self.settings.recent_limit = limit as usize;
+            }
+            ui.label("files");
+            if ui.button("Clear recent files").clicked() {
+                if let Some(dir) = self.history_dir.clone() {
+                    match prefs::clear_recent(&dir) {
+                        Ok(()) => self.files.clear(),
+                        Err(error) => self.note = error,
+                    }
+                } else {
+                    self.files.clear();
+                }
+            }
+        });
+        if self.history_dir.is_none() {
+            ui.label(RichText::new("This unpackaged run keeps settings for this session only. The Store app keeps them in its LocalState folder.").color(paint.note));
+        }
+        if self.settings != before {
+            self.settings_changed();
+        }
+        ui.add_space(8.0);
+        ui.heading("About");
+        ui.label(format!("ScalarScope {} (package 3.0.0.0, Microsoft Store 9P3HT1PHBKQK)", env!("CARGO_PKG_VERSION")));
+        ui.label(RichText::new("Privacy: ScalarScope reads only the files you open and writes only the bundles you save and its own settings and history in its package folder. It sends nothing anywhere: no account, no telemetry, no analytics.").color(paint.note));
+        ui.horizontal(|ui| {
+            ui.hyperlink_to("Report an issue", ISSUES_URL);
+            ui.hyperlink_to("Privacy policy", PRIVACY_URL);
+            ui.hyperlink_to("Source", SOURCE_URL);
+        });
+        if !self.note.is_empty() {
+            ui.label(RichText::new(&self.note).color(paint.mark));
+        }
     }
 
     /// One tile per delta. A tile opens its "Why" panel.
@@ -523,7 +659,7 @@ impl ScalarScopeApp {
                 let color = match tile.status.as_str() {
                     "fired" => paint.mark,
                     "withheld" => paint.note,
-                    _ => Color32::GRAY,
+                    _ => paint.note,
                 };
                 let open = self.why.as_deref() == Some(tile.symbol.as_str());
                 let text = RichText::new(format!("{} {} · {}", tile.symbol, tile.status, tile.headline)).color(color);
@@ -537,7 +673,7 @@ impl ScalarScopeApp {
         };
         egui::Frame::group(ui.style()).show(ui, |ui| {
             ui.set_width(ui.available_width());
-            ui.label(RichText::new(format!("{} {}: {}", tile.symbol, tile.status, tile.headline)).color(Color32::WHITE).strong());
+            ui.label(RichText::new(format!("{} {}: {}", tile.symbol, tile.status, tile.headline)).color(self.paint.text).strong());
             ui.add(egui::Label::new(RichText::new(&tile.why).color(paint.note)).wrap());
             egui::Grid::new(format!("why-{}", tile.symbol)).num_columns(2).show(ui, |ui| {
                 for [name, value] in &tile.parameters {
@@ -606,7 +742,7 @@ impl ScalarScopeApp {
                 share(&review.left),
                 share(&review.right)
             ))
-            .color(Color32::WHITE),
+            .color(self.paint.text),
         );
         let (left_dots, right_dots) = (views::quantile_strip(&review.left), views::quantile_strip(&review.right));
         if !left_dots.is_empty() && !right_dots.is_empty() {
@@ -1053,6 +1189,8 @@ struct Paint {
     mark: Color32,
     note: Color32,
     background: Color32,
+    /// Strong text: the headline, the verdict, a tile's title.
+    text: Color32,
     label: Option<&'static str>,
 }
 
@@ -1064,6 +1202,31 @@ impl Paint {
             mark: hex_color(palette.mark),
             note: hex_color(palette.note),
             background: hex_color(palette.background),
+            text: Color32::WHITE,
+            label: palette.label,
+        }
+    }
+
+    /// The palette on a light or dark page. On light, the background and text invert, and the
+    /// default and monochrome series darken so they keep their contrast.
+    fn themed(palette: prefs::SeriesPalette, light: bool) -> Self {
+        let dark = Self::from_palette(palette);
+        if !light {
+            return dark;
+        }
+        let (left, right, mark) = match palette.label {
+            None => (hex_color("138a83"), hex_color("c83e4d"), hex_color("a86b00")),
+            Some("monochrome") => (hex_color("000000"), hex_color("555555"), hex_color("888888")),
+            Some("high contrast") => (hex_color("005f87"), hex_color("b00020"), hex_color("6a1b9a")),
+            _ => (dark.left, dark.right, dark.mark),
+        };
+        Self {
+            left,
+            right,
+            mark,
+            note: hex_color("4f5566"),
+            background: hex_color("f7f7fa"),
+            text: hex_color("15171c"),
             label: palette.label,
         }
     }

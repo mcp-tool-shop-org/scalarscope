@@ -159,3 +159,31 @@ fn new_directory() -> std::path::PathBuf {
     fs::create_dir_all(&directory).unwrap();
     directory
 }
+
+#[test]
+fn settings_write_under_the_2_0_keys_and_keep_the_rest() {
+    let dir = std::env::temp_dir().join(format!("scalarscope-settings-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::create_dir_all(&dir).unwrap();
+    std::fs::write(dir.join("preferences.json"), r#"{"ReduceAnimations": true, "Theme": 2, "RecentFiles": [{"Path": "a.csv"}]}"#).unwrap();
+    let mut settings = scalarscope::prefs::read(&dir);
+    assert_eq!(settings.theme, 2);
+    settings.theme = 1;
+    settings.color_vision = 3;
+    settings.anomaly_rule = 1;
+    settings.text_scale = 1.5;
+    scalarscope::prefs::write_settings(&dir, &settings).unwrap();
+    let text = std::fs::read_to_string(dir.join("preferences.json")).unwrap();
+    let value: serde_json::Value = serde_json::from_str(&text).unwrap();
+    assert_eq!(value["ReduceAnimations"], true);
+    assert_eq!((value["Theme"].as_u64(), value["ColorVisionMode"].as_u64(), value["AnomalyRule"].as_u64()), (Some(1), Some(3), Some(1)));
+    let again = scalarscope::prefs::read(&dir);
+    assert_eq!((again.theme, again.color_vision, again.anomaly_rule, again.text_scale), (1, 3, 1, 1.5));
+    assert_eq!(again.recent.len(), 1);
+    scalarscope::prefs::clear_recent(&dir).unwrap();
+    assert!(scalarscope::prefs::read(&dir).recent.is_empty());
+    assert_eq!(scalarscope::prefs::read(&dir).theme, 1);
+    std::fs::write(dir.join("preferences.json"), "[1]").unwrap();
+    assert!(scalarscope::prefs::write_settings(&dir, &settings).is_err());
+    assert_eq!(std::fs::read_to_string(dir.join("preferences.json")).unwrap(), "[1]");
+}

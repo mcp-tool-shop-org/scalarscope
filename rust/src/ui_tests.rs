@@ -39,6 +39,8 @@ fn blank(history: Option<PathBuf>) -> ScalarScopeApp {
         highlight: None,
         built: None,
         saved_hash: None,
+        page: super::Page::Compare,
+        settings: prefs::ReviewPrefs::default(),
         history_dir: history,
         recent: Vec::new(),
         files: Vec::new(),
@@ -204,6 +206,41 @@ fn the_review_is_built_once_per_pair_of_inputs() {
     app.right = Some(loaded("other.csv", &long_csv(9.0, 3)));
     show(&mut app);
     assert_ne!(app.built.clone().unwrap().0, first);
+}
+
+#[test]
+fn the_settings_page_draws_and_light_theme_paints_dark_text() {
+    let mut app = blank(None);
+    app.page = super::Page::Settings;
+    show(&mut app);
+    for theme in [0, 1, 2] {
+        app.settings.theme = theme;
+        app.page = super::Page::Compare;
+        app.left = Some(loaded("baseline.csv", &long_csv(12.0, 1)));
+        app.right = Some(loaded("optimized.csv", &long_csv(8.0, 2)));
+        show(&mut app);
+    }
+    let light = super::Paint::themed(prefs::series_palette(0, false), true);
+    let dark = super::Paint::themed(prefs::series_palette(0, false), false);
+    assert_ne!(light.background, dark.background);
+    assert_ne!(light.text, Color32::WHITE);
+    assert_eq!(dark.text, Color32::WHITE);
+}
+
+#[test]
+fn the_anomaly_setting_reaches_the_review_and_rebuilds_it() {
+    let mut app = blank(None);
+    app.left = Some(loaded("baseline.csv", &long_csv(12.0, 1)));
+    app.right = Some(loaded("optimized.csv", &long_csv(8.0, 2)));
+    show(&mut app);
+    let mad = app.built.clone().unwrap();
+    app.settings.anomaly_rule = 1;
+    app.settings_changed();
+    show(&mut app);
+    let sigma = app.built.clone().unwrap();
+    assert_ne!(mad.0, sigma.0);
+    let Ok(crate::review::Pair::Inference(review)) = sigma.1 else { panic!("inference") };
+    assert!(review.caption.contains("3 population standard deviations"), "{}", review.caption);
 }
 
 #[test]
