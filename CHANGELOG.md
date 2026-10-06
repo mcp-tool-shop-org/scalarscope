@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Recovery resumes to Home, Compare, Help, or Settings. Start fresh returns to Home.
 
 ### Changed
+- The Store package declares Windows.Desktop only, tested up to Windows 11 (10.0.26100.0). Earlier packages also declared Windows.Universal, which offered a full-trust desktop app to device families that cannot run it. The pack script refuses any other family.
 - Package identity version is `3.0.0.0` for the next Partner Center update of store `9P3HT1PHBKQK`. Name, publisher, and publisher display name are unchanged.
 - The release workflow publishes an unsigned `ScalarScope_3.0.0.0_Store.msixupload` whose binary is the Rust review, the same upload shape as `ScalarScope_v2.0.0_Store.msixupload`. Partner Center signs it. The old workflow built the .NET package.
 - Welcome and Settings read the assembly version instead of a hardcoded `2.0.0`.
