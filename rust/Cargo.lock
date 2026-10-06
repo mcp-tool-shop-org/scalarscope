@@ -2843,6 +2843,7 @@ version = "3.0.0"
 dependencies = [
  "eframe",
  "egui_plot",
+ "flate2",
  "rfd",
  "serde",
  "serde_json",

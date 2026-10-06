@@ -237,23 +237,23 @@ fn loading_a_path_fills_one_side_and_a_cancel_or_a_missing_file_does_not() {
     let mut app = blank(Some(dir.clone()));
 
     queue_pick(None);
-    app.load(true);
+    app.load(true, false);
     assert!(app.left.is_none());
 
     queue_pick(Some(dir.join("missing.csv")));
-    app.load(true);
+    app.load(true, false);
     assert!(app.left.is_none());
     assert!(app.note.contains("Could not read"));
 
     queue_pick(Some(csv));
-    app.load(true);
+    app.load(true, false);
     assert!(app.left.is_some());
     assert!(app.note.is_empty());
 
     let bad = dir.join("notes.txt");
     fs::write(&bad, "not a run").unwrap();
     queue_pick(Some(bad));
-    app.load(false);
+    app.load(false, false);
     assert!(app.right.is_none());
     assert!(!app.note.is_empty());
 }
@@ -267,7 +267,7 @@ fn a_preferences_folder_that_is_a_file_keeps_the_opened_run_and_the_error() {
     fs::write(&blocked, "x").unwrap();
     let mut app = blank(Some(blocked));
     queue_pick(Some(csv));
-    app.load(false);
+    app.load(false, false);
     assert!(app.right.is_some());
     assert!(app.note.contains("preferences"));
 }

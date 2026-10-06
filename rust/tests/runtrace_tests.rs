@@ -84,6 +84,9 @@ fn the_golden_pair_matches_the_dotnet_assertions() {
     assert!(deltas["deltaTd"]["shouldBeSuppressed"].as_bool().unwrap() && !review.fired.contains(&"ΔTd".to_string()));
     assert!(deltas["deltaA"]["shouldBeSuppressed"].as_bool().unwrap() && !review.fired.contains(&"ΔĀ".to_string()));
 
+    assert!(!review.left_memory.is_empty() && review.left_memory.len() == review.right_memory.len());
+    assert!(review.caption.starts_with(&format!("Preset {}", intent["presetId"].as_str().unwrap())), "{}", review.caption);
+
     // The model may differ; dataset, code and environment match. The baseline's warmup ends at
     // step 12 of 20, past half the run, which the .NET guardrail also notes.
     assert_eq!(

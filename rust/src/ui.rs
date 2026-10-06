@@ -52,7 +52,14 @@ fn pick_run() -> Option<std::path::PathBuf> {
     if let Some(queued) = take_pick() {
         return queued;
     }
-    rfd::FileDialog::new().add_filter("Run", &["json", "csv", "log"]).pick_file()
+    rfd::FileDialog::new().add_filter("Run", &["json", "csv", "log", "gz"]).pick_file()
+}
+
+fn pick_run_folder() -> Option<std::path::PathBuf> {
+    if let Some(queued) = take_pick() {
+        return queued;
+    }
+    rfd::FileDialog::new().pick_folder()
 }
 
 fn pick_bundle() -> Option<std::path::PathBuf> {
@@ -119,6 +126,13 @@ impl Default for ScalarScopeApp {
 
 impl eframe::App for ScalarScopeApp {
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
+        // The page is taller than the window once throughput and memory are drawn.
+        egui::ScrollArea::vertical().auto_shrink([false, false]).show(ui, |ui| self.page(ui));
+    }
+}
+
+impl ScalarScopeApp {
+    fn page(&mut self, ui: &mut egui::Ui) {
         ui.ctx().set_zoom_factor(self.text_scale);
         if self.paint.background != Color32::from_rgb(0x12, 0x12, 0x1f) {
             let mut visuals = egui::Visuals::dark();
@@ -131,10 +145,16 @@ impl eframe::App for ScalarScopeApp {
         ui.horizontal(|ui| {
             ui.heading(RichText::new("ScalarScope").color(paint.mark));
             if ui.button("Open path A").clicked() {
-                self.load(true);
+                self.load(true, false);
+            }
+            if ui.button("Folder A").on_hover_text("Open a run folder for side A").clicked() {
+                self.load(true, true);
             }
             if ui.button("Open path B").clicked() {
-                self.load(false);
+                self.load(false, false);
+            }
+            if ui.button("Folder B").on_hover_text("Open a run folder for side B").clicked() {
+                self.load(false, true);
             }
             if ui.button("Open bundle").clicked() {
                 self.open_bundle();
@@ -218,8 +238,9 @@ impl eframe::App for ScalarScopeApp {
 }
 
 impl ScalarScopeApp {
-    fn load(&mut self, left: bool) {
-        let Some(path) = pick_run() else {
+    fn load(&mut self, left: bool, folder: bool) {
+        let picked = if folder { pick_run_folder() } else { pick_run() };
+        let Some(path) = picked else {
             return;
         };
         match open_path(&path) {
@@ -348,6 +369,16 @@ impl ScalarScopeApp {
                 .show(ui, |plot| {
                     plot.line(series_line("A throughput", paint.left, plain_points(&review.left_throughput)));
                     plot.line(series_line("B throughput", paint.right, plain_points(&review.right_throughput)));
+                });
+        }
+        if !distribution && !review.left_memory.is_empty() && !review.right_memory.is_empty() {
+            ui.label(RichText::new("Memory, MiB, same steps, own scale.").color(paint.note));
+            Plot::new("memory")
+                .height(120.0)
+                .y_axis_label("MiB")
+                .show(ui, |plot| {
+                    plot.line(series_line("A memory", paint.left, plain_points(&review.left_memory)));
+                    plot.line(series_line("B memory", paint.right, plain_points(&review.right_memory)));
                 });
         }
         ui.add_space(6.0);

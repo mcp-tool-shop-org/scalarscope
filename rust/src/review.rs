@@ -25,6 +25,9 @@ pub struct InferenceReview {
     pub right_steady: Option<usize>,
     pub left_throughput: Vec<f64>,
     pub right_throughput: Vec<f64>,
+    /// Memory in MiB at the same steps, when both sides recorded it.
+    pub left_memory: Vec<f64>,
+    pub right_memory: Vec<f64>,
     pub left_cdf: Vec<(f64, f64)>,
     pub right_cdf: Vec<(f64, f64)>,
     pub left_p50: Option<f64>,
@@ -95,11 +98,12 @@ fn inference(left: &InferenceRun, right: &InferenceRun) -> InferenceReview {
     let right_values = window(&right.latency_ms, skip_right, count);
     let left_finite = readings::finite_sorted(&left_values);
     let right_finite = readings::finite_sorted(&right_values);
-    let (left_throughput, right_throughput) = throughput(left, right, skip_left, skip_right, count);
+    let (left_throughput, right_throughput) = beside(&left.throughput, &right.throughput, left, right, skip_left, skip_right, count);
+    let (left_memory, right_memory) = beside(&left.memory_mb, &right.memory_mb, left, right, skip_left, skip_right, count);
     let (findings, verdict) = inference_verdict(left, right);
     let fired = findings.iter().map(|row| row.symbol.clone()).collect();
     let mut caption = format!(
-        "latency_ms (ms). {summary} The band is a centered 5-sample rolling mean ± population standard deviation, not a confidence interval. Marks are 3-sigma on this window. p50, p95, and p99 are nearest-rank. The distribution is the empirical CDF of these same samples. ΔTd and ΔĀ stay off this page."
+        "Preset tensorflowrt-runtime-v1 (inference runtime). latency_ms (ms). {summary} The band is a centered 5-sample rolling mean ± population standard deviation, not a confidence interval. Marks are 3-sigma on this window. p50, p95, and p99 are nearest-rank. The distribution is the empirical CDF of these same samples. ΔTd and ΔĀ stay off this page."
     );
     if left.steady_step.is_some() && right.steady_step.is_some() {
         caption.push_str(" The vertical line is the steady-state milestone.");
@@ -119,6 +123,8 @@ fn inference(left: &InferenceRun, right: &InferenceRun) -> InferenceReview {
         right_steady: readings::steady_index(&right.steps, skip_right, count, right.steady_step.filter(|_| left.steady_step.is_some())),
         left_throughput,
         right_throughput,
+        left_memory,
+        right_memory,
         left_cdf: readings::empirical_cdf(&left_finite),
         right_cdf: readings::empirical_cdf(&right_finite),
         left_p50: readings::percentile(&left_finite, 0.50),
@@ -192,7 +198,11 @@ fn inference_verdict(left: &InferenceRun, right: &InferenceRun) -> (Vec<Finding>
         let introduced = outliers_right - outliers_left;
         findings.push(finding(
             "ΔF",
-            format!("Introduced {introduced} new runtime anomalies"),
+            if introduced == 1 {
+                "Introduced 1 new runtime anomaly".to_string()
+            } else {
+                format!("Introduced {introduced} new runtime anomalies")
+            },
             outliers_left as f64,
             outliers_right as f64,
             "count",
@@ -393,22 +403,26 @@ fn window(values: &[f64], skip: usize, count: usize) -> Vec<Option<f64>> {
     values.iter().skip(skip).take(count).copied().map(Some).collect()
 }
 
-fn throughput(
+/// A series recorded beside latency (throughput, memory), cut to the same aligned window.
+/// Both sides need it at every latency step, or neither is shown.
+fn beside(
+    left_values: &[f64],
+    right_values: &[f64],
     left: &InferenceRun,
     right: &InferenceRun,
     skip_left: usize,
     skip_right: usize,
     count: usize,
 ) -> (Vec<f64>, Vec<f64>) {
-    if left.throughput.len() != left.latency_ms.len() || right.throughput.len() != right.latency_ms.len() {
+    if left_values.len() != left.latency_ms.len() || right_values.len() != right.latency_ms.len() {
         return (Vec::new(), Vec::new());
     }
-    if left.throughput.is_empty() || right.throughput.is_empty() {
+    if left_values.is_empty() || right_values.is_empty() {
         return (Vec::new(), Vec::new());
     }
     (
-        left.throughput.iter().skip(skip_left).take(count).copied().collect(),
-        right.throughput.iter().skip(skip_right).take(count).copied().collect(),
+        left_values.iter().skip(skip_left).take(count).copied().collect(),
+        right_values.iter().skip(skip_right).take(count).copied().collect(),
     )
 }
 

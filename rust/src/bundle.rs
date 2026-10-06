@@ -68,6 +68,10 @@ pub struct StoredSeries {
     pub right_steady: Option<usize>,
     pub left_throughput: Vec<f64>,
     pub right_throughput: Vec<f64>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub left_memory: Vec<f64>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub right_memory: Vec<f64>,
     pub left_cdf: Vec<[f64; 2]>,
     pub right_cdf: Vec<[f64; 2]>,
     pub left_p50: Option<f64>,
@@ -400,6 +404,8 @@ pub fn stored_pair(review: &StoredReview) -> Option<Pair> {
                 right_steady: series.right_steady,
                 left_throughput: series.left_throughput.clone(),
                 right_throughput: series.right_throughput.clone(),
+                left_memory: series.left_memory.clone(),
+                right_memory: series.right_memory.clone(),
                 left_cdf: pairs(&series.left_cdf),
                 right_cdf: pairs(&series.right_cdf),
                 left_p50: series.left_p50,
@@ -526,6 +532,8 @@ fn inference_review(review: &InferenceReview) -> StoredReview {
             right_steady: review.right_steady,
             left_throughput: review.left_throughput.clone(),
             right_throughput: review.right_throughput.clone(),
+            left_memory: review.left_memory.clone(),
+            right_memory: review.right_memory.clone(),
             left_cdf: store_pairs(&review.left_cdf),
             right_cdf: store_pairs(&review.right_cdf),
             left_p50: review.left_p50,

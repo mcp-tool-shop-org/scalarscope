@@ -49,7 +49,7 @@ fn sealed_bundle_reopens_the_stored_review() {
 
     let deltas = String::from_utf8(entry(&entries, "findings/deltas.json")).unwrap();
     assert!(deltas.contains("FailurePresence"));
-    assert!(deltas.contains("Introduced 1 new runtime anomalies"));
+    assert!(deltas.contains("Introduced 1 new runtime anomaly"));
     assert!(!deltas.contains("confidence"));
     assert!(!deltas.contains("StructuralEmergence"));
 

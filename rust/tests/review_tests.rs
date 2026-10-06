@@ -227,7 +227,7 @@ fn delta_f_fires_only_when_the_right_side_has_more_outliers() {
         panic!("inference");
     };
     assert_eq!(review.fired, vec!["ΔF".to_string(), "ΔO".to_string()]);
-    assert!(review.verdict.contains("Introduced 1 new runtime anomalies"));
+    assert!(review.verdict.contains("Introduced 1 new runtime anomaly"));
 
     let Pair::Inference(review) = pair(&marked("a", spiked, None), &marked("b", calm, None)).unwrap() else {
         panic!("inference");

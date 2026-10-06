@@ -83,7 +83,11 @@ fn open_path_uses_the_file_stem_and_refuses_a_missing_file() {
     let Side::Inference(run) = loaded.side else { panic!("csv") };
     assert_eq!(run.label, "baseline");
     assert!(open_path(Path::new(r"D:\no\such\scalarscope.csv")).unwrap_err().contains("Could not read"));
-    assert!(open_path(&dir).unwrap_err().contains("Could not read"));
+    // A folder is a source too: it opens its best file under the folder's name.
+    let folder = open_path(&dir).unwrap();
+    let Side::Inference(run) = folder.side else { panic!("csv") };
+    assert_eq!(run.latency_ms, vec![10.0, 11.0]);
+    assert_eq!(run.label, dir.file_name().unwrap().to_str().unwrap());
 }
 
 #[test]
@@ -371,6 +375,8 @@ fn stored_drawings_come_back_and_an_unknown_kind_does_not_become_a_chart() {
             right_steady: Some(0),
             left_throughput: Vec::new(),
             right_throughput: vec![1.0],
+            left_memory: Vec::new(),
+            right_memory: Vec::new(),
             left_cdf: vec![[1.0, 1.0]],
             right_cdf: Vec::new(),
             left_p50: Some(1.0),

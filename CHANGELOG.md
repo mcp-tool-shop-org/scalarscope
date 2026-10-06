@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.0.0] - 2026-10-03
 
 ### Added
+- ScalarScope's stored RunTrace JSON opens, the format of the repo's golden fixtures. It keeps the milestones written in the file, its fingerprints and its memory series. The validator runs the 2.0 stages with the same codes (`RT_TIMELINE_*`, `RT_SCALAR_*`, `RT_MILESTONE_*`, `RT_FINGERPRINT_INVALID`, `RT_ENVIRONMENT_MISSING`, `RT_CAPABILITY_MISMATCH`). A broken timeline stops the comparison with the 2.0 message, so no delta is computed and nothing can be saved. The three 2.0 golden assertion files pass in `rust/tests/runtrace_tests.rs`.
+- Fingerprint notes (model changed; dataset, code or environment differ or are absent) and the TFRT guardrails (no steady state, warmup over half the run, aggregated stats only) show under the verdict and are stored in the bundle. A bundle without them keeps the bytes and hash it had.
+- A gzipped profiler trace (`.json.gz`), a runtime log (`.log`) and a run folder open. A folder opens its best source in the 2.0 order (profiler trace, benchmark CSV, benchmark JSON, runtime log), and its `config.json` `warmup_steps` sets where warmup ends. A log reads `latency_ms: 12.5` and `memory_mb: 512`, which the 2.0 patterns read as no number.
+- Memory draws under throughput when both runs have it. The caption names the preset the page applies.
 - A Chrome profiler trace with a complete `ProfilerStep` contributes one latency sample per step. The duration is microseconds converted to milliseconds. Ops nested in that step, including a TensorRT event, are not extra inferences. A trace with no such step still keeps events whose names contain TensorRT or inference. A trace that has neither is refused. The previous .NET connector still uses only that name filter.
 - A packaged run reads `preferences.json` from the same LocalState folder. Series colors follow a saved color-vision mode, or the high-contrast palette when that checkbox is on and the mode is still Default. Text scale follows the saved value, clamped from 0.75 to 2. Recent files and gallery views reopen from that folder. Writing a recent file keeps every other field. A missing file stays in the list. A file that is not a JSON object is left unchanged. Plugins in that folder are not loaded.
 - The release workflow packs the Rust review as the unsigned `ScalarScope_3.0.0.0_x64.msix`. The package name stays `mcp-tool-shop.ScalarScope`, the publisher stays `CN=5305D976-6952-4F00-9C21-3A5DB090359F`, the version stays `3.0.0.0`, and the architecture stays x64. It is not uploaded. The Store copy is still the previous .NET package. A packaged run keeps `comparison-log.json` in that package's LocalState folder. An unpackaged run does not write that folder.
@@ -18,6 +22,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Home keeps a local comparison log. A review is written when both runs are loaded: the two names, the deltas that fired across the full run (ΔF, ΔTc, ΔTd, ΔĀ, ΔO), and the bundle hash once a bundle is saved or opened. The file stays in app data.
 
 ### Fixed
+- A detected milestone is a step number everywhere. ΔO read it as a sample index, which mis-placed it when steps do not start at 0.
+- One introduced anomaly reads "Introduced 1 new runtime anomaly". A 2.0 bundle with the plural sentence still opens.
+- The page scrolls, so the throughput and memory plots are not cut off.
 - The spread band on an inference series is drawn as one trapezoid per step. It was one long polygon, which the plot filled as a fan of wedges across the chart. The legend shows one spread entry per side, in that side's color.
 - ΔTc stays quiet when both steady-state milestones are within 3 steps of each other, the same resolution the .NET app used. It had fired on a 1-step difference. A missing milestone still withholds ΔTc.
 - A reopened bundle names its two runs above the review, instead of Path A and Path B.
