@@ -38,23 +38,20 @@ ScalarScope v1.4+ provides **deterministic delta computation**: identical inputs
 Every comparison generates an **input fingerprint** based on:
 
 ```
-SHA256(leftRunId | rightRunId | alignmentMode | leftSteps | rightSteps)
+L:{leftRunId}:{leftSteps}|R:{rightRunId}:{rightSteps}|A:{alignment}
 ```
 
-This fingerprint is:
-- Truncated to 16 characters for readability
-- Stored in exports for verification
-- Used to derive deterministic seeds when needed
+`DeterminismService.ComputeInputFingerprint` hashes that string with SHA-256 and keeps the full lowercase hex digest. It is not truncated to 16 characters.
 
 ### Delta Hashing
 
-Each computation generates a **delta hash** based on:
+`CanonicalDeltaService` stores `DeterminismService.ComputeDeltaHash(IEnumerable<CanonicalDelta>)`. Each delta is one line:
 
 ```
-SHA256(JSON([{id, status, confidence, explanation}, ...]))
+id={id};status={status};left={left};right={right};delta={delta};magnitude={magnitude};confidence={confidence}
 ```
 
-This hash uniquely identifies the output and can be compared across runs.
+The hash is SHA-256 of those lines. The explanation is not an input. The version field on a reproducibility record is `VersionInfo.Version`, the assembly version, not a hardcoded 1.4.0.
 
 ## Verification Process
 

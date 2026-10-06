@@ -50,7 +50,7 @@ Open any `.scbundle` without recomputing:
 
 - A matching SHA-256 checks the archived bytes. It is a content check, not a signature.
 - Frozen deltas are displayed exactly as they were at export time
-- A review-mode banner makes it clear results are verified, not re-derived
+- A review-mode banner says the stored review is shown, not recomputed
 - The insights tray shows frozen insight events from the bundle
 - Both parties see identical results when sharing bundles
 

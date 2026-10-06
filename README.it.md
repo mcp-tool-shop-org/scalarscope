@@ -27,7 +27,7 @@ La maggior parte dei team di machine learning analizza i log. ScalarScope sostit
 - **Analisi delta standard:** Cinque tipi di delta (ΔTc, ΔO, ΔF, ΔĀ, ΔTd) vengono attivati solo quando le differenze sono statisticamente significative.
 - **Impostazioni predefinite per l'esecuzione:** L'impostazione predefinita TFRT sopprime automaticamente le metriche irrilevanti, consentendoti di concentrarti su ciò che è importante per i carichi di lavoro TensorFlow-TRT.
 - **Pacchetti riproducibili:** Esporta archivi `.scbundle` con integrità SHA-256, delta "congelati" e metadati completi.
-- **Modalità di revisione:** Apri un pacchetto senza doverlo ricalcolare; i risultati sono verificati crittograficamente, non ricavati.
+- **Modalità di revisione** — Open a bundle without recomputing. A matching SHA-256 is a content check, not a signature.
 - **Priorità alla privacy:** Nessuna telemetria, nessuna analisi, tutti i dati rimangono locali a meno che tu non li esporti esplicitamente.
 
 ---
@@ -130,7 +130,7 @@ Esporta i risultati come archivi `.scbundle` (ComparisonBundle v1.0.0):
 
 ### Modalità di revisione
 
-Apri qualsiasi file `.scbundle` senza doverlo ricalcolare. La modalità di revisione verifica l'integrità, visualizza i delta "congelati" e mostra un banner che indica che i risultati sono verificati e non ricalcolati.
+Open a bundle without recomputing. A matching SHA-256 is a content check, not a signature. The stored deltas are shown as stored.
 
 ### Framework di visualizzazione VortexKit
 

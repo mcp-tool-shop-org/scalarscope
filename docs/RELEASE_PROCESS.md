@@ -70,9 +70,10 @@ git push origin vX.Y.Z
    - [ ] Attach checksums file
 
 2. **Artifacts**
-   - [ ] MSIX is signed
-   - [ ] Checksums generated (SHA256)
-   - [ ] Support bundle sample included
+   - [ ] Unsigned `release/ScalarScope_3.0.0.0_x64.msix` is attached
+   - [ ] Unsigned `release/ScalarScope_3.0.0.0_Store.msixupload` is attached
+   - [ ] `release/checksums.txt` is attached
+   - [ ] Partner Center signs the upload during ingestion. This repo does not produce a signed MSIX.
 
 3. **Announcement**
    - [ ] Update README badges if needed
@@ -80,16 +81,15 @@ git push origin vX.Y.Z
 
 ## Artifact Naming
 
+The pack script writes these names. The package version stays `3.0.0.0`.
+
 ```
-ScalarScope-{version}-{arch}.msix
-ScalarScope-{version}-checksums.txt
+release/ScalarScope_3.0.0.0_x64.msix
+release/ScalarScope_3.0.0.0_Store.msixupload
+release/checksums.txt
 ```
 
-Example:
-```
-ScalarScope-1.0.0-rc.1-x64.msix
-ScalarScope-1.0.0-rc.1-checksums.txt
-```
+Do not look for `ScalarScope-{version}-{arch}.msix`. Partner Center signs the upload. The repo copy stays unsigned.
 
 ## Changelog Rules
 

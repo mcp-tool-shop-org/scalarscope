@@ -40,7 +40,7 @@
             
             <!-- Why fired explanation -->
             <VerticalStackLayout Spacing="4">
-                <Label Text="Why this fired:" TextColor="#666" FontSize="10"/>
+                <Label Text="{Binding WhyHeading, Source={x:Reference whyPanelRoot}}" TextColor="#666" FontSize="10"/>
                 <Label Text="{Binding WhyFired, Source={x:Reference whyPanelRoot}}"
                        TextColor="#ccc"
                        FontSize="11"

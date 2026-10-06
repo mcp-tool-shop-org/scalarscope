@@ -302,23 +302,12 @@ public partial class ComparisonPage : ContentPage, IQueryAttributable
     private void OnHighlightDeltaRequested(HelpPage sender, string deltaType)
     {
         // Map deltaType string to delta ID
-        var deltaId = deltaType switch
-        {
-            "failure" => "delta_f",
-            "convergence" => "delta_tc",
-            "dominance" => "delta_td",
-            "alignment" => "delta_a",
-            "oscillation" => "delta_o",
-            _ => null
-        };
+        var deltaId = DeltaIds.HighlightToken(deltaType);
 
-        if (deltaId != null)
+        if (!string.IsNullOrEmpty(deltaId))
         {
-            // Highlight the delta in DeltaZone
-            ViewModel.HighlightedDeltaId = deltaId;
-            
-            // Expand the Why? panel for this delta
-            var delta = ViewModel.CanonicalDeltas?.FirstOrDefault(d => d.Id == deltaId);
+            var delta = ViewModel.CanonicalDeltas?.FirstOrDefault(d => DeltaIds.Canonical(d.Id) == deltaId);
+            ViewModel.HighlightedDeltaId = delta?.Id ?? deltaId;
             if (delta != null)
             {
                 deltaZone.SelectedDelta = delta;

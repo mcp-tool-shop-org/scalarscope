@@ -45,6 +45,7 @@ public partial class DeltaWhyPanel : ContentView
     public string TriggerType => GetTriggerType();
     public bool HasTriggerType => !string.IsNullOrEmpty(TriggerType);
     public string WhyFired => BuildWhyFired();
+    public string WhyHeading => DeltaCopyService.WhyHeading(Delta?.Status);
     public double Confidence => Delta?.Confidence ?? Delta?.ConvergenceConfidence ?? 0;
     public bool HasConfidence => Confidence > 0;
     public string? Guardrail => GetGuardrail();
@@ -102,6 +103,7 @@ public partial class DeltaWhyPanel : ContentView
         OnPropertyChanged(nameof(TriggerType));
         OnPropertyChanged(nameof(HasTriggerType));
         OnPropertyChanged(nameof(WhyFired));
+        OnPropertyChanged(nameof(WhyHeading));
         OnPropertyChanged(nameof(Confidence));
         OnPropertyChanged(nameof(HasConfidence));
         OnPropertyChanged(nameof(ConfidenceTier));
@@ -116,13 +118,13 @@ public partial class DeltaWhyPanel : ContentView
     {
         if (Delta == null) return "";
 
-        return Delta.Id switch
+        return DeltaIds.Canonical(Delta.Id) switch
         {
-            "delta_td" => DetermineTdTriggerType(),
-            "delta_a" => "persistence_weighted",
-            "delta_o" => "area_episode",
-            "delta_tc" => Delta.ConvergenceConfidence.HasValue ? "step_difference" : "one_run_converged",
-            "delta_f" => DetermineFTriggerType(),
+            DeltaIds.StructuralEmergence => DetermineTdTriggerType(),
+            DeltaIds.EvaluatorAlignment => "persistence_weighted",
+            DeltaIds.StabilityOscillation => "area_episode",
+            DeltaIds.ConvergenceTiming => Delta.ConvergenceConfidence.HasValue ? "step_difference" : "one_run_converged",
+            DeltaIds.FailurePresence => DetermineFTriggerType(),
             _ => ""
         };
     }
@@ -146,13 +148,13 @@ public partial class DeltaWhyPanel : ContentView
         if (Delta == null) return "";
         
         // Phase 5.3: Prepend confidence prefix to explanation
-        var baseExplanation = Delta.Id switch
+        var baseExplanation = DeltaIds.Canonical(Delta.Id) switch
         {
-            "delta_f" => BuildFailureWhy(),
-            "delta_tc" => BuildConvergenceWhy(),
-            "delta_td" => BuildEmergenceWhy(),
-            "delta_a" => BuildAlignmentWhy(),
-            "delta_o" => BuildStabilityWhy(),
+            DeltaIds.FailurePresence => BuildFailureWhy(),
+            DeltaIds.ConvergenceTiming => BuildConvergenceWhy(),
+            DeltaIds.StructuralEmergence => BuildEmergenceWhy(),
+            DeltaIds.EvaluatorAlignment => BuildAlignmentWhy(),
+            DeltaIds.StabilityOscillation => BuildStabilityWhy(),
             _ => Delta.Explanation
         };
         
@@ -238,9 +240,9 @@ public partial class DeltaWhyPanel : ContentView
     {
         if (Delta == null) return;
 
-        switch (Delta.Id)
+        switch (DeltaIds.Canonical(Delta.Id))
         {
-            case "delta_tc":
+            case DeltaIds.ConvergenceTiming:
                 _parameters["ResolutionSteps"] = "3";
                 if (Delta.EpsilonUsed.HasValue)
                     _parameters["Epsilon"] = Delta.EpsilonUsed.Value.ToString("F4");
@@ -248,25 +250,25 @@ public partial class DeltaWhyPanel : ContentView
                     _parameters["Confidence"] = $"{Delta.ConvergenceConfidence.Value:P0}";
                 break;
 
-            case "delta_td":
+            case DeltaIds.StructuralEmergence:
                 _parameters["RecurrenceWindow"] = "7";
                 if (Delta.DominanceRatioK.HasValue)
                     _parameters["DominanceK"] = $"{Delta.DominanceRatioK.Value:F2}";
                 break;
 
-            case "delta_a":
+            case DeltaIds.EvaluatorAlignment:
                 _parameters["DualGate"] = "persist<0.05, raw<0.10";
                 _parameters["Weighting"] = "final 25% @ 2×";
                 break;
 
-            case "delta_o":
+            case DeltaIds.StabilityOscillation:
                 _parameters["MinDuration"] = "4";
                 _parameters["ThetaSigmaMultiplier"] = "1.0";
                 if (Delta.ThresholdUsed.HasValue)
                     _parameters["Threshold"] = Delta.ThresholdUsed.Value.ToString("F3");
                 break;
 
-            case "delta_f":
+            case DeltaIds.FailurePresence:
                 _parameters["PersistenceWindow"] = "3";
                 break;
         }
@@ -301,11 +303,11 @@ public partial class DeltaWhyPanel : ContentView
 
     private string? GetGuardrail()
     {
-        return Delta?.Id switch
+        return DeltaIds.Canonical(Delta?.Id) switch
         {
-            "delta_a" => "Agreement ≠ correctness.",
-            "delta_td" => "Dominance ≠ collapse.",
-            "delta_o" => "Instability ≠ failure.",
+            DeltaIds.EvaluatorAlignment => "Agreement ≠ correctness.",
+            DeltaIds.StructuralEmergence => "Dominance ≠ collapse.",
+            DeltaIds.StabilityOscillation => "Instability ≠ failure.",
             _ => null
         };
     }

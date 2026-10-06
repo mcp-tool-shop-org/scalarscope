@@ -6,7 +6,7 @@ Pre-release verification for ScalarScope Desktop.
 
 ## Environment Setup
 
-- [ ] Windows 10 (19041+) or Windows 11
+- [ ] Windows 10 build 17763 or later, or Windows 11. One sign-off run is on build 17763. Do not raise the package MinVersion.
 - [ ] .NET 9.0 SDK installed
 - [ ] Clean build: `dotnet clean && dotnet build -c Release`
 - [ ] Sample files available: `correlated_professors.json`, `orthogonal_professors.json`
@@ -17,7 +17,7 @@ Pre-release verification for ScalarScope Desktop.
 
 ### Happy Path
 - [ ] Load valid JSON file via file picker
-- [ ] Load sample files from Overview page (both buttons work)
+- [ ] Load sample files from Home and Compare. Overview is not a tab and is not part of this sign-off.
 - [ ] Large file (10MB+) loads with warning displayed
 - [ ] File with many timesteps (10,000+) triggers performance mode
 

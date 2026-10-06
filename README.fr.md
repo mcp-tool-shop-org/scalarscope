@@ -27,7 +27,7 @@ La plupart des équipes d'apprentissage automatique analysent les journaux. Scal
 - **Analyse delta canonique** : Cinq types de delta (ΔTc, ΔO, ΔF, ΔĀ, ΔTd) ne s'activent que lorsque les différences sont statistiquement significatives.
 - **Présets d'exécution** : Le présélectionné TFRT supprime automatiquement les métriques non pertinentes afin que vous puissiez vous concentrer sur ce qui compte pour les charges de travail TensorFlow-TRT.
 - **Bundles reproductibles** : Exportez des archives `.scbundle` avec une intégrité SHA-256, des deltas figés et des métadonnées complètes.
-- **Mode examen** : Ouvrez un bundle sans recalculer ; les résultats sont vérifiés cryptographiquement, et non recalculés.
+- **Mode examen** — Open a bundle without recomputing. A matching SHA-256 is a content check, not a signature.
 - **Confidentialité avant tout** : Zéro télémétrie, zéro analyse, toutes les données restent locales, sauf si vous les exportez explicitement.
 
 ---
@@ -130,7 +130,7 @@ Exportez les résultats sous forme d'archives `.scbundle` (ComparisonBundle v1.0
 
 ### Mode d'examen
 
-Ouvrez n'importe quel fichier `.scbundle` sans recalcul. Le mode d'examen vérifie l'intégrité, affiche les différences figées et affiche une bannière indiquant que les résultats sont vérifiés et non recalculés.
+Open a bundle without recomputing. A matching SHA-256 is a content check, not a signature. The stored deltas are shown as stored.
 
 ### Framework de visualisation VortexKit
 

@@ -27,7 +27,7 @@
 - **標準的なデルタ分析** — 統計的に意味のある差異のみを検出する5種類のデルタ（ΔTc、ΔO、ΔF、ΔĀ、ΔTd）を提供します。
 - **実行時プリセット** — TFRTプリセットでは、TensorFlow-TRTのワークロードにとって無関係なメトリクスを自動的に抑制し、重要な要素に集中できます。
 - **再現可能なバンドル** — SHA-256による整合性チェック、固定されたデルタ、および完全なメタデータを含む`.scbundle`アーカイブをエクスポートできます。
-- **レビューモード** — 再計算せずにバンドルを開き、結果は暗号学的に検証され、再計算されることはありません。
+- **レビューモード** — Open a bundle without recomputing. A matching SHA-256 is a content check, not a signature.
 - **プライバシー重視** — テレメトリーや分析は一切行わず、すべてのデータは明示的にエクスポートしない限りローカルに保持されます。
 
 ---
@@ -130,7 +130,7 @@ await svgExporter.ExportSvgAsync(svgData, "trajectory.svg",
 
 ### レビューモード
 
-`.scbundle`ファイルを再計算せずに開きます。レビューモードでは、完全性が検証され、固定されたデルタが表示され、結果が検証されていることを示すバナーが表示されます（再計算されたものではありません）。
+Open a bundle without recomputing. A matching SHA-256 is a content check, not a signature. The stored deltas are shown as stored.
 
 ### VortexKit 可視化フレームワーク
 

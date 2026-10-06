@@ -27,7 +27,7 @@
 - **规范的差异分析**：五种差异类型（ΔTc、ΔO、ΔF、ΔĀ、ΔTd）仅在差异在统计上具有意义时才会触发。
 - **运行时预设**：TFRT 预设会自动抑制不相关的指标，让您专注于 TensorFlow-TRT 工作负载中重要的数据。
 - **可重现的包**：导出包含 SHA-256 完整性校验、冻结的差异和完整元数据的 `.scbundle` 归档文件。
-- **审查模式**：无需重新计算即可打开一个包；结果经过密码学验证，而不是重新计算。
+- **审查模式** — Open a bundle without recomputing. A matching SHA-256 is a content check, not a signature.
 - **注重隐私**：零数据收集，零分析，所有数据都保存在本地，除非您明确导出。
 
 ---
@@ -130,7 +130,7 @@ await svgExporter.ExportSvgAsync(svgData, "trajectory.svg",
 
 ### 审查模式
 
-无需重新计算即可打开任何 `.scbundle` 文件。审查模式验证完整性，显示冻结的差异，并显示一个审查模式横幅，以便您知道结果是经过验证的，而不是重新计算的。
+Open a bundle without recomputing. A matching SHA-256 is a content check, not a signature. The stored deltas are shown as stored.
 
 ### VortexKit 可视化框架
 

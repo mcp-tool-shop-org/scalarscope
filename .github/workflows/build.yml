@@ -12,6 +12,8 @@ on:
       - "**/app.manifest"
       - "global.json"
       - ".github/workflows/**"
+      - "packaging/**"
+      - "rust/**"
   pull_request:
     branches: [main]
     paths:
@@ -23,6 +25,8 @@ on:
       - "**/app.manifest"
       - "global.json"
       - ".github/workflows/**"
+      - "packaging/**"
+      - "rust/**"
   workflow_dispatch:
 
 concurrency:
@@ -108,3 +112,31 @@ jobs:
         echo "- **Version:** ${{ steps.version.outputs.VERSION }}+${{ steps.version.outputs.SHORT_SHA }}" >> $env:GITHUB_STEP_SUMMARY
         echo "- **Branch:** ${{ github.ref_name }}" >> $env:GITHUB_STEP_SUMMARY
         echo "- **Commit:** ${{ github.sha }}" >> $env:GITHUB_STEP_SUMMARY
+
+  pack-review:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        persist-credentials: false
+
+    - name: Setup Rust
+      uses: dtolnay/rust-toolchain@7e38f4b43b4db5c8dd498af069a4f6196df1d067
+      with:
+        toolchain: 1.98.1
+
+    - name: Build the review the tag will pack
+      shell: pwsh
+      run: |
+        $env:RUSTFLAGS = "--remap-path-prefix=$env:USERPROFILE=. --remap-path-prefix=$env:GITHUB_WORKSPACE=. -C target-feature=+crt-static"
+        cargo build --release --locked --manifest-path rust/Cargo.toml
+
+    - name: Pack the unsigned MSIX
+      shell: pwsh
+      run: |
+        ./packaging/pack.ps1
+        if (-not (Test-Path release/ScalarScope_3.0.0.0_x64.msix)) {
+          throw "release/ScalarScope_3.0.0.0_x64.msix is missing."
+        }

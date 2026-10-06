@@ -150,7 +150,7 @@ Export results as `.scbundle` archives (ComparisonBundle v1.0.0):
 
 ### Review Mode
 
-Open any `.scbundle` without recomputing. Review mode verifies integrity, displays frozen deltas, and shows a review-mode banner so you know results are verified, not re-derived.
+Open any `.scbundle` without recomputing. A matching SHA-256 is a content check, not a signature. The stored deltas are shown as stored.
 
 ### VortexKit Visualization Framework
 

@@ -27,7 +27,7 @@ A maioria das equipes de aprendizado de máquina analisa logs. O ScalarScope sub
 - **Análise de diferenças canônicas** — Cinco tipos de diferenças (ΔTc, ΔO, ΔF, ΔĀ, ΔTd) são ativados apenas quando as diferenças são estatisticamente significativas.
 - **Configurações de tempo de execução** — A configuração TFRT suprime automaticamente as métricas irrelevantes para que você se concentre no que é importante para as cargas de trabalho TensorFlow-TRT.
 - **Pacotes reproduzíveis** — Exporte arquivos `.scbundle` com integridade SHA-256, diferenças fixas e metadados de rastreabilidade completos.
-- **Modo de revisão** — Abra um pacote sem recalcular; os resultados são verificados criptograficamente, não recalculados.
+- **Modo de revisão** — Open a bundle without recomputing. A matching SHA-256 is a content check, not a signature.
 - **Privacidade em primeiro lugar** — Sem telemetria, sem análise, todos os dados permanecem locais, a menos que você os exporte explicitamente.
 
 ---
@@ -130,7 +130,7 @@ Exporte os resultados como arquivos `.scbundle` (ComparisonBundle v1.0.0):
 
 ### Modo de Revisão
 
-Abra qualquer arquivo `.scbundle` sem recalcular. O modo de revisão verifica a integridade, exibe os deltas fixos e mostra um banner de modo de revisão para que você saiba que os resultados foram verificados e não recalculados.
+Open a bundle without recomputing. A matching SHA-256 is a content check, not a signature. The stored deltas are shown as stored.
 
 ### Framework de Visualização VortexKit
 

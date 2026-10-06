@@ -75,11 +75,12 @@ public partial class HelpPage : ContentPage
         {
             try
             {
-                // Navigate to comparison page and highlight the delta
-                await Shell.Current.GoToAsync("//compare");
+                // An empty Compare has nothing to highlight. Ask it to load the example.
+                if (!App.Comparison.HasBothRuns)
+                    App.Comparison.RequestDemoOpen();
 
-                // After navigation, request the comparison page to highlight this delta type
-                await Task.Delay(300); // Allow navigation to complete
+                await Shell.Current.GoToAsync("//compare");
+                await Task.Delay(300);
 
                 // Publish a "see in context" event for the delta
                 var message = deltaType switch

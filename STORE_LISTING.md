@@ -33,7 +33,7 @@ ScalarScope is a precision instrument for comparing machine learning inference r
 
 - **Compare Two Runs**: Load before/after inference traces and see exactly what changed. Convergence time, latency distribution, throughput gains—all measured with statistical confidence.
 
-- **Delta Analysis (ΔTc, ΔF, ΔO)**: Canonical deltas fire when differences are scientifically significant. No false positives, no overclaiming. Every finding includes confidence intervals and guardrails.
+- **Delta Analysis (ΔTc, ΔF, ΔO)**: Canonical deltas fire when differences are scientifically significant. No false positives, no overclaiming. The band on a trace is a spread of the samples, not a confidence interval. Findings include guardrails.
 
 - **Runtime Presets**: TFRT Runtime Preset automatically suppresses metrics that don't apply to inference workloads, so you only see what matters.
 
@@ -48,7 +48,7 @@ ScalarScope collects no telemetry, sends no analytics, and stores all data local
 
 ## Feature Bullets (5)
 
-1. Compare inference runs with scientific rigor and confidence intervals
+1. Compare inference runs with scientific rigor. The band is a spread, not a confidence interval.
 2. Canonical delta analysis (ΔTc convergence, ΔO variability, ΔF failures)
 3. TFRT Runtime Preset for TensorFlow-RT optimization workflows
 4. Reproducible bundles with a SHA-256 content check
@@ -105,7 +105,7 @@ ScalarScope collects no telemetry, sends no analytics, and stores all data local
 6. [ ] Load baseline TFRT trace (JSON)
 7. [ ] Load optimized TFRT trace (JSON)
 8. [ ] Verify side-by-side display
-9. [ ] Verify deltas appear (ΔTc should fire)
+9. [ ] Verify deltas. ΔTc is expected only when both traces have a steady-state milestone. A missing milestone must not appear as a stabilization time.
 10. [ ] Click delta tile → Why panel opens
 11. [ ] Click "Show Me" → scrolls to anchor
 
@@ -170,7 +170,7 @@ The next Partner Center upload. Name, publisher, and publisher display name are 
 **Inference Optimization Focus**
 - TFRT Runtime Preset with automatic delta suppression
 - RunTrace comparison with milestone alignment
-- Scientific rigor: confidence intervals, guardrails, reproducibility
+- Scientific rigor: a spread band, guardrails, reproducibility. The band is not a confidence interval.
 
 **Quality of Life**
 - Recent comparisons on Welcome page
@@ -182,6 +182,6 @@ The next Partner Center upload. Name, publisher, and publisher display name are 
 
 ## Contact
 
-- **Support:** https://github.com/mcp-tool-shop/ScalarScope/issues
-- **Documentation:** https://github.com/mcp-tool-shop/ScalarScope/blob/main/docs/README.md
+- **Support:** https://github.com/mcp-tool-shop-org/scalarscope/issues
+- **Documentation:** https://github.com/mcp-tool-shop-org/scalarscope/blob/main/README.md
 - **Privacy Policy:** Local-only app, no data collection

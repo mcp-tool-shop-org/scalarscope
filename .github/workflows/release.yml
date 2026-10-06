@@ -27,14 +27,8 @@ jobs:
     - name: Reject a tag that is not the Store identity
       shell: pwsh
       run: |
-        $ref = $env:GITHUB_REF
-        if ($ref -like 'refs/tags/*') {
-          $tag = $ref.Substring('refs/tags/'.Length)
-          $version = $tag
-          if ($version.StartsWith('v')) { $version = $version.Substring(1) }
-          if ($version -ne '3.0.0.0') {
-            throw "Tag $tag is not 3.0.0.0. The Store identity stays 3.0.0.0 and is not rewritten from the tag."
-          }
+        if ($env:GITHUB_REF -ne 'refs/tags/v3.0.0.0') {
+          throw "Release runs only for refs/tags/v3.0.0.0. A manual run from another ref is refused. The Store identity stays 3.0.0.0."
         }
 
     - name: Setup Rust
@@ -45,8 +39,8 @@ jobs:
     - name: Build the review
       shell: pwsh
       run: |
-        $env:RUSTFLAGS = "--remap-path-prefix=$env:USERPROFILE=. -C target-feature=+crt-static"
-        cargo build --release --manifest-path rust/Cargo.toml
+        $env:RUSTFLAGS = "--remap-path-prefix=$env:USERPROFILE=. --remap-path-prefix=$env:GITHUB_WORKSPACE=. -C target-feature=+crt-static"
+        cargo build --release --locked --manifest-path rust/Cargo.toml
 
     - name: Pack the unsigned MSIX
       shell: pwsh

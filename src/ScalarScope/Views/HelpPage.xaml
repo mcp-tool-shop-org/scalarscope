@@ -55,9 +55,9 @@
                                 <Label Text="ΔF" FontSize="18" FontAttributes="Bold" TextColor="#ff6b6b" VerticalOptions="Center" />
                                 <Label Text="Failure Rate Delta" FontSize="16" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#333333, Dark=#FFFFFF}" VerticalOptions="Center" />
                             </HorizontalStackLayout>
-                            <Label Text="When it fires: σ(FA - FB) ≥ 0.05 (failure rates differ by ≥5%)"
+                            <Label Text="On an inference review this is a count of latency outliers, not a training failure rate. On a training review it is which path produced more failed outputs."
                                    TextColor="{AppThemeBinding Light=#666666, Dark=#AAAAAA}" />
-                            <Label Text="What it means: One training path produces significantly more failed outputs than the other. A lower failure rate indicates more reliable convergence."
+                            <Label Text="What it means: One path has more of those events than the other. A lower count is the steadier run. It is not a confidence interval."
                                    TextColor="{AppThemeBinding Light=#333333, Dark=#CCCCCC}" />
                             <Label Text="Guardrail: Confidence depends on sample size. Small n may cause noisy estimates."
                                    TextColor="#ffd93d" FontSize="12" FontAttributes="Italic" />
@@ -84,11 +84,11 @@
                                 <Label Text="ΔTc" FontSize="18" FontAttributes="Bold" TextColor="#4ecdc4" VerticalOptions="Center" />
                                 <Label Text="Convergence Time Delta" FontSize="16" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#333333, Dark=#FFFFFF}" VerticalOptions="Center" />
                             </HorizontalStackLayout>
-                            <Label Text="When it fires: |TcA - TcB| ≥ 10% of max(TcA, TcB)"
+                            <Label Text="On an inference review this is latency stabilization. It is reported only when both traces have a steady-state milestone. A missing milestone is not a stabilization time. On a training review it is when the paths reach stable loss."
                                    TextColor="{AppThemeBinding Light=#666666, Dark=#AAAAAA}" />
-                            <Label Text="What it means: Training paths reach stable loss at different rates. Faster convergence isn't always better—it may indicate premature convergence to a suboptimal minimum."
+                            <Label Text="What it means: The two paths settle at different times. On a training review, faster is not always better."
                                    TextColor="{AppThemeBinding Light=#333333, Dark=#CCCCCC}" />
-                            <Label Text="Guardrail: Consider ΔTc alongside final loss values. Fast + bad loss = concerning."
+                            <Label Text="Guardrail: On a training review, read ΔTc next to final loss. On an inference review, do not treat a missing steady state as a fired time."
                                    TextColor="#ffd93d" FontSize="12" FontAttributes="Italic" />
                             <Button Text="See in context →"
                                     Clicked="OnSeeInContextClicked"
@@ -113,9 +113,9 @@
                                 <Label Text="ΔTd" FontSize="18" FontAttributes="Bold" TextColor="#ff9f43" VerticalOptions="Center" />
                                 <Label Text="Dominance Time Delta" FontSize="16" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#333333, Dark=#FFFFFF}" VerticalOptions="Center" />
                             </HorizontalStackLayout>
-                            <Label Text="When it fires: |TdA - TdB| ≥ 15% of max(TdA, TdB) where Td = epoch when λ₁/Σλ ≥ 0.7"
+                            <Label Text="An inference preset suppresses ΔTd. It is not a live finding on that review. On a geometry review it is the step when one eigenvalue dominates."
                                    TextColor="{AppThemeBinding Light=#666666, Dark=#AAAAAA}" />
-                            <Label Text="What it means: Paths develop eigenvalue dominance at different rates. Earlier dominance suggests faster emergence of a shared evaluative axis."
+                            <Label Text="What it means: On a geometry review, the paths develop a shared axis at different rates. Do not look for this result on an inference preset."
                                    TextColor="{AppThemeBinding Light=#333333, Dark=#CCCCCC}" />
                             <Label Text="⚠️ Guardrail: Dominance ≠ collapse. High λ₁ with good generalization is fine. High λ₁ with rising validation loss = mode collapse."
                                    TextColor="#ff6b6b" FontSize="12" FontAttributes="Bold" />
@@ -142,9 +142,9 @@
                                 <Label Text="ΔĀ" FontSize="18" FontAttributes="Bold" TextColor="#4ecdc4" VerticalOptions="Center" />
                                 <Label Text="Alignment Delta" FontSize="16" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#333333, Dark=#FFFFFF}" VerticalOptions="Center" />
                             </HorizontalStackLayout>
-                            <Label Text="When it fires: |cosθ(v₁A, v₁B)| ≥ 0.85 (converged to similar principal direction)"
+                            <Label Text="An inference preset suppresses ΔĀ. It is not a live finding on that review. On a geometry review it is the alignment of the principal directions."
                                    TextColor="{AppThemeBinding Light=#666666, Dark=#AAAAAA}" />
-                            <Label Text="What it means: Both paths found a similar 'quality axis' despite different training dynamics. High alignment suggests a robust latent structure in the evaluator ensemble."
+                            <Label Text="What it means: On a geometry review, both paths may share a direction. That agreement is not proof the direction is right."
                                    TextColor="{AppThemeBinding Light=#333333, Dark=#CCCCCC}" />
                             <Label Text="⚠️ Guardrail: Agreement ≠ correctness. Both paths could converge to the same wrong answer if evaluators share systematic bias."
                                    TextColor="#ff6b6b" FontSize="12" FontAttributes="Bold" />
@@ -171,9 +171,9 @@
                                 <Label Text="ΔO" FontSize="18" FontAttributes="Bold" TextColor="#c56cf0" VerticalOptions="Center" />
                                 <Label Text="Oscillation Index Delta" FontSize="16" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#333333, Dark=#FFFFFF}" VerticalOptions="Center" />
                             </HorizontalStackLayout>
-                            <Label Text="When it fires: |OA - OB| ≥ 0.15 where O = stddev of angular velocity over window"
+                            <Label Text="On an inference review this is latency oscillation. On a training review it is oscillation of the path. Loss stays loss, and this row does not turn a loss curve into a latency."
                                    TextColor="{AppThemeBinding Light=#666666, Dark=#AAAAAA}" />
-                            <Label Text="What it means: Training stability differs—one path shows more 'thrashing' in parameter space. High oscillation may indicate conflicting gradient signals from evaluators."
+                            <Label Text="What it means: One series moves around more than the other after it should have settled."
                                    TextColor="{AppThemeBinding Light=#333333, Dark=#CCCCCC}" />
                             <Label Text="⚠️ Guardrail: Instability ≠ failure. Some exploration is healthy. Only concerning if oscillation persists without loss improvement."
                                    TextColor="#ff6b6b" FontSize="12" FontAttributes="Bold" />
@@ -499,7 +499,7 @@
                             <Label Text="🔧 App crashes on startup"
                                    FontAttributes="Bold"
                                    TextColor="{AppThemeBinding Light=#333333, Dark=#FFFFFF}" />
-                            <Label Text="• Delete settings: %LOCALAPPDATA%\ScalarScope\settings.json"
+                            <Label Text="• Packaged preferences live in the package LocalState folder as preferences.json. Crash logs are a different folder."
                                    TextColor="{AppThemeBinding Light=#666666, Dark=#AAAAAA}" />
                             <Label Text="• Reinstall the application"
                                    TextColor="{AppThemeBinding Light=#666666, Dark=#AAAAAA}" />
@@ -521,7 +521,7 @@
                                    TextColor="{AppThemeBinding Light=#666666, Dark=#AAAAAA}" />
                             <Label Text="• Check if another window has focus"
                                    TextColor="{AppThemeBinding Light=#666666, Dark=#AAAAAA}" />
-                            <Label Text="• See QUICK_REFERENCE.md for shortcut list"
+                            <Label Text="• The shortcut list is the table on this page. There is no separate shortcut file."
                                    TextColor="{AppThemeBinding Light=#666666, Dark=#AAAAAA}" />
                         </VerticalStackLayout>
                     </Border>
@@ -540,7 +540,7 @@
                            FontAttributes="Bold"
                            TextColor="{AppThemeBinding Light=#333333, Dark=#FFFFFF}" />
 
-                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="24" RowSpacing="8">
+                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnSpacing="24" RowSpacing="8">
                         <Label Grid.Row="0" Grid.Column="0" Text="Space" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#333333, Dark=#00d9ff}" />
                         <Label Grid.Row="0" Grid.Column="1" Text="Play / Pause" TextColor="{AppThemeBinding Light=#666666, Dark=#AAAAAA}" />
 
@@ -556,8 +556,7 @@
                         <Label Grid.Row="4" Grid.Column="0" Text="S" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#333333, Dark=#00d9ff}" />
                         <Label Grid.Row="4" Grid.Column="1" Text="Take screenshot" TextColor="{AppThemeBinding Light=#666666, Dark=#AAAAAA}" />
 
-                        <Label Grid.Row="5" Grid.Column="0" Text="Ctrl+O" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#333333, Dark=#00d9ff}" />
-                        <Label Grid.Row="5" Grid.Column="1" Text="Open file" TextColor="{AppThemeBinding Light=#666666, Dark=#AAAAAA}" />
+
                     </Grid>
                 </VerticalStackLayout>
             </Border>

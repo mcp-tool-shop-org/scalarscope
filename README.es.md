@@ -27,7 +27,7 @@ La mayoría de los equipos de aprendizaje automático analizan registros. Scalar
 - **Análisis de diferencias canónicas** — Cinco tipos de diferencias (ΔTc, ΔO, ΔF, ΔĀ, ΔTd) solo se activan cuando las diferencias son estadísticamente significativas.
 - **Preajustes de tiempo de ejecución** — El preajuste TFRT suprime automáticamente las métricas irrelevantes para que se concentre en lo que importa para las cargas de trabajo de TensorFlow-TRT.
 - **Paquetes reproducibles** — Exporte archivos `.scbundle` con integridad SHA-256, diferencias congeladas y metadatos de procedencia completos.
-- **Modo de revisión** — Abra un paquete sin volver a calcular; los resultados se verifican criptográficamente, no se recalculan.
+- **Modo de revisión** — Open a bundle without recomputing. A matching SHA-256 is a content check, not a signature.
 - **Privacidad primero** — Sin telemetría, sin análisis, todos los datos permanecen locales a menos que los exporte explícitamente.
 
 ---
@@ -130,7 +130,7 @@ Exporte los resultados como archivos `.scbundle` (ComparisonBundle v1.0.0):
 
 ### Modo de revisión
 
-Abra cualquier archivo `.scbundle` sin volver a calcular. El modo de revisión verifica la integridad, muestra los deltas congelados y muestra un banner de modo de revisión para que sepa que los resultados están verificados, no recalculados.
+Open a bundle without recomputing. A matching SHA-256 is a content check, not a signature. The stored deltas are shown as stored.
 
 ### Marco de visualización de VortexKit
 

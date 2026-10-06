@@ -84,11 +84,11 @@
                             </VerticalStackLayout>
                             
                             <HorizontalStackLayout Grid.Column="1" Spacing="8" VerticalOptions="Center">
-                                <Button Text="Load Runs"
+                                <Button Text="Open Compare"
                                         Style="{StaticResource ActionButton}"
                                         Command="{Binding NavigateToCompareCommand}"
                                         IsVisible="{Binding CanLoadRuns}"
-                                        AutomationProperties.Name="Load Runs"/>
+                                        AutomationProperties.Name="Open Compare"/>
                                 <Button Text="Open Bundle"
                                         Style="{StaticResource ActionButton}"
                                         Command="{Binding OpenBundleCommand}"
@@ -110,7 +110,7 @@
                             <Label Text="⚖️" FontSize="20" VerticalOptions="Start"/>
                             <VerticalStackLayout Grid.Column="1" Spacing="2">
                                 <Label Text="Compare" Style="{StaticResource ItemTitle}"/>
-                                <Label Text="Load two inference runs and see what changed. Convergence, latency, throughput—measured with confidence intervals."
+                                <Label Text="Load two inference runs and see what changed. The band is a spread of the samples, not a confidence interval."
                                        Style="{StaticResource ItemDescription}"/>
                             </VerticalStackLayout>
                         </Grid>

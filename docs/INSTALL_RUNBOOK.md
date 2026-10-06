@@ -73,7 +73,7 @@ After installation, verify the app works correctly:
 Install the newer package from Partner Center or the Microsoft Store. The package name and publisher must match the installed app. User data stays. An unsigned MSIX from this repo is the upload file, not the installer.
 
 ### Upgrade Verification Checklist
-- [ ] Version number updated (Help > About)
+- [ ] Version number updated (Settings > About)
 - [ ] User settings preserved
 - [ ] Recent files list preserved
 - [ ] No crashes on first launch post-upgrade
@@ -98,14 +98,14 @@ Install the newer package from Partner Center or the Microsoft Store. The packag
 - Start Menu shortcut
 - App registration
 
-**Preserved** (user choice):
-- User settings in `%LOCALAPPDATA%\ScalarScope\`
-- Export files in user-chosen locations
+**Preserved until you delete them**:
+- Crash logs in `%LOCALAPPDATA%\ScalarScope\logs`. That folder is not the packaged review.
+- Export files in the folders you chose
 
-**To fully remove user data**:
-```powershell
-Remove-Item -Recurse "$env:LOCALAPPDATA\ScalarScope"
-```
+**Removed with the package**:
+- `preferences.json` and `comparison-log.json` in the package LocalState folder
+
+Uninstall does not leave the review behind in `%LOCALAPPDATA%\ScalarScope\`. Deleting that folder removes crash logs only. See `docs/DATA_PERSISTENCE.md`.
 
 ## Troubleshooting
 
@@ -113,10 +113,7 @@ Remove-Item -Recurse "$env:LOCALAPPDATA\ScalarScope"
 
 **Symptom**: "App Installer cannot install this package"
 
-**Solutions**:
-1. Enable Developer Mode: Settings > Update & Security > For Developers
-2. Or enable sideloading in Group Policy
-3. Check Windows version meets minimum requirements
+The unsigned `ScalarScope_3.0.0.0_x64.msix` in this repo is the upload file. Windows will not install it on double-click. Developer Mode does not install this file. Install from the Store, or from a package Partner Center has signed.
 
 ### App Won't Start
 
@@ -124,9 +121,9 @@ Remove-Item -Recurse "$env:LOCALAPPDATA\ScalarScope"
 
 **Solutions**:
 1. Check GPU drivers are up to date
-2. Try: `ScalarScope.exe --software-rendering`
+2. The binary has no `--software-rendering` switch. Launching with that flag does not change how the process starts.
 3. Check Event Viewer for crash details
-4. Generate support bundle: Help > Create Support Bundle
+4. The version string is Settings > About. The support bundle is the button on the Guide page, and the same button on Recovery when the app opens there. There is no Help menu. That button cannot be used when the process will not stay open. Send a startup failure to the GitHub issues URL below.
 
 ### Performance Issues
 
@@ -166,8 +163,8 @@ Use this checklist to certify a clean install:
 [ ] Playback works smoothly
 [ ] Export creates valid PNG
 [ ] Keyboard shortcuts respond
-[ ] Help menu opens
-[ ] About shows correct version
+[ ] Guide page opens
+[ ] Settings > About shows the correct version
 ```
 
 ## Support
@@ -175,5 +172,5 @@ Use this checklist to certify a clean install:
 If you encounter issues not covered here:
 
 1. Check [GitHub Issues](https://github.com/mcp-tool-shop-org/scalarscope/issues)
-2. Create a support bundle: Help > Create Support Bundle
+2. If the app stays open, create a support bundle from the button on the Guide page. Recovery has the same button when the app opens there. There is no Help menu.
 3. Open a new issue with the support bundle attached

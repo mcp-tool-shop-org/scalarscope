@@ -27,6 +27,19 @@ public static class DeltaIds
     }
 
     /// <summary>
+    /// Guide "see in context" sends a short word. The row id is the wire token.
+    /// </summary>
+    public static string HighlightToken(string? token) => token switch
+    {
+        "failure" => FailurePresence,
+        "convergence" => ConvergenceTiming,
+        "dominance" => StructuralEmergence,
+        "alignment" => EvaluatorAlignment,
+        "oscillation" => StabilityOscillation,
+        _ => Canonical(token)
+    };
+
+    /// <summary>
     /// DeltaType the detector assigns for each id. Importers must use this,
     /// not a fallback of Behavior for every unrecognized string.
     /// </summary>

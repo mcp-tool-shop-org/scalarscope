@@ -140,50 +140,78 @@ public static class DeltaCopyService
         
         // Bottom line
         sb.AppendLine("---");
-        sb.AppendLine("**Bottom Line:** " + GenerateBottomLine(deltaList, pathA, pathB));
+        sb.AppendLine("**Bottom Line:** " + BottomLine(deltaList, pathA, pathB));
         
         return sb.ToString();
     }
     
     private static string TranslateToPlainLanguage(CanonicalDelta delta, string pathA, string pathB)
+        => Describe(delta, pathA, pathB);
+
+    /// <summary>
+    /// The Why panel heading follows the row status. A withheld row is not "why this fired."
+    /// </summary>
+    public static string WhyHeading(DeltaStatus? status) => status switch
     {
-        var winner = delta.Delta > 0 ? pathB : pathA;
-        var loser = delta.Delta > 0 ? pathA : pathB;
-        
+        DeltaStatus.Suppressed => "Why this is withheld:",
+        DeltaStatus.Indeterminate => "Why this is not settled:",
+        DeltaStatus.Present => "Why this fired:",
+        _ => "What this row says:"
+    };
+
+    /// <summary>
+    /// The card uses the detector's own sentence. A missing sentence falls back
+    /// to the step difference or the failure flags, never a normalized time times 100.
+    /// </summary>
+    public static string Describe(CanonicalDelta delta, string pathA, string pathB)
+    {
+        if (!string.IsNullOrWhiteSpace(delta.Explanation))
+            return delta.Explanation;
+
         return DeltaIds.Canonical(delta.Id) switch
         {
-            DeltaIds.ConvergenceTiming => delta.Delta > 0
-                ? $"{loser} converged {Math.Abs((int)(delta.Delta * 100))} steps faster than {winner}"
-                : $"{winner} converged {Math.Abs((int)(delta.Delta * 100))} steps faster than {loser}",
-                
-            DeltaIds.StructuralEmergence => delta.Delta > 0
-                ? $"{winner} showed stronger emergence of shared structure"
-                : $"{loser} showed stronger emergence of shared structure",
-                
-            DeltaIds.EvaluatorAlignment => delta.Delta > 0
-                ? $"{winner} had better final alignment (professors agreed more)"
-                : $"{loser} had better final alignment (professors agreed more)",
-                
-            DeltaIds.StabilityOscillation => delta.Delta > 0
-                ? $"{winner} was less stable during training (more oscillation)"
-                : $"{loser} was less stable during training (more oscillation)",
-                
-            DeltaIds.FailurePresence => $"Only {winner} completed without failure",
-                
-            _ => delta.Explanation
+            DeltaIds.ConvergenceTiming => DescribeConvergence(delta, pathA, pathB),
+            DeltaIds.FailurePresence => DescribeFailure(delta, pathA, pathB),
+            _ => ""
         };
     }
-    
-    private static string GenerateBottomLine(List<CanonicalDelta> deltas, string pathA, string pathB)
+
+    private static string DescribeConvergence(CanonicalDelta delta, string pathA, string pathB)
     {
-        // Check for failure delta
+        if (delta.DeltaTcSteps is not int steps)
+            return "";
+        if (steps < 0)
+            return $"{pathA} reached steady state {Math.Abs(steps)} steps sooner than {pathB}.";
+        if (steps > 0)
+            return $"{pathB} reached steady state {steps} steps sooner than {pathA}.";
+        return $"{pathA} and {pathB} reached steady state together.";
+    }
+
+    private static string DescribeFailure(CanonicalDelta delta, string pathA, string pathB)
+    {
+        if (delta.FailedA == true && delta.FailedB == true)
+            return $"Both {pathA} and {pathB} failed.";
+        if (delta.FailedA == true)
+            return $"{pathA} failed. {pathB} did not.";
+        if (delta.FailedB == true)
+            return $"{pathB} failed. {pathA} did not.";
+        return "";
+    }
+
+    /// <summary>
+    /// The closing sentence. Both failures stay both failures.
+    /// </summary>
+    public static string BottomLine(IReadOnlyList<CanonicalDelta> deltas, string pathA, string pathB)
+    {
         var failure = deltas.FirstOrDefault(d => DeltaIds.Canonical(d.Id) == DeltaIds.FailurePresence);
         if (failure != null)
         {
-            var failedPath = failure.FailedA == true ? pathA : pathB;
-            var successPath = failure.FailedA == true ? pathB : pathA;
-            return $"{successPath} completed successfully while {failedPath} failed. " +
-                   "The successful approach should be preferred.";
+            if (failure.FailedA == true && failure.FailedB == true)
+                return $"Both {pathA} and {pathB} failed. Neither approach completed successfully.";
+            if (failure.FailedA == true && failure.FailedB != true)
+                return $"{pathB} completed successfully while {pathA} failed. The successful approach should be preferred.";
+            if (failure.FailedB == true && failure.FailedA != true)
+                return $"{pathA} completed successfully while {pathB} failed. The successful approach should be preferred.";
         }
         
         // Check dominance (emergence) delta

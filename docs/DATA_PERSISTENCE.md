@@ -1,128 +1,64 @@
 # Data Persistence Rules
 
-This document describes what data ScalarScope stores, where it's stored, and what happens during install/upgrade/uninstall.
+This document describes what ScalarScope stores, where it is stored, and what an install, upgrade, or uninstall does to those files.
 
-## Storage Locations
+The app does not write `settings.json`, `recent.json`, or `window.json`. A backup or a wipe of those names does not save or remove the review.
 
-### Application Data
-**Location**: `%LOCALAPPDATA%\ScalarScope\`
+## Packaged review state
 
-Contains:
-- `settings.json` - User preferences (theme, default export settings)
-- `recent.json` - Recently opened files list
-- `window.json` - Window position and size
-- `logs/` - Application logs (rotated, max 10 MB)
+A packaged run keeps these files in the package LocalState folder (`FileSystem.AppDataDirectory` for the MSIX):
 
-### Temporary Data
-**Location**: `%TEMP%\ScalarScope\`
+`%LOCALAPPDATA%\Packages\mcp-tool-shop.ScalarScope_yn6b8xqrexa5j\LocalState`
 
-Contains:
-- Frame export buffers (cleaned on exit)
-- Crash dumps (preserved for support)
+- `preferences.json` — preferences the app writes
+- `comparison-log.json` — the comparison log
 
-### User-Created Data
-**Location**: User-specified paths
+An unpackaged `cargo run` of the Rust review does not write that folder.
 
-Contains:
-- Exported screenshots (PNG)
-- Exported frame sequences
-- Support bundles (ZIP)
+## Crash logs (a different folder)
 
-## Lifecycle Behavior
+`CrashReportingService` writes under `%LOCALAPPDATA%\ScalarScope\`:
 
-### Fresh Install
-- Creates `%LOCALAPPDATA%\ScalarScope\` directory
-- Initializes `settings.json` with defaults
-- No migration needed
+- `logs\` — crash logs
+- `crash.json`
+- `session_state.json`
+
+That tree is not the packaged review. Copying or deleting it does not copy or delete `preferences.json` or `comparison-log.json`.
+
+## Lifecycle
+
+### Fresh install
+
+The package LocalState folder starts empty. The app creates `preferences.json` when it saves a preference. Nothing migrates `settings.json`.
 
 ### Upgrade
-- **Preserves all user data**
-- May add new settings fields with defaults
-- Logs are preserved (useful for debugging upgrade issues)
-- Recent files list maintained
+
+A Store upgrade keeps the package LocalState folder. The package name and publisher stay the same. Crash logs under `%LOCALAPPDATA%\ScalarScope\` are also left in place.
 
 ### Uninstall
-- Removes application files
-- **Preserves** `%LOCALAPPDATA%\ScalarScope\` by default
-- User can manually delete to fully clean
 
-### Full Clean Uninstall
+Uninstall removes the package, including that package's LocalState folder. Crash logs under `%LOCALAPPDATA%\ScalarScope\` stay until you delete that folder.
+
+### Remove crash logs only
+
 ```powershell
-# After standard uninstall:
-Remove-Item -Recurse "$env:LOCALAPPDATA\ScalarScope"
-Remove-Item -Recurse "$env:TEMP\ScalarScope" -ErrorAction SilentlyContinue
+Remove-Item -Recurse -Force "$env:LOCALAPPDATA\ScalarScope"
 ```
 
-## Settings Schema
+That command does not remove a packaged review. To remove the packaged review, uninstall the app.
 
-### settings.json
-```json
-{
-  "version": "1.0.0",
-  "theme": "dark",
-  "export": {
-    "defaultWidth": 1920,
-    "defaultHeight": 1080,
-    "defaultFps": 30,
-    "defaultFormat": "png"
-  },
-  "playback": {
-    "defaultSpeed": 1.0
-  },
-  "annotations": {
-    "showPhases": true,
-    "showWarnings": true,
-    "showInsights": true,
-    "showFailures": true
-  },
-  "accessibility": {
-    "reduceMotion": false,
-    "highContrast": false
-  }
-}
-```
+## Backup
 
-### recent.json
-```json
-{
-  "version": "1.0.0",
-  "maxEntries": 10,
-  "files": [
-    {
-      "path": "C:\\Data\\run1.json",
-      "lastOpened": "2025-02-04T10:30:00Z",
-      "displayName": "Path A Training Run"
-    }
-  ]
-}
-```
+Back up the two review files from package LocalState:
 
-## Privacy Considerations
-
-ScalarScope:
-- Does **NOT** collect telemetry
-- Does **NOT** phone home
-- Does **NOT** upload user data
-- All data stays local
-
-## Backup Recommendations
-
-To backup ScalarScope settings:
 ```powershell
-Copy-Item -Recurse "$env:LOCALAPPDATA\ScalarScope" "D:\Backup\ScalarScope"
+$local = "$env:LOCALAPPDATA\Packages\mcp-tool-shop.ScalarScope_yn6b8xqrexa5j\LocalState"
+Copy-Item "$local\preferences.json" "D:\Backup\ScalarScope\preferences.json"
+Copy-Item "$local\comparison-log.json" "D:\Backup\ScalarScope\comparison-log.json"
 ```
 
-To restore:
-```powershell
-Copy-Item -Recurse "D:\Backup\ScalarScope" "$env:LOCALAPPDATA\ScalarScope"
-```
+Restore by copying those two files back into the same LocalState folder while the app is closed. Do not restore them into `%LOCALAPPDATA%\ScalarScope\`.
 
-## Version Migration
+## Privacy
 
-When upgrading across major versions, the app:
-1. Reads existing settings
-2. Applies migration transformations if needed
-3. Writes updated settings with new version
-4. Logs any migration issues
-
-Migration is **non-destructive** - original files are backed up as `.bak` before modification.
+ScalarScope does not collect telemetry, does not phone home, and does not upload user data. Data stays on the machine unless you export it.

@@ -7,7 +7,7 @@ Compare inference optimization runs with scientific rigor.
 - **Compare Two Runs** — Load before/after inference traces and see what changed
 - **Delta Analysis** — Canonical deltas fire when differences are significant
 - **Runtime Presets** — TFRT preset suppresses irrelevant metrics automatically
-- **Reproducible Bundles** — Export comparisons with cryptographic integrity (SHA-256)
+- **Reproducible Bundles** — A matching SHA-256 is a content check, not a signature.
 - **Review Mode** — Open frozen bundles without recomputing
 
 ## VortexKit

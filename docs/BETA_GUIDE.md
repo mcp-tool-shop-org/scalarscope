@@ -23,18 +23,18 @@ During this beta period, we're looking for feedback on:
 ## What to Test
 
 ### Basic Workflow
-1. Load a training run JSON file
-2. Play/pause the trajectory animation
-3. Adjust playback speed
-4. Toggle annotation categories
-5. Switch between tabs (Trajectory, Scalars, Geometry, etc.)
-6. Export a screenshot
+The shell has four tabs: Home, Compare, Guide, and Settings. Trajectory, Scalars, and Geometry are not tabs.
+1. Open Home
+2. Open Compare and load two runs
+3. Open Guide and read a delta
+4. Open Settings and check About
+5. Export from Compare when that control is on the page
 
 ### Comparison Workflow
-1. Navigate to Compare tab
+1. Open the Compare tab
 2. Load two different runs
-3. Verify synchronized playback
-4. Check analytics panel for meaningful metrics
+3. Read the deltas that fired
+4. Open the Why panel on one row
 
 ### Stress Testing
 1. Load large files (1000+ timesteps)
@@ -51,7 +51,7 @@ During this beta period, we're looking for feedback on:
 
 ### Before Reporting
 1. Check [existing issues](https://github.com/mcp-tool-shop-org/scalarscope/issues)
-2. Create a support bundle (Help > Create Support Bundle)
+2. Create a support bundle from the button on the Guide page. Recovery has the same button when the app opens there. There is no Help menu.
 
 ### What to Include
 - **Steps to reproduce**: Exactly what you did
@@ -91,7 +91,7 @@ During this beta period, we're looking for feedback on:
 ## What Logs to Include
 
 When reporting issues, include:
-1. **Support bundle** (Help > Create Support Bundle) - contains:
+1. **Support bundle** (the button on the Guide page) - contains:
    - System information
    - Memory usage
    - Recent crash logs
@@ -103,7 +103,7 @@ When reporting issues, include:
 
 For the current release (display version 3.0.0):
 - **Windows only** - macOS/Linux not yet tested
-- **Self-signed certificate** - You may need Developer Mode enabled
+- **Unsigned upload** - Do not double-click the MSIX. Windows will not install that file. Wait for the Partner Center signed install. Developer Mode is not the fix.
 - **No auto-update** - Manual download for new versions
 - **No cloud features** - All data is local
 
