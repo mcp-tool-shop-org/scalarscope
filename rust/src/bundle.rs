@@ -45,6 +45,10 @@ pub struct StoredReview {
     pub inference: Option<StoredSeries>,
     #[serde(default)]
     pub training: Option<StoredTraining>,
+    /// Fingerprint, validation and guardrail notes. Left out of the file when empty, so a
+    /// review without them keeps the bytes and hash it had before this field existed.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub notices: Vec<String>,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, serde::Deserialize)]
@@ -64,6 +68,10 @@ pub struct StoredSeries {
     pub right_steady: Option<usize>,
     pub left_throughput: Vec<f64>,
     pub right_throughput: Vec<f64>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub left_memory: Vec<f64>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub right_memory: Vec<f64>,
     pub left_cdf: Vec<[f64; 2]>,
     pub right_cdf: Vec<[f64; 2]>,
     pub left_p50: Option<f64>,
@@ -396,6 +404,8 @@ pub fn stored_pair(review: &StoredReview) -> Option<Pair> {
                 right_steady: series.right_steady,
                 left_throughput: series.left_throughput.clone(),
                 right_throughput: series.right_throughput.clone(),
+                left_memory: series.left_memory.clone(),
+                right_memory: series.right_memory.clone(),
                 left_cdf: pairs(&series.left_cdf),
                 right_cdf: pairs(&series.right_cdf),
                 left_p50: series.left_p50,
@@ -410,6 +420,7 @@ pub fn stored_pair(review: &StoredReview) -> Option<Pair> {
                 caption: review.caption.clone(),
                 left_text: review.left_text.clone(),
                 right_text: review.right_text.clone(),
+                notices: review.notices.clone(),
             }))
         }
         "training" => {
@@ -499,6 +510,7 @@ fn inference_review(review: &InferenceReview) -> StoredReview {
     let labels = [review.left_label.as_str(), review.right_label.as_str()];
     StoredReview {
         kind: "inference".to_string(),
+        notices: review.notices.iter().map(|line| scrub(line, &labels)).collect(),
         verdict: scrub(&review.verdict, &labels),
         fired: review.fired.clone(),
         caption: scrub(&review.caption, &labels),
@@ -520,6 +532,8 @@ fn inference_review(review: &InferenceReview) -> StoredReview {
             right_steady: review.right_steady,
             left_throughput: review.left_throughput.clone(),
             right_throughput: review.right_throughput.clone(),
+            left_memory: review.left_memory.clone(),
+            right_memory: review.right_memory.clone(),
             left_cdf: store_pairs(&review.left_cdf),
             right_cdf: store_pairs(&review.right_cdf),
             left_p50: review.left_p50,
@@ -537,6 +551,7 @@ fn training_review(review: &TrainingReview) -> StoredReview {
     let labels = [review.left.run_id.as_str(), review.right.run_id.as_str()];
     StoredReview {
         kind: "training".to_string(),
+        notices: Vec::new(),
         verdict: String::new(),
         fired: Vec::new(),
         caption: scrub(&review.caption, &labels),
@@ -588,6 +603,7 @@ fn findings_only(entries: &[(String, Vec<u8>)]) -> Result<StoredReview, String> 
     };
     Ok(StoredReview {
         kind: "findings".to_string(),
+        notices: Vec::new(),
         verdict,
         fired,
         caption: "This bundle stores the findings. It does not store the series, so the chart is not drawn from another file.".to_string(),

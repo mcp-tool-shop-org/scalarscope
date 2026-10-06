@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::open::{InferenceRun, Side, TrainingEntry};
 use crate::readings::{self, Band};
+use crate::runtrace;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct InferenceReview {
@@ -24,6 +25,9 @@ pub struct InferenceReview {
     pub right_steady: Option<usize>,
     pub left_throughput: Vec<f64>,
     pub right_throughput: Vec<f64>,
+    /// Memory in MiB at the same steps, when both sides recorded it.
+    pub left_memory: Vec<f64>,
+    pub right_memory: Vec<f64>,
     pub left_cdf: Vec<(f64, f64)>,
     pub right_cdf: Vec<(f64, f64)>,
     pub left_p50: Option<f64>,
@@ -38,6 +42,8 @@ pub struct InferenceReview {
     pub caption: String,
     pub left_text: String,
     pub right_text: String,
+    /// Fingerprint, validation and guardrail notes, one per line. Empty for a plain file.
+    pub notices: Vec<String>,
 }
 
 /// One delta the inference page actually fired. The numbers are the same
@@ -74,7 +80,10 @@ pub enum Pair {
 
 pub fn pair(left: &Side, right: &Side) -> Result<Pair, String> {
     match (left, right) {
-        (Side::Inference(left), Side::Inference(right)) => Ok(Pair::Inference(inference(left, right))),
+        (Side::Inference(left), Side::Inference(right)) => {
+            blocked(left, right)?;
+            Ok(Pair::Inference(inference(left, right)))
+        }
         (Side::Training(left), Side::Training(right)) => Ok(Pair::Training(training(left, right))),
         _ => Err(
             "One side is a training history and the other is an inference trace. Load two of the same kind."
@@ -89,11 +98,12 @@ fn inference(left: &InferenceRun, right: &InferenceRun) -> InferenceReview {
     let right_values = window(&right.latency_ms, skip_right, count);
     let left_finite = readings::finite_sorted(&left_values);
     let right_finite = readings::finite_sorted(&right_values);
-    let (left_throughput, right_throughput) = throughput(left, right, skip_left, skip_right, count);
+    let (left_throughput, right_throughput) = beside(&left.throughput, &right.throughput, left, right, skip_left, skip_right, count);
+    let (left_memory, right_memory) = beside(&left.memory_mb, &right.memory_mb, left, right, skip_left, skip_right, count);
     let (findings, verdict) = inference_verdict(left, right);
     let fired = findings.iter().map(|row| row.symbol.clone()).collect();
     let mut caption = format!(
-        "latency_ms (ms). {summary} The band is a centered 5-sample rolling mean ± population standard deviation, not a confidence interval. Marks are 3-sigma on this window. p50, p95, and p99 are nearest-rank. The distribution is the empirical CDF of these same samples. ΔTd and ΔĀ stay off this page."
+        "Preset tensorflowrt-runtime-v1 (inference runtime). latency_ms (ms). {summary} The band is a centered 5-sample rolling mean ± population standard deviation, not a confidence interval. Marks are 3-sigma on this window. p50, p95, and p99 are nearest-rank. The distribution is the empirical CDF of these same samples. ΔTd and ΔĀ stay off this page."
     );
     if left.steady_step.is_some() && right.steady_step.is_some() {
         caption.push_str(" The vertical line is the steady-state milestone.");
@@ -113,6 +123,8 @@ fn inference(left: &InferenceRun, right: &InferenceRun) -> InferenceReview {
         right_steady: readings::steady_index(&right.steps, skip_right, count, right.steady_step.filter(|_| left.steady_step.is_some())),
         left_throughput,
         right_throughput,
+        left_memory,
+        right_memory,
         left_cdf: readings::empirical_cdf(&left_finite),
         right_cdf: readings::empirical_cdf(&right_finite),
         left_p50: readings::percentile(&left_finite, 0.50),
@@ -127,7 +139,53 @@ fn inference(left: &InferenceRun, right: &InferenceRun) -> InferenceReview {
         left: left_values,
         right: right_values,
         caption,
+        notices: notices(left, right),
     }
+}
+
+/// A broken timeline on either side stops the comparison before any delta is computed,
+/// with the message the .NET app showed.
+fn blocked(left: &InferenceRun, right: &InferenceRun) -> Result<(), String> {
+    let (Some(left_trace), Some(right_trace)) = (&left.trace, &right.trace) else {
+        let broken = [left, right]
+            .into_iter()
+            .find(|run| run.trace.as_ref().is_some_and(|trace| trace.validation.timeline_rejects()));
+        return match broken {
+            Some(run) => Err(runtrace::blocked_side_message(&run.label, run.trace.as_ref().map(|trace| &trace.validation))),
+            None => Ok(()),
+        };
+    };
+    if !left_trace.validation.timeline_rejects() && !right_trace.validation.timeline_rejects() {
+        return Ok(());
+    }
+    Err(runtrace::blocked_message(
+        (&left.label, &left_trace.run_id, &left_trace.validation),
+        (&right.label, &right_trace.run_id, &right_trace.validation),
+    ))
+}
+
+fn notices(left: &InferenceRun, right: &InferenceRun) -> Vec<String> {
+    let mut lines = Vec::new();
+    if let (Some(left_trace), Some(right_trace)) = (&left.trace, &right.trace) {
+        for note in runtrace::compare_fingerprints(&left_trace.fingerprints, &right_trace.fingerprints) {
+            lines.push(match note.code {
+                Some(code) => format!("{} ({code})", note.message),
+                None => note.message,
+            });
+        }
+    }
+    for run in [left, right] {
+        let Some(trace) = &run.trace else {
+            continue;
+        };
+        for issue in trace.validation.errors.iter().chain(&trace.validation.warnings) {
+            lines.push(format!("{}: {} ({})", run.label, issue.message, issue.code));
+        }
+        for note in &trace.guardrails {
+            lines.push(format!("{}: {note}", run.label));
+        }
+    }
+    lines
 }
 
 fn inference_verdict(left: &InferenceRun, right: &InferenceRun) -> (Vec<Finding>, String) {
@@ -140,7 +198,11 @@ fn inference_verdict(left: &InferenceRun, right: &InferenceRun) -> (Vec<Finding>
         let introduced = outliers_right - outliers_left;
         findings.push(finding(
             "ΔF",
-            format!("Introduced {introduced} new runtime anomalies"),
+            if introduced == 1 {
+                "Introduced 1 new runtime anomaly".to_string()
+            } else {
+                format!("Introduced {introduced} new runtime anomalies")
+            },
             outliers_left as f64,
             outliers_right as f64,
             "count",
@@ -159,8 +221,8 @@ fn inference_verdict(left: &InferenceRun, right: &InferenceRun) -> (Vec<Finding>
         Tc::Quiet => {}
     }
 
-    let spread_left = population_std_from(&left.latency_ms, left.steady_step.unwrap_or(0).max(0) as usize);
-    let spread_right = population_std_from(&right.latency_ms, right.steady_step.unwrap_or(0).max(0) as usize);
+    let spread_left = population_std_from(&left.latency_ms, index_of_step(left, left.steady_step));
+    let spread_right = population_std_from(&right.latency_ms, index_of_step(right, right.steady_step));
     let scale = spread_left.max(spread_right);
     if (spread_right - spread_left).abs() > 0.01 * scale {
         let text = if spread_right < spread_left {
@@ -278,6 +340,11 @@ fn count_outliers(values: &[f64]) -> usize {
     finite.iter().filter(|value| (*value - mean).abs() > threshold).count()
 }
 
+/// The first sample at or after `step`, or the start when there is no milestone.
+fn index_of_step(run: &InferenceRun, step: Option<i64>) -> usize {
+    step.map_or(0, |step| run.steps.iter().position(|value| *value >= step).unwrap_or(run.steps.len()))
+}
+
 fn population_std_from(values: &[f64], start: usize) -> f64 {
     let tail: Vec<f64> = values.iter().skip(start).copied().filter(|value| value.is_finite()).collect();
     if tail.len() < 2 {
@@ -336,22 +403,26 @@ fn window(values: &[f64], skip: usize, count: usize) -> Vec<Option<f64>> {
     values.iter().skip(skip).take(count).copied().map(Some).collect()
 }
 
-fn throughput(
+/// A series recorded beside latency (throughput, memory), cut to the same aligned window.
+/// Both sides need it at every latency step, or neither is shown.
+fn beside(
+    left_values: &[f64],
+    right_values: &[f64],
     left: &InferenceRun,
     right: &InferenceRun,
     skip_left: usize,
     skip_right: usize,
     count: usize,
 ) -> (Vec<f64>, Vec<f64>) {
-    if left.throughput.len() != left.latency_ms.len() || right.throughput.len() != right.latency_ms.len() {
+    if left_values.len() != left.latency_ms.len() || right_values.len() != right.latency_ms.len() {
         return (Vec::new(), Vec::new());
     }
-    if left.throughput.is_empty() || right.throughput.is_empty() {
+    if left_values.is_empty() || right_values.is_empty() {
         return (Vec::new(), Vec::new());
     }
     (
-        left.throughput.iter().skip(skip_left).take(count).copied().collect(),
-        right.throughput.iter().skip(skip_right).take(count).copied().collect(),
+        left_values.iter().skip(skip_left).take(count).copied().collect(),
+        right_values.iter().skip(skip_right).take(count).copied().collect(),
     )
 }
 

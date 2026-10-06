@@ -35,6 +35,8 @@ fn inference(label: &str, latency: Vec<f64>, steady: Option<i64>, warmup: Option
         throughput,
         warmup_end: warmup,
         steady_step: steady,
+        memory_mb: Vec::new(),
+        trace: None,
     })
 }
 
@@ -81,7 +83,11 @@ fn open_path_uses_the_file_stem_and_refuses_a_missing_file() {
     let Side::Inference(run) = loaded.side else { panic!("csv") };
     assert_eq!(run.label, "baseline");
     assert!(open_path(Path::new(r"D:\no\such\scalarscope.csv")).unwrap_err().contains("Could not read"));
-    assert!(open_path(&dir).unwrap_err().contains("Could not read"));
+    // A folder is a source too: it opens its best file under the folder's name.
+    let folder = open_path(&dir).unwrap();
+    let Side::Inference(run) = folder.side else { panic!("csv") };
+    assert_eq!(run.latency_ms, vec![10.0, 11.0]);
+    assert_eq!(run.label, dir.file_name().unwrap().to_str().unwrap());
 }
 
 #[test]
@@ -196,6 +202,8 @@ fn a_step_list_that_does_not_match_the_samples_is_not_a_stabilization_time() {
         throughput: vec![1.0],
         warmup_end: None,
         steady_step: None,
+        memory_mb: Vec::new(),
+        trace: None,
     };
     let right = InferenceRun {
         label: "right".to_string(),
@@ -204,6 +212,8 @@ fn a_step_list_that_does_not_match_the_samples_is_not_a_stabilization_time() {
         throughput: Vec::new(),
         warmup_end: None,
         steady_step: None,
+        memory_mb: Vec::new(),
+        trace: None,
     };
     let Pair::Inference(review) = pair(&Side::Inference(left.clone()), &Side::Inference(right)).unwrap() else { panic!("inference") };
     assert!(review.verdict.contains("not a stabilization time"));
@@ -220,6 +230,8 @@ fn a_step_list_that_does_not_match_the_samples_is_not_a_stabilization_time() {
         throughput: Vec::new(),
         warmup_end: None,
         steady_step: Some(2),
+        memory_mb: Vec::new(),
+        trace: None,
     };
     let Pair::Inference(review) = pair(&Side::Inference(left), &Side::Inference(right)).unwrap() else { panic!("inference") };
     assert!(!review.fired.iter().any(|symbol| symbol == "ΔO"));
@@ -341,6 +353,7 @@ fn stored_drawings_come_back_and_an_unknown_kind_does_not_become_a_chart() {
 
     let hand = StoredReview {
         kind: "inference".to_string(),
+        notices: Vec::new(),
         verdict: String::new(),
         fired: Vec::new(),
         caption: String::new(),
@@ -362,6 +375,8 @@ fn stored_drawings_come_back_and_an_unknown_kind_does_not_become_a_chart() {
             right_steady: Some(0),
             left_throughput: Vec::new(),
             right_throughput: vec![1.0],
+            left_memory: Vec::new(),
+            right_memory: Vec::new(),
             left_cdf: vec![[1.0, 1.0]],
             right_cdf: Vec::new(),
             left_p50: Some(1.0),
@@ -477,6 +492,7 @@ fn write_file_and_open_file_round_trip_and_report_a_missing_path() {
     let empty = BundleDocument {
         review: StoredReview {
             kind: "findings".to_string(),
+            notices: Vec::new(),
             verdict: String::new(),
             fired: Vec::new(),
             caption: String::new(),

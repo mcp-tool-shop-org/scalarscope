@@ -1,17 +1,23 @@
 //! What a file is allowed to become.
 //!
-//! An inference file contributes a latency series. A backpropagate
-//! `run_history.json` contributes the stored training-loss samples of one
-//! entry. Geometry stays out of this shell.
+//! An inference file contributes a latency series. A stored RunTrace also brings its
+//! milestones, fingerprints and validation. A backpropagate `run_history.json`
+//! contributes the stored training-loss samples of one entry. Geometry stays out of
+//! this shell.
+//!
+//! A milestone (`warmup_end`, `steady_step`) is a step number from `steps`, never a
+//! sample index.
 
 use std::fs;
+use std::io::Read;
 use std::path::Path;
 
 use serde_json::Value;
 
 use crate::milestones::{detect_steady_start, detect_warmup_end};
+use crate::runtrace::{self, TraceInfo};
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct InferenceRun {
     pub label: String,
     pub steps: Vec<i64>,
@@ -19,6 +25,10 @@ pub struct InferenceRun {
     pub throughput: Vec<f64>,
     pub warmup_end: Option<i64>,
     pub steady_step: Option<i64>,
+    /// Memory in MiB at the same steps, or empty.
+    pub memory_mb: Vec<f64>,
+    /// Present when the run came from a stored RunTrace.
+    pub trace: Option<TraceInfo>,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -50,17 +60,233 @@ pub struct Loaded {
 }
 
 pub fn open_path(path: &Path) -> Result<Loaded, String> {
-    let text = fs::read_to_string(path).map_err(|error| format!("Could not read the file. {error}"))?;
-    let label = path
-        .file_stem()
-        .and_then(|stem| stem.to_str())
-        .unwrap_or("run")
+    if path.is_dir() {
+        return open_folder(path);
+    }
+    let name = path.file_name().and_then(|name| name.to_str()).unwrap_or("run").to_string();
+    let lower = name.to_ascii_lowercase();
+    let text = if lower.ends_with(".gz") {
+        let bytes = fs::read(path).map_err(|error| format!("Could not read the file. {error}"))?;
+        let mut text = String::new();
+        flate2::read::GzDecoder::new(bytes.as_slice())
+            .read_to_string(&mut text)
+            .map_err(|error| format!("The file is not a readable gzip archive. {error}"))?;
+        text
+    } else {
+        fs::read_to_string(path).map_err(|error| format!("Could not read the file. {error}"))?
+    };
+    let stem = lower.trim_end_matches(".gz");
+    let label = name[..stem.len()]
+        .rsplit_once('.')
+        .map_or(&name[..stem.len()], |(base, _)| base)
         .to_string();
-    let side = open_text(&text, &label)?;
+    let side = if stem.ends_with(".log") { open_log(&text, &label)? } else { open_text(&text, &label)? };
     Ok(Loaded {
         path: path.display().to_string(),
         side,
     })
+}
+
+/// How the .NET connector ranked what it found in a folder: the profiler trace first,
+/// then a benchmark CSV, a benchmark JSON, and a runtime log last.
+const FOLDER_SEARCH_DEPTH: usize = 6;
+
+/// A run folder. The best source in it is opened, and a `config.json` with
+/// `warmup_steps` (or `warmup_iterations`) sets where warmup ends.
+pub fn open_folder(folder: &Path) -> Result<Loaded, String> {
+    let label = folder.file_name().and_then(|name| name.to_str()).unwrap_or("run").to_string();
+    let files = folder_files(folder);
+    let named = |relative: &str| {
+        let wanted = folder.join(relative);
+        files.iter().find(|file| **file == wanted).cloned()
+    };
+    let mut ranked: Vec<(u32, std::path::PathBuf)> = Vec::new();
+    if let Some(trace) = named("profiler/trace.json").or_else(|| named("profiler/trace.json.gz")) {
+        ranked.push((100, trace));
+    }
+    for file in files.iter().filter(|file| file_name(file).starts_with("trace.json")).take(5) {
+        ranked.push((95, file.clone()));
+    }
+    if let Some(csv) = named("benchmark.csv").filter(|file| is_latency_csv(file)) {
+        ranked.push((50, csv));
+    }
+    for file in files.iter().filter(|file| file_name(file).ends_with(".csv")).take(10) {
+        if is_latency_csv(file) {
+            ranked.push((45, file.clone()));
+        }
+    }
+    if let Some(json) = named("benchmark.json") {
+        ranked.push((40, json));
+    }
+    if let Some(log) = named("runtime.log").filter(|file| is_runtime_log_file(file)) {
+        ranked.push((10, log));
+    }
+    for file in files.iter().filter(|file| file_name(file).ends_with(".log")).take(10) {
+        if is_runtime_log_file(file) {
+            ranked.push((5, file.clone()));
+        }
+    }
+    // Highest rank wins; within a rank, the first found.
+    let best = ranked
+        .iter()
+        .enumerate()
+        .max_by_key(|(order, (rank, _))| (*rank, std::cmp::Reverse(*order)))
+        .map(|(_, (_, path))| path.clone())
+        .ok_or_else(|| {
+            "This folder has no profiler trace, benchmark CSV or JSON, or runtime log.".to_string()
+        })?;
+    let mut loaded = open_path(&best)?;
+    if let Side::Inference(run) = &mut loaded.side {
+        run.label = label;
+        if let Some(warmup) = config_warmup(folder) {
+            let index = run.steps.iter().position(|step| *step >= warmup);
+            run.warmup_end = Some(warmup);
+            run.steady_step = index
+                .and_then(|index| detect_steady_start(&run.latency_ms, index))
+                .and_then(|index| run.steps.get(index).copied());
+        }
+    }
+    loaded.path = folder.display().to_string();
+    Ok(loaded)
+}
+
+fn file_name(path: &Path) -> String {
+    path.file_name().and_then(|name| name.to_str()).unwrap_or("").to_ascii_lowercase()
+}
+
+fn folder_files(folder: &Path) -> Vec<std::path::PathBuf> {
+    let mut files = Vec::new();
+    let mut pending = vec![(folder.to_path_buf(), 0)];
+    while let Some((dir, depth)) = pending.pop() {
+        let Ok(entries) = fs::read_dir(&dir) else {
+            continue;
+        };
+        let mut entries: Vec<_> = entries.flatten().map(|entry| entry.path()).collect();
+        entries.sort();
+        for path in entries {
+            if path.is_dir() {
+                if depth < FOLDER_SEARCH_DEPTH {
+                    pending.push((path, depth + 1));
+                }
+            } else {
+                files.push(path);
+            }
+        }
+    }
+    files.sort();
+    files
+}
+
+fn config_warmup(folder: &Path) -> Option<i64> {
+    let text = fs::read_to_string(folder.join("config.json")).ok()?;
+    let value: Value = serde_json::from_str(&text).ok()?;
+    value.get("warmup_steps").or_else(|| value.get("warmup_iterations"))?.as_i64()
+}
+
+/// A CSV the .NET connector would take: its header names latency, throughput or memory.
+fn is_latency_csv(path: &Path) -> bool {
+    fs::read_to_string(path).ok().and_then(|text| text.lines().next().map(str::to_ascii_lowercase)).is_some_and(|header| {
+        header.contains("latency") || header.contains("throughput") || header.contains("memory")
+    })
+}
+
+fn is_runtime_log_file(path: &Path) -> bool {
+    fs::read_to_string(path).is_ok_and(|text| is_runtime_log(&text))
+}
+
+/// The .NET check: one of the first 20 lines mentions TensorRT, latency_ms, TF-TRT or batch size.
+pub fn is_runtime_log(text: &str) -> bool {
+    text.lines().take(20).any(|line| {
+        let line = line.to_ascii_lowercase();
+        ["tensorrt", "latency_ms", "tf-trt", "batch size"].iter().any(|word| line.contains(word))
+    })
+}
+
+/// The first `keyword [_ ]* [:=]? \s* number` in a line, case-insensitive, as the .NET
+/// log patterns read it. `decimal` allows a decimal point in the number. Unlike the .NET
+/// pattern, a `ms` unit right after the keyword is skipped, so `latency_ms: 12.5` reads
+/// as 12.5; the .NET pattern found no number there although that name marks a runtime log.
+fn log_value(line: &str, keyword: &str, decimal: bool) -> Option<String> {
+    let lower = line.to_ascii_lowercase();
+    let bytes = lower.as_bytes();
+    let mut from = 0;
+    while let Some(found) = lower[from..].find(keyword) {
+        let mut at = from + found + keyword.len();
+        let skip_separators = |mut at: usize| {
+            while at < bytes.len() && (bytes[at] == b'_' || bytes[at].is_ascii_whitespace()) {
+                at += 1;
+            }
+            at
+        };
+        at = skip_separators(at);
+        if lower[at..].starts_with("ms") && !lower[at + 2..].starts_with(|c: char| c.is_ascii_alphabetic()) {
+            at = skip_separators(at + 2);
+        }
+        if at < bytes.len() && (bytes[at] == b':' || bytes[at] == b'=') {
+            at += 1;
+        }
+        while at < bytes.len() && bytes[at].is_ascii_whitespace() {
+            at += 1;
+        }
+        let start = at;
+        while at < bytes.len() && (bytes[at].is_ascii_digit() || (decimal && bytes[at] == b'.')) {
+            at += 1;
+        }
+        if at > start {
+            return Some(lower[start..at].to_string());
+        }
+        from += found + keyword.len();
+    }
+    None
+}
+
+/// A runtime log, one sample per line that names a step, latency, throughput or memory.
+/// A line without a step takes the next step after the last one.
+pub fn open_log(text: &str, label: &str) -> Result<Side, String> {
+    let mut steps = Vec::new();
+    let mut latency = Vec::new();
+    let mut rates = Vec::new();
+    let mut memory = Vec::new();
+    let mut next_step = 0_i64;
+    for line in text.lines() {
+        let step = log_value(line, "step", false).and_then(|value| value.parse::<i64>().ok());
+        let sample = log_value(line, "latency", true).and_then(|value| value.parse::<f64>().ok());
+        let rate = log_value(line, "throughput", true).and_then(|value| value.parse::<f64>().ok());
+        // `memory_mb` is already MiB; a bare `memory` number is bytes, as the .NET reader took it.
+        let mebibytes = log_value(line, "memory_mb", true)
+            .and_then(|value| value.parse::<f64>().ok())
+            .or_else(|| log_value(line, "memory", false).and_then(|value| value.parse::<f64>().ok()).map(|bytes| bytes / 1_048_576.0));
+        if step.is_none() && sample.is_none() && rate.is_none() && mebibytes.is_none() {
+            continue;
+        }
+        let at = step.unwrap_or(next_step);
+        next_step = at + 1;
+        let Some(sample) = sample.filter(|value| value.is_finite()) else {
+            continue;
+        };
+        steps.push(at);
+        latency.push(sample);
+        rates.push(rate);
+        memory.push(mebibytes);
+    }
+    if latency.is_empty() {
+        return Err("This log has no latency lines.".to_string());
+    }
+    let complete = |values: Vec<Option<f64>>| -> Vec<f64> {
+        if values.iter().all(Option::is_some) {
+            values.into_iter().flatten().collect()
+        } else {
+            Vec::new()
+        }
+    };
+    Ok(Side::Inference(finish(InferenceRun {
+        label: label.to_string(),
+        steps,
+        latency_ms: latency,
+        throughput: complete(rates),
+        memory_mb: complete(memory),
+        ..InferenceRun::default()
+    })))
 }
 
 pub fn open_text(text: &str, label: &str) -> Result<Side, String> {
@@ -75,6 +301,7 @@ pub fn open_text(text: &str, label: &str) -> Result<Side, String> {
 fn open_json(value: Value, label: &str) -> Result<Side, String> {
     match &value {
         Value::Object(map) if map.contains_key("traceEvents") => open_trace(map, label),
+        Value::Object(map) if runtrace::looks_like_runtrace(map) => open_runtrace(map, label),
         Value::Object(map) if map.contains_key("trajectory") => Err(
             "This is a geometry run. This Rust review opens an inference trace or a backpropagate training history."
                 .to_string(),
@@ -247,6 +474,8 @@ fn open_csv(text: &str, label: &str) -> Result<Side, String> {
         throughput,
         warmup_end: None,
         steady_step: None,
+        memory_mb: Vec::new(),
+        trace: None,
     })))
 }
 
@@ -319,16 +548,87 @@ fn series(label: &str, latency: Vec<f64>, throughput: Vec<f64>) -> InferenceRun 
         throughput,
         warmup_end: None,
         steady_step: None,
+        memory_mb: Vec::new(),
+        trace: None,
     })
 }
 
 fn finish(mut run: InferenceRun) -> InferenceRun {
     let warmup = detect_warmup_end(&run.latency_ms);
-    run.warmup_end = warmup.map(|step| step as i64);
+    let step_at = |index: usize| run.steps.get(index).copied().unwrap_or(index as i64);
+    run.warmup_end = warmup.map(step_at);
     run.steady_step = warmup
-        .and_then(|step| detect_steady_start(&run.latency_ms, step))
-        .map(|step| step as i64);
+        .and_then(|index| detect_steady_start(&run.latency_ms, index))
+        .map(step_at);
     run
+}
+
+/// A stored RunTrace. Its own milestones are used as written; only a trace without
+/// them falls back to detection from the latency values.
+fn open_runtrace(map: &serde_json::Map<String, Value>, label: &str) -> Result<Side, String> {
+    let trace = runtrace::parse(map)?;
+    let validation = runtrace::validate(&trace);
+    let latency = runtrace::series(&trace, &runtrace::LATENCY_NAMES)
+        .ok_or_else(|| "This RunTrace has no latency series.".to_string())?;
+    let throughput = runtrace::series(&trace, &runtrace::THROUGHPUT_NAMES);
+    let memory = runtrace::series(&trace, &runtrace::MEMORY_NAMES);
+    let memory_scale = memory.map_or(1.0, |series| if series.name.ends_with("_bytes") { 1.0 / 1_048_576.0 } else { 1.0 });
+    let mut steps = Vec::new();
+    let mut latency_ms = Vec::new();
+    let mut rates = Vec::new();
+    let mut memory_mb = Vec::new();
+    for (index, sample) in latency.values.iter().enumerate() {
+        let Some(sample) = sample.filter(|value| value.is_finite()) else {
+            continue;
+        };
+        steps.push(trace.steps.get(index).copied().unwrap_or(index as i64));
+        latency_ms.push(sample);
+        let at = |series: Option<&runtrace::Scalar>| {
+            series.and_then(|series| series.values.get(index).copied().flatten()).filter(|value| value.is_finite())
+        };
+        if let Some(rate) = at(throughput) {
+            rates.push(rate);
+        }
+        if let Some(memory) = at(memory) {
+            memory_mb.push(memory * memory_scale);
+        }
+    }
+    if latency_ms.is_empty() {
+        return Err("This RunTrace has no numeric latency.".to_string());
+    }
+    if rates.len() != latency_ms.len() {
+        rates.clear();
+    }
+    if memory_mb.len() != latency_ms.len() {
+        memory_mb.clear();
+    }
+    let stored_warmup = runtrace::milestone(&trace, "warmup_end");
+    let stored_steady = runtrace::milestone(&trace, "steady_state_start");
+    let stored = stored_warmup.is_some() || stored_steady.is_some();
+    let run = InferenceRun {
+        label: if trace.label.trim().is_empty() { label.to_string() } else { trace.label.clone() },
+        steps,
+        latency_ms,
+        throughput: rates,
+        memory_mb,
+        trace: Some(TraceInfo {
+            run_id: trace.run_id.clone(),
+            fingerprints: trace.fingerprints.clone(),
+            guardrails: runtrace::guardrails(&trace),
+            validation,
+            stored_milestones: stored,
+        }),
+        ..InferenceRun::default()
+    };
+    Ok(Side::Inference(if stored {
+        InferenceRun {
+            warmup_end: stored_warmup,
+            steady_step: stored_steady,
+            ..run
+        }
+    } else {
+        finish(run)
+    }))
 }
 
 fn bench_array(map: &serde_json::Map<String, Value>) -> Option<&Vec<Value>> {
