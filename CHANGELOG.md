@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.0.0] - 2026-10-03
 
 ### Added
+- Export SVG writes the current view (series, warmup, distribution with its threshold, difference, spectrum) as a vector drawing with axes, legend and caption. Export PNG saves a picture of the window.
+- 2.0 bundles open. A 2.0 comparison bundle shows its stored deltas as tiles, with why.json's explanation and parameters. A 2.0 inference review, which 2.0 auto-saved without integrity.json, opens as unverified: the page says its bytes cannot be checked and shows the hash its JSON states. Real 2.0 files are kept in `tests/Fixtures/Bundles`, written by the 2.0 code (`BundleFixtureWriter.cs`), and a bundle this review writes is read back by the 2.0 importer in the .NET tests.
 - The app opens on a Welcome tab, as 2.0 did. It offers Compare two runs, Try the sample comparison (two synthetic runs built into the app), and Open a review bundle, with four cards on what the review gives and the recent reviews. A Guide tab explains, with search: reading a comparison, the headline, each delta, why ΔTd and ΔĀ are not on the inference page, run shapes, the views, several runs, bundles, inputs and shortcuts.
 - Keyboard shortcuts: F1 opens the Guide, Ctrl+, Settings, Ctrl+H Welcome; on Compare, 1 to 6 choose the view, and Esc closes the Why panel.
 - Text fields and plot backgrounds sit a shade deeper than the page, so a text field is visible on the dark theme.
@@ -35,6 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Home keeps a local comparison log. A review is written when both runs are loaded: the two names, the deltas that fired across the full run (ΔF, ΔTc, ΔTd, ΔĀ, ΔO), and the bundle hash once a bundle is saved or opened. The file stays in app data.
 
 ### Fixed
+- A 2.0 comparison bundle did not open at all: 2.0 compresses bundle entries with Deflate, and the review read stored entries only. Real 2.0 delta ids are camelCase (`failurePresence`) and are now matched in either case.
 - A detected milestone is a step number everywhere. ΔO read it as a sample index, which mis-placed it when steps do not start at 0.
 - One introduced anomaly reads "Introduced 1 new runtime anomaly". A 2.0 bundle with the plural sentence still opens.
 - The page scrolls, so the throughput and memory plots are not cut off.
