@@ -398,6 +398,47 @@ pub fn mad_indices(values: &[Option<f64>]) -> Vec<usize> {
         .collect()
 }
 
+/// Which samples count as anomalies.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum AnomalyRule {
+    /// More than [`MAD_LIMIT`] robust deviations (1.4826 × MAD) from the median. The default.
+    #[default]
+    Mad,
+    /// More than 3 population standard deviations from the mean, the 2.0 rule. The standard
+    /// deviation grows with the spikes it is meant to find (C5), so it is a setting, not the default.
+    ThreeSigma,
+}
+
+impl AnomalyRule {
+    /// The rule as `preferences.json` stores it (`AnomalyRule`).
+    pub fn code(self) -> u8 {
+        match self {
+            AnomalyRule::Mad => 0,
+            AnomalyRule::ThreeSigma => 1,
+        }
+    }
+
+    pub fn from_code(code: u8) -> Self {
+        if code == 1 { AnomalyRule::ThreeSigma } else { AnomalyRule::Mad }
+    }
+
+    /// The rule in words, for the caption and the ΔF panel.
+    pub fn describe(self) -> String {
+        match self {
+            AnomalyRule::Mad => format!("more than {MAD_LIMIT} robust deviations (1.4826 × MAD) from the median"),
+            AnomalyRule::ThreeSigma => "more than 3 population standard deviations from the mean (the 2.0 rule, chosen in Settings)".to_string(),
+        }
+    }
+}
+
+/// The anomalies among `values` under `rule`.
+pub fn anomalies(rule: AnomalyRule, values: &[Option<f64>]) -> Vec<usize> {
+    match rule {
+        AnomalyRule::Mad => mad_indices(values),
+        AnomalyRule::ThreeSigma => crate::readings::three_sigma_indices(values),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

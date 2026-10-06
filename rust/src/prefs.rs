@@ -31,6 +31,10 @@ pub struct ReviewPrefs {
     pub color_vision: u8,
     pub high_contrast: bool,
     pub text_scale: f32,
+    /// 2.0's `Theme` (MAUI `AppTheme`): 0 follows Windows, 1 is Light, 2 is Dark.
+    pub theme: u8,
+    /// `AnomalyRule`, new in 3.0: 0 is the MAD rule, 1 is the 2.0 3-sigma rule.
+    pub anomaly_rule: u8,
     pub recent_limit: usize,
     pub recent: Vec<RecentFile>,
 }
@@ -41,6 +45,8 @@ impl Default for ReviewPrefs {
             color_vision: 0,
             high_contrast: false,
             text_scale: 1.0,
+            theme: 0,
+            anomaly_rule: 0,
             recent_limit: 10,
             recent: Vec::new(),
         }
@@ -81,6 +87,42 @@ pub fn read(directory: &Path) -> ReviewPrefs {
         return ReviewPrefs::default();
     };
     prefs_from(&map)
+}
+
+/// Read `preferences.json` as an object, or an empty one when there is no file yet. A file that is
+/// not an object is an error, and it is left as it is.
+fn read_object(directory: &Path) -> Result<Map<String, Value>, String> {
+    if directory.as_os_str().is_empty() {
+        return Err("The preferences folder is missing.".to_string());
+    }
+    let file = directory.join(FILE_NAME);
+    if !file.exists() {
+        return Ok(Map::new());
+    }
+    let text = fs::read_to_string(&file).map_err(|error| format!("Could not read preferences. {error}"))?;
+    match serde_json::from_str::<Value>(&text) {
+        Ok(Value::Object(map)) => Ok(map),
+        _ => Err("preferences.json is not an object. It was left unchanged.".to_string()),
+    }
+}
+
+/// Write the settings the Settings page owns, under 2.0's key names. Every other key stays.
+pub fn write_settings(directory: &Path, settings: &ReviewPrefs) -> Result<(), String> {
+    let mut root = read_object(directory)?;
+    root.insert("Theme".to_string(), Value::from(settings.theme));
+    root.insert("ColorVisionMode".to_string(), Value::from(settings.color_vision));
+    root.insert("HighContrastMode".to_string(), Value::from(settings.high_contrast));
+    root.insert("TextScale".to_string(), Value::from(f64::from(settings.text_scale.clamp(0.75, 2.0))));
+    root.insert("RecentFilesLimit".to_string(), Value::from(settings.recent_limit.clamp(1, 40) as u64));
+    root.insert("AnomalyRule".to_string(), Value::from(settings.anomaly_rule));
+    write_object(directory, &root)
+}
+
+/// Empty `RecentFiles`. Every other key stays.
+pub fn clear_recent(directory: &Path) -> Result<(), String> {
+    let mut root = read_object(directory)?;
+    root.insert("RecentFiles".to_string(), Value::Array(Vec::new()));
+    write_object(directory, &root)
 }
 
 /// Move a file to the front of `RecentFiles`. Every other key stays.
@@ -186,6 +228,8 @@ fn prefs_from(map: &Map<String, Value>) -> ReviewPrefs {
         color_vision: json_u8(map.get("ColorVisionMode")).unwrap_or(0),
         high_contrast: map.get("HighContrastMode").and_then(Value::as_bool).unwrap_or(false),
         text_scale: text_scale.clamp(0.75, 2.0),
+        theme: json_u8(map.get("Theme")).filter(|theme| *theme <= 2).unwrap_or(0),
+        anomaly_rule: json_u8(map.get("AnomalyRule")).filter(|rule| *rule <= 1).unwrap_or(0),
         recent_limit: recent_limit(map.get("RecentFilesLimit")),
         recent,
     }
