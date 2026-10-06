@@ -199,55 +199,65 @@ fn a_flat_series_of_twenty_finds_steady_state_at_the_first_stable_window() {
 }
 
 #[test]
-fn delta_tc_uses_the_milestone_and_is_withheld_without_one() {
-    let later = pair(&marked("a", vec![10.0; 8], Some(2)), &marked("b", vec![10.0; 8], Some(5))).unwrap();
-    let Pair::Inference(review) = later else { panic!("inference") };
-    assert_eq!(review.fired, vec!["ΔTc".to_string()]);
-    assert!(review.verdict.contains("Stabilizes 3 steps later"));
+fn delta_tc_set_by_hand_on_a_short_run_is_withheld() {
+    // A steady step given without a file to state it is not used; eight samples are too short
+    // to find one. The stated-step rule is covered by the golden fixtures in runtrace_tests.
+    let review = pair(&marked("a", vec![10.0; 8], Some(2)), &marked("b", vec![10.0; 8], Some(5))).unwrap();
+    let Pair::Inference(review) = review else { panic!("inference") };
+    assert!(review.fired.is_empty());
+    assert!(review.verdict.contains("ΔTc is withheld") && review.verdict.contains("too short to tell"), "{}", review.verdict);
+}
 
-    let earlier = pair(&marked("a", vec![10.0; 8], Some(5)), &marked("b", vec![10.0; 8], Some(2))).unwrap();
-    let Pair::Inference(review) = earlier else { panic!("inference") };
-    assert!(review.verdict.contains("Stabilizes 3 steps earlier"));
-
-    let left = "step,latency_ms\n0,10\n1,10\n2,10\n3,10\n";
-    let right = "step,latency_ms\n0,10\n1,10\n2,10\n3,10\n4,10\n5,10\n6,10\n7,10\n";
-    let Pair::Inference(review) = pair(&open_text(left, "short").unwrap(), &open_text(right, "longer").unwrap()).unwrap() else {
-        panic!("inference");
-    };
-    assert!(!review.fired.iter().any(|symbol| symbol == "ΔTc"));
-    assert!(review.verdict.contains("not a stabilization time"));
+fn spikes(count: usize) -> Vec<f64> {
+    let mut values = vec![10.0; 200];
+    for index in 0..count {
+        values[20 + index * 22] = 100.0;
+    }
+    values
 }
 
 #[test]
-fn delta_f_fires_only_when_the_right_side_has_more_outliers() {
-    let calm = vec![10.0; 20];
-    let mut spiked = vec![10.0; 19];
-    spiked.push(100.0);
-    let Pair::Inference(review) = pair(&marked("a", calm.clone(), None), &marked("b", spiked.clone(), None)).unwrap() else {
+fn delta_f_fires_only_for_an_excess_beyond_chance() {
+    let Pair::Inference(review) = pair(&marked("a", vec![10.0; 200], None), &marked("b", spikes(8), None)).unwrap() else {
         panic!("inference");
     };
-    assert_eq!(review.fired, vec!["ΔF".to_string(), "ΔO".to_string()]);
-    assert!(review.verdict.contains("Introduced 1 new runtime anomaly"));
+    assert_eq!(review.fired, vec!["ΔF".to_string()]);
+    assert!(review.verdict.contains("Introduced 8 new runtime anomalies"), "{}", review.verdict);
 
-    let Pair::Inference(review) = pair(&marked("a", spiked, None), &marked("b", calm, None)).unwrap() else {
+    // Fewer anomalies on B is not a ΔF, and one more is not beyond chance.
+    let Pair::Inference(review) = pair(&marked("a", spikes(8), None), &marked("b", vec![10.0; 200], None)).unwrap() else {
         panic!("inference");
     };
-    assert_eq!(review.fired, vec!["ΔO".to_string()]);
-    assert!(review.verdict.contains("Reduced runtime variability"));
+    assert!(review.fired.is_empty(), "{:?}", review.fired);
+    let Pair::Inference(review) = pair(&marked("a", vec![10.0; 200], None), &marked("b", spikes(1), None)).unwrap() else {
+        panic!("inference");
+    };
+    assert!(review.fired.is_empty(), "{:?}", review.fired);
+}
+
+fn spread(width: f64, seed: u64) -> Vec<f64> {
+    let mut rng = scalarscope::stats::Rng::new(seed);
+    (0..300).map(|_| 10.0 + ((rng.next_u64() % 1000) as f64 / 1000.0 - 0.5) * width).collect()
 }
 
 #[test]
-fn delta_o_ignores_a_change_inside_one_percent_of_the_larger_spread() {
-    let Pair::Inference(review) = pair(&marked("a", vec![1.0, -1.0], None), &marked("b", vec![1.005, -1.005], None)).unwrap() else {
+fn delta_o_fires_only_when_the_spread_interval_excludes_one() {
+    let Pair::Inference(review) = pair(&marked("a", spread(1.0, 1), None), &marked("b", spread(1.005, 2), None)).unwrap() else {
         panic!("inference");
     };
-    assert!(!review.fired.iter().any(|symbol| symbol == "ΔO"));
+    assert!(!review.fired.iter().any(|symbol| symbol == "ΔO"), "{}", review.verdict);
 
-    let Pair::Inference(review) = pair(&marked("a", vec![1.0, -1.0], None), &marked("b", vec![1.02, -1.02], None)).unwrap() else {
+    let Pair::Inference(review) = pair(&marked("a", spread(1.0, 3), None), &marked("b", spread(2.0, 4), None)).unwrap() else {
         panic!("inference");
     };
     assert_eq!(review.fired, vec!["ΔO".to_string()]);
-    assert!(review.verdict.contains("Increased runtime variability"));
+    assert!(review.verdict.contains("Increased runtime variability: relative spread (p10–p90 / p50) × 2"), "{}", review.verdict);
+
+    // Two samples cannot carry an interval.
+    let Pair::Inference(review) = pair(&marked("a", vec![1.0, -1.0], None), &marked("b", vec![1.5, -1.5], None)).unwrap() else {
+        panic!("inference");
+    };
+    assert!(review.fired.is_empty());
 }
 
 fn marked(label: &str, latency: Vec<f64>, steady: Option<i64>) -> Side {
@@ -276,4 +286,41 @@ fn delta_tc_stays_quiet_below_the_three_step_resolution() {
         assert!(!review.fired.iter().any(|symbol| symbol == "ΔTc"), "{left_step} vs {right_step}");
         assert!(!review.verdict.contains("Stabilizes"), "{left_step} vs {right_step}");
     }
+}
+
+fn decay(amplitude: f64, base: f64, tau: f64, seed: u64) -> Side {
+    let mut rng = scalarscope::stats::Rng::new(seed);
+    let rows: String = (0..400)
+        .map(|step| {
+            let noise = ((rng.next_u64() % 1000) as f64 / 1000.0 - 0.5) * 0.06;
+            format!("{step},{}\n", base * (1.0 + noise) + amplitude * (-(step as f64) / tau).exp())
+        })
+        .collect();
+    open_text(&format!("step,latency_ms\n{rows}"), "decay").unwrap()
+}
+
+#[test]
+fn delta_tc_fires_when_the_settling_ranges_are_apart() {
+    // A slow warmup (tau 40) against a fast one (tau 5): settled near step 200 against step 25.
+    let Pair::Inference(review) = pair(&decay(30.0, 10.0, 40.0, 1), &decay(30.0, 10.0, 5.0, 2)).unwrap() else { panic!("inference") };
+    assert!(review.fired.contains(&"ΔTc".to_string()), "{}", review.verdict);
+    assert!(review.verdict.contains("earlier"), "{}", review.verdict);
+    assert!(review.left_text.contains("warmup, settles"), "{}", review.left_text);
+}
+
+#[test]
+fn delta_tc_stays_quiet_when_the_ranges_overlap() {
+    // The same decay constant: both settle at about the same step.
+    let Pair::Inference(review) = pair(&decay(30.0, 12.0, 12.0, 3), &decay(22.0, 8.0, 12.0, 4)).unwrap() else { panic!("inference") };
+    assert!(!review.fired.contains(&"ΔTc".to_string()), "{}", review.verdict);
+}
+
+#[test]
+fn the_headline_is_a_ratio_with_an_interval_and_names_short_percentiles() {
+    let Pair::Inference(review) = pair(&decay(0.0, 12.0, 1.0, 5), &decay(0.0, 9.0, 1.0, 6)).unwrap() else { panic!("inference") };
+    assert!(review.headline.starts_with("B/A p50 0.7"), "{}", review.headline);
+    assert!(review.headline.contains("p99"), "{}", review.headline);
+    let short = |n: usize| open_text(&format!("step,latency_ms\n{}", (0..n).map(|s| format!("{s},10\n")).collect::<String>()), "short").unwrap();
+    let Pair::Inference(review) = pair(&short(60), &short(60)).unwrap() else { panic!("inference") };
+    assert!(review.headline.contains("p99 needs 368 steady samples per side"), "{}", review.headline);
 }

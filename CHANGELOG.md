@@ -34,6 +34,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Recovery resumes to Home, Compare, Help, or Settings. Start fresh returns to Home.
 
 ### Changed
+- An inference review leads with B/A at p50, p90 and p99 over the steady samples, each with a 95% interval from 1000 moving-block bootstrap resamples. The block length is the cube root of the sample count and the seed is fixed, so a review repeats exactly. A percentile without enough samples to bound it says how many it needs (p99 needs 368), and the ratios, ΔO and ΔF need 20 steady samples per side.
+- Each run gets a shape (flat, warmup, slowdown, no steady state, or too short to tell) from PELT change points on log-latency, and a steady-start range across three penalties. ΔTc fires only when both runs settle and their ranges do not overlap. Steps stated in a RunTrace file keep the 2.0 rule. The 2.0 window heuristic is a cross-check, and the page says when it disagrees. This replaces the 3-step floor.
+- ΔO compares relative spread, (p90 − p10) / p50, and fires when its interval excludes 1. ΔF counts samples beyond 5 robust deviations (MAD) in the steady samples and fires when B's excess is beyond chance (one-sided exact test, p < 0.05). On the 2.0 golden pair ΔF is now quiet: 2.0 counted the optimized run's first warmup sample as an anomaly. `docs/parity-and-beyond.spec.md` lists every verdict change.
+- The spread band is the p10–p90 of an 11-sample window, and the marks use the MAD rule.
 - The Store package declares Windows.Desktop only, tested up to Windows 11 (10.0.26100.0). Earlier packages also declared Windows.Universal, which offered a full-trust desktop app to device families that cannot run it. The pack script refuses any other family.
 - Package identity version is `3.0.0.0` for the next Partner Center update of store `9P3HT1PHBKQK`. Name, publisher, and publisher display name are unchanged.
 - The release workflow publishes an unsigned `ScalarScope_3.0.0.0_Store.msixupload` whose binary is the Rust review, the same upload shape as `ScalarScope_v2.0.0_Store.msixupload`. Partner Center signs it. The old workflow built the .NET package.

@@ -177,6 +177,7 @@ fn a_stored_review_draws_inference_training_and_findings_text() {
         review: StoredReview {
             kind: "findings".to_string(),
             notices: Vec::new(),
+            headline: String::new(),
             verdict: "ΔF Introduced 1 new runtime anomalies".to_string(),
             fired: vec!["ΔF".to_string()],
             caption: "The series was not stored.".to_string(),

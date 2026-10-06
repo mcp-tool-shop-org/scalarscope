@@ -553,13 +553,14 @@ fn series(label: &str, latency: Vec<f64>, throughput: Vec<f64>) -> InferenceRun 
     })
 }
 
+/// Milestones from the latency values. The steady step is where the run's shape settles
+/// (`shape::run_shape`); a run that slows down or never settles has none. The warmup end stays
+/// the 2.0 window heuristic, which alignment falls back to.
 fn finish(mut run: InferenceRun) -> InferenceRun {
     let warmup = detect_warmup_end(&run.latency_ms);
     let step_at = |index: usize| run.steps.get(index).copied().unwrap_or(index as i64);
     run.warmup_end = warmup.map(step_at);
-    run.steady_step = warmup
-        .and_then(|index| detect_steady_start(&run.latency_ms, index))
-        .map(step_at);
+    run.steady_step = crate::shape::run_shape(&run.latency_ms).steady.map(step_at);
     run
 }
 

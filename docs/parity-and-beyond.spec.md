@@ -181,6 +181,23 @@ It works like RunForge's (`docs/sidecar-workbench.md` in runforge), on the share
 
 Store submission follows phase 4b (D1). WACK, the listing, screenshots, samples for testers and certification notes come then, as they did for RunForge.
 
+## Verdict changes from 2.0
+
+Phase 2 changes how four rules answer. Each change is deliberate and has a test.
+
+| Rule | 2.0 | 3.0 | Why |
+|---|---|---|---|
+| ΔF | 3-sigma outliers over the whole series; fires when B has more | Samples beyond 5 robust deviations (1.4826 × MAD) from the median, steady samples only; fires when B's excess is beyond chance (one-sided exact conditional binomial test, p < 0.05) | A warmup sample is startup cost, not a runtime anomaly (C3); the standard deviation is inflated by the very spikes it is meant to find (C5); one extra spike is not evidence |
+| ΔO | Population standard deviation from the steady step, in ms; fires on a 1% difference | Relative spread of the steady samples, (p90 − p10) / p50; fires when the 95% block-bootstrap interval on B's over A's excludes 1 | Spikes are ΔF's to report; a 1% threshold fires on noise (C1, C5); in ms, a faster run with the same proportional jitter would be called steadier |
+| ΔTc | Any nonzero difference in steady step (inference comparer) | Steps stated in RunTrace files keep the 2.0 rule. Otherwise each run's shape decides (flat, warmup, slowdown, no steady state); ΔTc fires only when both settle and their steady-start ranges do not overlap | Many runs never settle (W1); a segment boundary is not a measurement (W2, W3) |
+| Ratios, ΔO, ΔF | — | Need 20 steady samples per side | A bootstrap of a handful of samples returns the same handful, so its interval is a point |
+
+The band became the p10–p90 of an 11-sample centred window and the marks became the 5-MAD rule (V5, C5). The 2.0 window heuristic stays as a cross-check: when it puts steady state outside the detected range, the page says so (W4).
+
+**The golden pair.** 2.0's `expected_assertions.json` says ΔF fires, because the optimized run's first sample (40 ms) is a 3-sigma outlier of the whole series. That sample is warmup. Under the 3.0 rule ΔF is quiet. `rust/tests/runtrace_tests.rs` asserts the 2.0 oracle still says "fired" and that 3.0 does not. Every other golden assertion holds.
+
+**Deferred to phase 3.** S3 keeps the 2.0 3-sigma rule as a setting that bundles record. The setting needs the Settings page, so it lands there.
+
 ## Corrections
 
 - The 3.0.0 changelog says ΔTc's 3-step floor is "the same resolution the .NET app used". That is true of 2.0's geometry convergence delta (`ResolutionSteps = 3`), not its inference comparer, which fires on any nonzero difference. The line is corrected in this change.

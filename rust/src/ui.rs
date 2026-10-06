@@ -328,6 +328,9 @@ impl ScalarScopeApp {
         ui.label(RichText::new(&review.left_text).color(paint.note));
         ui.label(RichText::new(&review.right_text).color(paint.note));
         ui.add_space(4.0);
+        if !review.headline.is_empty() {
+            ui.label(RichText::new(&review.headline).color(Color32::WHITE).strong());
+        }
         ui.label(RichText::new(&review.verdict).color(Color32::WHITE));
         for line in &review.notices {
             ui.label(RichText::new(line).color(paint.note));

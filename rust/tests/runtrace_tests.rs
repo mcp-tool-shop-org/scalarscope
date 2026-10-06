@@ -80,7 +80,12 @@ fn the_golden_pair_matches_the_dotnet_assertions() {
     assert_eq!(deltas["deltaTc"]["direction"], "optimized_stabilizes_earlier");
     assert!(review.verdict.contains(&format!("Stabilizes {earlier} steps earlier")), "{}", review.verdict);
     assert_eq!(review.fired.contains(&"ΔO".to_string()), deltas["deltaO"]["fired"].as_bool().unwrap());
-    assert_eq!(review.fired.contains(&"ΔF".to_string()), deltas["deltaF"]["fired"].as_bool().unwrap());
+    // A deliberate change from 2.0, recorded in docs/parity-and-beyond.spec.md ("Verdict changes"):
+    // 2.0 fires ΔF here because the optimized run's first sample (40 ms) is a 3-sigma outlier of
+    // the whole series. That sample is warmup, which is startup cost, not a runtime anomaly (C3);
+    // 3.0 counts anomalies in the steady samples, where both runs are flat, so ΔF is quiet.
+    assert!(deltas["deltaF"]["fired"].as_bool().unwrap(), "the 2.0 oracle still says fired");
+    assert!(!review.fired.contains(&"ΔF".to_string()), "{}", review.verdict);
     assert!(deltas["deltaTd"]["shouldBeSuppressed"].as_bool().unwrap() && !review.fired.contains(&"ΔTd".to_string()));
     assert!(deltas["deltaA"]["shouldBeSuppressed"].as_bool().unwrap() && !review.fired.contains(&"ΔĀ".to_string()));
 
