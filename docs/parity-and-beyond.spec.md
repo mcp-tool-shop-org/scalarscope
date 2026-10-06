@@ -1,6 +1,6 @@
 # ScalarScope 3: parity and beyond
 
-Status: draft for review, 2026-10-06. Nothing here is built yet.
+Status: decisions D1–D4 taken by the director on 2026-10-06. Nothing here is built yet.
 
 ScalarScope 3 is the Rust review in `rust/`. It replaces the .NET 2.0 app on the Store listing 9P3HT1PHBKQK, so every current user gets it as an update. This spec says what 3 must do before that update ships, and what it should do beyond 2.0. Three things set the bar:
 
@@ -8,14 +8,14 @@ ScalarScope 3 is the Rust review in `rust/`. It replaces the .NET 2.0 app on the
 2. **The numbers are sound.** A comparison says how sure it is, and the program withholds what the data cannot support.
 3. **A workbench sidecar**, like RunForge's: a local model builds measures and proposes what each knob does, and the program gathers the evidence.
 
-## Decisions this spec needs
+## Decisions (director, 2026-10-06)
 
-| # | Decision | Recommendation |
+| # | Question | Ruling |
 |---|---|---|
-| D1 | Port the ASPIRE geometry half: training-dynamics JSON, trajectories, eigen spectrum, evaluator alignment, failures. | Port the import and the static views in phase 4, after the inference core. The engine that wrote these files is no longer in the org, so the audience is existing files and the demo pair. Animated playback becomes an optional presentation mode beside static views (finding V7). |
-| D2 | Share RunForge's workbench code through a new crate instead of copying it. | Yes. The formula language, hypotheses, e-value evidence and Ollama loop touch RunForge's own types in only a few places. A small `Run` interface (named sample series plus a recipe of knobs) is the seam. The change goes to runforge by pull request, with its tests carried over. |
-| D3 | ΔTc in 3.0 has a 3-step floor (PR #1). The 2.0 inference comparer fires on any nonzero difference; the 3-step floor came from 2.0's geometry path. | Keep the floor for now and correct the changelog line. Phase 2 replaces it with an interval rule: ΔTc fires only when the two steady-state intervals do not overlap (findings W1–W3). |
-| D4 | Which local model drives the sidecar. | Use the tool-capable model RunForge uses. Pin it per session and record it in the session file. |
+| D1 | Port the ASPIRE geometry half: training-dynamics JSON, trajectories, eigen spectrum, evaluator alignment, failures. | **Yes, with `aspire-ai` as its source** (`prototypes/packages/aspire-ai`). The exporter that 2.0 documents (`aspire.export.geometry_export` in `aspire-engine`) no longer exists, and `aspire-ai` records only per-epoch losses and teacher scores. Phase 4 therefore has two parts. First, a geometry exporter in `aspire-ai` writes the 2.0 `GeometryRun` format. Second, ScalarScope imports it and draws static views, with playback optional (V7). |
+| D2 | Share RunForge's workbench code through a new crate instead of copying it. | **Yes.** The formula language, hypotheses, e-value evidence and Ollama loop move to a shared crate behind a small `Run` interface (named sample series plus a recipe of knobs). The change goes to runforge by pull request, with its tests carried over. |
+| D3 | ΔTc in 3.0 has a 3-step floor (PR #1). The 2.0 inference comparer fires on any nonzero difference; the floor came from 2.0's geometry path. | **Keep the floor until phase 2**, then replace it with the interval rule in S5: ΔTc fires only when the two milestone ranges do not overlap (W1–W3). |
+| D4 | Which local model drives the sidecar. | **The tool-capable model RunForge uses,** pinned per session and recorded in the session file. |
 
 ## Research grounding
 
@@ -175,10 +175,11 @@ It works like RunForge's (`docs/sidecar-workbench.md` in runforge), on the share
 | 1. Inputs | RunTrace read and validate, fingerprints, `.gz`, memory/CPU/GPU, `.log`, folders, guardrails, TFRT preset shown | The three 2.0 oracles pass in Rust: the golden pair, nearly identical and broken |
 | 2. Statistics | S1–S6, the interval ΔTc, wall-clock alignment, the difference/spectrum/threshold/strip/heat-map/segment views | Tests for each statistic against hand-computed values. The golden pair keeps its 2.0 verdicts, or the spec records why one changes |
 | 3. Product shell | Delta tiles and Why, Welcome with a sample, Guide, Settings with Light/Dark/System and accessibility, shortcuts, review mode, PNG/SVG export, bundle compatibility in both directions | A 2.0 user's files, bundles and preferences open. The Store QA items in `STORE_LISTING.md` pass |
-| 4. Geometry (D1) | Geometry import and deltas with 2.0 defaults, static trajectory/eigen/evaluator/failure views, optional playback, frame export | The 2.0 geometry tests pass in Rust. The demo pair renders |
+| 4a. Geometry exporter (D1) | In `aspire-ai`, record per step the student's pooled hidden state and each teacher dimension's score, then write the 2.0 `GeometryRun` export: a 2-D projection fitted over the run, velocity, curvature, effective dimension, eigen spectrum, evaluators and failures | A short training run writes an export that ScalarScope 2.0 opens. Its fields match the two 2.0 samples (`Resources/Raw/Samples/*_professors.json`) |
+| 4b. Geometry views (D1) | Geometry import and deltas with 2.0 defaults, static trajectory/eigen/evaluator/failure views, optional playback, frame export | The 2.0 geometry tests pass in Rust. The demo pair and an export from 4a render |
 | 5. Workbench and history | The shared crate (D2), knobs, measures, hypotheses, evidence, envelope, history change points | The RunForge workbench tests pass on the shared crate. A live session on the golden folders ends with program-set states |
 
-Store submission follows phase 3 if D1 says geometry can wait, otherwise phase 4. WACK, the listing, screenshots, samples for testers and certification notes come then, as they did for RunForge.
+Store submission follows phase 4b (D1). WACK, the listing, screenshots, samples for testers and certification notes come then, as they did for RunForge.
 
 ## Corrections
 
