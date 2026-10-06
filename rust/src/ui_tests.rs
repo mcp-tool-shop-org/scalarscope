@@ -40,6 +40,7 @@ fn blank(history: Option<PathBuf>) -> ScalarScopeApp {
         built: None,
         saved_hash: None,
         page: super::Page::Compare,
+        guide_query: String::new(),
         settings: prefs::ReviewPrefs::default(),
         history_dir: history,
         recent: Vec::new(),
@@ -241,6 +242,31 @@ fn the_anomaly_setting_reaches_the_review_and_rebuilds_it() {
     assert_ne!(mad.0, sigma.0);
     let Ok(crate::review::Pair::Inference(review)) = sigma.1 else { panic!("inference") };
     assert!(review.caption.contains("3 population standard deviations"), "{}", review.caption);
+}
+
+#[test]
+fn welcome_loads_the_sample_and_guide_search_filters() {
+    let mut app = blank(None);
+    app.page = super::Page::Welcome;
+    show(&mut app);
+    app.load_sample();
+    assert_eq!(app.page, super::Page::Compare);
+    show(&mut app);
+    let Some((_, Ok(crate::review::Pair::Inference(review)))) = app.built.clone() else { panic!("the sample builds: {}", app.note) };
+    assert!(review.headline.starts_with("B/A p50 0.6"), "{}", review.headline);
+    assert_eq!(super::pages::search("").len(), super::pages::GUIDE.len());
+    assert!(super::pages::search("ΔTc").iter().any(|section| section.title.starts_with("ΔTc")));
+    assert!(super::pages::search("zzz-not-there").is_empty());
+    app.page = super::Page::Guide;
+    app.guide_query = "bundle".to_string();
+    show(&mut app);
+}
+
+#[test]
+fn number_keys_choose_views() {
+    assert_eq!(super::pages::view_for_key(egui::Key::Num2), Some(super::View::Warmup));
+    assert_eq!(super::pages::view_for_key(egui::Key::Num6), Some(super::View::HeatMap));
+    assert_eq!(super::pages::view_for_key(egui::Key::A), None);
 }
 
 #[test]

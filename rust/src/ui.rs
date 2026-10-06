@@ -16,7 +16,9 @@ use crate::views;
 /// The app's pages, as 2.0's tabs.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Page {
+    Welcome,
     Compare,
+    Guide,
     Settings,
 }
 
@@ -145,6 +147,8 @@ pub struct ScalarScopeApp {
     /// The hash of the bundle saved last, for "Copy hash".
     saved_hash: Option<String>,
     page: Page,
+    /// The Guide's search text.
+    guide_query: String,
     /// What the Settings page edits, under 2.0's `preferences.json` keys.
     settings: prefs::ReviewPrefs,
     /// Set only when this process is the Store package. An unpackaged run leaves LocalState alone.
@@ -177,7 +181,8 @@ impl Default for ScalarScopeApp {
             highlight: None,
             built: None,
             saved_hash: None,
-            page: Page::Compare,
+            page: Page::Welcome,
+            guide_query: String::new(),
             settings: saved.clone(),
             history_dir,
             recent,
@@ -207,15 +212,21 @@ impl ScalarScopeApp {
     fn page(&mut self, ui: &mut egui::Ui) {
         ui.ctx().set_zoom_factor(self.text_scale);
         self.apply_theme(ui.ctx());
+        self.handle_shortcuts(ui.ctx());
         let paint = self.paint;
         ui.horizontal(|ui| {
             ui.heading(RichText::new("ScalarScope").color(paint.mark));
+            ui.selectable_value(&mut self.page, Page::Welcome, "Welcome");
             ui.selectable_value(&mut self.page, Page::Compare, "Compare");
+            ui.selectable_value(&mut self.page, Page::Guide, "Guide");
             ui.selectable_value(&mut self.page, Page::Settings, "Settings");
         });
         ui.add_space(4.0);
-        if self.page == Page::Settings {
-            return self.draw_settings(ui);
+        match self.page {
+            Page::Settings => return self.draw_settings(ui),
+            Page::Welcome => return self.draw_welcome(ui),
+            Page::Guide => return self.draw_guide(ui),
+            Page::Compare => {}
         }
         let reviewing = self.opened.is_some();
         ui.horizontal(|ui| {
@@ -311,7 +322,6 @@ impl ScalarScopeApp {
                 }
             }
         }
-        self.draw_recent(ui);
     }
 }
 
@@ -323,6 +333,7 @@ impl ScalarScopeApp {
         };
         self.built = None;
         self.highlight = None;
+        self.page = Page::Compare;
         match open_paths(&paths) {
             Ok(loaded) => {
                 self.opened = None;
@@ -560,9 +571,8 @@ impl ScalarScopeApp {
             let mut visuals = if light { egui::Visuals::light() } else { egui::Visuals::dark() };
             visuals.panel_fill = paint.background;
             visuals.window_fill = paint.background;
-            if !light {
-                visuals.extreme_bg_color = paint.background;
-            }
+            // Text fields and plot backgrounds sit a shade deeper than the page, so a field is visible.
+            visuals.extreme_bg_color = if light { egui::Color32::WHITE } else { paint.background.gamma_multiply(0.6) };
             ctx.set_visuals_of(theme, visuals);
         }
         self.paint = Paint::themed(palette, ctx.theme() == egui::Theme::Light);
@@ -1150,6 +1160,8 @@ impl ScalarScopeApp {
     }
 
     fn reopen(&mut self, entry: &LogEntry) {
+        // A recent review is a whole comparison, so it opens on Compare.
+        self.page = Page::Compare;
         if let Some(path) = entry.bundle_path.as_deref().filter(|path| !path.trim().is_empty()) {
             match bundle::open_file(Path::new(path)) {
                 Ok(opened) => {
@@ -1261,6 +1273,9 @@ pub fn install_style(cc: &eframe::CreationContext<'_>) {
     visuals.window_fill = Color32::from_rgb(0x12, 0x12, 0x1f);
     cc.egui_ctx.set_visuals(visuals);
 }
+
+#[path = "ui_pages.rs"]
+mod pages;
 
 #[cfg(test)]
 #[path = "ui_tests.rs"]

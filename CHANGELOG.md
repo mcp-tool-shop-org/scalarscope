@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.0.0] - 2026-10-03
 
 ### Added
+- The app opens on a Welcome tab, as 2.0 did. It offers Compare two runs, Try the sample comparison (two synthetic runs built into the app), and Open a review bundle, with four cards on what the review gives and the recent reviews. A Guide tab explains, with search: reading a comparison, the headline, each delta, why ΔTd and ΔĀ are not on the inference page, run shapes, the views, several runs, bundles, inputs and shortcuts.
+- Keyboard shortcuts: F1 opens the Guide, Ctrl+, Settings, Ctrl+H Welcome; on Compare, 1 to 6 choose the view, and Esc closes the Why panel.
+- Text fields and plot backgrounds sit a shade deeper than the page, so a text field is visible on the dark theme.
 - A Settings tab, written to the 2.0 `preferences.json` keys so a 2.0 user's choices carry over, with every other key kept: theme (Follow Windows, Light or Dark, 2.0's `Theme`), series colors for color-vision modes, high contrast, text scale, the recent-files limit and Clear recent files. It also has the anomaly rule: the MAD rule, or the 2.0 3-sigma rule as a choice (`AnomalyRule`, new in 3.0). The review's caption names the rule, so a stored review says which one made it. An About section gives the version, the privacy statement, and links to report an issue, the privacy policy and the source.
 - A Light theme. The page, the text and the default series colors change together. 3.0 was dark only, and the window background stayed near-black whatever the theme until the app set its own clear color.
 - A tile for each delta (ΔF, ΔTc, ΔO) says whether it fired, stayed quiet or was withheld. A tile opens a "Why" panel with the rule, this pair's numbers, and the parameters, plus Copy finding and Show me. Show me moves to the view the delta is about and shades the stretch. The tiles are stored in the bundle with run labels scrubbed, like the verdict.
