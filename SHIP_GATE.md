@@ -61,7 +61,7 @@
 
 - [x] `[all]` Logo in the README header, from the brand repo, 1024×1024 (2026-10-06)
 - [x] `[all]` Translations (polyglot-mcp, 8 languages) — local TranslateGemma 27B, concurrency 1, 7/7 succeeded on 2026-10-06. Japanese is Japanese.
-- [ ] `[org]` Landing page (@mcptoolshop/site-theme)
+- [x] `[org]` Landing page (@mcptoolshop/site-theme) — live at https://mcp-tool-shop-org.github.io/scalarscope/ on 2026-10-06. Handbook and pagefind returned 200. The hero says the Rust review, and the Store copy is still the previous .NET package.
 - [x] `[all]` GitHub repo metadata: description, homepage, topics (2026-10-06). Description names the Rust review and the previous Store package. Homepage is the Pages URL. Topics are rust, windows, machine-learning, and inference.
 
 ---

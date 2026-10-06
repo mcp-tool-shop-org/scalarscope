@@ -33,12 +33,14 @@ Measured 2026-10-06. The fifteen feature-audit highs stay open. This treatment d
 | B. Error Handling | 4/10 | Unchanged. The window shows a sentence. It does not carry hint, cause, and retryable. |
 | C. Operator Docs | 8/10 | README, CHANGELOG, LICENSE, and the seven handbook pages. The handbook was not re-scaffolded. |
 | D. Shipping Hygiene | 6/10 | `verify.sh` is the product check. No tag. The MSIX is not installed. The site npm tree reported 18 vulnerabilities and was not force-fixed. |
-| E. Identity (soft) | 8/10 | Logo, coverage badge at 96%, GitHub metadata, and seven regenerated translations. The landing page is built locally. It is not live until Pages deploys this commit. |
-| **Overall** | **34/50** | |
+| E. Identity (soft) | 9/10 | Logo, coverage badge at 96%, GitHub metadata, seven translations, and a live landing page. The handbook's dark palette finding stays open. |
+| **Overall** | **35/50** | |
 
 Translations: TranslateGemma 27B, concurrency 1, 7/7 succeeded in 388.6s. Japanese has CJK text and a translated trust-model section. `README.pt.md` was not left behind.
 
-`shipcheck audit` on 2026-10-06, after translations and metadata: Checked 12, Unchecked 1, Skipped 24. The unchecked line is the live landing page.
+`shipcheck audit` before the live check: Checked 12, Unchecked 1, Skipped 24. After the landing line was checked against the live site: Checked 13, Unchecked 0, Skipped 24. The landing page is live. Re-fetched HTML for `/`, `/handbook/`, `/handbook/rust-review/`, and `pagefind/pagefind.js` all returned 200. The hero contains "Rust review" and "previous .NET package". ASPIRE is not in that hero. The published Japanese README contains the trust-model heading and the content-check sentence. Identity scan of those fetched pages was CLEAN.
+
+CI on `c560ed6` was green: Build and Test, Coverage, and Deploy site to GitHub Pages.
 
 `shipcheck security-docs` passed. Identity scan of the tree before translations was CLEAN.
 
