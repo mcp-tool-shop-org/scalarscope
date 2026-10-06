@@ -219,6 +219,18 @@ enum Tc {
     Quiet,
 }
 
+/// A difference in steady-state step below this is noise in the milestone, not a timing
+/// change. The .NET app used the same floor (`ResolutionSteps = 3`).
+pub const TC_RESOLUTION_STEPS: i64 = 3;
+
+fn steps_text(count: i64) -> String {
+    if count == 1 {
+        "1 step".to_string()
+    } else {
+        format!("{count} steps")
+    }
+}
+
 fn delta_tc(left: &InferenceRun, right: &InferenceRun) -> Tc {
     let both = left.steady_step.is_some() && right.steady_step.is_some();
     let left_step = left.steady_step.unwrap_or_else(|| last_step(left));
@@ -232,10 +244,13 @@ fn delta_tc(left: &InferenceRun, right: &InferenceRun) -> Tc {
             "ΔTc is withheld. A steady-state milestone is missing, so the last step is not a stabilization time.".to_string(),
         );
     }
+    if difference.abs() < TC_RESOLUTION_STEPS {
+        return Tc::Quiet;
+    }
     let text = if difference < 0 {
-        format!("Stabilizes {} steps earlier", difference.abs())
+        format!("Stabilizes {} earlier", steps_text(difference.abs()))
     } else {
-        format!("Stabilizes {difference} steps later")
+        format!("Stabilizes {} later", steps_text(difference))
     };
     Tc::Fired {
         text,

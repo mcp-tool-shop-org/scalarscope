@@ -498,3 +498,16 @@ fn mark_points_skip_an_index_the_series_does_not_have() {
     assert_eq!(super::plain_points(&[2.0]), vec![[0.0, 2.0]]);
     assert_eq!(super::cdf_points(&[(3.0, 1.0)]), vec![[3.0, 1.0]]);
 }
+
+#[test]
+fn the_band_is_one_convex_trapezoid_per_step() {
+    let band: Vec<Option<Band>> = (0..6).map(|step| Some(Band { low: step as f64, high: step as f64 + 2.0 + (step % 2) as f64 })).collect();
+    let polygons = super::band_polygons(&band);
+    assert_eq!(polygons.len(), 5);
+    for (index, polygon) in polygons.iter().enumerate() {
+        let x = index as f64;
+        assert_eq!(polygon.len(), 4);
+        assert_eq!([polygon[0][0], polygon[1][0], polygon[2][0], polygon[3][0]], [x, x + 1.0, x + 1.0, x]);
+        assert!(polygon[0][1] <= polygon[3][1] && polygon[1][1] <= polygon[2][1]);
+    }
+}

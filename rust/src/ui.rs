@@ -144,10 +144,14 @@ impl eframe::App for ScalarScopeApp {
             }
         });
         ui.add_space(6.0);
+        let (left_name, right_name) = match self.opened.as_ref().and_then(|opened| stored_names(&opened.review)) {
+            Some(names) => names,
+            None => (side_name(&self.left, "Path A"), side_name(&self.right, "Path B")),
+        };
         ui.horizontal(|ui| {
-            ui.label(RichText::new(side_name(&self.left, "Path A")).color(paint.left));
+            ui.label(RichText::new(left_name).color(paint.left));
             ui.label("vs");
-            ui.label(RichText::new(side_name(&self.right, "Path B")).color(paint.right));
+            ui.label(RichText::new(right_name).color(paint.right));
         });
         if let Some(label) = paint.label {
             ui.label(RichText::new(format!("Series colors follow the saved {label} palette.")).color(paint.note));
@@ -316,9 +320,9 @@ impl ScalarScopeApp {
                     plot.line(series_line("B distribution", paint.right, cdf_points(&review.right_cdf)));
                 } else {
                     for (name, color, band) in [("A spread", paint.left, &review.left_band), ("B spread", paint.right, &review.right_band)] {
-                        for (index, polygon) in band_polygons(band).into_iter().enumerate() {
-                            let fill = Color32::from_rgba_unmultiplied(color.r(), color.g(), color.b(), 72);
-                            plot.polygon(Polygon::new(format!("{name} {index}"), PlotPoints::new(polygon)).fill_color(fill).width(0.0));
+                        let fill = Color32::from_rgba_unmultiplied(color.r(), color.g(), color.b(), 72);
+                        for polygon in band_polygons(band) {
+                            plot.polygon(Polygon::new(name, PlotPoints::new(polygon)).fill_color(fill).stroke(egui::Stroke::new(0.0, color)));
                         }
                     }
                     plot.line(series_line("A", paint.left, value_points(&review.left)));
@@ -392,38 +396,19 @@ fn mark_points(name: &str, values: &[Option<f64>], marks: &[usize], color: Color
     Points::new(name, PlotPoints::new(points)).color(color).radius(4.0)
 }
 
+/// The band as one trapezoid per pair of neighbouring steps that both have a band.
+/// A trapezoid is convex, so the plot fills it exactly; a gap in the band leaves a gap.
 fn band_polygons(band: &[Option<Band>]) -> Vec<Vec<[f64; 2]>> {
-    let mut polygons = Vec::new();
-    let mut start = None;
-    for (index, point) in band.iter().enumerate() {
-        if point.is_some() && start.is_none() {
-            start = Some(index);
-        }
-        let ended = point.is_none() || index + 1 == band.len();
-        if ended {
-            if let Some(from) = start.take() {
-                let to = if point.is_some() { index } else { index - 1 };
-                if to > from {
-                    let mut polygon = Vec::new();
-                    for cursor in from..=to {
-                        if let Some(sample) = band[cursor] {
-                            polygon.push([cursor as f64, sample.low]);
-                        }
-                    }
-                    for cursor in (from..=to).rev() {
-                        if let Some(sample) = band[cursor] {
-                            polygon.push([cursor as f64, sample.high]);
-                        }
-                    }
-                    polygons.push(polygon);
-                }
-            }
-        }
-        if point.is_none() {
-            start = None;
-        }
-    }
-    polygons
+    band.windows(2)
+        .enumerate()
+        .filter_map(|(index, pair)| {
+            let (Some(here), Some(next)) = (pair[0], pair[1]) else {
+                return None;
+            };
+            let (x, x_next) = (index as f64, (index + 1) as f64);
+            Some(vec![[x, here.low], [x_next, next.low], [x_next, next.high], [x, here.high]])
+        })
+        .collect()
 }
 
 impl ScalarScopeApp {
@@ -685,6 +670,14 @@ impl Paint {
 fn hex_color(hex: &str) -> Color32 {
     let number = u32::from_str_radix(hex, 16).unwrap_or(0);
     Color32::from_rgb((number >> 16) as u8, (number >> 8) as u8, number as u8)
+}
+
+/// The run names a stored review was saved with.
+fn stored_names(review: &bundle::StoredReview) -> Option<(String, String)> {
+    match bundle::stored_pair(review)? {
+        Pair::Inference(review) => Some((review.left_label, review.right_label)),
+        Pair::Training(review) => Some((review.left.run_id, review.right.run_id)),
+    }
 }
 
 fn side_name(loaded: &Option<Loaded>, empty: &str) -> String {
