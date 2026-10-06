@@ -336,7 +336,7 @@ fn with_repeats(first: Side, more: Vec<Side>) -> Side {
         .into_iter()
         .map(|side| match side {
             Side::Inference(run) => run,
-            Side::Training(_) => panic!("inference"),
+            _ => panic!("inference"),
         })
         .collect();
     Side::Inference(run)

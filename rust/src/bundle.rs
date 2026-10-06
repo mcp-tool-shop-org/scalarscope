@@ -55,6 +55,15 @@ pub struct StoredReview {
     /// The delta tiles. Left out when empty.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub explanations: Vec<crate::review::Explanation>,
+    /// Both geometry exports, for a geometry review. Left out otherwise.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub geometry: Option<StoredGeometry>,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, serde::Deserialize)]
+pub struct StoredGeometry {
+    pub left: crate::geometry::GeometryRun,
+    pub right: crate::geometry::GeometryRun,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, serde::Deserialize)]
@@ -169,6 +178,7 @@ pub fn document_from_pair(pair: &Pair) -> BundleDocument {
     let review = match pair {
         Pair::Inference(review) => inference_review(review),
         Pair::Training(review) => training_review(review),
+        Pair::Geometry(review) => geometry_document(review),
     };
     BundleDocument { review }
 }
@@ -476,6 +486,7 @@ fn dotnet_review(entries: &[(String, Vec<u8>)]) -> Option<Result<OpenedBundle, S
     let stated = text(&value, "bundleHash");
     let review = StoredReview {
         kind: "dotnet-review".to_string(),
+        geometry: None,
         verdict: if sentences.is_empty() { "No delta fired in this 2.0 review.".to_string() } else { sentences.join(" ") },
         fired,
         caption: "A 2.0 inference review. It stores the deltas, not the samples, so there is no chart, and 2.0 wrote no integrity.json, so its bytes cannot be checked. Open the two runs to review them in 3.0.".to_string(),
@@ -556,6 +567,16 @@ pub fn stored_pair(review: &StoredReview) -> Option<Pair> {
                 notices: review.notices.clone(),
                 headline: review.headline.clone(),
                 explanations: review.explanations.clone(),
+            }))
+        }
+        "geometry" => {
+            let stored = review.geometry.as_ref()?;
+            Some(Pair::Geometry(crate::review::GeometryReview {
+                left_label: review.left_text.clone(),
+                right_label: review.right_text.clone(),
+                left: stored.left.clone(),
+                right: stored.right.clone(),
+                warnings: review.notices.clone(),
             }))
         }
         "training" => {
@@ -645,6 +666,7 @@ fn inference_review(review: &InferenceReview) -> StoredReview {
     let labels = [review.left_label.as_str(), review.right_label.as_str()];
     StoredReview {
         kind: "inference".to_string(),
+        geometry: None,
         notices: review.notices.iter().map(|line| scrub(line, &labels)).collect(),
         headline: review.headline.clone(),
         // A tile's text can name the runs, and a run's label can carry a folder.
@@ -707,6 +729,24 @@ fn inference_review(review: &InferenceReview) -> StoredReview {
     }
 }
 
+fn geometry_document(review: &crate::review::GeometryReview) -> StoredReview {
+    StoredReview {
+        kind: "geometry".to_string(),
+        verdict: String::new(),
+        fired: Vec::new(),
+        caption: "Two ASPIRE training-dynamics runs, stored in full so the review redraws exactly.".to_string(),
+        left_text: review.left_label.clone(),
+        right_text: review.right_label.clone(),
+        findings: Vec::new(),
+        inference: None,
+        training: None,
+        notices: review.warnings.clone(),
+        headline: String::new(),
+        explanations: Vec::new(),
+        geometry: Some(StoredGeometry { left: review.left.clone(), right: review.right.clone() }),
+    }
+}
+
 fn training_review(review: &TrainingReview) -> StoredReview {
     let labels = [review.left.run_id.as_str(), review.right.run_id.as_str()];
     StoredReview {
@@ -714,6 +754,7 @@ fn training_review(review: &TrainingReview) -> StoredReview {
         notices: Vec::new(),
         headline: String::new(),
         explanations: Vec::new(),
+        geometry: None,
         verdict: String::new(),
         fired: Vec::new(),
         caption: scrub(&review.caption, &labels),
@@ -806,6 +847,7 @@ fn findings_only(entries: &[(String, Vec<u8>)]) -> Result<StoredReview, String> 
     };
     Ok(StoredReview {
         kind: "findings".to_string(),
+        geometry: None,
         notices: Vec::new(),
         headline: String::new(),
         explanations,

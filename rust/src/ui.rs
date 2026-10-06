@@ -7,7 +7,7 @@ use egui_plot::{HLine, Line, LineStyle, Plot, PlotPoints, Points, Polygon, VLine
 
 use crate::bundle::{self, OpenedBundle};
 use crate::history::{self, LogEntry};
-use crate::open::{open_path, open_paths, Loaded, Side};
+use crate::open::{open_path, open_paths, Loaded};
 use crate::prefs::{self, SavedView};
 use crate::readings::Band;
 use crate::review::{self, InferenceReview, Pair, TrainingReview};
@@ -177,6 +177,8 @@ pub struct ScalarScopeApp {
     settings: prefs::ReviewPrefs,
     /// Where the screenshot asked for by "Export PNG" goes when it arrives.
     pending_png: Option<std::path::PathBuf>,
+    /// The time the geometry page's marker is at; the end of the runs until moved.
+    scrub: Option<f64>,
     /// Set only when this process is the Store package. An unpackaged run leaves LocalState alone.
     history_dir: Option<std::path::PathBuf>,
     recent: Vec<LogEntry>,
@@ -211,6 +213,7 @@ impl Default for ScalarScopeApp {
             guide_query: String::new(),
             settings: saved.clone(),
             pending_png: None,
+            scrub: None,
             history_dir,
             recent,
             files: saved.recent,
@@ -339,6 +342,7 @@ impl ScalarScopeApp {
             match bundle::stored_pair(&opened.review) {
                 Some(Pair::Inference(review)) => self.draw_inference(ui, &review),
                 Some(Pair::Training(review)) => draw_training(ui, &review, paint),
+                Some(Pair::Geometry(review)) => self.draw_geometry(ui, &review),
                 None => {
                     if !opened.review.left_text.is_empty() || !opened.review.right_text.is_empty() {
                         ui.label(RichText::new(format!("{} vs {}", opened.review.left_text, opened.review.right_text)).color(paint.note));
@@ -357,6 +361,7 @@ impl ScalarScopeApp {
             match built {
                 Some(Pair::Inference(review)) => self.draw_inference(ui, &review),
                 Some(Pair::Training(review)) => draw_training(ui, &review, paint),
+                Some(Pair::Geometry(review)) => self.draw_geometry(ui, &review),
                 None => {
                     ui.label(
                         RichText::new("Open two inference traces, or two backpropagate run histories. Or open a .scbundle.")
@@ -1088,6 +1093,14 @@ impl ScalarScopeApp {
                 None,
                 None,
             ),
+            Pair::Geometry(review) => (
+                "geometry".to_string(),
+                Vec::new(),
+                review.left_label.clone(),
+                review.right_label.clone(),
+                Some(review.left.metadata.run_id.clone()),
+                Some(review.right.metadata.run_id.clone()),
+            ),
             Pair::Training(review) => (
                 "loss".to_string(),
                 Vec::new(),
@@ -1229,10 +1242,7 @@ impl ScalarScopeApp {
         match open_path(Path::new(path)) {
             Ok(loaded) => {
                 self.opened = None;
-                let name = match &loaded.side {
-                    Side::Inference(run) => run.label.clone(),
-                    Side::Training(entry) => entry.run_id.clone(),
-                };
+                let name = loaded.side.name();
                 let slot = if self.left.is_none() { "A" } else { "B" };
                 let preferences_note = if self.remember_opened_file(&loaded) {
                     None
@@ -1258,10 +1268,7 @@ impl ScalarScopeApp {
         let Some(dir) = self.history_dir.clone() else {
             return true;
         };
-        let name = match &loaded.side {
-            Side::Inference(run) => run.label.clone(),
-            Side::Training(entry) => entry.run_id.clone(),
-        };
+        let name = loaded.side.name();
         match prefs::remember_file(&dir, &loaded.path, &name) {
             Ok(()) => {
                 self.files = prefs::read(&dir).recent;
@@ -1369,6 +1376,7 @@ fn stored_names(review: &bundle::StoredReview) -> Option<(String, String)> {
     match bundle::stored_pair(review)? {
         Pair::Inference(review) => Some((review.left_label, review.right_label)),
         Pair::Training(review) => Some((review.left.run_id, review.right.run_id)),
+        Pair::Geometry(review) => Some((review.left_label, review.right_label)),
     }
 }
 
@@ -1376,10 +1384,7 @@ fn side_name(loaded: &Option<Loaded>, empty: &str) -> String {
     let Some(loaded) = loaded else {
         return empty.to_string();
     };
-    match &loaded.side {
-        Side::Inference(run) => run.label.clone(),
-        Side::Training(entry) => entry.run_id.clone(),
-    }
+    loaded.side.name()
 }
 
 pub fn install_style(cc: &eframe::CreationContext<'_>) {
@@ -1391,6 +1396,9 @@ pub fn install_style(cc: &eframe::CreationContext<'_>) {
 
 #[path = "ui_pages.rs"]
 mod pages;
+
+#[path = "ui_geometry.rs"]
+mod geometry_views;
 
 #[cfg(test)]
 #[path = "ui_tests.rs"]

@@ -33,7 +33,7 @@ fn trace_json() -> String {
 fn inference(side: Side) -> scalarscope::open::InferenceRun {
     match side {
         Side::Inference(run) => run,
-        Side::Training(_) => panic!("inference"),
+        _ => panic!("inference"),
     }
 }
 

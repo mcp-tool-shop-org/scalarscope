@@ -128,6 +128,18 @@ pub struct TrainingReview {
 pub enum Pair {
     Inference(InferenceReview),
     Training(TrainingReview),
+    Geometry(GeometryReview),
+}
+
+/// Two ASPIRE training-dynamics runs side by side.
+#[derive(Clone, Debug, PartialEq)]
+pub struct GeometryReview {
+    pub left_label: String,
+    pub right_label: String,
+    pub left: crate::geometry::GeometryRun,
+    pub right: crate::geometry::GeometryRun,
+    /// Warnings from reading either file, each naming its run.
+    pub warnings: Vec<String>,
 }
 
 /// Choices that change how a review reads its samples. Recorded in the caption, so a stored
@@ -148,8 +160,9 @@ pub fn pair_with(left: &Side, right: &Side, options: Options) -> Result<Pair, St
             Ok(Pair::Inference(inference(left, right, options.anomaly)))
         }
         (Side::Training(left), Side::Training(right)) => Ok(Pair::Training(training(left, right))),
+        (Side::Geometry(left), Side::Geometry(right)) => Ok(Pair::Geometry(geometry_review(left, right))),
         _ => Err(
-            "One side is a training history and the other is an inference trace. Load two of the same kind."
+            "The two sides are different kinds (an inference trace, a training history, or a geometry export). Load two of the same kind."
                 .to_string(),
         ),
     }
@@ -727,6 +740,23 @@ fn index_of_step(run: &InferenceRun, step: Option<i64>) -> usize {
     step.map_or(0, |step| run.steps.iter().position(|value| *value >= step).unwrap_or(run.steps.len()))
 }
 
+
+fn geometry_review(left: &crate::open::GeometrySide, right: &crate::open::GeometrySide) -> GeometryReview {
+    let (left_label, right_label) = (left.run.name(), right.run.name());
+    let warnings = left
+        .warnings
+        .iter()
+        .map(|warning| format!("{left_label}: {warning}"))
+        .chain(right.warnings.iter().map(|warning| format!("{right_label}: {warning}")))
+        .collect();
+    GeometryReview {
+        left_label,
+        right_label,
+        left: left.run.clone(),
+        right: right.run.clone(),
+        warnings,
+    }
+}
 
 fn training(left: &TrainingEntry, right: &TrainingEntry) -> TrainingReview {
     let caption = "Training loss, stored samples. Backpropagate keeps at most 100 points by uniform index sampling before it writes the file. final_loss is a separate number and is not appended to this curve. This is not an inference review, so ΔTc, ΔO, ΔF, ΔĀ, and ΔTd are not computed.".to_string();

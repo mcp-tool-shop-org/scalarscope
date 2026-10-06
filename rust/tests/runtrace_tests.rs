@@ -23,7 +23,7 @@ fn json(name: &str) -> Value {
 fn run(name: &str) -> InferenceRun {
     match open_text(&fixture(name), name).unwrap() {
         Side::Inference(run) => run,
-        Side::Training(_) => panic!("{name} opened as a training history"),
+        other => panic!("{name} opened as {}", other.name()),
     }
 }
 
