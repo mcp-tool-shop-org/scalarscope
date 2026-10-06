@@ -9,7 +9,7 @@
          
          Profiles:
          - Share: Minimal (deltas + why + summary + repro)
-         - Review: Share + key assets (screenshots, cards)
+         - Review: Share + assets/export-info.txt
          - Audit: Review + embedded audit bundle
     -->
     

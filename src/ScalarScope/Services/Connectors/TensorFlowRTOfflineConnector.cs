@@ -181,6 +181,9 @@ public sealed partial class TensorFlowRTOfflineConnector : IRunConnector
     /// </summary>
     public async Task<RuntimeRunTrace> ImportRuntimeAsync(string source, CancellationToken ct = default)
     {
+        if (File.Exists(source) && LooksLikeStoredRunTrace(source))
+            return await ReadStoredRunTraceAsync(source, ct);
+
         var detectedSources = await DetectSourcesAsync(source, ct);
         if (detectedSources.Count == 0)
         {
@@ -385,6 +388,294 @@ public sealed partial class TensorFlowRTOfflineConnector : IRunConnector
         return parts.Count == 0 ? null : string.Join(";", parts);
     }
     
+    /// <summary>
+    /// A stored run trace carries schemaVersion and scalars.series.
+    /// A profiler trace and a geometry file stay on their own paths.
+    /// </summary>
+    private static bool LooksLikeStoredRunTrace(string path)
+    {
+        if (!path.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        try
+        {
+            using var stream = File.OpenRead(path);
+            using var document = JsonDocument.Parse(stream);
+            var root = document.RootElement;
+            if (root.ValueKind != JsonValueKind.Object)
+                return false;
+            if (root.TryGetProperty("traceEvents", out _))
+                return false;
+            if (root.TryGetProperty("trajectory", out _))
+                return false;
+            if (!root.TryGetProperty("schemaVersion", out var version) || version.ValueKind != JsonValueKind.String)
+                return false;
+            return root.TryGetProperty("scalars", out var scalars)
+                && scalars.ValueKind == JsonValueKind.Object
+                && scalars.TryGetProperty("series", out var series)
+                && series.ValueKind == JsonValueKind.Array;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Read the latency series and the milestones the file already stores.
+    /// The steady-state detector is not asked to invent a second set.
+    /// </summary>
+    private async Task<RuntimeRunTrace> ReadStoredRunTraceAsync(string path, CancellationToken ct)
+    {
+        await using var stream = File.OpenRead(path);
+        using var document = await JsonDocument.ParseAsync(stream, cancellationToken: ct);
+        var root = document.RootElement;
+
+        var runTypeText = JsonString(root, "runType") ?? "inference";
+        if (runTypeText.Equals("training", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException(
+                $"[{TfrtErrorCodes.TFRT_NO_SUPPORTED_EXPORT}] A training history is not an inference trace.");
+        }
+
+        var series = ReadStoredSeries(root);
+        var latency = series.FirstOrDefault(item =>
+            item.Name.Equals("latency_ms", StringComparison.OrdinalIgnoreCase)
+            || item.Name.Equals("latency", StringComparison.OrdinalIgnoreCase));
+        if (latency == null || !latency.Values.Any(value => value.HasValue))
+        {
+            throw new InvalidOperationException(
+                $"[{TfrtErrorCodes.TFRT_NO_LATENCY_SIGNAL}] The run trace has no latency series.");
+        }
+
+        var count = latency.Values.Count;
+        var milestones = ReadStoredMilestones(root);
+        var metadataElement = root.TryGetProperty("metadata", out var metadataNode) ? metadataNode : default;
+        var wall = ReadNumberList(root, "timeline", "wallTimeSeconds");
+
+        return new RuntimeRunTrace
+        {
+            SchemaVersion = JsonString(root, "schemaVersion") ?? RuntimeRunTrace.CurrentSchemaVersion,
+            RunId = JsonString(root, "runId") ?? Path.GetFileNameWithoutExtension(path),
+            RunType = runTypeText.Equals("evaluation", StringComparison.OrdinalIgnoreCase)
+                ? RunType.Evaluation
+                : RunType.Inference,
+            Framework = ParseStoredFramework(JsonString(root, "framework")),
+            CreatedUtc = root.TryGetProperty("createdUtc", out var created) && created.TryGetDateTimeOffset(out var stamp)
+                ? stamp
+                : DateTimeOffset.UnixEpoch,
+            Label = JsonString(root, "label"),
+            Metadata = new RuntimeMetadata
+            {
+                ModelFingerprint = JsonString(metadataElement, "modelFingerprint") ?? RuntimeMetadata.AbsentFingerprint,
+                DatasetFingerprint = JsonString(metadataElement, "datasetFingerprint") ?? RuntimeMetadata.AbsentFingerprint,
+                CodeFingerprint = JsonString(metadataElement, "codeFingerprint") ?? RuntimeMetadata.AbsentFingerprint,
+                EnvironmentFingerprint = JsonString(metadataElement, "environmentFingerprint") ?? RuntimeMetadata.AbsentFingerprint,
+                Seed = metadataElement.ValueKind == JsonValueKind.Object
+                    && metadataElement.TryGetProperty("seed", out var seed) && seed.TryGetInt32(out var seedValue)
+                    ? seedValue
+                    : null,
+                Notes = JsonString(metadataElement, "notes")
+            },
+            Timeline = new RuntimeTimeline
+            {
+                Steps = ReadStepList(root, count),
+                WallTimeSeconds = wall.Count == count ? wall : null
+            },
+            Scalars = new RuntimeScalars { Series = series },
+            Milestones = milestones,
+            Capabilities = ReadStoredCapabilities(root, series),
+            Provenance = new RuntimeProvenance
+            {
+                Source = path,
+                ConnectorId = ConnectorId,
+                ConnectorVersion = Version,
+                IngestedUtc = DateTimeOffset.UtcNow
+            }
+        };
+    }
+
+    private static List<RuntimeScalarSeries> ReadStoredSeries(JsonElement root)
+    {
+        var series = new List<RuntimeScalarSeries>();
+        if (!root.TryGetProperty("scalars", out var scalars) || !scalars.TryGetProperty("series", out var list))
+            return series;
+
+        foreach (var item in list.EnumerateArray())
+        {
+            var name = JsonString(item, "name");
+            if (string.IsNullOrWhiteSpace(name))
+                continue;
+            series.Add(new RuntimeScalarSeries
+            {
+                Name = name,
+                Unit = ParseStoredUnit(JsonString(item, "unit")),
+                Values = ReadNullableDoubles(item, "values"),
+                Description = JsonString(item, "description"),
+                SourceKey = JsonString(item, "sourceKey"),
+                Aggregation = ParseStoredAggregation(JsonString(item, "aggregation"))
+            });
+        }
+
+        return series;
+    }
+
+    private static RuntimeMilestones ReadStoredMilestones(JsonElement root)
+    {
+        var list = new List<RuntimeMilestone>();
+        if (root.TryGetProperty("milestones", out var milestones)
+            && milestones.TryGetProperty("list", out var items)
+            && items.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var item in items.EnumerateArray())
+            {
+                if (!item.TryGetProperty("step", out var step) || !step.TryGetInt32(out var stepValue))
+                    continue;
+                list.Add(new RuntimeMilestone
+                {
+                    Type = ParseStoredMilestone(JsonString(item, "type")),
+                    Step = stepValue,
+                    Label = JsonString(item, "label")
+                });
+            }
+        }
+
+        return new RuntimeMilestones { List = list };
+    }
+
+    private static RuntimeCapabilities ReadStoredCapabilities(JsonElement root, List<RuntimeScalarSeries> series)
+    {
+        if (!root.TryGetProperty("capabilities", out var caps) || caps.ValueKind != JsonValueKind.Object)
+            return RuntimeCapabilities.Detect(new RuntimeScalars { Series = series });
+
+        return new RuntimeCapabilities
+        {
+            HasLoss = JsonBool(caps, "hasLoss"),
+            HasAccuracy = JsonBool(caps, "hasAccuracy"),
+            HasLatency = JsonBool(caps, "hasLatency"),
+            HasThroughput = JsonBool(caps, "hasThroughput"),
+            HasMemory = JsonBool(caps, "hasMemory"),
+            HasCheckpoints = JsonBool(caps, "hasCheckpoints"),
+            HasProfiler = JsonBool(caps, "hasProfiler"),
+            HasEvaluatorVectors = JsonBool(caps, "hasEvaluatorVectors"),
+            HasEigenSpectrum = JsonBool(caps, "hasEigenSpectrum")
+        };
+    }
+
+    private static List<int> ReadStepList(JsonElement root, int count)
+    {
+        if (root.TryGetProperty("timeline", out var timeline)
+            && timeline.TryGetProperty("steps", out var steps)
+            && steps.ValueKind == JsonValueKind.Array)
+        {
+            var list = new List<int>();
+            foreach (var step in steps.EnumerateArray())
+            {
+                if (step.TryGetInt32(out var value))
+                    list.Add(value);
+            }
+            if (list.Count > 0)
+                return list;
+        }
+
+        return Enumerable.Range(0, count).ToList();
+    }
+
+    private static List<double> ReadNumberList(JsonElement root, string objectName, string arrayName)
+    {
+        var list = new List<double>();
+        if (root.TryGetProperty(objectName, out var owner)
+            && owner.TryGetProperty(arrayName, out var array)
+            && array.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var item in array.EnumerateArray())
+            {
+                if (item.ValueKind == JsonValueKind.Number)
+                    list.Add(item.GetDouble());
+            }
+        }
+
+        return list;
+    }
+
+    private static List<double?> ReadNullableDoubles(JsonElement owner, string name)
+    {
+        var list = new List<double?>();
+        if (!owner.TryGetProperty(name, out var array) || array.ValueKind != JsonValueKind.Array)
+            return list;
+        foreach (var item in array.EnumerateArray())
+            list.Add(item.ValueKind == JsonValueKind.Number ? item.GetDouble() : null);
+        return list;
+    }
+
+    private static string? JsonString(JsonElement owner, string name)
+    {
+        if (owner.ValueKind != JsonValueKind.Object)
+            return null;
+        if (!owner.TryGetProperty(name, out var value) || value.ValueKind != JsonValueKind.String)
+            return null;
+        var text = value.GetString();
+        return string.IsNullOrWhiteSpace(text) ? null : text;
+    }
+
+    private static bool JsonBool(JsonElement owner, string name)
+    {
+        return owner.TryGetProperty(name, out var value)
+            && value.ValueKind == JsonValueKind.True;
+    }
+
+    private static FrameworkType ParseStoredFramework(string? value) => value?.ToLowerInvariant() switch
+    {
+        "tensorflowrt" => FrameworkType.TensorFlowRT,
+        "tensorflow" => FrameworkType.TensorFlow,
+        "pytorch" => FrameworkType.PyTorch,
+        "jax" => FrameworkType.Jax,
+        "mlflow" => FrameworkType.MLflow,
+        "wandb" => FrameworkType.WandB,
+        "tensorboard" => FrameworkType.TensorBoard,
+        _ => FrameworkType.Unknown
+    };
+
+    private static ScalarUnit ParseStoredUnit(string? value) => value?.ToLowerInvariant() switch
+    {
+        "milliseconds" => ScalarUnit.Milliseconds,
+        "seconds" => ScalarUnit.Seconds,
+        "microseconds" => ScalarUnit.Microseconds,
+        "items_per_second" => ScalarUnit.ItemsPerSecond,
+        "bytes" => ScalarUnit.Bytes,
+        "megabytes" => ScalarUnit.Megabytes,
+        "gigabytes" => ScalarUnit.Gigabytes,
+        "percent" => ScalarUnit.Percent,
+        "loss" => ScalarUnit.Loss,
+        "accuracy" => ScalarUnit.Accuracy,
+        "count" => ScalarUnit.Count,
+        _ => ScalarUnit.None
+    };
+
+    private static ScalarAggregation? ParseStoredAggregation(string? value) => value?.ToLowerInvariant() switch
+    {
+        "none" => ScalarAggregation.None,
+        "mean" => ScalarAggregation.Mean,
+        "median" => ScalarAggregation.Median,
+        "p50" => ScalarAggregation.P50,
+        "p90" => ScalarAggregation.P90,
+        "p95" => ScalarAggregation.P95,
+        "p99" => ScalarAggregation.P99,
+        _ => null
+    };
+
+    private static RuntimeMilestoneType ParseStoredMilestone(string? value) => value?.ToLowerInvariant() switch
+    {
+        "warmup_end" => RuntimeMilestoneType.WarmupEnd,
+        "steady_state_start" => RuntimeMilestoneType.SteadyStateStart,
+        "steady_state_end" => RuntimeMilestoneType.SteadyStateEnd,
+        "epoch_start" => RuntimeMilestoneType.EpochStart,
+        "epoch_end" => RuntimeMilestoneType.EpochEnd,
+        "eval" => RuntimeMilestoneType.Eval,
+        "checkpoint" => RuntimeMilestoneType.Checkpoint,
+        _ => RuntimeMilestoneType.Custom
+    };
+
     private TfrtSource? ClassifyFile(string path, TfrtFolderContext? context)
     {
         var name = Path.GetFileName(path).ToLowerInvariant();

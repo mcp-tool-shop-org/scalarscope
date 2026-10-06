@@ -663,8 +663,8 @@ public record SvgColorPalette
 {
     public string Background { get; init; } = "#1E1E2E";
     public string Text { get; init; } = "#CDD6F4";
-    public string GridMajor { get; init; } = "#45475A";
-    public string GridMinor { get; init; } = "#313244";
+    public string GridMajor { get; init; } = "#8e8eae";
+    public string GridMinor { get; init; } = "#6b6b8a";
 
     public string Trajectory { get; init; } = "#89B4FA";
     public string TrajectoryStart { get; init; } = "#94E2D5";
@@ -694,8 +694,8 @@ public record SvgColorPalette
     {
         Background = "#FFFFFF",
         Text = "#1E1E2E",
-        GridMajor = "#CDD6F4",
-        GridMinor = "#E6E9EF",
+        GridMajor = "#5c5c72",
+        GridMinor = "#6e6e88",
         Trajectory = "#1E66F5",
         TrajectoryStart = "#40A02B",
         TrajectoryEnd = "#D20F39",
@@ -740,8 +740,8 @@ public record SvgColorPalette
     {
         Background = "#FFFFFF",
         Text = "#000000",
-        GridMajor = "#CCCCCC",
-        GridMinor = "#EEEEEE",
+        GridMajor = "#5c5c72",
+        GridMinor = "#6e6e88",
         Trajectory = "#0066CC",
         TrajectoryStart = "#228B22",
         TrajectoryEnd = "#CC0000",

@@ -44,13 +44,17 @@ public partial class ComparisonViewModel : ObservableObject
     private bool _hasBothRuns;
 
     [ObservableProperty]
-    private string _frameworkName = "TFRT";
+    private string _frameworkName = "";
+
+    public bool HasFrameworkName => !string.IsNullOrWhiteSpace(FrameworkName);
+
+    partial void OnFrameworkNameChanged(string value) => OnPropertyChanged(nameof(HasFrameworkName));
 
     [ObservableProperty]
-    private bool _hasPreset = true;
+    private bool _hasPreset;
 
     [ObservableProperty]
-    private string _presetName = "TFRT Runtime";
+    private string _presetName = "";
 
     [ObservableProperty]
     private int _deltaCount;
@@ -499,6 +503,9 @@ public partial class ComparisonViewModel : ObservableObject
         TraceNote = "";
         HasTraceNote = false;
         HasBothRuns = false;
+        FrameworkName = "";
+        HasPreset = false;
+        PresetName = "";
         ComparisonSummary = "";
         InterpretationVerdict = "";
         LeftDescription = "";
@@ -834,14 +841,51 @@ public partial class ComparisonViewModel : ObservableObject
         InterpretationVerdict = review.Verdict;
         LeftDescription = DescribeSide(review.LeftLabel, review, review.LeftP50, review.LeftP95, review.LeftP99, review.LeftAnomalies.Count, review.LeftValues.Count);
         RightDescription = DescribeSide(review.RightLabel, review, review.RightP50, review.RightP95, review.RightP99, review.RightAnomalies.Count, review.RightValues.Count);
-        FrameworkName = "TFRT";
-        PresetName = "TFRT Runtime";
-        HasPreset = true;
+        FrameworkName = FrameworkBadge(left.Framework, right.Framework);
+        var tfrtPair = left.Framework == FrameworkType.TensorFlowRT
+            && right.Framework == FrameworkType.TensorFlowRT;
+        HasPreset = tfrtPair;
+        PresetName = tfrtPair ? "TFRT Runtime" : "";
         IsLeftDominant = null;
         IsRightDominant = null;
         TryRecordTrace(review);
+        TryWriteReviewBundle(comparison, left, right);
         SyncChrome();
     }
+
+    private static void TryWriteReviewBundle(ComparisonResult comparison, RuntimeRunTrace left, RuntimeRunTrace right)
+    {
+        try
+        {
+            var directory = ComparisonLog.DefaultDirectory;
+            Directory.CreateDirectory(directory);
+            new RunTraceComparer().WriteReviewBundle(
+                comparison,
+                left,
+                right,
+                Path.Combine(directory, "inference-review.scbundle"));
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Review bundle: {ex.Message}");
+        }
+    }
+
+    private static string FrameworkBadge(FrameworkType left, FrameworkType right)
+    {
+        var a = FrameworkLabel(left);
+        var b = FrameworkLabel(right);
+        if (a.Length == 0 && b.Length == 0)
+            return "";
+        return string.Equals(a, b, StringComparison.Ordinal) ? a : a + " / " + b;
+    }
+
+    private static string FrameworkLabel(FrameworkType framework) => framework switch
+    {
+        FrameworkType.TensorFlowRT => "TFRT",
+        FrameworkType.Unknown => "",
+        _ => framework.ToString()
+    };
 
     private static string DescribeSide(string label, TraceReview review, double? p50, double? p95, double? p99, int anomalies, int count)
     {
@@ -942,6 +986,9 @@ public partial class ComparisonViewModel : ObservableObject
 
         if (HasBothRuns)
         {
+            FrameworkName = "Geometry";
+            HasPreset = false;
+            PresetName = "";
             GenerateComparisonSummary();
             
             // Phase 3: Compute canonical deltas

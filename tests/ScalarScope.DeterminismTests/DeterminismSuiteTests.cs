@@ -3,6 +3,7 @@ using Xunit;
 
 namespace ScalarScope.DeterminismTests;
 
+[Trait("Category", "Determinism")]
 public class DeterminismSuiteTests
 {
     private static readonly string[] RequiredTests =

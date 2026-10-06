@@ -165,8 +165,8 @@
                     <Border Style="{StaticResource Card}">
                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
                             <VerticalStackLayout Spacing="4">
-                                <Label Text="TFRT Optimization Example" Style="{StaticResource ItemTitle}"/>
-                                <Label Text="See a real before/after comparison with deltas, explanations, and export."
+                                <Label Text="Orthogonal and correlated professors" Style="{StaticResource ItemTitle}"/>
+                                <Label Text="Compare opens this geometry pair from the bundled professor runs."
                                        Style="{StaticResource ItemDescription}"/>
                             </VerticalStackLayout>
                             <Button Grid.Column="1"

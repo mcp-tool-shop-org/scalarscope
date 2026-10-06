@@ -40,75 +40,42 @@ This document tracks the UX consistency audit for ScalarScope across light and d
 
 ## Page-by-Page Audit
 
-### Overview Page
-| Element | Dark Theme | Light Theme | Status |
-|---------|------------|-------------|--------|
-| Background | ✅ `#0f0f1a` | ✅ `#f5f5f5` | Pass |
-| Welcome card | ✅ `#1a1a2e` | ✅ `#ffffff` | Pass |
-| Heading text | ✅ White | ✅ Dark gray | Pass |
-| Body text | ✅ Muted white | ✅ Medium gray | Pass |
-| Buttons | ✅ Cyan accent | ✅ Cyan accent | Pass |
+The shell a person opens is Home, Compare, Guide, and Settings. Older page names are not this shell.
 
-### Trajectory Page
+### Home
 | Element | Dark Theme | Light Theme | Status |
 |---------|------------|-------------|--------|
-| Canvas background | ✅ `#0f0f1a` | ✅ `#f5f5f5` | Pass |
-| Trajectory line | ✅ Cyan glow | ✅ Cyan (solid) | Pass |
-| Grid lines | ✅ `#2a2a4e` | ✅ `#dddddd` | Pass |
-| Annotation labels | ✅ White | ✅ Dark gray | Pass |
-| Playback controls | ✅ Surface bg | ✅ White bg | Pass |
+| Background | `#0f0f1a` | `#f5f5f5` | Pass |
+| Cards | `#1a1a2e` | `#ffffff` | Pass |
+| Primary button | White text on `#4ecdc4` | White text on `#4ecdc4` | Fail |
 
-### Scalars Page
+### Compare
 | Element | Dark Theme | Light Theme | Status |
 |---------|------------|-------------|--------|
-| Chart background | ✅ `#0f0f1a` | ✅ `#f5f5f5` | Pass |
-| Metric cards | ✅ `#1a1a2e` | ✅ `#ffffff` | Pass |
-| Ring visualizations | ✅ Colored | ✅ Colored | Pass |
+| Left run accent | `#4ecdc4` | `#4ecdc4` | Pass |
+| Right run accent | `#ff6b6b` | `#ff6b6b` | Pass |
+| Primary button | White text on `#4ecdc4` | White text on `#4ecdc4` | Fail |
 
-### Geometry Page
+### Guide
 | Element | Dark Theme | Light Theme | Status |
 |---------|------------|-------------|--------|
-| Eigen bars | ✅ Colored | ✅ Colored | Pass |
-| Labels | ✅ White | ✅ Dark gray | Pass |
+| Background | `#0f0f1a` | `#f5f5f5` | Pass |
+| Cards | `#1a1a2e` | `#ffffff` | Pass |
+| Primary button | White text on `#4ecdc4` | White text on `#4ecdc4` | Fail |
 
-### Compare Page
+### Settings
 | Element | Dark Theme | Light Theme | Status |
 |---------|------------|-------------|--------|
-| Left run accent | ✅ Teal | ✅ Teal | Pass |
-| Right run accent | ✅ Coral | ✅ Coral | Pass |
-| Divider | ✅ `#2a2a4e` | ✅ `#dddddd` | Pass |
-| Analytics panel | ✅ `#16213e` | ✅ `#ffffff` | Pass |
-
-### Failures Page
-| Element | Dark Theme | Light Theme | Status |
-|---------|------------|-------------|--------|
-| Timeline background | ✅ `#0f0f1a` | ✅ `#f5f5f5` | Pass |
-| Critical markers | ✅ Red | ✅ Red | Pass |
-| Warning markers | ✅ Orange | ✅ Orange | Pass |
-| Info markers | ✅ Yellow | ✅ Yellow | Pass |
-
-### Help Page
-| Element | Dark Theme | Light Theme | Status |
-|---------|------------|-------------|--------|
-| Background | ✅ `#0f0f1a` | ✅ `#f5f5f5` | Pass |
-| Cards | ✅ `#1a1a2e` | ✅ `#ffffff` | Pass |
-| Issue frames | ✅ `#0f0f1a` | ✅ `#f8f8f8` | Pass |
-| Button primary | ✅ Teal | ✅ Teal | Pass |
-| Button secondary | ✅ `#2a2a4e` | ✅ `#dddddd` | Pass |
-
-### Recovery Page
-| Element | Dark Theme | Light Theme | Status |
-|---------|------------|-------------|--------|
-| Background | ✅ `#1a1a2e` | ✅ `#f5f5f5` | Pass |
-| Info card | ✅ `#16213e` | ✅ `#ffffff` | Pass |
-| Buttons | ✅ Appropriate | ✅ Appropriate | Pass |
+| Background | `#0f0f1a` | `#f5f5f5` | Pass |
+| Cards | `#1a1a2e` | `#ffffff` | Pass |
+| Primary button | White text on `#4ecdc4` | White text on `#4ecdc4` | Fail |
 
 ## Component Audit
 
 ### Buttons
 | State | Dark Theme | Light Theme | Status |
 |-------|------------|-------------|--------|
-| Primary | Teal bg, white text | Teal bg, white text | Pass |
+| Primary | White text on `#4ecdc4` | White text on `#4ecdc4` | Fail |
 | Secondary | Surface bg, white text | Light bg, dark text | Pass |
 | Disabled | Muted bg, disabled text | Muted bg, disabled text | Pass |
 | Hover | Lightened | Darkened | N/A (touch) |
@@ -162,9 +129,11 @@ This document tracks the UX consistency audit for ScalarScope across light and d
 
 1. **Tab bar doesn't change in light mode** - Uses dark theme colors consistently. This is intentional for brand identity but could be revisited.
 
-2. **Cyan accent on light background** - Low contrast ratio (2.3:1). Consider using darker teal for interactive elements in light mode.
+2. **Cyan accent on light background** - `#00d9ff` on `#f5f5f5` is about 2.3:1.
 
-3. **Muted text in both themes** - Borderline accessibility. Reserved for truly non-essential hints only.
+3. **White text on the teal button** - White on `#4ecdc4` is about 1.9:1, under the 4.5:1 text minimum. This audit records that failure. `#4ecdc4` stays Path A. The button color is not darkened here.
+
+4. **Muted text in both themes** - Borderline accessibility. Reserved for truly non-essential hints only.
 
 ## Recommendations
 
@@ -174,7 +143,7 @@ This document tracks the UX consistency audit for ScalarScope across light and d
 - [x] Check frame/card borders respond to theme
 
 ### Future Improvements
-- [ ] Consider darker accent for light mode buttons
+- [ ] White on `#4ecdc4` stays a recorded failure. Path A is not darkened by this audit.
 - [ ] Add high-contrast mode option
 - [ ] Test with Windows High Contrast theme
 
@@ -182,13 +151,13 @@ This document tracks the UX consistency audit for ScalarScope across light and d
 
 | Category | Items Checked | Passing | Issues |
 |----------|---------------|---------|--------|
-| Pages | 7 | 7 | 0 |
-| Components | 4 | 4 | 0 |
-| Contrast (Dark) | 4 | 4 | 0 |
+| Pages | 4 | 0 | 4 |
+| Components | 4 | 3 | 1 |
+| Contrast (Dark) | 4 | 3 | 1 |
 | Contrast (Light) | 4 | 2 | 2 |
-| **Total** | **19** | **17** | **2** |
+| **Total** | **16** | **8** | **8** |
 
-**Overall Status**: ✅ Ready for RC1 with minor accessibility notes
+**Overall Status**: Fail. Home, Compare, Guide, and Settings each carry a primary button with white text on `#4ecdc4` (about 1.9:1). That pair does not clear the 4.5:1 text minimum. The teal is Path A and is not darkened by this audit.
 
 ---
 
@@ -200,4 +169,4 @@ This document tracks the UX consistency audit for ScalarScope across light and d
 4. Change back to Dark
 5. Verify restoration
 
-**Result**: ✅ Pass - Dynamic theme switching works correctly
+**Result**: Fail. The page inventory is Home, Compare, Guide, and Settings. White text on `#4ecdc4` does not clear 4.5:1, so the shell is not ready.

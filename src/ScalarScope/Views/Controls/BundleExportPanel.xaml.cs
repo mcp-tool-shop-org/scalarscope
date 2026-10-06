@@ -102,8 +102,8 @@ public partial class BundleExportPanel : ContentView
         ? Color.FromArgb("#10B981") 
         : Color.FromArgb("#666");
     
-    public string AssetsIncludedText => _selectedProfile != BundleProfile.Share 
-        ? "✓ assets/ (screenshots, cards)" 
+    public string AssetsIncludedText => _selectedProfile != BundleProfile.Share
+        ? "✓ assets/export-info.txt"
         : "○ assets/ (not in Share profile)";
     
     public Color AssetsIncludedColor => _selectedProfile != BundleProfile.Share 

@@ -2,6 +2,8 @@
 // Before/After optimization comparison with scientific rigor.
 // Handles alignment, fingerprint validation, delta computation, and review-only export.
 
+using System.Globalization;
+using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -1351,6 +1353,44 @@ public sealed class RunTraceComparer
             ParentBundleHash = null
         };
     }
+
+    /// <summary>
+    /// Write the inference review to a .scbundle file. The bytes are the review. Recompute stays off.
+    /// </summary>
+    public ReviewOnlyBundle WriteReviewBundle(
+        ComparisonResult result,
+        RuntimeRunTrace traceA,
+        RuntimeRunTrace traceB,
+        string destinationPath,
+        ReviewExportMode mode = ReviewExportMode.Review)
+    {
+        if (!destinationPath.EndsWith(".scbundle", StringComparison.OrdinalIgnoreCase))
+            throw new ArgumentException("An inference review is saved as a .scbundle file.", nameof(destinationPath));
+
+        var bundle = ExportReviewBundle(result, traceA, traceB, mode);
+        var json = JsonSerializer.Serialize(bundle, ReviewJsonOptions);
+        var directory = Path.GetDirectoryName(destinationPath);
+        if (!string.IsNullOrEmpty(directory))
+            Directory.CreateDirectory(directory);
+        if (File.Exists(destinationPath))
+            File.Delete(destinationPath);
+
+        using (var archive = ZipFile.Open(destinationPath, ZipArchiveMode.Create))
+        {
+            var entry = archive.CreateEntry("review/review.json", CompressionLevel.NoCompression);
+            using var writer = new StreamWriter(entry.Open(), new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+            writer.Write(json);
+        }
+
+        return bundle;
+    }
+
+    private static readonly JsonSerializerOptions ReviewJsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
+    };
     
     /// <summary>
     /// Re-export from an existing review bundle (stamps parent hash).
@@ -1374,7 +1414,29 @@ public sealed class RunTraceComparer
     
     private string ComputeBundleHash(ComparisonResult result, ReviewFingerprintSummary summary)
     {
-        var content = $"{result.ComparisonId}|{result.ComputedUtc:O}|{summary.ModelFingerprintA}|{summary.ModelFingerprintB}";
+        var findings = string.Join("\n", result.Deltas.Select(delta =>
+            "finding:" + string.Join("|",
+                delta.DeltaType,
+                delta.Signal,
+                delta.ValueA.ToString("R", CultureInfo.InvariantCulture),
+                delta.ValueB.ToString("R", CultureInfo.InvariantCulture),
+                delta.Fired ? "fired" : "quiet",
+                delta.IsSuppressed ? "suppressed" : "live",
+                delta.Interpretation ?? "")));
+        var fingerprints = "fingerprint:" + string.Join("|",
+            summary.LabelA,
+            summary.LabelB,
+            summary.ModelFingerprintA,
+            summary.ModelFingerprintB,
+            summary.DatasetFingerprintA,
+            summary.DatasetFingerprintB,
+            summary.CodeFingerprintA,
+            summary.CodeFingerprintB,
+            summary.EnvironmentFingerprintA,
+            summary.EnvironmentFingerprintB,
+            summary.FrameworkA,
+            summary.FrameworkB);
+        var content = "alignment:" + result.Alignment.Summary + "\n" + findings + "\n" + fingerprints;
         var bytes = Encoding.UTF8.GetBytes(content);
         var hash = SHA256.HashData(bytes);
         return Convert.ToHexString(hash).ToLowerInvariant();

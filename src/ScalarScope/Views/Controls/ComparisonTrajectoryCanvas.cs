@@ -137,7 +137,9 @@ public class ComparisonTrajectoryCanvas : SKCanvasView
     }
 
     private static new readonly SKColor BackgroundColor = SKColor.Parse("#1a1a2e");
-    private static readonly SKColor GridColor = SKColor.Parse("#2a2a4e");
+    private static readonly SKColor GridColor = SKColor.Parse("#70708a");
+    private static readonly SKTypeface LabelTypeface =
+        SKTypeface.FromFamilyName("Arial", SKFontStyle.Bold) ?? SKTypeface.Default;
     private static readonly SKColor HighlightColor = SKColor.Parse("#ffd93d"); // Phase 3: Delta highlight color
 
     private float _scale = 100f;
@@ -158,11 +160,24 @@ public class ComparisonTrajectoryCanvas : SKCanvasView
 
     private void OnDemoAnimationFrame()
     {
-        // Only repaint if we're showing demo data
+        if (!IsShown(this))
+            return;
         if (Run is null && AllowDemoFallback)
         {
             MainThread.BeginInvokeOnMainThread(InvalidateSurface);
         }
+    }
+
+    private static bool IsShown(VisualElement element)
+    {
+        if (element.Parent == null)
+            return false;
+        for (Element? node = element; node != null; node = node.Parent)
+        {
+            if (node is VisualElement visual && !visual.IsVisible)
+                return false;
+        }
+        return true;
     }
 
     private static void OnRunChanged(BindableObject bindable, object oldValue, object newValue)
@@ -270,6 +285,7 @@ public class ComparisonTrajectoryCanvas : SKCanvasView
 
     private void DrawGrid(SKCanvas canvas, SKImageInfo info)
     {
+        using var dash = SKPathEffect.CreateDash([5, 5], 0);
         using var paint = new SKPaint
         {
             Color = GridColor,
@@ -280,7 +296,7 @@ public class ComparisonTrajectoryCanvas : SKCanvasView
         canvas.DrawLine(0, _center.Y, info.Width, _center.Y, paint);
         canvas.DrawLine(_center.X, 0, _center.X, info.Height, paint);
 
-        paint.PathEffect = SKPathEffect.CreateDash([5, 5], 0);
+        paint.PathEffect = dash;
         for (int i = -2; i <= 2; i++)
         {
             if (i == 0) continue;
@@ -300,7 +316,7 @@ public class ComparisonTrajectoryCanvas : SKCanvasView
             (byte)(AccentColor.Blue * 255)
         );
 
-        using var boldFont = new SKFont(SKTypeface.FromFamilyName("Arial", SKFontStyle.Bold), 16);
+        using var boldFont = new SKFont(LabelTypeface, 16);
         using var subtitleFont = new SKFont(SKTypeface.Default, 12);
         using var paint = new SKPaint
         {

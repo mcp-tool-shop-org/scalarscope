@@ -93,7 +93,7 @@ public class OverlayComparisonCanvas : SKCanvasView
     #region Palette
 
     private static readonly SKColor BackgroundColor = SKColor.Parse("#1a1a2e");
-    private static readonly SKColor GridColor = SKColor.Parse("#2a2a4e");
+    private static readonly SKColor GridColor = SKColor.Parse("#70708a");
     private static readonly SKColor DeviationColor = SKColor.Parse("#ff6b6b");
     private static readonly SKColor BandColor = SKColor.Parse("#74b9ff");
 
@@ -137,11 +137,24 @@ public class OverlayComparisonCanvas : SKCanvasView
 
     private void OnDemoAnimationFrame()
     {
-        // Only repaint if we're showing demo data
+        if (!IsShown(this))
+            return;
         if (AllowDemoFallback && (Runs is null || Runs.Count == 0))
         {
             MainThread.BeginInvokeOnMainThread(InvalidateSurface);
         }
+    }
+
+    private static bool IsShown(VisualElement element)
+    {
+        if (element.Parent == null)
+            return false;
+        for (Element? node = element; node != null; node = node.Parent)
+        {
+            if (node is VisualElement visual && !visual.IsVisible)
+                return false;
+        }
+        return true;
     }
 
     private static void OnRunsChanged(BindableObject bindable, object oldValue, object newValue)
@@ -267,6 +280,7 @@ public class OverlayComparisonCanvas : SKCanvasView
 
     private void DrawGrid(SKCanvas canvas, SKImageInfo info)
     {
+        using var dash = SKPathEffect.CreateDash([5, 5], 0);
         using var paint = new SKPaint
         {
             Color = GridColor,
@@ -277,7 +291,7 @@ public class OverlayComparisonCanvas : SKCanvasView
         canvas.DrawLine(0, _center.Y, info.Width, _center.Y, paint);
         canvas.DrawLine(_center.X, 0, _center.X, info.Height, paint);
 
-        paint.PathEffect = SKPathEffect.CreateDash([5, 5], 0);
+        paint.PathEffect = dash;
         for (int i = -2; i <= 2; i++)
         {
             if (i == 0) continue;
@@ -313,13 +327,14 @@ public class OverlayComparisonCanvas : SKCanvasView
             IsAntialias = true
         };
 
+        using var meanDash = SKPathEffect.CreateDash([4, 4], 0);
         using var meanPaint = new SKPaint
         {
             Color = BandColor.WithAlpha(150),
             Style = SKPaintStyle.Stroke,
             StrokeWidth = 2,
             IsAntialias = true,
-            PathEffect = SKPathEffect.CreateDash([4, 4], 0)
+            PathEffect = meanDash
         };
 
         // Draw mean trajectory
@@ -363,13 +378,14 @@ public class OverlayComparisonCanvas : SKCanvasView
             IsAntialias = true
         };
 
+        using var borderDash = SKPathEffect.CreateDash([4, 4], 0);
         using var borderPaint = new SKPaint
         {
             Color = DeviationColor.WithAlpha(100),
             Style = SKPaintStyle.Stroke,
             StrokeWidth = 1,
             IsAntialias = true,
-            PathEffect = SKPathEffect.CreateDash([4, 4], 0)
+            PathEffect = borderDash
         };
 
         foreach (var region in deviation!.DivergenceRegions)

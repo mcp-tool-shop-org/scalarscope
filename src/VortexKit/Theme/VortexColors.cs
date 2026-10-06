@@ -4,7 +4,7 @@ namespace VortexKit;
 
 /// <summary>
 /// Semantic color palette for VortexKit visualizations.
-/// Designed for dark backgrounds with high contrast and accessibility.
+/// Grid lines clear 3:1 on the background.
 /// </summary>
 public static class VortexColors
 {
@@ -28,7 +28,7 @@ public static class VortexColors
     /// <summary>
     /// Grid and divider color.
     /// </summary>
-    public static SKColor Grid => SKColor.Parse("#2a2a4e");
+    public static SKColor Grid => SKColor.Parse("#70708a");
 
     #endregion
 

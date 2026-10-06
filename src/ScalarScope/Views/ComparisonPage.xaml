@@ -46,9 +46,10 @@
                         Padding="8,4"
                         StrokeShape="RoundRectangle 4"
                         Stroke="Transparent"
-                        VerticalOptions="Center">
-                    <Label Text="{Binding FrameworkName, FallbackValue='TFRT'}" 
-                           FontSize="10" 
+                        VerticalOptions="Center"
+                        IsVisible="{Binding HasFrameworkName}">
+                    <Label Text="{Binding FrameworkName}"
+                           FontSize="10"
                            TextColor="#00d9ff"
                            FontAttributes="Bold"/>
                 </Border>

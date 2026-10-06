@@ -239,7 +239,7 @@ public sealed class BundleExporter
         
         if (manifest.Contents.Optional.Any(o => o.StartsWith("assets/")))
         {
-            sb.AppendLine("├── assets/                # Visual assets");
+            sb.AppendLine("├── assets/                # export-info.txt");
         }
         
         if (manifest.Contents.Optional.Any(o => o.StartsWith("audit/")))

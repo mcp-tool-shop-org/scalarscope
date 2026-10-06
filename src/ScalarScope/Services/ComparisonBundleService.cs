@@ -465,7 +465,7 @@ public sealed class ComparisonBundleService
         sb.AppendLine("│   └── environment.json # Runtime environment info");
         if (bundle.Manifest.Contents.IncludesAssets)
         {
-            sb.AppendLine("├── assets/            # Visual assets (screenshots, cards)");
+            sb.AppendLine("├── assets/            # export-info.txt");
         }
         if (bundle.Manifest.Contents.IncludesAudit)
         {
