@@ -2,17 +2,17 @@ import type { SiteConfig } from '@mcptoolshop/site-theme';
 
 export const config: SiteConfig = {
   title: 'ScalarScope',
-  description: 'ASPIRE Scalar Vortex Visualizer — .NET MAUI desktop app for comparing ML inference runs with scientific rigor.',
+  description: 'A Windows review of two machine-learning runs. The program this repo builds is the Rust review. The Store listing is still the previous package.',
   logoBadge: 'SS',
   brandName: 'ScalarScope',
   repoUrl: 'https://github.com/mcp-tool-shop-org/scalarscope',
   footerText: 'MIT Licensed — built by <a href="https://github.com/mcp-tool-shop-org" style="color:var(--color-muted);text-decoration:underline">mcp-tool-shop-org</a>',
 
   hero: {
-    badge: '.NET MAUI · Windows',
+    badge: 'Rust review · Windows',
     headline: 'ML inference runs,',
     headlineAccent: 'compared with rigor.',
-    description: 'Stop eyeballing logs. ScalarScope loads two TFRT traces side by side, fires canonical delta analysis only when differences are statistically meaningful, and exports .scbundle archives. A matching SHA-256 is a content check, not a signature.',
+    description: 'The program this repo builds is the Rust review. It opens two inference files, or a training history whose loss stays loss. The Store listing is still the previous .NET package. A matching SHA-256 is a content check, not a signature.',
     primaryCta: { href: 'https://apps.microsoft.com/detail/9P3HT1PHBKQK', label: 'Get from Microsoft Store' },
     secondaryCta: { href: 'handbook/', label: 'Read the Handbook' },
     previews: [
@@ -40,7 +40,7 @@ export const config: SiteConfig = {
       features: [
         {
           title: 'Apples-to-apples comparison',
-          desc: 'Load two TFRT inference traces side by side. The TFRT preset auto-suppresses irrelevant metrics so your analysis stays focused on what actually changed between runs.',
+          desc: 'Open two inference files, or two training histories. On an inference pair the review reports ΔF and ΔO, and ΔTc only when both sides have a steady-state milestone.',
         },
         {
           title: 'Canonical delta analysis',

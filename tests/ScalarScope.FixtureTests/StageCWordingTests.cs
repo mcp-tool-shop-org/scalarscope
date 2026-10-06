@@ -117,10 +117,22 @@ public class StageCWordingTests
         Read("README.md").Should().Contain(claim);
         Read("site/src/content/docs/handbook/bundles.md").Should().NotContain("results are verified");
 
-        foreach (var name in new[] { "ja", "zh", "es", "fr", "hi", "it", "pt-BR" })
+        // The English sentence stays on the English page. Each translation
+        // has to say the same thing in its own language. The forbidden words
+        // are the ones that would turn the hash into a signature.
+        foreach (var (name, claimInLanguage) in new (string Name, string Claim)[]
+        {
+            ("ja", "一致するSHA-256は、署名ではなく、コンテンツチェックです。"),
+            ("zh", "匹配的 SHA-256 是内容检查，而不是签名。"),
+            ("es", "Una coincidencia de SHA-256 es una verificación de contenido, no una firma."),
+            ("fr", "Un hachage SHA-256 correspondant est une vérification du contenu, et non une signature."),
+            ("hi", "मिलान SHA-256 एक सामग्री जांच है, हस्ताक्षर नहीं।"),
+            ("it", "Un SHA-256 corrispondente è un controllo del contenuto, non una firma."),
+            ("pt-BR", "Um SHA-256 correspondente é uma verificação de conteúdo, não uma assinatura."),
+        })
         {
             var page = Read($"README.{name}.md");
-            page.Should().Contain(claim);
+            page.Should().Contain(claimInLanguage);
             page.Should().NotContain("cryptographically");
             page.Should().NotContain("criptográficamente");
             page.Should().NotContain("cryptographiquement");

@@ -19,8 +19,12 @@ TestResults/
 *.appxupload
 release/checksums.txt
 
-# Landing site dependencies
+# Landing site dependencies and build output
 node_modules/
+site/node_modules/
+site/.astro/
+site/dist/
+.polyglot-cache.json
 
 # Per-agent swarm worktrees
 .swarm/

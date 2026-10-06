@@ -2,20 +2,31 @@
   <a href="README.md">English</a> | <a href="README.ja.md">日本語</a> | <a href="README.zh.md">中文</a> | <a href="README.es.md">Español</a> | <a href="README.fr.md">Français</a> | <a href="README.hi.md">हिन्दी</a> | <a href="README.it.md">Italiano</a> | <a href="README.pt-BR.md">Português (BR)</a>
 </p>
 
-The other languages are older translations of the .NET app page. The retired repository name, the live Pages badge, the NuGet badge, and `dotnet add package VortexKit` are removed there. This English page is the current one.
-
-# ScalarScope
+<p align="center">
+  <img src="https://raw.githubusercontent.com/mcp-tool-shop-org/brand/main/logos/ScalarScope/readme.png" width="400" alt="ScalarScope">
+</p>
 
 > Part of [MCP Tool Shop](https://mcptoolshop.com)
 
 <p align="center">
+  <a href="https://github.com/mcp-tool-shop-org/scalarscope/actions/workflows/build.yml"><img src="https://github.com/mcp-tool-shop-org/scalarscope/actions/workflows/build.yml/badge.svg" alt="Build and Test"></a>
+  <a href="https://codecov.io/gh/mcp-tool-shop-org/scalarscope"><img src="https://codecov.io/gh/mcp-tool-shop-org/scalarscope/graph/badge.svg" alt="Coverage"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square" alt="License: MIT"></a>
+  <a href="https://mcp-tool-shop-org.github.io/scalarscope/"><img src="https://img.shields.io/badge/Landing-page-blue?style=flat-square" alt="Landing page"></a>
   <a href="https://apps.microsoft.com/detail/9P3HT1PHBKQK"><img src="https://img.shields.io/badge/Microsoft%20Store-9P3HT1PHBKQK-0078D4?style=flat-square&logo=microsoft" alt="Microsoft Store"></a>
 </p>
 
 **A review of two machine-learning runs.** The app you build from this repo is the Rust program in `rust/`. The release workflow packs that program as the unsigned 3.0.0.0 MSIX. The package name and publisher stay the same. That file is not uploaded. The Store copy is still the previous .NET package until that upload.
 
 Package version **3.0.0.0**. Store updates of [9P3HT1PHBKQK](https://apps.microsoft.com/detail/9P3HT1PHBKQK) keep the name `mcp-tool-shop.ScalarScope` and the publisher `CN=5305D976-6952-4F00-9C21-3A5DB090359F`.
+
+## Trust model
+
+The review reads the two files you open. A packaged run also reads and writes `comparison-log.json` and `preferences.json` in that package's LocalState folder. A bundle is written only to the path you pick.
+
+It does not send those files anywhere. There is no account, no telemetry, and no analytics. Plugins in that folder are left in place and are not loaded. The hash on a bundle checks the archived bytes. It is a content check, not a signature, and it does not say who wrote the file.
+
+The program needs permission to read the files you pick and to write the bundle you save.
 
 ---
 
@@ -295,14 +306,18 @@ cargo llvm-cov --offline --locked --all-targets --fail-under-lines 90
 
 ## Related
 
-- [Handbook source](site/src/content/docs/handbook/) — Docs source in this repo. Not published as a site yet.
+- [Handbook](https://mcp-tool-shop-org.github.io/scalarscope/handbook/) — The guide for the review
 - [RESULTS_AND_LIMITATIONS.md](docs/RESULTS_AND_LIMITATIONS.md) — Full experimental results
 - [CHANGELOG.md](CHANGELOG.md) — Release history
 - [PRIVACY.md](PRIVACY.md) — Privacy policy
-- [ROADMAP.md](ROADMAP.md) — Planned features
+- [ROADMAP.md](ROADMAP.md) — An older unchecked plan, not the current review
 
 ---
 
 ## License
 
 [MIT](LICENSE) — Copyright (c) 2025-2026 ScalarScope Project (mcp-tool-shop-org)
+
+<p align="center">
+  Built by <a href="https://mcp-tool-shop.github.io/">MCP Tool Shop</a>
+</p>
