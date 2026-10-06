@@ -41,6 +41,7 @@ fn blank(history: Option<PathBuf>) -> ScalarScopeApp {
         saved_hash: None,
         page: super::Page::Compare,
         guide_query: String::new(),
+        pending_png: None,
         settings: prefs::ReviewPrefs::default(),
         history_dir: history,
         recent: Vec::new(),
@@ -270,6 +271,43 @@ fn number_keys_choose_views() {
 }
 
 #[test]
+fn each_view_exports_an_svg_and_a_png_round_trips() {
+    let mut app = blank(None);
+    app.left = Some(loaded("base<line>.csv", &long_csv(12.0, 1)));
+    app.right = Some(loaded("optimized.csv", &long_csv(8.0, 2)));
+    show(&mut app);
+    let Some((_, Ok(crate::review::Pair::Inference(review)))) = app.built.clone() else { panic!("built") };
+    let colors = app.svg_colors();
+    for svg in [
+        crate::svg::series(&review, colors),
+        crate::svg::warmup(&review, colors),
+        crate::svg::distribution(&review, colors, Some(10.0)),
+        crate::svg::difference(&review, colors),
+        crate::svg::spectrum(&review, colors),
+    ] {
+        assert!(svg.starts_with("<svg") && svg.ends_with("</svg>"));
+        assert!(svg.contains("base&lt;line&gt;"), "labels are escaped");
+        assert_eq!(svg.matches("<svg").count(), 1);
+    }
+    let dir = std::env::temp_dir().join(format!("scalarscope-export-{}", std::process::id()));
+    fs::create_dir_all(&dir).unwrap();
+    let path = dir.join("view.svg");
+    super::queue_save(Some(path.clone()));
+    app.view = super::View::Difference;
+    app.export_svg(&review);
+    assert!(fs::read_to_string(&path).unwrap().contains("by percentile"));
+
+    let image = egui::ColorImage::new([3, 2], vec![Color32::from_rgb(10, 20, 30); 6]);
+    let bytes = super::encode_png(&image).unwrap();
+    let decoder = png::Decoder::new(std::io::Cursor::new(bytes));
+    let mut reader = decoder.read_info().unwrap();
+    let mut pixels = vec![0; reader.output_buffer_size().unwrap()];
+    let info = reader.next_frame(&mut pixels).unwrap();
+    assert_eq!((info.width, info.height), (3, 2));
+    assert_eq!(&pixels[..4], &[10, 20, 30, 255]);
+}
+
+#[test]
 fn percentile_labels_name_the_nines() {
     assert_eq!(super::percentile_label(0.0), "p0");
     assert_eq!(super::percentile_label(1.0), "p90");
@@ -343,6 +381,7 @@ fn a_stored_review_draws_inference_training_and_findings_text() {
             inference: None,
             training: None,
         },
+        verified: true,
     });
     show(&mut app);
     app.opened.as_mut().unwrap().review.verdict.clear();

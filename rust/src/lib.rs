@@ -11,6 +11,7 @@ pub mod review;
 pub mod runtrace;
 pub mod shape;
 pub mod stats;
+pub mod svg;
 pub mod ui;
 pub mod views;
 

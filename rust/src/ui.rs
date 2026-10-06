@@ -115,6 +115,30 @@ fn pick_bundle() -> Option<std::path::PathBuf> {
         .pick_file()
 }
 
+/// Where to write an exported picture, `kind` being `svg` or `png`.
+fn pick_export_path(kind: &str, name: &str) -> Option<std::path::PathBuf> {
+    if let Some(queued) = take_save() {
+        return queued;
+    }
+    let filter = if kind == "svg" { "SVG image" } else { "PNG image" };
+    rfd::FileDialog::new().add_filter(filter, &[kind]).set_file_name(format!("{name}.{kind}")).save_file()
+}
+
+/// A window screenshot as PNG bytes.
+pub fn encode_png(image: &egui::ColorImage) -> Result<Vec<u8>, String> {
+    let [width, height] = image.size;
+    let mut bytes = Vec::new();
+    {
+        let mut encoder = png::Encoder::new(&mut bytes, width as u32, height as u32);
+        encoder.set_color(png::ColorType::Rgba);
+        encoder.set_depth(png::BitDepth::Eight);
+        let mut writer = encoder.write_header().map_err(|error| format!("Could not write the PNG. {error}"))?;
+        let pixels: Vec<u8> = image.pixels.iter().flat_map(|pixel| pixel.to_array()).collect();
+        writer.write_image_data(&pixels).map_err(|error| format!("Could not write the PNG. {error}"))?;
+    }
+    Ok(bytes)
+}
+
 fn pick_save_path() -> Option<std::path::PathBuf> {
     if let Some(queued) = take_save() {
         return queued;
@@ -151,6 +175,8 @@ pub struct ScalarScopeApp {
     guide_query: String,
     /// What the Settings page edits, under 2.0's `preferences.json` keys.
     settings: prefs::ReviewPrefs,
+    /// Where the screenshot asked for by "Export PNG" goes when it arrives.
+    pending_png: Option<std::path::PathBuf>,
     /// Set only when this process is the Store package. An unpackaged run leaves LocalState alone.
     history_dir: Option<std::path::PathBuf>,
     recent: Vec<LogEntry>,
@@ -184,6 +210,7 @@ impl Default for ScalarScopeApp {
             page: Page::Welcome,
             guide_query: String::new(),
             settings: saved.clone(),
+            pending_png: None,
             history_dir,
             recent,
             files: saved.recent,
@@ -213,6 +240,7 @@ impl ScalarScopeApp {
         ui.ctx().set_zoom_factor(self.text_scale);
         self.apply_theme(ui.ctx());
         self.handle_shortcuts(ui.ctx());
+        self.receive_screenshot(ui.ctx());
         let paint = self.paint;
         ui.horizontal(|ui| {
             ui.heading(RichText::new("ScalarScope").color(paint.mark));
@@ -292,8 +320,16 @@ impl ScalarScopeApp {
 
         ui.add_space(8.0);
         if let Some(opened) = opened {
+            if !opened.verified {
+                ui.label(
+                    RichText::new("Unverified 2.0 review: 2.0 saved it without integrity.json, so these bytes cannot be checked. The hash below is the one its JSON states.")
+                        .color(paint.mark),
+                );
+            }
             ui.horizontal(|ui| {
-                ui.label(RichText::new(format!("Stored review · {}", &opened.bundle_hash[..16])).color(paint.note));
+                let hash = opened.bundle_hash.get(..16).unwrap_or(&opened.bundle_hash);
+                let kind = if opened.verified { "Stored review" } else { "Stated hash" };
+                ui.label(RichText::new(format!("{kind} · {hash}")).color(paint.note));
                 if ui.button("Copy hash").on_hover_text("Copy the full SHA-256 content check").clicked() {
                     ui.ctx().copy_text(opened.bundle_hash.clone());
                 }
@@ -304,9 +340,16 @@ impl ScalarScopeApp {
                 Some(Pair::Inference(review)) => self.draw_inference(ui, &review),
                 Some(Pair::Training(review)) => draw_training(ui, &review, paint),
                 None => {
+                    if !opened.review.left_text.is_empty() || !opened.review.right_text.is_empty() {
+                        ui.label(RichText::new(format!("{} vs {}", opened.review.left_text, opened.review.right_text)).color(paint.note));
+                    }
                     if !opened.review.verdict.is_empty() {
                         ui.label(RichText::new(&opened.review.verdict).color(self.paint.text));
                     }
+                    for line in &opened.review.notices {
+                        ui.label(RichText::new(line).color(paint.note));
+                    }
+                    self.draw_tiles(ui, &opened.review.explanations);
                     ui.label(RichText::new(&opened.review.caption).color(paint.note));
                 }
             }
@@ -417,6 +460,23 @@ impl ScalarScopeApp {
             for (view, name) in View::ALL {
                 ui.selectable_value(&mut self.view, view, name);
             }
+            ui.separator();
+            let vector = self.view != View::HeatMap;
+            if ui
+                .add_enabled(vector, egui::Button::new("Export SVG"))
+                .on_hover_text("This view as a vector drawing")
+                .on_disabled_hover_text("The heat map exports as PNG")
+                .clicked()
+            {
+                self.export_svg(review);
+            }
+            if ui.button("Export PNG").on_hover_text("A picture of the window").clicked() {
+                self.pending_png = pick_export_path("png", "scalarscope");
+                if self.pending_png.is_some() {
+                    ui.ctx().send_viewport_cmd(egui::ViewportCommand::Screenshot(egui::UserData::default()));
+                    ui.ctx().request_repaint();
+                }
+            }
         });
         ui.label(RichText::new(&review.left_text).color(paint.note));
         ui.label(RichText::new(&review.right_text).color(paint.note));
@@ -428,7 +488,7 @@ impl ScalarScopeApp {
         for line in &review.notices {
             ui.label(RichText::new(line).color(paint.note));
         }
-        self.draw_tiles(ui, review);
+        self.draw_tiles(ui, &review.explanations);
         match self.view {
             View::Series => {}
             View::Distribution => {
@@ -548,6 +608,61 @@ impl ScalarScopeApp {
         self.built.as_ref().map(|(_, pair)| pair.clone())
     }
 
+    fn svg_colors(&self) -> crate::svg::Colors {
+        let rgb = |color: Color32| [color.r(), color.g(), color.b()];
+        crate::svg::Colors {
+            left: rgb(self.paint.left),
+            right: rgb(self.paint.right),
+            mark: rgb(self.paint.mark),
+            note: rgb(self.paint.note),
+            text: rgb(self.paint.text),
+            background: rgb(self.paint.background),
+        }
+    }
+
+    /// The current view as an SVG file.
+    fn export_svg(&mut self, review: &InferenceReview) {
+        let colors = self.svg_colors();
+        let (name, svg) = match self.view {
+            View::Series | View::HeatMap => ("series", crate::svg::series(review, colors)),
+            View::Warmup => ("warmup", crate::svg::warmup(review, colors)),
+            View::Distribution => ("distribution", crate::svg::distribution(review, colors, self.threshold.or(review.left_p95))),
+            View::Difference => ("difference", crate::svg::difference(review, colors)),
+            View::Spectrum => ("spectrum", crate::svg::spectrum(review, colors)),
+        };
+        let Some(path) = pick_export_path("svg", name) else {
+            return;
+        };
+        self.note = match std::fs::write(&path, svg) {
+            Ok(()) => format!("Saved the {name} view as SVG."),
+            Err(error) => format!("Could not write the SVG. {error}"),
+        };
+    }
+
+    fn receive_screenshot(&mut self, ctx: &egui::Context) {
+        if self.pending_png.is_none() {
+            return;
+        }
+        let image = ctx.input(|input| {
+            input.events.iter().find_map(|event| match event {
+                egui::Event::Screenshot { image, .. } => Some(image.clone()),
+                _ => None,
+            })
+        });
+        let Some(image) = image else {
+            // The screenshot arrives in a later frame; keep frames coming until it does.
+            ctx.request_repaint();
+            return;
+        };
+        let Some(path) = self.pending_png.take() else {
+            return;
+        };
+        self.note = match encode_png(&image).and_then(|bytes| std::fs::write(&path, bytes).map_err(|error| format!("Could not write the PNG. {error}"))) {
+            Ok(()) => "Saved a PNG of the window.".to_string(),
+            Err(error) => error,
+        };
+    }
+
     fn options(&self) -> review::Options {
         review::Options {
             anomaly: crate::stats::AnomalyRule::from_code(self.settings.anomaly_rule),
@@ -658,14 +773,14 @@ impl ScalarScopeApp {
     }
 
     /// One tile per delta. A tile opens its "Why" panel.
-    fn draw_tiles(&mut self, ui: &mut egui::Ui, review: &InferenceReview) {
-        if review.explanations.is_empty() {
+    fn draw_tiles(&mut self, ui: &mut egui::Ui, explanations: &[review::Explanation]) {
+        if explanations.is_empty() {
             return;
         }
         let paint = self.paint;
         ui.add_space(4.0);
         ui.horizontal_wrapped(|ui| {
-            for tile in &review.explanations {
+            for tile in explanations {
                 let color = match tile.status.as_str() {
                     "fired" => paint.mark,
                     "withheld" => paint.note,
@@ -678,7 +793,7 @@ impl ScalarScopeApp {
                 }
             }
         });
-        let Some(tile) = review.explanations.iter().find(|tile| Some(tile.symbol.as_str()) == self.why.as_deref()) else {
+        let Some(tile) = explanations.iter().find(|tile| Some(tile.symbol.as_str()) == self.why.as_deref()) else {
             return;
         };
         egui::Frame::group(ui.style()).show(ui, |ui| {

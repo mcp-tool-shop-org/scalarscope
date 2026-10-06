@@ -152,6 +152,9 @@ pub struct Verification {
 pub struct OpenedBundle {
     pub bundle_hash: String,
     pub review: StoredReview,
+    /// False for a 2.0 review-only bundle: it has no integrity.json, so its bytes cannot be checked,
+    /// and `bundle_hash` is the hash its JSON states.
+    pub verified: bool,
 }
 
 #[derive(Serialize, serde::Deserialize)]
@@ -389,6 +392,13 @@ pub fn verify(bytes: &[u8]) -> Result<Verification, String> {
 
 pub fn open_bytes(bytes: &[u8]) -> Result<OpenedBundle, String> {
     let verification = verify(bytes)?;
+    if !verification.valid && verification.codes == ["MissingIntegrity"] {
+        // 2.0 auto-saved an inference review as review/review.json alone, with no integrity.json.
+        let entries = unpack(bytes)?;
+        if let Some(opened) = dotnet_review(&entries) {
+            return opened;
+        }
+    }
     if !verification.valid {
         return Err(format!(
             "The bundle hash does not match these bytes ({}).",
@@ -404,7 +414,85 @@ pub fn open_bytes(bytes: &[u8]) -> Result<OpenedBundle, String> {
     Ok(OpenedBundle {
         bundle_hash: verification.actual_bundle_hash,
         review,
+        verified: true,
     })
+}
+
+/// A 2.0 review-only bundle: `review/review.json` holding a `ReviewOnlyBundle` (version, bundleHash,
+/// comparison with its deltas). It keeps the deltas, not the samples, so there is no chart, and
+/// without integrity.json nothing checks its bytes. None when the archive is not that.
+/// A run's label, or the side's letter when the file has none.
+fn or_side(label: &str, side: &str) -> String {
+    if label.trim().is_empty() { side.to_string() } else { label.to_string() }
+}
+
+fn dotnet_review(entries: &[(String, Vec<u8>)]) -> Option<Result<OpenedBundle, String>> {
+    let [(path, data)] = entries else {
+        return None;
+    };
+    if path != REVIEW_PATH {
+        return None;
+    }
+    let value: Value = serde_json::from_slice(data).ok()?;
+    let comparison = value.get("comparison")?;
+    value.get("version")?;
+    let text = |item: &Value, key: &str| item.get(key).and_then(Value::as_str).unwrap_or("").to_string();
+    let number = |item: &Value, key: &str| item.get(key).and_then(Value::as_f64);
+    let intent = comparison.get("intent").cloned().unwrap_or(Value::Null);
+    let (label_a, label_b) = (text(&intent, "labelA"), text(&intent, "labelB"));
+    let mut explanations = Vec::new();
+    let mut fired = Vec::new();
+    let mut sentences = Vec::new();
+    for delta in comparison.get("deltas").and_then(Value::as_array).into_iter().flatten() {
+        let symbol = text(delta, "deltaType");
+        let is_fired = delta.get("fired").and_then(Value::as_bool).unwrap_or(false);
+        let suppressed = delta.get("isSuppressed").and_then(Value::as_bool).unwrap_or(false);
+        let headline = Some(text(delta, "interpretation"))
+            .filter(|line| !line.is_empty())
+            .or_else(|| Some(text(delta, "suppressionReason")).filter(|line| !line.is_empty()))
+            .unwrap_or_else(|| if suppressed { "Suppressed".to_string() } else { "Did not fire".to_string() });
+        if is_fired {
+            fired.push(symbol.clone());
+            sentences.push(format!("{symbol} {headline}"));
+        }
+        let shown = |value: Option<f64>| value.map_or("none".to_string(), |value| format!("{value}"));
+        explanations.push(crate::review::Explanation {
+            symbol: symbol.clone(),
+            status: if is_fired { "fired" } else if suppressed { "withheld" } else { "quiet" }.to_string(),
+            headline,
+            why: format!(
+                "{} This is the finding 2.0 stored; 3.0 does not recompute it, and its rules differ (see the Guide).",
+                text(delta, "notes")
+            ),
+            parameters: vec![
+                [or_side(&label_a, "A"), shown(number(delta, "valueA"))],
+                [or_side(&label_b, "B"), shown(number(delta, "valueB"))],
+                ["Difference".to_string(), shown(number(delta, "absoluteDifference"))],
+                ["2.0 confidence".to_string(), shown(number(delta, "confidence"))],
+            ],
+            anchor: None,
+        });
+    }
+    let stated = text(&value, "bundleHash");
+    let review = StoredReview {
+        kind: "dotnet-review".to_string(),
+        verdict: if sentences.is_empty() { "No delta fired in this 2.0 review.".to_string() } else { sentences.join(" ") },
+        fired,
+        caption: "A 2.0 inference review. It stores the deltas, not the samples, so there is no chart, and 2.0 wrote no integrity.json, so its bytes cannot be checked. Open the two runs to review them in 3.0.".to_string(),
+        left_text: label_a,
+        right_text: label_b,
+        findings: Vec::new(),
+        inference: None,
+        training: None,
+        notices: comparison.get("warnings").and_then(Value::as_array).into_iter().flatten().filter_map(Value::as_str).map(str::to_string).collect(),
+        headline: String::new(),
+        explanations,
+    };
+    Some(Ok(OpenedBundle {
+        bundle_hash: stated,
+        review,
+        verified: false,
+    }))
 }
 
 pub fn write_file(path: &Path, sealed: &Sealed) -> Result<(), String> {
@@ -647,8 +735,49 @@ fn findings_only(entries: &[(String, Vec<u8>)]) -> Result<StoredReview, String> 
         return Err("This bundle has no stored review.".to_string());
     };
     let deltas: Vec<Value> = serde_json::from_slice(data).map_err(|_| "The stored findings did not parse.".to_string())?;
+    let whys: Vec<Value> = entries
+        .iter()
+        .find(|(path, _)| path == "findings/why.json")
+        .and_then(|(_, data)| serde_json::from_slice(data).ok())
+        .unwrap_or_default();
     let mut fired = Vec::new();
     let mut sentences = Vec::new();
+    let mut explanations = Vec::new();
+    for delta in &deltas {
+        let id = delta.get("id").and_then(Value::as_str).unwrap_or("");
+        let status = delta.get("status").and_then(Value::as_str).unwrap_or("");
+        let why = whys.iter().find(|row| row.get("deltaId").and_then(Value::as_str).is_some_and(|key| key.eq_ignore_ascii_case(id)));
+        let line = |item: Option<&Value>, key: &str| item.and_then(|item| item.get(key)).and_then(Value::as_str).unwrap_or("").to_string();
+        let headline = [line(Some(delta), "summarySentence"), line(Some(delta), "explanation"), line(Some(delta), "name")]
+            .into_iter()
+            .find(|text| !text.is_empty())
+            .unwrap_or_else(|| id.to_string());
+        let mut parameters: Vec<[String; 2]> = why
+            .and_then(|row| row.get("parameters"))
+            .and_then(Value::as_object)
+            .map(|map| map.iter().map(|(key, value)| [key.clone(), value.to_string().trim_matches('"').to_string()]).collect())
+            .unwrap_or_default();
+        if let Some(confidence) = delta.get("confidence").and_then(Value::as_f64) {
+            parameters.push(["2.0 confidence".to_string(), format!("{confidence:.2}")]);
+        }
+        explanations.push(crate::review::Explanation {
+            symbol: symbol_for(id).unwrap_or(id).to_string(),
+            status: match status {
+                "Present" => "fired",
+                "Suppressed" => "withheld",
+                _ => "quiet",
+            }
+            .to_string(),
+            headline,
+            why: [line(why, "explanation"), "This is the finding 2.0 stored; 3.0 does not recompute it.".to_string()]
+                .into_iter()
+                .filter(|text| !text.is_empty())
+                .collect::<Vec<_>>()
+                .join(" "),
+            parameters,
+            anchor: None,
+        });
+    }
     for delta in deltas {
         let status = delta.get("status").and_then(Value::as_str).unwrap_or("");
         if status != "Present" {
@@ -679,7 +808,7 @@ fn findings_only(entries: &[(String, Vec<u8>)]) -> Result<StoredReview, String> 
         kind: "findings".to_string(),
         notices: Vec::new(),
         headline: String::new(),
-        explanations: Vec::new(),
+        explanations,
         verdict,
         fired,
         caption: "This bundle stores the findings. It does not store the series, so the chart is not drawn from another file.".to_string(),
@@ -691,13 +820,14 @@ fn findings_only(entries: &[(String, Vec<u8>)]) -> Result<StoredReview, String> 
     })
 }
 
+/// The delta symbol for a stored id. 2.0 writes ids in camelCase (`failurePresence`); match either case.
 fn symbol_for(id: &str) -> Option<&'static str> {
-    match id {
-        "FailurePresence" => Some("ΔF"),
-        "ConvergenceTiming" => Some("ΔTc"),
-        "StabilityOscillation" => Some("ΔO"),
-        "StructuralEmergence" => Some("ΔTd"),
-        "EvaluatorAlignment" => Some("ΔĀ"),
+    match id.to_ascii_lowercase().as_str() {
+        "failurepresence" => Some("ΔF"),
+        "convergencetiming" => Some("ΔTc"),
+        "stabilityoscillation" => Some("ΔO"),
+        "structuralemergence" => Some("ΔTd"),
+        "evaluatoralignment" => Some("ΔĀ"),
         _ => None,
     }
 }
