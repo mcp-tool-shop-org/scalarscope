@@ -3,6 +3,7 @@
 
 pub mod bundle;
 pub mod geometry;
+pub mod geometry_deltas;
 pub mod history;
 pub mod milestones;
 pub mod open;
