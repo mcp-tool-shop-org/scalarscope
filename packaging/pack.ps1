@@ -53,6 +53,8 @@ try {
         if ($executable -ne 'scalarscope.exe') { throw "Executable is $executable" }
         $publisher = $manifest.Package.Properties.PublisherDisplayName
         if ($publisher -ne 'mcp-tool-shop') { throw "Publisher display name is $publisher" }
+        $families = @($manifest.Package.Dependencies.TargetDeviceFamily | ForEach-Object { $_.Name })
+        if ($families.Count -ne 1 -or $families[0] -ne 'Windows.Desktop') { throw "Device families are $($families -join ', '); a full-trust app declares Windows.Desktop only" }
     }
     finally {
         $zip.Dispose()

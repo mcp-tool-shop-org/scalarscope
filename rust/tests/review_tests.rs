@@ -265,3 +265,13 @@ fn marked(label: &str, latency: Vec<f64>, steady: Option<i64>) -> Side {
 fn finite(values: &[Option<f64>]) -> Vec<f64> {
     values.iter().copied().flatten().collect()
 }
+
+#[test]
+fn delta_tc_stays_quiet_below_the_three_step_resolution() {
+    for (left_step, right_step) in [(4, 5), (5, 3), (2, 2)] {
+        let quiet = pair(&marked("a", vec![10.0; 8], Some(left_step)), &marked("b", vec![10.0; 8], Some(right_step))).unwrap();
+        let Pair::Inference(review) = quiet else { panic!("inference") };
+        assert!(!review.fired.iter().any(|symbol| symbol == "ΔTc"), "{left_step} vs {right_step}");
+        assert!(!review.verdict.contains("Stabilizes"), "{left_step} vs {right_step}");
+    }
+}

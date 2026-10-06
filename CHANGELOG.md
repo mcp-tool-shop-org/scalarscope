@@ -18,12 +18,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Home keeps a local comparison log. A review is written when both runs are loaded: the two names, the deltas that fired across the full run (ΔF, ΔTc, ΔTd, ΔĀ, ΔO), and the bundle hash once a bundle is saved or opened. The file stays in app data.
 
 ### Fixed
+- The spread band on an inference series is drawn as one trapezoid per step. It was one long polygon, which the plot filled as a fan of wedges across the chart. The legend shows one spread entry per side, in that side's color.
+- ΔTc stays quiet when both steady-state milestones are within 3 steps of each other, the same resolution the .NET app used. It had fired on a 1-step difference. A missing milestone still withholds ΔTc.
+- A reopened bundle names its two runs above the review, instead of Path A and Path B.
 - A bundle's hash is recomputed from the files in the archive. A stated hash that does not match those bytes is rejected, including a file that was left out of the hash list. The exporter writes the same UTF-8 bytes it hashes.
 - Home opens a `.scbundle`. Compare imports that bundle, and Try Example loads the built-in runs. The comparison log records a bundle when it loads.
 - Playback advances on the UI thread. A tick that is already queued is dropped.
 - Recovery resumes to Home, Compare, Help, or Settings. Start fresh returns to Home.
 
 ### Changed
+- The Store package declares Windows.Desktop only, tested up to Windows 11 (10.0.26100.0). Earlier packages also declared Windows.Universal, which offered a full-trust desktop app to device families that cannot run it. The pack script refuses any other family.
 - Package identity version is `3.0.0.0` for the next Partner Center update of store `9P3HT1PHBKQK`. Name, publisher, and publisher display name are unchanged.
 - The release workflow publishes an unsigned `ScalarScope_3.0.0.0_Store.msixupload` whose binary is the Rust review, the same upload shape as `ScalarScope_v2.0.0_Store.msixupload`. Partner Center signs it. The old workflow built the .NET package.
 - Welcome and Settings read the assembly version instead of a hardcoded `2.0.0`.
