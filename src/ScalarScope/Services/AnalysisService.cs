@@ -9,6 +9,12 @@ namespace ScalarScope.Services;
 /// </summary>
 public class AnalysisService
 {
+    /// <summary>
+    /// Longest series the overlay will scan. A longer series is refused.
+    /// The exponent for a series at or under this cap is unchanged.
+    /// </summary>
+    public const int OverlayScanCap = 2500;
+
     #region Eigenvalue Analysis
 
     /// <summary>
@@ -54,6 +60,11 @@ public class AnalysisService
         var trajectory = run.Trajectory?.Timesteps ?? [];
         if (trajectory.Count < 10)
             return new EigenvalueTimeline();
+        if (trajectory.Count > OverlayScanCap)
+            return new EigenvalueTimeline
+            {
+                UnavailableReason = "Series is longer than the overlay scan."
+            };
 
         var points = new List<EigenvaluePoint>();
         const int windowSize = 5;
@@ -142,6 +153,12 @@ public class AnalysisService
     public LyapunovAnalysis EstimateLyapunovExponent(GeometryRun run)
     {
         var trajectory = run.Trajectory?.Timesteps ?? [];
+        if (trajectory.Count > OverlayScanCap)
+            return new LyapunovAnalysis
+            {
+                IsValid = false,
+                ErrorMessage = "Series is longer than the overlay scan. The exponent was not estimated."
+            };
         if (trajectory.Count < 20)
             return new LyapunovAnalysis { IsValid = false, ErrorMessage = "Insufficient data" };
 
@@ -475,6 +492,7 @@ public record EigenvalueTimeline
     public double MaxLambda2 { get; init; }
     public double TimeStart => Points.Count > 0 ? Points[0].Time : 0;
     public double TimeEnd => Points.Count > 0 ? Points[^1].Time : 1;
+    public string? UnavailableReason { get; init; }
 }
 
 public record EigenvaluePoint

@@ -655,10 +655,35 @@ public class InferenceOptimizationFixtureTests
         assertions.TestCases.ErrorCodesStable.RepeatedValue.Should().Be(ReadInt(expected.Errors[0].Context["repeatedValue"]));
         assertions.TestCases.ErrorCodesStable.Reason.Should().NotBeNullOrWhiteSpace();
 
-        if (assertions.ExpectedBehavior?.ComparisonBlocked == true)
-            result.IsValid.Should().BeFalse();
-        if (assertions.ExpectedBehavior?.DeltasComputed == false)
-            result.IsValid.Should().BeFalse();
+        assertions.ExpectedBehavior.Should().NotBeNull();
+        var behavior = assertions.ExpectedBehavior!;
+        behavior.ComparisonBlocked.Should().BeTrue();
+        behavior.DeltasComputed.Should().BeFalse();
+        behavior.BundleExportDisabled.Should().BeTrue();
+        behavior.ErrorExplanationShown.Should().BeTrue();
+        behavior.PresetApplicationBlocked.Should().BeTrue();
+
+        var comparison = _comparer.Compare(broken, broken, ComparisonIntent.TfrtOptimization());
+        comparison.ComparisonBlocked.Should().BeTrue();
+        comparison.Deltas.Should().BeEmpty();
+        comparison.PresetId.Should().BeEmpty();
+        comparison.Fingerprints.IsValidForComparison.Should().BeFalse();
+        comparison.Alignment.AlignedStepCount.Should().Be(0);
+        comparison.Alignment.IsSuccess.Should().BeFalse();
+
+        var userMessage = assertions.ExpectedUserMessage;
+        userMessage.Should().NotBeNull();
+        comparison.UserMessage.Should().Contain(userMessage!.Title);
+        comparison.UserMessage.Split(userMessage.Title).Length.Should().Be(2);
+        foreach (var bullet in userMessage.Bullets ?? [])
+            comparison.UserMessage.Should().Contain(bullet);
+        foreach (var advice in userMessage.ActionableAdvice ?? [])
+            comparison.UserMessage.Should().Contain(advice);
+
+        var export = Assert.Throws<InvalidOperationException>(
+            () => _comparer.ExportReviewBundle(comparison, broken, broken));
+        export.Message.Should().Contain("Bundle export is disabled");
+        export.Message.Should().Contain(comparison.UserMessage);
     }
 
     private static void ExpectCapabilities(RuntimeRunTrace trace, CapabilityExpectation? expected)

@@ -11,7 +11,11 @@ public class DeterminismSuiteTests
         "FingerprintDeterminism",
         "DeltaHashDeterminism",
         "DoubleNormalization",
-        "RunIdNormalization"
+        "RunIdNormalization",
+        "InstabilityAlignmentExport",
+        "SingleStepAlignment",
+        "EnumSchemaRoundTrip",
+        "FiveDeltaIdRoundTrip"
     ];
 
     [Fact]
@@ -20,13 +24,12 @@ public class DeterminismSuiteTests
         var results = DeterminismTestSuite.RunAllTests();
 
         Assert.NotNull(results);
-        Assert.True(results.TotalTests >= RequiredTests.Length, results.ToString());
+        Assert.Equal(RequiredTests.Length, results.TotalTests);
         Assert.True(results.AllPassed, results.ToString());
         Assert.Equal(0, results.FailedTests);
 
-        foreach (var name in RequiredTests)
-        {
-            Assert.Contains(results.Results, result => result.TestName == name && result.Passed);
-        }
+        var names = results.Results.Select(result => result.TestName).OrderBy(name => name, StringComparer.Ordinal);
+        Assert.Equal(RequiredTests.OrderBy(name => name, StringComparer.Ordinal), names);
+        Assert.All(results.Results, result => Assert.True(result.Passed, result.TestName));
     }
 }

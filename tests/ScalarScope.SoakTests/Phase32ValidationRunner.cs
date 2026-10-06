@@ -295,9 +295,10 @@ public class Phase32ValidationRunner
             Notes = notes
         };
 
-    private static bool CanLock(Phase32ValidationReport report)
+    public static bool CanLock(Phase32ValidationReport report)
         => report.PairResults.Count > 0
            && report.SuiteGates?.GateA == true
+           && report.SuiteGates?.GateD == true
            && report.DeltaFVerification?.Checks.Count > 0
            && report.DeltaFVerification.Checks.All(check => check.Passed)
            && (report.DeltaImplementationStatus?.AllImplemented ?? false);
@@ -497,7 +498,8 @@ public class Phase32ValidationReport
 
         // Lock Decision
         sb.AppendLine("---");
-        sb.AppendLine($"## Lock Decision: {(Locked ? "🔒 **LOCKED**" : "🔓 **NOT LOCKED**")}");
+        var showLocked = Locked && AllGatesPassed;
+        sb.AppendLine($"## Lock Decision: {(showLocked ? "🔒 **LOCKED**" : "🔓 **NOT LOCKED**")}");
         if (!string.IsNullOrEmpty(LockDecision))
         {
             sb.AppendLine(LockDecision);

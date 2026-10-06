@@ -51,6 +51,7 @@ public class FailuresTimeline : SKCanvasView
 
     public FailuresTimeline()
     {
+        AccessibleCanvasHook.Attach(this);
         PaintSurface += OnPaintSurface;
         EnableTouchEvents = true;
         Touch += OnTouch;
@@ -67,7 +68,7 @@ public class FailuresTimeline : SKCanvasView
         var canvas = e.Surface.Canvas;
         var info = e.Info;
 
-        canvas.Clear(BackgroundColor);
+        AccessibleCanvasHook.Paint(canvas, e.Info, this, BackgroundColor);
 
         DrawTimeline(canvas, info);
         DrawFailureMarkers(canvas, info);

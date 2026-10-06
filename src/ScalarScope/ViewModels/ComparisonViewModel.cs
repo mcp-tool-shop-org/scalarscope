@@ -553,8 +553,9 @@ public partial class ComparisonViewModel : ObservableObject
         // Update comparison state
         UpdateComparisonState();
 
-        // Reset player to start
+        // Reset player to start, then honor the saved speed and auto-play.
         Player.JumpToTimeCommand.Execute(0.0);
+        Player.ApplySavedPlayback();
         NotifyComputedPropertiesChanged();
         
         // Phase 5.2: Smooth transition if coming from demo state
@@ -824,6 +825,7 @@ public partial class ComparisonViewModel : ObservableObject
         TraceReview = review;
         ShowTraceReview = true;
         HasBothRuns = true;
+        Player.ApplySavedPlayback();
         IsCompareMode = true;
         CanonicalDeltas = [];
         DeltaCount = review.FiredSymbols.Count;

@@ -68,6 +68,7 @@ public class ProbingInspectorPanel : SKCanvasView
 
     public ProbingInspectorPanel()
     {
+        AccessibleCanvasHook.Attach(this);
         PaintSurface += OnPaintSurface;
     }
 
@@ -82,7 +83,7 @@ public class ProbingInspectorPanel : SKCanvasView
         var canvas = e.Surface.Canvas;
         var info = e.Info;
 
-        canvas.Clear(BackgroundColor);
+        AccessibleCanvasHook.Paint(canvas, e.Info, this, BackgroundColor);
 
         if (Run == null || SelectedIndex == null)
         {

@@ -275,6 +275,7 @@ public partial class VortexSessionViewModel : ObservableObject
             Player.TotalCycles = run.Metadata?.Cycles ?? run.Trajectory?.Timesteps?.Count ?? 0;
             Player.ConfigureForRunSize(run.Trajectory?.Timesteps?.Count ?? 0);
             Player.JumpToTimeCommand.Execute(0.0);
+            Player.ApplySavedPlayback();
 
             UserPreferencesService.AddRecentFile(path, RunName);
             try { ScalarScope.App.SaveSessionState(); }

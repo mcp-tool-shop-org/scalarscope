@@ -81,7 +81,10 @@ public partial class OverviewPage : ContentPage
 
             if (pathA == null || pathB == null)
             {
-                await DisplayAlert("Demo Error", "Failed to load demo data. Please try again.", "OK");
+                await DisplayAlert(
+                    "Demo Error",
+                    DemoService.LastFailure ?? DemoService.DescribeLoadFailure(DemoService.PathAFileName, null),
+                    "OK");
                 return;
             }
 
@@ -222,8 +225,8 @@ public partial class OverviewPage : ContentPage
             exportStatusLabel.Text = "Exporting...";
             exportStatusLabel.TextColor = Color.FromArgb("#888");
 
-            var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            var scalarScopeExports = Path.Combine(documentsPath, "ScalarScope Exports");
+            var scalarScopeExports = ExportPreferences.FolderOr(Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "ScalarScope Exports"));
             Directory.CreateDirectory(scalarScopeExports);
 
             var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
@@ -262,8 +265,8 @@ public partial class OverviewPage : ContentPage
         {
             exportStatusLabel.Text = "Exporting...";
 
-            var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            var scalarScopeExports = Path.Combine(documentsPath, "ScalarScope Exports");
+            var scalarScopeExports = ExportPreferences.FolderOr(Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "ScalarScope Exports"));
             Directory.CreateDirectory(scalarScopeExports);
 
             var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");

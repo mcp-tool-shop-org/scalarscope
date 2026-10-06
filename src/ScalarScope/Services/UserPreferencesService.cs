@@ -8,11 +8,26 @@ namespace ScalarScope.Services;
 /// </summary>
 public static class UserPreferencesService
 {
-    private static readonly string PreferencesPath = Path.Combine(
-        FileSystem.AppDataDirectory, "preferences.json");
-
+    private static string? _preferencesOverride;
     private static UserPreferences? _cached;
     private static bool _loadFailed;
+
+    /// <summary>Why the last read or write failed. Null when the file is in sync.</summary>
+    public static string? StorageNotice { get; private set; }
+
+    /// <summary>Point load and save at a throwaway folder. Null uses the app data file.</summary>
+    public static void UseDirectory(string? directory)
+    {
+        _preferencesOverride = string.IsNullOrWhiteSpace(directory)
+            ? null
+            : Path.Combine(directory, "preferences.json");
+        _cached = null;
+        _loadFailed = false;
+        StorageNotice = null;
+    }
+
+    private static string PreferencesPath =>
+        _preferencesOverride ?? Path.Combine(FileSystem.AppDataDirectory, "preferences.json");
 
     /// <summary>
     /// Check if a specific hint has been dismissed.
@@ -419,10 +434,13 @@ public static class UserPreferencesService
 
         try
         {
-            if (!File.Exists(PreferencesPath))
+            // A directory at this path is not a missing file. File.Exists is false
+            // for it, and reading it is what tells Settings the file was left unchanged.
+            if (!File.Exists(PreferencesPath) && !Directory.Exists(PreferencesPath))
             {
                 _cached = new UserPreferences();
                 _loadFailed = false;
+                StorageNotice = null;
                 return _cached;
             }
 
@@ -431,11 +449,13 @@ public static class UserPreferencesService
                 ?? throw new InvalidDataException("preferences.json was empty.");
             _cached = parsed;
             _loadFailed = false;
+            StorageNotice = null;
         }
         catch (Exception ex)
         {
             _loadFailed = true;
             _cached = null;
+            StorageNotice = "Saved settings could not be read. The preferences file was left unchanged.";
             ErrorLoggingService.Instance.Log(ex, "preferences.json");
             return new UserPreferences();
         }
@@ -447,9 +467,10 @@ public static class UserPreferencesService
     {
         if (_loadFailed)
         {
+            StorageNotice = "Saved settings could not be read. The preferences file was left unchanged.";
             ErrorLoggingService.Instance.Log(
                 ErrorSeverity.Warning,
-                "preferences.json was not overwritten because it could not be read.",
+                StorageNotice,
                 "preferences.json");
             return false;
         }
@@ -463,11 +484,30 @@ public static class UserPreferencesService
             var json = JsonSerializer.Serialize(prefs, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(PreferencesPath, json);
             _cached = prefs;
+            StorageNotice = null;
             return true;
         }
         catch (Exception ex)
         {
             ErrorLoggingService.Instance.Log(ex, "preferences.json");
+            StorageNotice = "The preference was not stored.";
+            _cached = null;
+            try
+            {
+                if (File.Exists(PreferencesPath))
+                {
+                    var json = File.ReadAllText(PreferencesPath);
+                    _cached = JsonSerializer.Deserialize<UserPreferences>(json);
+                }
+            }
+            catch (Exception reload)
+            {
+                _loadFailed = true;
+                _cached = null;
+                ErrorLoggingService.Instance.Log(reload, "preferences.json");
+                StorageNotice = "Saved settings could not be read. The preferences file was left unchanged.";
+            }
+
             return false;
         }
     }

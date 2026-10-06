@@ -83,8 +83,12 @@ public class AnalysisOverlayPanel : SKCanvasView
     private Models.GeometryRun? _currentRenderRun;
     private bool _isRenderingDemo;
 
+    private int _analysisTicket;
+    private bool _analysisQueued;
+
     public AnalysisOverlayPanel()
     {
+        AccessibleCanvasHook.Attach(this);
         PaintSurface += OnPaintSurface;
         
         // Phase 1: Subscribe to demo animation for continuous repainting
@@ -111,11 +115,13 @@ public class AnalysisOverlayPanel : SKCanvasView
             if (newValue is VortexSessionViewModel newSession)
             {
                 newSession.Player.TimeChanged += panel.OnTimeChanged;
+                panel._analysisQueued = false;
                 panel.RefreshAnalysis();
             }
             else
             {
                 panel._analysis = null;
+                panel._analysisQueued = false;
             }
             panel.InvalidateSurface();
         }
@@ -139,15 +145,43 @@ public class AnalysisOverlayPanel : SKCanvasView
     /// </summary>
     public void RefreshAnalysis()
     {
-        if (Session?.Run != null)
-        {
-            _analysis = _analysisService.AnalyzeRun(Session.Run);
-        }
-        else
+        RequestAnalysis(Session?.Run);
+    }
+
+    private void RequestAnalysis(Models.GeometryRun? run)
+    {
+        if (run == null)
         {
             _analysis = null;
+            _analysisQueued = false;
+            InvalidateSurface();
+            return;
         }
-        InvalidateSurface();
+
+        var ticket = ++_analysisTicket;
+        _analysisQueued = true;
+        var service = _analysisService;
+        Task.Run(() =>
+        {
+            var analysis = service.AnalyzeRun(run);
+            void Apply()
+            {
+                if (ticket != _analysisTicket)
+                    return;
+                _analysis = analysis;
+                _analysisQueued = false;
+                InvalidateSurface();
+            }
+
+            try
+            {
+                MainThread.BeginInvokeOnMainThread(Apply);
+            }
+            catch (InvalidOperationException)
+            {
+                Apply();
+            }
+        });
     }
 
     private void OnPaintSurface(object? sender, SKPaintSurfaceEventArgs e)
@@ -155,7 +189,7 @@ public class AnalysisOverlayPanel : SKCanvasView
         var canvas = e.Surface.Canvas;
         var info = e.Info;
 
-        canvas.Clear(BackgroundColor);
+        AccessibleCanvasHook.Paint(canvas, info, this, BackgroundColor);
 
         // Phase 1: Use demo data when no session available
         _currentRenderRun = Session?.Run;
@@ -167,9 +201,9 @@ public class AnalysisOverlayPanel : SKCanvasView
             _isRenderingDemo = true;
             
             // Generate analysis for demo run if needed
-            if (_currentRenderRun != null && _analysis == null)
+            if (_currentRenderRun != null && _analysis == null && !_analysisQueued)
             {
-                _analysis = _analysisService.AnalyzeRun(_currentRenderRun);
+                RequestAnalysis(_currentRenderRun);
             }
         }
 
@@ -234,16 +268,16 @@ public class AnalysisOverlayPanel : SKCanvasView
 
     private void DrawNoDataMessage(SKCanvas canvas, SKImageInfo info)
     {
-        using var font = new SKFont(SKTypeface.Default, 14);
-        using var paint = new SKPaint { Color = TextColor, IsAntialias = true };
+        using var font = new SKFont(SKTypeface.Default, AccessibleCanvasHook.ScaledFont(14));
+        using var paint = new SKPaint { Color = AccessibleCanvasHook.Ink(TextColor), IsAntialias = true };
         canvas.DrawText("Load a training run to see analysis", 
             info.Width / 2f, info.Height / 2f, SKTextAlign.Center, font, paint);
     }
 
     private void DrawLabel(SKCanvas canvas, string text, float x, float y)
     {
-        using var font = new SKFont(SKTypeface.Default, 11);
-        using var paint = new SKPaint { Color = TextColor, IsAntialias = true };
+        using var font = new SKFont(SKTypeface.Default, AccessibleCanvasHook.ScaledFont(11));
+        using var paint = new SKPaint { Color = AccessibleCanvasHook.Ink(TextColor), IsAntialias = true };
         canvas.DrawText(text, x, y + 4, SKTextAlign.Left, font, paint);
     }
 

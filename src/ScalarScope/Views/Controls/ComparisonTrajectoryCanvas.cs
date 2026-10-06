@@ -149,6 +149,7 @@ public class ComparisonTrajectoryCanvas : SKCanvasView
 
     public ComparisonTrajectoryCanvas()
     {
+        AccessibleCanvasHook.Attach(this);
         PaintSurface += OnPaintSurface;
         
         // Phase 1: Subscribe to demo animation for continuous repainting
@@ -187,7 +188,7 @@ public class ComparisonTrajectoryCanvas : SKCanvasView
         var canvas = e.Surface.Canvas;
         var info = e.Info;
 
-        canvas.Clear(BackgroundColor);
+        AccessibleCanvasHook.Paint(canvas, e.Info, this, BackgroundColor);
 
         _center = new SKPoint(info.Width / 2f, info.Height / 2f);
         _scale = Math.Min(info.Width, info.Height) / 4f;

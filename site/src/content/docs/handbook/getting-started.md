@@ -87,4 +87,6 @@ Open the **Settings** tab to configure:
 - **Accessibility**: high contrast mode, color vision modes (deuteranopia, protanopia, tritanopia, monochrome), screen reader support, text scale (75% to 200%), large pointer
 - **Session**: auto-load last session, recent files limit
 
-All preferences are stored locally and persist between sessions.
+The Settings tab writes these controls, and the four-tab shell reads them when it starts. The Rust review applies color vision, high contrast, and text scale. It does not offer screen reader descriptions or a larger pointer.
+
+All preferences are stored locally and persist between sessions. If the preferences file cannot be read, ScalarScope leaves that file unchanged and Settings says so.

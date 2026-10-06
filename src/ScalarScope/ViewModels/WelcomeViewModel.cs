@@ -19,6 +19,12 @@ public partial class WelcomeViewModel : ObservableObject
     private bool _hasComparisonLog;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasClearNotice))]
+    private string _clearNotice = "";
+
+    public bool HasClearNotice => !string.IsNullOrWhiteSpace(ClearNotice);
+
+    [ObservableProperty]
     private List<ComparisonLogEntry> _comparisonLogEntries = [];
 
     [ObservableProperty]
@@ -155,14 +161,23 @@ public partial class WelcomeViewModel : ObservableObject
         try
         {
             ComparisonLog.Clear(ComparisonLog.DefaultDirectory);
+            ComparisonLogEntries = [];
+            HasComparisonLog = false;
+            ClearNotice = "";
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Comparison log: {ex.Message}");
-        }
+            try
+            {
+                ErrorLoggingService.Instance.Log(ex, "comparison-log.json");
+            }
+            catch (Exception logEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"Comparison log: {logEx.Message}");
+            }
 
-        ComparisonLogEntries = [];
-        HasComparisonLog = false;
+            ClearNotice = ex.Message;
+        }
     }
 
     /// <summary>

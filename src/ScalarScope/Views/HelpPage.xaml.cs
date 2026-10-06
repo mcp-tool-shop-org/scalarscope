@@ -114,17 +114,23 @@ public partial class HelpPage : ContentPage
             // Start the demo again
             var (pathA, pathB) = await DemoService.StartDemoAsync();
 
-            if (pathA != null && pathB != null)
+            if (pathA == null || pathB == null)
             {
-                App.Comparison.LoadDemoRuns(pathA, pathB);
-                await Shell.Current.GoToAsync("//compare");
+                await DisplayAlert(
+                    "Demo Error",
+                    DemoService.LastFailure ?? DemoService.DescribeLoadFailure(DemoService.PathAFileName, null),
+                    "OK");
+                return;
+            }
 
-                // Auto-start playback
-                await Task.Delay(500);
-                if (!App.Comparison.Player.IsPlaying)
-                {
-                    App.Comparison.Player.PlayPauseCommand.Execute(null);
-                }
+            App.Comparison.LoadDemoRuns(pathA, pathB);
+            await Shell.Current.GoToAsync("//compare");
+
+            // Auto-start playback
+            await Task.Delay(500);
+            if (!App.Comparison.Player.IsPlaying)
+            {
+                App.Comparison.Player.PlayPauseCommand.Execute(null);
             }
         }
         catch (Exception ex)

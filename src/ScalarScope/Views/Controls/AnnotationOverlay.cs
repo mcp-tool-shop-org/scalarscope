@@ -129,6 +129,8 @@ public class AnnotationOverlay : SKCanvasView
 
     public AnnotationOverlay()
     {
+        AccessibleCanvasHook.Attach(this);
+        Density = UserPreferencesService.GetAnnotationDensity();
         PaintSurface += OnPaintSurface;
         InputTransparent = true; // Allow clicks to pass through
     }
@@ -142,7 +144,7 @@ public class AnnotationOverlay : SKCanvasView
     private void OnPaintSurface(object? sender, SKPaintSurfaceEventArgs e)
     {
         var canvas = e.Surface.Canvas;
-        canvas.Clear(SKColors.Transparent);
+        AccessibleCanvasHook.Paint(canvas, e.Info, this, SKColors.Transparent);
 
         if (Run == null) return;
 

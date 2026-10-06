@@ -1,9 +1,9 @@
 using System.Diagnostics;
-using System.Numerics;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.ApplicationModel;
 using ScalarScope.Models;
 using ScalarScope.Services;
+using ScalarScope.ViewModels;
 
 namespace ScalarScope.SoakTests;
 
@@ -28,27 +28,28 @@ public class SoakTestRunner
         _config = config;
     }
 
-    public async Task<SoakTestReport> RunAsync()
+    public async Task<SoakTestReport> RunAsync(CancellationToken external = default)
     {
         _logger.LogInformation("Starting soak test with duration: {Duration} minutes", _config.DurationMinutes);
 
         _startMemory = GC.GetTotalMemory(true);
         _stopwatch.Start();
 
-        var cts = new CancellationTokenSource(TimeSpan.FromMinutes(_config.DurationMinutes));
+        using var durationCts = new CancellationTokenSource(TimeSpan.FromMinutes(_config.DurationMinutes));
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(durationCts.Token, external);
         var iteration = 0;
 
         try
         {
-            while (!cts.Token.IsCancellationRequested)
+            while (!linked.Token.IsCancellationRequested)
             {
                 iteration++;
                 _logger.LogInformation("Starting iteration {Iteration}", iteration);
 
-                await RunIterationAsync(iteration, cts.Token);
+                await RunIterationAsync(iteration, linked.Token);
 
                 // Brief pause between iterations
-                await Task.Delay(TimeSpan.FromSeconds(_config.PauseBetweenIterationsSeconds), cts.Token);
+                await Task.Delay(TimeSpan.FromSeconds(_config.PauseBetweenIterationsSeconds), linked.Token);
             }
         }
         catch (OperationCanceledException)
@@ -110,53 +111,58 @@ public class SoakTestRunner
         await Task.Delay(100, ct);
     }
 
-    private async Task TestPlaybackAsync(int iteration, CancellationToken ct)
+    /// <summary>
+    /// Drive the player the shell uses. A stopped player does not move Time.
+    /// </summary>
+    public static SoakTestResult ExercisePlayback(int budgetMs)
     {
         var sw = Stopwatch.StartNew();
         var passed = false;
-        var message = "PlaybackController was not exercised";
+        var message = "TrajectoryPlayerViewModel was not exercised";
 
         try
         {
-            using var playback = new PlaybackController { EnableParticles = false, EnableMotionBlur = false };
-            var points = new List<Vector2>();
-            var times = new List<double>();
-            for (var i = 0; i < 5; i++)
-            {
-                points.Add(new Vector2(i, 0));
-                times.Add(i * 0.25);
-            }
-
-            playback.SetTrajectory(points, times);
-            playback.StepForward();
-            var stepped = playback.GetCurrentFrameIndex() > 0 || playback.CurrentTime > 0;
-            playback.Play();
-            await Task.Delay(40, ct);
-            playback.Stop();
+            using var player = new TrajectoryPlayerViewModel { Duration = 4 };
+            player.StepForwardCommand.Execute(null);
+            var stepped = player.Time > 0;
+            player.StopCommand.Execute(null);
+            var reset = player.Time == 0;
+            player.PlayPauseCommand.Execute(null);
+            var playing = player.IsPlaying;
+            player.AdvanceOneTick();
+            var moved = player.Time > 0;
+            player.StopCommand.Execute(null);
+            player.AdvanceOneTick();
+            var ended = !player.IsPlaying && player.Time == 0;
             sw.Stop();
 
-            passed = stepped
-                && !playback.IsPlaying
-                && playback.CurrentTime == 0
-                && sw.ElapsedMilliseconds < PlaybackBudgetMs;
-            message = stepped
-                ? $"PlaybackController step/play/stop in {sw.ElapsedMilliseconds} ms (budget {PlaybackBudgetMs} ms)"
-                : "PlaybackController.StepForward did not advance the trajectory";
+            passed = stepped && reset && playing && moved && ended && sw.ElapsedMilliseconds < budgetMs;
+            message = passed
+                ? $"TrajectoryPlayerViewModel step/play/stop in {sw.ElapsedMilliseconds} ms (budget {budgetMs} ms)"
+                : $"TrajectoryPlayerViewModel did not advance and stop (stepped={stepped} reset={reset} playing={playing} moved={moved} ended={ended})";
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
             sw.Stop();
-            message = $"PlaybackController failed: {ex.Message}";
+            message = $"TrajectoryPlayerViewModel failed: {ex}";
         }
 
-        _results.Add(new SoakTestResult
+        return new SoakTestResult
         {
-            TestName = $"Playback_Iteration{iteration}",
+            TestName = "Playback",
             Passed = passed,
             Message = message,
             Timestamp = DateTime.UtcNow,
             MetricValue = sw.ElapsedMilliseconds
-        });
+        };
+    }
+
+    private async Task TestPlaybackAsync(int iteration, CancellationToken ct)
+    {
+        var result = ExercisePlayback(PlaybackBudgetMs);
+        result.TestName = $"Playback_Iteration{iteration}";
+        _results.Add(result);
+        await Task.Delay(1, ct);
     }
 
     private async Task TestExportAsync(int iteration, CancellationToken ct)
@@ -226,95 +232,190 @@ public class SoakTestRunner
         });
     }
 
-    private async Task TestThemeToggleAsync(int iteration, CancellationToken ct)
+    /// <summary>
+    /// Toggle theme on a throwaway preferences file. A restore failure fails the iteration.
+    /// </summary>
+    public static SoakTestResult ExerciseThemeToggle(string directory, bool lockFileBeforeRestore = false)
     {
         var sw = Stopwatch.StartNew();
         var passed = false;
         var message = "UserPreferencesService.SetTheme was not exercised";
         AppTheme? previous = null;
+        UserPreferencesService.UseDirectory(directory);
 
         try
         {
-            previous = UserPreferencesService.GetTheme();
-            var next = previous == AppTheme.Dark ? AppTheme.Light : AppTheme.Dark;
-            UserPreferencesService.SetTheme(next);
-            var readBack = UserPreferencesService.GetTheme();
-            sw.Stop();
-            passed = readBack == next && sw.ElapsedMilliseconds < ToggleBudgetMs;
-            message = passed
-                ? $"Theme toggled to {next} in {sw.ElapsedMilliseconds} ms (budget {ToggleBudgetMs} ms)"
-                : $"Theme read-back was {readBack}, expected {next}, in {sw.ElapsedMilliseconds} ms";
-        }
-        catch (Exception ex) when (ex is not OperationCanceledException)
-        {
-            sw.Stop();
-            message = $"Theme path failed: {ex.Message}";
+            try
+            {
+                previous = UserPreferencesService.GetTheme();
+                var next = previous == AppTheme.Dark ? AppTheme.Light : AppTheme.Dark;
+                UserPreferencesService.SetTheme(next);
+                var readBack = UserPreferencesService.GetTheme();
+                sw.Stop();
+                passed = readBack == next && sw.ElapsedMilliseconds < ToggleBudgetMs;
+                message = passed
+                    ? $"Theme toggled to {next} in {sw.ElapsedMilliseconds} ms (budget {ToggleBudgetMs} ms)"
+                    : $"Theme read-back was {readBack}, expected {next}, in {sw.ElapsedMilliseconds} ms";
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                sw.Stop();
+                passed = false;
+                message = ex.ToString();
+            }
+            finally
+            {
+                if (lockFileBeforeRestore)
+                {
+                    var path = Path.Combine(directory, "preferences.json");
+                    if (File.Exists(path))
+                        File.SetAttributes(path, FileAttributes.ReadOnly);
+                }
+
+                if (previous.HasValue)
+                {
+                    try
+                    {
+                        UserPreferencesService.SetTheme(previous.Value);
+                        if (!string.IsNullOrEmpty(UserPreferencesService.StorageNotice))
+                        {
+                            passed = false;
+                            message = UserPreferencesService.StorageNotice;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        passed = false;
+                        message = ex.ToString();
+                    }
+                }
+            }
         }
         finally
         {
-            if (previous.HasValue)
-            {
-                try { UserPreferencesService.SetTheme(previous.Value); }
-                catch { /* restore is best-effort */ }
-            }
+            UserPreferencesService.UseDirectory(null);
         }
 
-        await Task.Delay(1, ct);
-        _results.Add(new SoakTestResult
+        return new SoakTestResult
         {
-            TestName = $"ThemeToggle_Iteration{iteration}",
+            TestName = "ThemeToggle",
             Passed = passed,
             Message = message,
             Timestamp = DateTime.UtcNow,
             MetricValue = sw.ElapsedMilliseconds
-        });
+        };
     }
 
-    private async Task TestAnnotationToggleAsync(int iteration, CancellationToken ct)
+    /// <summary>
+    /// An inactive demo shows nothing at t=0.5. An armed demo shows demo_start, then the density read-back.
+    /// </summary>
+    public static SoakTestResult ExerciseAnnotationToggle(string directory)
     {
         var sw = Stopwatch.StartNew();
         var passed = false;
         var message = "Annotation preferences were not exercised";
         AnnotationDensity? previous = null;
+        UserPreferencesService.UseDirectory(directory);
+        DemoService.EndDemo();
 
         try
         {
-            DemoAnnotationService.ResetForNewDemo();
-            var annotations = DemoAnnotationService.GetAllAnnotations();
-            DemoAnnotationService.CheckTimeThreshold(0.5);
-            previous = UserPreferencesService.GetAnnotationDensity();
-            var next = previous == AnnotationDensity.Full ? AnnotationDensity.Minimal : AnnotationDensity.Full;
-            UserPreferencesService.SetAnnotationDensity(next);
-            var readBack = UserPreferencesService.GetAnnotationDensity();
-            sw.Stop();
-            passed = annotations.Count > 0 && readBack == next && sw.ElapsedMilliseconds < ToggleBudgetMs;
-            message = passed
-                ? $"Annotation density toggled to {next} across {annotations.Count} demo annotations in {sw.ElapsedMilliseconds} ms"
-                : $"Annotation toggle failed: count={annotations.Count} readBack={readBack} expected={next} elapsed={sw.ElapsedMilliseconds}";
-        }
-        catch (Exception ex) when (ex is not OperationCanceledException)
-        {
-            sw.Stop();
-            message = $"Annotation path failed: {ex.Message}";
+            try
+            {
+                DemoAnnotationService.ResetForNewDemo();
+                DemoAnnotationService.CheckTimeThreshold(0.5);
+                var inactive = DemoAnnotationService.CurrentAnnotation == null;
+
+                DemoService.ArmForChecks();
+                DemoAnnotationService.ResetForNewDemo();
+                DemoAnnotationService.CheckTimeThreshold(0.5);
+                var shown = DemoAnnotationService.CurrentAnnotation?.Id == "demo_start";
+
+                previous = UserPreferencesService.GetAnnotationDensity();
+                var next = previous == AnnotationDensity.Full ? AnnotationDensity.Minimal : AnnotationDensity.Full;
+                UserPreferencesService.SetAnnotationDensity(next);
+                var readBack = UserPreferencesService.GetAnnotationDensity();
+                sw.Stop();
+                passed = inactive && shown && readBack == next && sw.ElapsedMilliseconds < ToggleBudgetMs;
+                message = passed
+                    ? $"Annotation density toggled to {next}; threshold showed {DemoAnnotationService.CurrentAnnotation?.Id}"
+                    : $"Annotation toggle failed: inactive={inactive} shown={DemoAnnotationService.CurrentAnnotation?.Id} readBack={readBack} expected={next}";
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                sw.Stop();
+                passed = false;
+                message = ex.ToString();
+            }
+            finally
+            {
+                DemoService.EndDemo();
+                if (previous.HasValue)
+                {
+                    try
+                    {
+                        UserPreferencesService.SetAnnotationDensity(previous.Value);
+                        if (!string.IsNullOrEmpty(UserPreferencesService.StorageNotice))
+                        {
+                            passed = false;
+                            message = UserPreferencesService.StorageNotice;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        passed = false;
+                        message = ex.ToString();
+                    }
+                }
+            }
         }
         finally
         {
-            if (previous.HasValue)
-            {
-                try { UserPreferencesService.SetAnnotationDensity(previous.Value); }
-                catch { /* restore is best-effort */ }
-            }
+            UserPreferencesService.UseDirectory(null);
         }
 
-        await Task.Delay(1, ct);
-        _results.Add(new SoakTestResult
+        return new SoakTestResult
         {
-            TestName = $"AnnotationToggle_Iteration{iteration}",
+            TestName = "AnnotationToggle",
             Passed = passed,
             Message = message,
             Timestamp = DateTime.UtcNow,
             MetricValue = sw.ElapsedMilliseconds
-        });
+        };
+    }
+
+    private async Task TestThemeToggleAsync(int iteration, CancellationToken ct)
+    {
+        var directory = Path.Combine(Path.GetTempPath(), "ss-soak-theme-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(directory);
+        try
+        {
+            var result = ExerciseThemeToggle(directory);
+            result.TestName = $"ThemeToggle_Iteration{iteration}";
+            _results.Add(result);
+            await Task.Delay(1, ct);
+        }
+        finally
+        {
+            try { Directory.Delete(directory, true); } catch { /* the iteration message already names a failure */ }
+        }
+    }
+
+    private async Task TestAnnotationToggleAsync(int iteration, CancellationToken ct)
+    {
+        var directory = Path.Combine(Path.GetTempPath(), "ss-soak-notes-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(directory);
+        try
+        {
+            var result = ExerciseAnnotationToggle(directory);
+            result.TestName = $"AnnotationToggle_Iteration{iteration}";
+            _results.Add(result);
+            await Task.Delay(1, ct);
+        }
+        finally
+        {
+            try { Directory.Delete(directory, true); } catch { /* the iteration message already names a failure */ }
+        }
     }
 
     private SoakTestReport GenerateReport(long endMemory, int iterations)
@@ -338,7 +439,10 @@ public class SoakTestRunner
             EndMemoryMB = endMemory / (1024.0 * 1024.0),
             MemoryGrowthMB = memoryGrowthMB,
             Results = _results,
-            OverallPassed = failedTests == 0 && memoryGrowthMB < _config.MaxMemoryGrowthMB
+            OverallPassed = iterations > 0
+                && totalTests > 0
+                && failedTests == 0
+                && memoryGrowthMB < _config.MaxMemoryGrowthMB
         };
 
         return report;

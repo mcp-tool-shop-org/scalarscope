@@ -165,6 +165,7 @@ public class TrajectoryCanvas : SKCanvasView
 
     public TrajectoryCanvas()
     {
+        AccessibleCanvasHook.Attach(this);
         PaintSurface += OnPaintSurface;
         EnableTouchEvents = true;
         Touch += OnTouch;
@@ -322,7 +323,7 @@ public class TrajectoryCanvas : SKCanvasView
         var canvas = e.Surface.Canvas;
         var info = e.Info;
 
-        canvas.Clear(BackgroundColor);
+        AccessibleCanvasHook.Paint(canvas, e.Info, this, BackgroundColor);
 
         _center = new SKPoint(info.Width / 2f + _panOffset.X, info.Height / 2f + _panOffset.Y);
         _scale = Math.Min(info.Width, info.Height) / 4f * _zoomLevel;

@@ -157,7 +157,10 @@ public partial class ComparisonPage : ContentPage, IQueryAttributable
             var (pathA, pathB) = await DemoService.StartDemoAsync();
             if (pathA == null || pathB == null)
             {
-                await DisplayAlert("Example unavailable", "The built-in example runs could not be loaded.", "OK");
+                await DisplayAlert(
+                    "Example unavailable",
+                    DemoService.LastFailure ?? DemoService.DescribeLoadFailure(DemoService.PathAFileName, null),
+                    "OK");
                 return;
             }
 

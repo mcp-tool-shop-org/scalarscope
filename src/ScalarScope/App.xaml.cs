@@ -32,6 +32,8 @@ public partial class App : Application
             UserAppTheme = savedTheme;
         }
 
+        ShellStartup.ApplyAccessibility();
+
         Keyboard = new KeyboardService(Session);
     }
 

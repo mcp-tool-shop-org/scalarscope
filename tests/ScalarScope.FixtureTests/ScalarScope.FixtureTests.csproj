@@ -33,6 +33,9 @@
   <!-- The soak project is a self-contained exe. Link the in-memory runner so verify runs the floors. -->
   <ItemGroup>
     <Compile Include="..\ScalarScope.SoakTests\Phase32ValidationRunner.cs" Link="Phase32ValidationRunner.cs" />
+    <Compile Include="..\ScalarScope.SoakTests\SoakCommand.cs" Link="SoakCommand.cs" />
+    <Compile Include="..\ScalarScope.SoakTests\SoakTestRunner.cs" Link="SoakTestRunner.cs" />
+    <Compile Include="..\ScalarScope.DeterminismTests\DeterminismSuiteTests.cs" Link="DeterminismSuiteTests.cs" />
   </ItemGroup>
 
   <!-- Include fixture files as content -->

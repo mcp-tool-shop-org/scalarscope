@@ -439,6 +439,7 @@ public class ExpectedAssertions
     public ExpectedSection? Expected { get; set; }
     public ExpectedValidationSection? ExpectedValidation { get; set; }
     public ExpectedBehaviorSection? ExpectedBehavior { get; set; }
+    public ExpectedUserMessage? ExpectedUserMessage { get; set; }
     public TestCasesSection? TestCases { get; set; }
 }
 
@@ -596,6 +597,13 @@ public class ExpectedBehaviorSection
     public bool? BundleExportDisabled { get; set; }
     public bool? ErrorExplanationShown { get; set; }
     public bool? PresetApplicationBlocked { get; set; }
+}
+
+public class ExpectedUserMessage
+{
+    public string? Title { get; set; }
+    public List<string>? Bullets { get; set; }
+    public List<string>? ActionableAdvice { get; set; }
 }
 
 public class TestCasesSection

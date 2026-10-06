@@ -36,16 +36,16 @@ public static class ErrorExplanationService
                 .AddStep("Close any other programs that might have the file open")
                 .AddStep("Right-click the file and check its security properties")
                 .AddStep("Try copying the file to a different location (like Documents)")
-                .AddStep("Run ScalarScope as administrator if the file requires elevated access")
+                .AddStep("Open that copy instead")
                 .Build(),
                 
             "FILE_FORMAT_INVALID" => builder
                 .WithSummary("The file format is not recognized or is corrupted.")
                 .WithRootCause("The file may not be a valid trajectory file, or it may have been damaged.")
-                .AddStep("Verify the file is a supported format (JSON or CSV)")
+                .AddStep("A geometry run opens as .json")
+                .AddStep("A latency trace opens as .csv or .json")
                 .AddStep("Open the file in a text editor to check for obvious corruption")
                 .AddStep("If the file was downloaded, try downloading it again")
-                .AddStep("Check TRAJECTORY_FORMAT.md for the expected file structure")
                 .Build(),
                 
             "FILE_TOO_LARGE" => builder
@@ -78,12 +78,11 @@ public static class ErrorExplanationService
                 .Build(),
                 
             "DIMENSION_MISMATCH" => builder
-                .WithSummary("The trajectories have different numbers of scalars and can't be compared directly.")
-                .WithRootCause("Comparison requires both trajectories to have the same scalar count.")
-                .AddStep("Verify both files track the same set of scalars")
-                .AddStep("Check if one file has additional or missing scalar columns")
-                .AddStep("Ensure consistent field ordering between runs")
-                .WithNote("Trajectory 1 and Trajectory 2 must have identical scalar schemas")
+                .WithSummary("The state dimension changes partway through this file.")
+                .WithRootCause("One run should keep the same state dimension at every timestep.")
+                .AddStep("Re-export the run from the tool that wrote it")
+                .AddStep("Check the training log for a shape change mid-run")
+                .AddStep("Open a different run")
                 .Build(),
                 
             // Comparison errors
@@ -92,18 +91,8 @@ public static class ErrorExplanationService
                 .WithRootCause("The trajectories may have incompatible time ranges or indexing schemes.")
                 .AddStep("Check that both trajectories cover overlapping time ranges")
                 .AddStep("Verify timestep values are consistent (e.g., both use frame numbers)")
-                .AddStep("Try enabling 'Force Alignment' in settings")
+                .AddStep("Choose another alignment on the Compare page")
                 .AddStep("Manually trim trajectories to matching ranges")
-                .Build(),
-                
-            "COMPUTATION_TIMEOUT" => builder
-                .WithSummary("The comparison took too long and was cancelled.")
-                .WithRootCause("Very large trajectories or complex analysis can exceed time limits.")
-                .AddStep("Try comparing smaller trajectory segments")
-                .AddStep("Disable advanced analysis features like eigenvalue decomposition")
-                .AddStep("Increase timeout in Settings > Performance")
-                .AddStep("Consider using the 'Quick Compare' mode for initial analysis")
-                .WithNote("Default timeout: 60 seconds")
                 .Build(),
                 
             "NUMERICAL_INSTABILITY" => builder
@@ -152,6 +141,62 @@ public static class ErrorExplanationService
                 .AddStep("Consider upgrading system RAM for large datasets")
                 .Build(),
                 
+            "FILE_CORRUPTED" => builder
+                .WithSummary("This file looks incomplete or damaged.")
+                .WithRootCause("The save may have stopped before the file was finished.")
+                .AddStep("Re-export the run")
+                .AddStep("Open a backup if you have one")
+                .Build(),
+
+            "INVALID_TIMESTEPS" => builder
+                .WithSummary("The timesteps in this file are not usable.")
+                .WithRootCause("A geometry run needs a monotonic timestep list.")
+                .AddStep("Re-export the geometry file as .json")
+                .AddStep("Open a different run")
+                .Build(),
+
+            "RUNS_TOO_DIFFERENT" => builder
+                .WithSummary("These two runs differ enough that the comparison may not be meaningful.")
+                .WithRootCause("Length or structure differs between the two files.")
+                .AddStep("Confirm these are the two runs you meant to open")
+                .AddStep("The comparison stays on screen either way")
+                .Build(),
+
+            "DELTA_COMPUTATION_TIMEOUT" => builder
+                .WithSummary("The comparison timed out while computing deltas.")
+                .WithRootCause("The two runs were large enough that the delta pass did not finish.")
+                .AddStep("Try a shorter window")
+                .AddStep("Try the comparison again")
+                .Build(),
+
+            "COMPUTATION_TIMEOUT" => builder
+                .WithSummary("The operation timed out.")
+                .WithRootCause("It did not finish in time. This was not a delta comparison unless you were comparing runs.")
+                .AddStep("Try the operation again")
+                .AddStep("Use a smaller file")
+                .Build(),
+
+            "EXPORT_WRITE_FAILED" => builder
+                .WithSummary("The export file could not be written.")
+                .WithRootCause("The destination may be full or not writable.")
+                .AddStep("Choose another folder in Settings")
+                .AddStep("Check that the folder still has free space")
+                .Build(),
+
+            "EXPORT_RENDER_FAILED" => builder
+                .WithSummary("The export image could not be drawn.")
+                .WithRootCause("Rendering the frame failed before the file was written.")
+                .AddStep("Try the export again")
+                .AddStep("Try a smaller resolution in Settings")
+                .Build(),
+
+            "UNEXPECTED_ERROR" => builder
+                .WithSummary(error.UserExplanation)
+                .WithRootCause("The failure did not match a more specific case.")
+                .AddStep("Try the operation again")
+                .AddStep("Restart ScalarScope if it happens again")
+                .Build(),
+
             "INTERNAL_ERROR" => builder
                 .WithSummary("An unexpected error occurred inside ScalarScope.")
                 .WithRootCause("This is likely a bug in ScalarScope that we'd like to fix.")

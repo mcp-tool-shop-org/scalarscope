@@ -74,8 +74,8 @@ public static class ImportSchemaService
             
             if (format is null)
             {
-                result.AddError("UNSUPPORTED_FORMAT", 
-                    $"File extension '{extension}' is not supported. Use .json or .csv",
+                result.AddError("UNSUPPORTED_FORMAT",
+                    $"File extension '{extension}' is not supported. A geometry run is .json. A latency trace may be .csv or .json.",
                     CreateUnsupportedFormatExplanation(extension));
                 return result;
             }
@@ -370,13 +370,13 @@ public static class ImportSchemaService
         {
             Code = "UNSUPPORTED_FORMAT",
             Title = "Unsupported File Format",
-            Summary = $"ScalarScope cannot import files with '{extension}' extension.",
-            RootCause = "Only JSON and CSV trajectory formats are currently supported.",
+            Summary = $"ScalarScope cannot import '{extension}' as a geometry run.",
+            RootCause = "A geometry run is a .json file. A latency trace may be .csv or .json. A training history is not a latency trace.",
             TroubleshootingSteps = new[]
             {
-                "Export your data as JSON with timestep/scalars structure",
-                "Export your data as CSV with header row",
-                "Check TRAJECTORY_FORMAT.md for schema examples"
+                "Open a geometry run as .json",
+                "Open a latency trace as .csv or .json",
+                "Review a training history as training loss, not as a latency trace"
             }
         };
     }
@@ -421,9 +421,9 @@ public static class ImportSchemaService
             RootCause = "ScalarScope needs timestep data to perform comparisons.",
             TroubleshootingSteps = new[]
             {
-                $"Add a '{fieldName}' array to your JSON file",
-                "Check TRAJECTORY_FORMAT.md for the expected structure",
-                "Verify your export tool is producing the correct format"
+                $"Add a '{fieldName}' array to the .json geometry file",
+                "A geometry run is .json. A latency trace may be .csv or .json",
+                "Re-export the run from the tool that wrote it"
             }
         };
     }
@@ -438,9 +438,9 @@ public static class ImportSchemaService
             RootCause = $"Expected {expectedType} but found a different type.",
             TroubleshootingSteps = new[]
             {
-                $"Ensure '{fieldName}' is a {expectedType} in your JSON",
-                "Check for typos or structural errors",
-                "Refer to TRAJECTORY_FORMAT.md for examples"
+                $"Ensure '{fieldName}' is a {expectedType} in the .json file",
+                "A geometry run is .json",
+                "Re-export the run from the tool that wrote it"
             }
         };
     }
@@ -506,9 +506,9 @@ public static class ImportSchemaService
             RootCause = "Each timestep must have numeric scalar data to compare.",
             TroubleshootingSteps = new[]
             {
-                "Add a 'scalars' object to each timestep",
-                "Include numeric values for each tracked scalar",
-                "Check TRAJECTORY_FORMAT.md for the expected structure"
+                "Add numeric scalar values to each timestep in the .json file",
+                "A latency trace may use .csv or .json",
+                "A training history is not a latency trace"
             }
         };
     }

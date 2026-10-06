@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 namespace ScalarScope.Services;
 
 /// <summary>
@@ -24,6 +26,28 @@ public static class ErrorStateMapping
                 UserTitle = "File Not Found",
                 UserExplanation = "We couldn't find the file you selected. It may have been moved, renamed, or deleted.",
                 SuggestedActions = ["Check if the file exists", "Try selecting the file again", "Check if you have permission to access this location"],
+                IsRecoverable = true
+            },
+            new()
+            {
+                Code = "FILE_ACCESS_DENIED",
+                Category = ErrorCategory.FileLoad,
+                Severity = ErrorSeverity.Error,
+                TechnicalMessage = "Access to the file was denied",
+                UserTitle = "Cannot Read File",
+                UserExplanation = "ScalarScope could not read this file. The folder may be missing, or the file's permissions do not allow this account to open it.",
+                SuggestedActions = ["Close other programs that have the file open", "Check the file's security properties", "Copy the file to Documents and open that copy"],
+                IsRecoverable = true
+            },
+            new()
+            {
+                Code = "COMPUTATION_TIMEOUT",
+                Category = ErrorCategory.System,
+                Severity = ErrorSeverity.Warning,
+                TechnicalMessage = "An operation exceeded its time limit",
+                UserTitle = "Timed Out",
+                UserExplanation = "The operation timed out before it finished.",
+                SuggestedActions = ["Try the operation again", "Use a smaller file"],
                 IsRecoverable = true
             },
             new()
@@ -181,7 +205,7 @@ public static class ErrorStateMapping
                 Severity = ErrorSeverity.Error,
                 TechnicalMessage = "An unexpected error occurred",
                 UserTitle = "Something Went Wrong",
-                UserExplanation = "An unexpected error occurred. This information has been recorded for debugging.",
+                UserExplanation = "An unexpected error occurred.",
                 SuggestedActions = ["Try the operation again", "Restart the application", "Contact support if this persists"],
                 IsRecoverable = true
             }
@@ -204,18 +228,20 @@ public static class ErrorStateMapping
     /// <summary>
     /// Map an exception to an error state.
     /// </summary>
-    public static ErrorState MapException(Exception ex)
+    public static ErrorState MapException(Exception ex, bool computingDeltas = false)
     {
         return ex switch
         {
             FileNotFoundException => GetByCode("FILE_NOT_FOUND")!,
             DirectoryNotFoundException => GetByCode("FILE_NOT_FOUND")!,
-            UnauthorizedAccessException => GetByCode("EXPORT_WRITE_FAILED")!,
+            UnauthorizedAccessException => GetByCode("FILE_ACCESS_DENIED")!,
             OutOfMemoryException => GetByCode("OUT_OF_MEMORY")!,
             IOException io when io.Message.Contains("disk") => GetByCode("EXPORT_WRITE_FAILED")!,
-            TimeoutException => GetByCode("DELTA_COMPUTATION_TIMEOUT")!,
-            _ => GetByCode("UNEXPECTED_ERROR")! with 
-            { 
+            JsonException => GetByCode("FILE_FORMAT_INVALID")!,
+            TimeoutException when computingDeltas => GetByCode("DELTA_COMPUTATION_TIMEOUT")!,
+            TimeoutException => GetByCode("COMPUTATION_TIMEOUT")!,
+            _ => GetByCode("UNEXPECTED_ERROR")! with
+            {
                 TechnicalMessage = ex.Message,
                 UserExplanation = $"An unexpected error occurred: {ex.Message}"
             }

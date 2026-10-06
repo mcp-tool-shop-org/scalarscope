@@ -1,3 +1,4 @@
+using ScalarScope.Services;
 using ScalarScope.Views;
 
 namespace ScalarScope;
@@ -11,8 +12,18 @@ public partial class AppShell : Shell
         // Register routes
         Routing.RegisterRoute("recovery", typeof(RecoveryPage));
 
-        if (App.NeedsRecovery)
+        var snapshotPath = CrashReportingService.GetLastSessionState()?.LoadedFilePath;
+        if (App.NeedsRecovery || ShellStartup.ShouldOpenSavedSession(
+                UserPreferencesService.GetAutoLoadLastSession(),
+                snapshotPath))
             Loaded += NavigateToRecovery;
+
+        Navigated += (_, _) => AccessibleShell.Apply(this);
+        AccessibilityService.Instance.SettingsChanged += () =>
+        {
+            try { MainThread.BeginInvokeOnMainThread(() => AccessibleShell.Apply(this)); }
+            catch (InvalidOperationException) { AccessibleShell.Apply(this); }
+        };
     }
 
     private async void NavigateToRecovery(object? sender, EventArgs e)

@@ -200,7 +200,7 @@ public static class ErrorBoundary
         {
             FileNotFoundException => $"Could not find the requested file during {operation}.",
             DirectoryNotFoundException => $"Could not find the requested folder during {operation}.",
-            UnauthorizedAccessException => $"Permission denied during {operation}. Try running as administrator.",
+            UnauthorizedAccessException => $"Permission denied during {operation}. Copy the file to Documents and open that copy.",
             IOException io when io.Message.Contains("being used") => $"File is in use. Close other applications and try again.",
             OutOfMemoryException => $"Not enough memory to complete {operation}. Close some applications and try again.",
             TimeoutException => $"Operation timed out during {operation}. Please try again.",
@@ -210,30 +210,52 @@ public static class ErrorBoundary
     }
     
     private static void LogError(Exception ex, string? context)
+        => RecordBoundaryFailure(ex, context);
+
+    /// <summary>
+    /// Send a boundary failure through the logging service, including the stack, and append error_log.txt.
+    /// </summary>
+    public static void RecordBoundaryFailure(
+        Exception ex,
+        string? context = null,
+        ErrorLoggingService? sink = null,
+        string? boundaryLogPath = null)
     {
         var contextStr = string.IsNullOrEmpty(context) ? "" : $" [{context}]";
         Debug.WriteLine($"[ErrorBoundary]{contextStr} {ex.GetType().Name}: {ex.Message}");
-        
-        // Log full stack trace in debug builds
+
 #if DEBUG
         Debug.WriteLine(ex.StackTrace);
 #endif
 
-        // Record for crash reporting (non-fatal)
+        var log = sink ?? ErrorLoggingService.Instance;
         try
         {
-            var errorLog = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "ScalarScope", "error_log.txt");
-            
-            var entry = $"[{DateTime.UtcNow:O}]{contextStr} {ex.GetType().Name}: {ex.Message}\n";
-            File.AppendAllText(errorLog, entry);
+            log.Log(ex, context);
         }
-        catch
+        catch (Exception logEx)
         {
-            // Don't throw when logging fails
+            Debug.WriteLine($"[ErrorBoundary] log failed: {logEx.Message}");
+        }
+
+        var errorLog = string.IsNullOrWhiteSpace(boundaryLogPath) ? BoundaryLogPath : boundaryLogPath;
+        try
+        {
+            var directory = Path.GetDirectoryName(errorLog);
+            if (!string.IsNullOrEmpty(directory))
+                Directory.CreateDirectory(directory);
+            File.AppendAllText(errorLog, $"[{DateTime.UtcNow:O}]{contextStr} {ex}\n");
+        }
+        catch (Exception writeEx)
+        {
+            try { log.Log(writeEx, "error_log.txt"); }
+            catch (Exception nested) { Debug.WriteLine($"[ErrorBoundary] fallback log failed: {nested.Message}"); }
         }
     }
+
+    public static string BoundaryLogPath => Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "ScalarScope", "error_log.txt");
     
     // ========================================================================
     // Phase 6.2: User-facing error handling with mapped states

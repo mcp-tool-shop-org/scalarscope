@@ -32,6 +32,7 @@ public class TraceReviewCanvas : SKCanvasView
 
     public TraceReviewCanvas()
     {
+        AccessibleCanvasHook.Attach(this);
         PaintSurface += OnPaintSurface;
         MinimumHeightRequest = 220;
     }
@@ -64,7 +65,7 @@ public class TraceReviewCanvas : SKCanvasView
     {
         var canvas = e.Surface.Canvas;
         var info = e.Info;
-        canvas.Clear(PlotBackground);
+        AccessibleCanvasHook.Paint(canvas, e.Info, this, PlotBackground);
 
         using var font = new SKFont { Size = Math.Clamp(info.Height / 22f, 14, 28) };
         using var paint = new SKPaint { IsAntialias = true, Color = CaptionColor };

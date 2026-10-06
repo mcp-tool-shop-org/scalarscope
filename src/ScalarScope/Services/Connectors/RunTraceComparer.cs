@@ -324,8 +324,14 @@ public sealed record ComparisonResult
     /// <summary>Delta spec version used.</summary>
     public required string DeltaSpecVersion { get; init; }
     
-    /// <summary>Preset applied.</summary>
+    /// <summary>Preset applied. Empty when validation blocked the comparison.</summary>
     public required string PresetId { get; init; }
+
+    /// <summary>True when a trace failed validation and no deltas were computed.</summary>
+    public bool ComparisonBlocked { get; init; }
+
+    /// <summary>What the reader is told when the comparison is blocked.</summary>
+    public string UserMessage { get; init; } = "";
     
     /// <summary>Whether the comparison is valid for analysis.</summary>
     public bool IsValid => Fingerprints.IsValidForComparison && Alignment.IsSuccess && Deltas.Any();
@@ -572,6 +578,11 @@ public sealed class RunTraceComparer
         // Add validation warnings
         warnings.AddRange(validationA.Warnings.Select(w => $"{intent.LabelA}: {w.Message}"));
         warnings.AddRange(validationB.Warnings.Select(w => $"{intent.LabelB}: {w.Message}"));
+
+        // A missing fingerprint still compares. Only a broken timeline stops the
+        // series: that is the non-monotonic fixture, and it must not invent deltas.
+        if (TimelineRejectsComparison(validationA) || TimelineRejectsComparison(validationB))
+            return BlockedComparison(comparisonId, intent, traceA, traceB, validationA, validationB, warnings);
         
         // Step 2: Compare fingerprints
         var fingerprints = CompareFingerprints(traceA, traceB, intent);
@@ -601,6 +612,93 @@ public sealed class RunTraceComparer
             DeltaSpecVersion = "1.0.0",
             PresetId = intent.PresetId
         };
+    }
+
+    private static bool TimelineRejectsComparison(RuntimeValidationResult validation) =>
+        validation.Errors.Any(error => error.Code.StartsWith("RT_TIMELINE", StringComparison.Ordinal));
+
+    private ComparisonResult BlockedComparison(
+        string comparisonId,
+        ComparisonIntent intent,
+        RuntimeRunTrace traceA,
+        RuntimeRunTrace traceB,
+        RuntimeValidationResult validationA,
+        RuntimeValidationResult validationB,
+        List<string> warnings)
+    {
+        var userMessage = DescribeBlockedComparison(traceA, traceB, validationA, validationB, intent);
+        var issue = new ComparisonIssue
+        {
+            Code = ComparisonErrorCodes.CMP_DELTA_INVALID_INPUT,
+            Severity = ComparisonIssueSeverity.Error,
+            Message = userMessage
+        };
+
+        return new ComparisonResult
+        {
+            ComparisonId = comparisonId,
+            ComputedUtc = DateTimeOffset.UtcNow,
+            Intent = intent,
+            Fingerprints = new FingerprintComparison
+            {
+                Differences = [],
+                Issues = [issue]
+            },
+            Alignment = new AlignmentResult
+            {
+                Mode = intent.Alignment,
+                AlignedStepCount = 0,
+                SkippedStepsA = 0,
+                SkippedStepsB = 0,
+                Issues = [issue]
+            },
+            Deltas = [],
+            Warnings = warnings,
+            DeltaSpecVersion = "1.0.0",
+            PresetId = "",
+            ComparisonBlocked = true,
+            UserMessage = userMessage
+        };
+    }
+
+    private static string DescribeBlockedComparison(
+        RuntimeRunTrace traceA,
+        RuntimeRunTrace traceB,
+        RuntimeValidationResult validationA,
+        RuntimeValidationResult validationB,
+        ComparisonIntent intent)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("We couldn't analyze this run");
+        var sameRun = string.Equals(traceA.RunId, traceB.RunId, StringComparison.Ordinal);
+        var repeat = AppendBlockedErrors(sb, sameRun ? null : intent.LabelA, validationA);
+        if (!sameRun)
+            repeat |= AppendBlockedErrors(sb, intent.LabelB, validationB);
+        if (repeat)
+            sb.AppendLine("Ensure iteration indices are strictly increasing");
+        return sb.ToString().TrimEnd();
+    }
+
+    private static bool AppendBlockedErrors(StringBuilder sb, string? label, RuntimeValidationResult validation)
+    {
+        var repeat = false;
+        foreach (var error in validation.Errors)
+        {
+            var prefix = string.IsNullOrEmpty(label) ? "" : $"{label}: ";
+            if (error.Code == RunTraceErrorCodes.RT_TIMELINE_NON_MONOTONIC
+                && error.Context != null
+                && error.Context.TryGetValue("index", out var index))
+            {
+                sb.AppendLine($"{prefix}Timeline steps repeat at index {index}");
+                repeat = true;
+            }
+            else
+            {
+                sb.AppendLine($"{prefix}{error.Message}");
+            }
+        }
+
+        return repeat;
     }
     
     #region Fingerprint Comparison
@@ -1188,6 +1286,9 @@ public sealed class RunTraceComparer
         RuntimeRunTrace traceB,
         ReviewExportMode mode = ReviewExportMode.Review)
     {
+        if (result.ComparisonBlocked)
+            throw new InvalidOperationException($"Bundle export is disabled. {result.UserMessage}");
+
         var fingerprintSummary = new ReviewFingerprintSummary
         {
             LabelA = result.Intent.LabelA,

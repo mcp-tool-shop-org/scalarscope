@@ -171,6 +171,16 @@ public partial class TrajectoryPlayerViewModel : ObservableObject, IDisposable
         TimeChanged?.Invoke();
     }
 
+    /// <summary>Apply the saved speed, and start playback when that preference is on.</summary>
+    public void ApplySavedPlayback()
+    {
+        var speed = UserPreferencesService.GetDefaultPlaybackSpeed();
+        if (speed > 0)
+            SetSpeed(speed);
+        if (UserPreferencesService.GetAutoPlayOnLoad() && !IsPlaying)
+            PlayPause();
+    }
+
     public void SetSpeed(double speed)
     {
         Speed = Math.Clamp(speed, 0.25, 4.0);

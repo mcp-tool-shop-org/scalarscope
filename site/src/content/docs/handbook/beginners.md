@@ -85,7 +85,7 @@ When two runs have different lengths, ScalarScope aligns them before comparison.
 | `Up` / `+` | Increase playback speed |
 | `Down` / `-` | Decrease playback speed |
 | `0` | Reset speed to 1x |
-| `Ctrl+S` or `Ctrl+E` | Quick export (PNG saved to Documents/ScalarScope Exports) |
+| `Ctrl+S` or `Ctrl+E` | Quick export (PNG saved to the export folder from Settings, or Documents/ScalarScope Exports when none is set) |
 | `1`–`6` | Request routes overview, trajectory, scalars, geometry, compare, and failures. Not Home, Compare, Guide, or Settings. Pressing 1 does not open Home. |
 | `?` | Open Guide tab |
 
@@ -99,7 +99,9 @@ Open the **Settings** tab to adjust:
 - **Accessibility** — high contrast mode, color vision simulation (deuteranopia, protanopia, tritanopia, monochrome), screen reader support, adjustable text scale (75% to 200%), large pointer mode
 - **Session** — auto-load last session, recent files limit (5, 10, or 20)
 
-All settings are stored locally in your app data directory and persist between sessions. Click **Reset All Settings** to return everything to defaults.
+The Settings tab writes these controls, and the four-tab shell reads them when it starts. The Rust review applies color vision, high contrast, and text scale. It does not offer screen reader descriptions or a larger pointer.
+
+All settings are stored locally in your app data directory and persist between sessions. If the preferences file cannot be read, ScalarScope leaves that file unchanged and Settings says so. Click **Reset All Settings** to return everything to defaults.
 
 ## FAQ
 

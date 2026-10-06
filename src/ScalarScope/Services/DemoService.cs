@@ -25,6 +25,28 @@ public static class DemoService
     public static bool IsDemoActive { get; private set; }
 
     /// <summary>
+    /// Why the last sample load failed. Null when both samples loaded.
+    /// </summary>
+    public static string? LastFailure { get; private set; }
+
+    /// <summary>
+    /// Mark a demo active so a threshold check can be tried without the sample files.
+    /// </summary>
+    public static void ArmForChecks()
+    {
+        IsDemoActive = true;
+    }
+
+    /// <summary>Name the sample file and the last error. Does not log.</summary>
+    public static string DescribeLoadFailure(string fileName, Exception? ex)
+    {
+        var reason = string.IsNullOrWhiteSpace(ex?.Message)
+            ? "No matching file was found in the app package."
+            : ex.Message;
+        return $"The sample file {fileName} could not be loaded. {reason}";
+    }
+
+    /// <summary>
     /// The currently loaded demo runs (if demo is active).
     /// </summary>
     public static GeometryRun? DemoPathA { get; private set; }
@@ -51,16 +73,22 @@ public static class DemoService
     /// </summary>
     public static async Task<(GeometryRun? PathA, GeometryRun? PathB)> StartDemoAsync()
     {
+        LastFailure = null;
         DemoPathA = await LoadPathAAsync();
         DemoPathB = await LoadPathBAsync();
 
         if (DemoPathA != null && DemoPathB != null)
         {
+            LastFailure = null;
             IsDemoActive = true;
             UserPreferencesService.MarkDemoSeen();
 
             // Reset annotation state for new demo
             DemoAnnotationService.ResetForNewDemo();
+        }
+        else
+        {
+            IsDemoActive = false;
         }
 
         return (DemoPathA, DemoPathB);
@@ -87,7 +115,7 @@ public static class DemoService
     /// </summary>
     private static async Task<GeometryRun?> LoadBundledRunAsync(string fileName)
     {
-        // Try multiple possible paths for MAUI asset loading
+        Exception? last = null;
         var pathsToTry = new[]
         {
             $"Samples/{fileName}",
@@ -102,15 +130,17 @@ public static class DemoService
                 using var stream = await FileSystem.OpenAppPackageFileAsync(path);
                 using var reader = new StreamReader(stream);
                 var json = await reader.ReadToEndAsync();
-                return JsonSerializer.Deserialize<GeometryRun>(json);
+                var run = JsonSerializer.Deserialize<GeometryRun>(json);
+                if (run != null)
+                    return run;
+                last = new InvalidDataException("The sample file did not contain a run.");
             }
-            catch
+            catch (Exception ex)
             {
-                // Try next path
+                last = ex;
             }
         }
 
-        // Fallback: try loading from source directory (for development)
         var sourceDir = AppContext.BaseDirectory;
         var devPaths = new[]
         {
@@ -125,17 +155,34 @@ public static class DemoService
                 if (File.Exists(devPath))
                 {
                     var json = await File.ReadAllTextAsync(devPath);
-                    return JsonSerializer.Deserialize<GeometryRun>(json);
+                    var run = JsonSerializer.Deserialize<GeometryRun>(json);
+                    if (run != null)
+                        return run;
+                    last = new InvalidDataException("The sample file did not contain a run.");
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // Try next path
+                last = ex;
             }
         }
 
-        System.Diagnostics.Debug.WriteLine($"Failed to load bundled run {fileName} from any path");
+        RememberFailure(fileName, last);
         return null;
+    }
+
+    private static void RememberFailure(string fileName, Exception? ex)
+    {
+        var sentence = DescribeLoadFailure(fileName, ex);
+        LastFailure = string.IsNullOrEmpty(LastFailure) ? sentence : $"{LastFailure} {sentence}";
+        try
+        {
+            ErrorLoggingService.Instance.Log(ErrorSeverity.Error, sentence, nameof(DemoService));
+        }
+        catch (Exception logEx)
+        {
+            System.Diagnostics.Debug.WriteLine(logEx.Message);
+        }
     }
 
     /// <summary>

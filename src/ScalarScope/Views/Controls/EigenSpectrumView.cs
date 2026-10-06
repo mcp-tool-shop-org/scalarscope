@@ -40,6 +40,7 @@ public class EigenSpectrumView : SKCanvasView
 
     public EigenSpectrumView()
     {
+        AccessibleCanvasHook.Attach(this);
         PaintSurface += OnPaintSurface;
         
         // Phase 1: Subscribe to demo animation for continuous repainting
@@ -81,7 +82,7 @@ public class EigenSpectrumView : SKCanvasView
         var canvas = e.Surface.Canvas;
         var info = e.Info;
 
-        canvas.Clear(BackgroundColor);
+        AccessibleCanvasHook.Paint(canvas, e.Info, this, BackgroundColor);
 
         // Phase 1: Use demo eigenvalues when no session data available
         _isRenderingDemo = false;

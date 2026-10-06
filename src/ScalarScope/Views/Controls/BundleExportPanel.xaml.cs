@@ -314,8 +314,8 @@ public partial class BundleExportPanel : ContentView
         try
         {
             // Use default location in documents
-            var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            var scalarScopePath = Path.Combine(documentsPath, "ScalarScope", "Bundles");
+            var scalarScopePath = ExportPreferences.FolderOr(Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "ScalarScope", "Bundles"));
             Directory.CreateDirectory(scalarScopePath);
             
             var fileName = $"comparison-{DateTime.UtcNow:yyyyMMdd-HHmmss}{ComparisonBundleService.BundleExtension}";
@@ -339,13 +339,22 @@ public partial class BundleExportPanel : ContentView
                       $"Hash: {result.BundleHash?[..16]}...";
         
         await page.DisplayAlert("Export Complete", message, "OK");
-        
-        // Also copy hash to clipboard
-        if (!string.IsNullOrEmpty(result.BundleHash))
+
+        if (string.IsNullOrEmpty(result.BundleHash))
+            return;
+
+        try
         {
             await Clipboard.SetTextAsync(result.BundleHash);
         }
+        catch (Exception ex)
+        {
+            await page.DisplayAlert("Export Complete", HashCopyNotice(result.FilePath, ex), "OK");
+        }
     }
+
+    public static string HashCopyNotice(string? savedPath, Exception ex)
+        => $"The bundle was saved at {savedPath}. The hash was not copied. {ex.Message}";
     
     private async Task ShowError(string message)
     {

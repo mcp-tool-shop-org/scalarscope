@@ -18,6 +18,11 @@
                    TextColor="{AppThemeBinding Light=#333333, Dark=#FFFFFF}"
                    SemanticProperties.HeadingLevel="Level1" />
 
+            <Label Text="{Binding StorageNotice}"
+                   IsVisible="{Binding HasStorageNotice}"
+                   TextColor="#f0a020"
+                   FontSize="14" />
+
             <!-- Appearance Section -->
             <Border BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#1a1a2e}"
                     Stroke="{AppThemeBinding Light=#DDDDDD, Dark=#2a2a4e}"

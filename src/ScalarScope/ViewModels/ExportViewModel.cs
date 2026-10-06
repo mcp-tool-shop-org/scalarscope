@@ -15,6 +15,13 @@ namespace ScalarScope.ViewModels;
 /// </summary>
 public partial class ExportViewModel : ObservableObject
 {
+    public ExportViewModel()
+    {
+        var (width, height) = ExportPreferences.SizeOr(1920, 1080);
+        Width = width;
+        Height = height;
+    }
+
     private readonly ExportService _exportService = new();
 
     [ObservableProperty]
@@ -161,8 +168,8 @@ public partial class ExportViewModel : ObservableObject
     {
         if (Run == null) return;
 
-        var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-        var scalarScopeExports = Path.Combine(documentsPath, "ScalarScope Exports");
+        var scalarScopeExports = ExportPreferences.FolderOr(Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "ScalarScope Exports"));
         Directory.CreateDirectory(scalarScopeExports);
 
         var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
@@ -227,8 +234,8 @@ public partial class ExportViewModel : ObservableObject
     {
         if (Run == null) return;
 
-        var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-        var scalarScopeExports = Path.Combine(documentsPath, "ScalarScope Exports");
+        var scalarScopeExports = ExportPreferences.FolderOr(Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "ScalarScope Exports"));
         Directory.CreateDirectory(scalarScopeExports);
 
         var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
@@ -266,8 +273,8 @@ public partial class ExportViewModel : ObservableObject
     {
         if (Run == null) return;
 
-        var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-        var scalarScopeExports = Path.Combine(documentsPath, "ScalarScope Exports");
+        var scalarScopeExports = ExportPreferences.FolderOr(Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "ScalarScope Exports"));
         Directory.CreateDirectory(scalarScopeExports);
 
         var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
@@ -344,8 +351,8 @@ public partial class ExportViewModel : ObservableObject
         });
 
         // FilePicker doesn't support save dialogs well in MAUI, so use a default path
-        var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-        var scalarScopeExports = Path.Combine(documentsPath, "ScalarScope Exports");
+        var scalarScopeExports = ExportPreferences.FolderOr(Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "ScalarScope Exports"));
         Directory.CreateDirectory(scalarScopeExports);
 
         var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
@@ -388,8 +395,8 @@ public partial class ExportViewModel : ObservableObject
     {
         if (Run == null) return;
 
-        var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-        var scalarScopeExports = Path.Combine(documentsPath, "ScalarScope Exports");
+        var scalarScopeExports = ExportPreferences.FolderOr(Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "ScalarScope Exports"));
         var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
         var outputDir = Path.Combine(scalarScopeExports, $"sequence_{timestamp}");
 
@@ -436,8 +443,8 @@ public partial class ExportViewModel : ObservableObject
         // Quick export at current time with default settings
         if (Run == null) return;
 
-        var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-        var scalarScopeExports = Path.Combine(documentsPath, "ScalarScope Exports");
+        var scalarScopeExports = ExportPreferences.FolderOr(Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "ScalarScope Exports"));
         Directory.CreateDirectory(scalarScopeExports);
 
         var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
@@ -474,8 +481,8 @@ public partial class ExportViewModel : ObservableObject
             return;
         }
 
-        var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-        var scalarScopeExports = Path.Combine(documentsPath, "ScalarScope Exports");
+        var scalarScopeExports = ExportPreferences.FolderOr(Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "ScalarScope Exports"));
         Directory.CreateDirectory(scalarScopeExports);
 
         var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");

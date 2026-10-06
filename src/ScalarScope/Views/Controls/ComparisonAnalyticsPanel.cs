@@ -68,6 +68,7 @@ public class ComparisonAnalyticsPanel : SKCanvasView
 
     public ComparisonAnalyticsPanel()
     {
+        AccessibleCanvasHook.Attach(this);
         PaintSurface += OnPaintSurface;
         
         // Phase 1: Subscribe to demo animation for continuous repainting
@@ -94,7 +95,7 @@ public class ComparisonAnalyticsPanel : SKCanvasView
         var canvas = e.Surface.Canvas;
         var info = e.Info;
 
-        canvas.Clear(BackgroundColor);
+        AccessibleCanvasHook.Paint(canvas, e.Info, this, BackgroundColor);
 
         // Phase 1: Use demo data when no real runs available
         _currentLeftRun = LeftRun;

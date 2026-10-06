@@ -193,6 +193,10 @@
                                 Command="{Binding ClearLogCommand}"
                                 IsVisible="{Binding HasComparisonLog}"/>
                     </Grid>
+                    <Label Text="{Binding ClearNotice}"
+                           IsVisible="{Binding HasClearNotice}"
+                           TextColor="#c45c26"
+                           FontSize="11"/>
                     
                     <!-- Comparison log -->
                     <VerticalStackLayout BindableLayout.ItemsSource="{Binding ComparisonLogEntries}"

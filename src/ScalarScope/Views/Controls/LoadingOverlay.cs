@@ -48,6 +48,7 @@ public class LoadingOverlay : SKCanvasView
 
     public LoadingOverlay()
     {
+        AccessibleCanvasHook.Attach(this);
         PaintSurface += OnPaintSurface;
         InputTransparent = false;
     }
@@ -102,7 +103,7 @@ public class LoadingOverlay : SKCanvasView
         var info = e.Info;
 
         // Semi-transparent dark background
-        canvas.Clear(SKColor.Parse("#dd0f0f1a"));
+        AccessibleCanvasHook.Paint(canvas, e.Info, this, SKColor.Parse("#dd0f0f1a"));
 
         var centerX = info.Width / 2f;
         var centerY = info.Height / 2f;

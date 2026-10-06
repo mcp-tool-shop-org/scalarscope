@@ -30,6 +30,18 @@ public class StageCServiceTests
         var spaced = service.EstimateLyapunovExponent(Run(25, i => i * 0.1));
         spaced.IsValid.Should().BeTrue();
         double.IsFinite(spaced.AverageExponent).Should().BeTrue();
+        var again = service.EstimateLyapunovExponent(Run(25, i => i * 0.1));
+        again.AverageExponent.Should().Be(spaced.AverageExponent);
+
+        var over = service.EstimateLyapunovExponent(Run(AnalysisService.OverlayScanCap + 1, i => i * 0.1));
+        over.IsValid.Should().BeFalse();
+        over.AverageExponent.Should().Be(0);
+        over.ErrorMessage.Should().Contain("overlay scan");
+        over.Classification.Should().Be("Unknown");
+
+        var eigenvalues = service.GetEigenvalueTimeline(Run(AnalysisService.OverlayScanCap + 1, i => i * 0.1));
+        eigenvalues.Points.Should().BeEmpty();
+        eigenvalues.UnavailableReason.Should().Contain("overlay scan");
     }
 
     [Fact]

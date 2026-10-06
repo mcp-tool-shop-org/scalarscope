@@ -32,7 +32,9 @@ public partial class SettingsViewModel : ObservableObject
             _ => AppTheme.Unspecified
         };
         UserPreferencesService.SetTheme(theme);
-        Application.Current!.UserAppTheme = theme;
+        if (Application.Current != null)
+            Application.Current.UserAppTheme = theme;
+        NoteStorage();
     }
 
     // --- Animation Settings ---
@@ -43,6 +45,7 @@ public partial class SettingsViewModel : ObservableObject
     partial void OnReduceAnimationsChanged(bool value)
     {
         UserPreferencesService.SetReduceAnimations(value);
+        NoteStorage();
     }
 
     // --- Playback Settings ---
@@ -60,6 +63,7 @@ public partial class SettingsViewModel : ObservableObject
         {
             UserPreferencesService.SetDefaultPlaybackSpeed(SpeedValues[value]);
         }
+        NoteStorage();
     }
 
     [ObservableProperty]
@@ -68,6 +72,7 @@ public partial class SettingsViewModel : ObservableObject
     partial void OnAutoPlayOnLoadChanged(bool value)
     {
         UserPreferencesService.SetAutoPlayOnLoad(value);
+        NoteStorage();
     }
 
     // --- Session Settings ---
@@ -78,6 +83,7 @@ public partial class SettingsViewModel : ObservableObject
     partial void OnAutoLoadLastSessionChanged(bool value)
     {
         UserPreferencesService.SetAutoLoadLastSession(value);
+        NoteStorage();
     }
 
     [ObservableProperty]
@@ -93,6 +99,7 @@ public partial class SettingsViewModel : ObservableObject
         {
             UserPreferencesService.SetRecentFilesLimit(RecentFilesValues[value]);
         }
+        NoteStorage();
     }
 
     // --- Export Settings ---
@@ -109,11 +116,13 @@ public partial class SettingsViewModel : ObservableObject
     partial void OnDefaultExportWidthChanged(int value)
     {
         UserPreferencesService.SetDefaultExportResolution(value, DefaultExportHeight);
+        NoteStorage();
     }
 
     partial void OnDefaultExportHeightChanged(int value)
     {
         UserPreferencesService.SetDefaultExportResolution(DefaultExportWidth, value);
+        NoteStorage();
     }
 
     // --- Accessibility Settings ---
@@ -128,6 +137,7 @@ public partial class SettingsViewModel : ObservableObject
         {
             HighContrastEnabled = value
         };
+        NoteStorage();
     }
 
     [ObservableProperty]
@@ -144,6 +154,7 @@ public partial class SettingsViewModel : ObservableObject
             _ => AnnotationDensity.Standard
         };
         UserPreferencesService.SetAnnotationDensity(density);
+        NoteStorage();
     }
 
     // Phase 4.3: Enhanced Accessibility
@@ -163,12 +174,20 @@ public partial class SettingsViewModel : ObservableObject
 
     partial void OnColorVisionIndexChanged(int value)
     {
-        var mode = (ColorPaletteMode)value;
-        UserPreferencesService.SetColorVisionMode((int)mode);
+        var index = ShellStartup.ClampColorVisionIndex(value);
+        if (index != value)
+        {
+            ColorVisionIndex = index;
+            return;
+        }
+
+        var mode = (ColorPaletteMode)index;
+        UserPreferencesService.SetColorVisionMode(index);
         AccessibilityService.Instance.Settings = AccessibilityService.Instance.Settings with
         {
             ColorPaletteMode = mode
         };
+        NoteStorage();
     }
 
     [ObservableProperty]
@@ -181,6 +200,7 @@ public partial class SettingsViewModel : ObservableObject
         {
             ScreenReaderEnabled = value
         };
+        NoteStorage();
     }
 
     [ObservableProperty]
@@ -193,6 +213,7 @@ public partial class SettingsViewModel : ObservableObject
         {
             LargePointer = value
         };
+        NoteStorage();
     }
 
     [ObservableProperty]
@@ -203,11 +224,19 @@ public partial class SettingsViewModel : ObservableObject
 
     partial void OnTextScaleChanged(float value)
     {
-        UserPreferencesService.SetTextScale(value);
+        var clamped = ShellStartup.ClampTextScale(value);
+        if (Math.Abs(clamped - value) > 0.001f)
+        {
+            TextScale = clamped;
+            return;
+        }
+
+        UserPreferencesService.SetTextScale(clamped);
         AccessibilityService.Instance.Settings = AccessibilityService.Instance.Settings with
         {
-            TextScale = value
+            TextScale = clamped
         };
+        NoteStorage();
     }
 
     // --- Commands ---
@@ -297,10 +326,10 @@ public partial class SettingsViewModel : ObservableObject
         };
 
         // Phase 4.3: Enhanced Accessibility
-        ColorVisionIndex = UserPreferencesService.GetColorVisionMode();
+        ColorVisionIndex = ShellStartup.ClampColorVisionIndex(UserPreferencesService.GetColorVisionMode());
         ScreenReaderMode = UserPreferencesService.GetScreenReaderMode();
         LargePointer = UserPreferencesService.GetLargePointer();
-        TextScale = UserPreferencesService.GetTextScale();
+        TextScale = ShellStartup.ClampTextScale(UserPreferencesService.GetTextScale());
 
         // Update AccessibilityService with loaded settings
         AccessibilityService.Instance.Settings = new AccessibilitySettings
@@ -312,6 +341,18 @@ public partial class SettingsViewModel : ObservableObject
             TextScale = TextScale,
             LargePointer = LargePointer
         };
+        NoteStorage();
+    }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasStorageNotice))]
+    private string _storageNotice = "";
+
+    public bool HasStorageNotice => !string.IsNullOrWhiteSpace(StorageNotice);
+
+    private void NoteStorage()
+    {
+        StorageNotice = UserPreferencesService.StorageNotice ?? "";
     }
 
     // --- About Section Commands ---

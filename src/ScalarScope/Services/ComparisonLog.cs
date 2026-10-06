@@ -21,7 +21,18 @@ public static class ComparisonLog
 
     private static readonly string[] SymbolOrder = ["ΔF", "ΔTc", "ΔTd", "ΔĀ", "ΔO"];
 
-    public static string DefaultDirectory => FileSystem.AppDataDirectory;
+    private static string? _directoryOverride;
+
+    public static string DefaultDirectory =>
+        string.IsNullOrWhiteSpace(_directoryOverride)
+            ? FileSystem.AppDataDirectory
+            : _directoryOverride;
+
+    /// <summary>Point the home log at a throwaway folder. Null uses app data.</summary>
+    public static void UseDirectory(string? directory)
+    {
+        _directoryOverride = string.IsNullOrWhiteSpace(directory) ? null : directory;
+    }
 
     public static string FilePathFor(string directory) => Path.Combine(directory, FileName);
 

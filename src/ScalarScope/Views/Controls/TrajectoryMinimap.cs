@@ -83,6 +83,7 @@ public class TrajectoryMinimap : SKCanvasView
 
     public TrajectoryMinimap()
     {
+        AccessibleCanvasHook.Attach(this);
         PaintSurface += OnPaintSurface;
         EnableTouchEvents = true;
         Touch += OnTouch;
@@ -166,7 +167,7 @@ public class TrajectoryMinimap : SKCanvasView
         var canvas = e.Surface.Canvas;
         var info = e.Info;
 
-        canvas.Clear(BackgroundColor);
+        AccessibleCanvasHook.Paint(canvas, e.Info, this, BackgroundColor);
 
         // Draw border
         using var borderPaint = new SKPaint

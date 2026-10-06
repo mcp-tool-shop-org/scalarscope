@@ -71,7 +71,7 @@ public static class FileValidationService
             return FileValidationResult.Error(
                 "Access Denied",
                 "ScalarScope doesn't have permission to read this file.",
-                ["Try moving the file to your Documents folder", "Run ScalarScope as administrator", "Check file permissions in File Explorer"]);
+                ["Close any other programs that have the file open", "Check the file's security properties", "Copy the file to Documents and open that copy"]);
         }
 
         // Step 5: Basic JSON validation

@@ -150,9 +150,9 @@ public class CrashReportingService
     /// <summary>
     /// Generate a support bundle.
     /// </summary>
-    public static async Task<string> GenerateSupportBundleAsync()
+    public static async Task<string> GenerateSupportBundleAsync(string? bundlePath = null, string? boundaryLogPath = null)
     {
-        var bundlePath = Path.Combine(
+        bundlePath ??= Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
             $"ScalarScope_Support_{DateTime.Now:yyyyMMdd_HHmmss}.txt");
 
@@ -231,6 +231,19 @@ public class CrashReportingService
                 sb.AppendLine(content);
                 sb.AppendLine();
             }
+        }
+
+        var boundaryLog = string.IsNullOrWhiteSpace(boundaryLogPath)
+            ? ErrorBoundary.BoundaryLogPath
+            : boundaryLogPath;
+        if (File.Exists(boundaryLog))
+        {
+            sb.AppendLine($"## Log: {Path.GetFileName(boundaryLog)}");
+            var boundaryTail = await ReadLogTailAsync(boundaryLog, 10000);
+            if (new FileInfo(boundaryLog).Length > 10000)
+                sb.AppendLine("  (truncated, showing last 10000 characters)");
+            sb.AppendLine(boundaryTail);
+            sb.AppendLine();
         }
 
         sb.AppendLine("═══════════════════════════════════════════════════════════════");

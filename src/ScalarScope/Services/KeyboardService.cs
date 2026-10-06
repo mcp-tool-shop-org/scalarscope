@@ -155,8 +155,8 @@ public class KeyboardService
     {
         if (_session.Run == null) return null;
 
-        var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-        var scalarScopeExports = Path.Combine(documentsPath, "ScalarScope Exports");
+        var scalarScopeExports = ExportPreferences.FolderOr(Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "ScalarScope Exports"));
         Directory.CreateDirectory(scalarScopeExports);
 
         var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
