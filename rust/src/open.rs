@@ -29,6 +29,16 @@ pub struct InferenceRun {
     pub memory_mb: Vec<f64>,
     /// Present when the run came from a stored RunTrace.
     pub trace: Option<TraceInfo>,
+    /// More runs of the same side (repeats of the same configuration). The headline and the
+    /// difference resample across all of them; the series view and the deltas use this run.
+    pub replicates: Vec<InferenceRun>,
+}
+
+impl InferenceRun {
+    /// This run and its replicates.
+    pub fn runs(&self) -> Vec<&InferenceRun> {
+        std::iter::once(self).chain(&self.replicates).collect()
+    }
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -58,6 +68,30 @@ pub struct Loaded {
     pub path: String,
     pub side: Side,
 }
+
+/// One side from one or more picked paths. Several paths are repeats of one configuration: the
+/// first is shown, and all of them feed the headline and the difference.
+pub fn open_paths(paths: &[std::path::PathBuf]) -> Result<Loaded, String> {
+    let (first, rest) = paths.split_first().ok_or_else(|| "No file was picked.".to_string())?;
+    let mut loaded = open_path(first)?;
+    if rest.is_empty() {
+        return Ok(loaded);
+    }
+    let mut replicates = Vec::new();
+    for path in rest {
+        match open_path(path)?.side {
+            Side::Inference(run) => replicates.push(run),
+            Side::Training(_) => return Err(SEVERAL_INFERENCE.to_string()),
+        }
+    }
+    match &mut loaded.side {
+        Side::Inference(run) => run.replicates.extend(replicates),
+        Side::Training(_) => return Err(SEVERAL_INFERENCE.to_string()),
+    }
+    Ok(loaded)
+}
+
+const SEVERAL_INFERENCE: &str = "Several files make one side only when each is an inference run.";
 
 pub fn open_path(path: &Path) -> Result<Loaded, String> {
     if path.is_dir() {
@@ -95,6 +129,9 @@ const FOLDER_SEARCH_DEPTH: usize = 6;
 /// `warmup_steps` (or `warmup_iterations`) sets where warmup ends.
 pub fn open_folder(folder: &Path) -> Result<Loaded, String> {
     let label = folder.file_name().and_then(|name| name.to_str()).unwrap_or("run").to_string();
+    if let Some(loaded) = open_run_set(folder, &label) {
+        return Ok(loaded);
+    }
     let files = folder_files(folder);
     let named = |relative: &str| {
         let wanted = folder.join(relative);
@@ -148,6 +185,30 @@ pub fn open_folder(folder: &Path) -> Result<Loaded, String> {
     }
     loaded.path = folder.display().to_string();
     Ok(loaded)
+}
+
+/// A folder with no files of its own whose subfolders each open as an inference run is a set
+/// of repeats of one configuration. Needs at least two such runs.
+fn open_run_set(folder: &Path, label: &str) -> Option<Loaded> {
+    let mut entries: Vec<std::path::PathBuf> = fs::read_dir(folder).ok()?.flatten().map(|entry| entry.path()).collect();
+    if entries.iter().any(|path| path.is_file()) {
+        return None;
+    }
+    entries.sort();
+    let mut runs = entries.iter().filter(|path| path.is_dir()).filter_map(|path| match open_folder(path).ok()?.side {
+        Side::Inference(run) => Some(run),
+        Side::Training(_) => None,
+    });
+    let mut first = runs.next()?;
+    first.replicates = runs.collect();
+    if first.replicates.is_empty() {
+        return None;
+    }
+    first.label = label.to_string();
+    Some(Loaded {
+        path: folder.display().to_string(),
+        side: Side::Inference(first),
+    })
 }
 
 fn file_name(path: &Path) -> String {
@@ -476,6 +537,7 @@ fn open_csv(text: &str, label: &str) -> Result<Side, String> {
         steady_step: None,
         memory_mb: Vec::new(),
         trace: None,
+        replicates: Vec::new(),
     })))
 }
 
@@ -550,6 +612,7 @@ fn series(label: &str, latency: Vec<f64>, throughput: Vec<f64>) -> InferenceRun 
         steady_step: None,
         memory_mb: Vec::new(),
         trace: None,
+        replicates: Vec::new(),
     })
 }
 

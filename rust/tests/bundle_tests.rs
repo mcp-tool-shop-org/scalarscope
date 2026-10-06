@@ -262,6 +262,7 @@ fn marked(label: &str, latency: Vec<f64>, steady: Option<i64>) -> Side {
         steady_step: steady,
         memory_mb: Vec::new(),
         trace: None,
+        replicates: Vec::new(),
     })
 }
 

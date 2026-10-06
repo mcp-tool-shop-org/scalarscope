@@ -145,6 +145,70 @@ pub fn difference_interval(a: &[f64], b: &[f64], probability: f64, seed: u64) ->
     })
 }
 
+/// Runs per side at which an interval covers run-to-run variation well enough to drop
+/// "indicative" (C1, C6).
+pub const MIN_RUNS: usize = 3;
+
+/// How B is set against A at one quantile.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Contrast {
+    /// B / A.
+    Ratio,
+    /// B − A.
+    Difference,
+}
+
+fn pooled_quantile(runs: &[&[f64]], probability: f64) -> Option<f64> {
+    let mut pooled: Vec<f64> = runs.iter().flat_map(|run| run.iter().copied()).collect();
+    quantile_unsorted(&mut pooled, probability)
+}
+
+/// B against A at one quantile when a side has several runs. Each replicate draws that side's
+/// runs with replacement, block-resamples each drawn run, pools them, and takes the quantile, so
+/// the interval carries run-to-run variation as well as the variation within a run (Kalibera and
+/// Jones 2013). With one run per side it is exactly [`ratio_interval`] or [`difference_interval`].
+pub fn runs_interval(a: &[&[f64]], b: &[&[f64]], probability: f64, contrast: Contrast, seed: u64) -> Option<Interval> {
+    if a.len() == 1 && b.len() == 1 {
+        return match contrast {
+            Contrast::Ratio => ratio_interval(a[0], b[0], probability, seed),
+            Contrast::Difference => difference_interval(a[0], b[0], probability, seed),
+        };
+    }
+    if a.is_empty() || b.is_empty() || a.iter().chain(b).any(|run| run.is_empty()) {
+        return None;
+    }
+    let combine = |qa: f64, qb: f64| match contrast {
+        Contrast::Ratio => (qa > 0.0).then(|| qb / qa),
+        Contrast::Difference => Some(qb - qa),
+    };
+    let estimate = combine(pooled_quantile(a, probability)?, pooled_quantile(b, probability)?)?;
+    let mut rng = Rng::new(seed ^ probability.to_bits() ^ 0x2E9_11CA7E);
+    let draw = |runs: &[&[f64]], rng: &mut Rng| -> Option<f64> {
+        let mut pooled = Vec::new();
+        let mut resample = Vec::new();
+        for _ in 0..runs.len() {
+            let run = runs[rng.below(runs.len())];
+            block_resample(run, block_length(run.len()), rng, &mut resample);
+            pooled.extend_from_slice(&resample);
+        }
+        quantile_unsorted(&mut pooled, probability)
+    };
+    let mut values = Vec::with_capacity(BOOTSTRAP_REPLICATES);
+    for _ in 0..BOOTSTRAP_REPLICATES {
+        if let (Some(qa), Some(qb)) = (draw(a, &mut rng), draw(b, &mut rng)) {
+            if let Some(value) = combine(qa, qb) {
+                values.push(value);
+            }
+        }
+    }
+    let tail = (1.0 - CONFIDENCE) / 2.0;
+    Some(Interval {
+        estimate,
+        low: quantile_unsorted(&mut values.clone(), tail)?,
+        high: quantile_unsorted(&mut values, 1.0 - tail)?,
+    })
+}
+
 /// The relative spread of a run, (p90 − p10) / p50, so a faster run with the same proportional
 /// jitter is not called steadier.
 pub fn relative_spread(values: &mut [f64]) -> Option<f64> {
@@ -410,6 +474,38 @@ mod tests {
         assert!(matches!(quantile_support(368, 0.99), Support::Ranks { high: 368, .. }));
         assert!(matches!(quantile_support(2000, 0.99), Support::Ranks { .. }));
         assert!(matches!(quantile_support(0, 0.5), Support::TooFew { .. }));
+    }
+
+    #[test]
+    fn runs_interval_is_the_single_run_interval_for_one_run_each() {
+        let a: Vec<f64> = (0..300).map(|i| 10.0 + (i % 7) as f64 * 0.1).collect();
+        let b: Vec<f64> = a.iter().map(|value| value * 0.9).collect();
+        assert_eq!(
+            runs_interval(&[&a], &[&b], 0.5, Contrast::Ratio, BOOTSTRAP_SEED),
+            ratio_interval(&a, &b, 0.5, BOOTSTRAP_SEED)
+        );
+        assert_eq!(
+            runs_interval(&[&a], &[&b], 0.9, Contrast::Difference, BOOTSTRAP_SEED),
+            difference_interval(&a, &b, 0.9, BOOTSTRAP_SEED)
+        );
+        assert!(runs_interval(&[], &[&b], 0.5, Contrast::Ratio, BOOTSTRAP_SEED).is_none());
+    }
+
+    #[test]
+    fn run_to_run_variation_widens_the_interval() {
+        // Three runs per side whose levels differ from run to run by about 5%.
+        let run = |level: f64, seed: u64| -> Vec<f64> {
+            let mut rng = Rng::new(seed);
+            (0..300).map(|_| level * (1.0 + ((rng.next_u64() % 1000) as f64 / 1000.0 - 0.5) * 0.02)).collect()
+        };
+        let a = [run(10.0, 1), run(10.5, 2), run(9.5, 3)];
+        let b = [run(9.0, 4), run(9.45, 5), run(8.55, 6)];
+        let refs_a: Vec<&[f64]> = a.iter().map(Vec::as_slice).collect();
+        let refs_b: Vec<&[f64]> = b.iter().map(Vec::as_slice).collect();
+        let several = runs_interval(&refs_a, &refs_b, 0.5, Contrast::Ratio, BOOTSTRAP_SEED).unwrap();
+        let single = ratio_interval(&a[0], &b[0], 0.5, BOOTSTRAP_SEED).unwrap();
+        assert!(several.high - several.low > 3.0 * (single.high - single.low), "{several:?} {single:?}");
+        assert!(several.low <= 0.9 && 0.9 <= several.high, "{several:?}");
     }
 
     #[test]
