@@ -107,6 +107,7 @@ public partial class App : MauiWinUIApplication
 			VirtualKey.Number6 => "D6",
 			VirtualKey.S => "S",
 			VirtualKey.A => "A",
+			VirtualKey.Enter => "Enter",
 			_ => null
 		};
 
@@ -126,6 +127,14 @@ public partial class App : MauiWinUIApplication
 		{
 			try
 			{
+				if (!ctrl && !shift
+					&& keyName is "Left" or "Right" or "Enter"
+					&& VortexKit.Core.AnimatedCanvas.TryHandleFocusedKey(keyName))
+				{
+					e.Handled = true;
+					return;
+				}
+
 				var handled = ScalarScope.App.Keyboard.HandleKeyPress(keyName, ctrl, shift);
 				if (handled)
 				{

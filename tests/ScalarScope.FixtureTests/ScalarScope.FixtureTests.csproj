@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\ScalarScope\ScalarScope.csproj" />
+    <ProjectReference Include="..\..\src\VortexKit\VortexKit.csproj" />
   </ItemGroup>
 
   <ItemGroup>

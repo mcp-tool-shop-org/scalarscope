@@ -72,9 +72,16 @@ public abstract class AnimatedCanvas : SKCanvasView
 
     private const float TapSlop = 10f;
 
+    private static AnimatedCanvas? _focused;
+    private readonly List<string> _labels = new();
+    private Microsoft.UI.Xaml.FrameworkElement? _native;
+
     private SKPoint? _pressPoint;
     private bool _dragged;
     private long? _activePointerId;
+
+    /// <summary>Text a screen reader gets for this canvas. The playhead is always in it.</summary>
+    public string AccessibleText { get; private set; } = "";
 
     protected SKPoint? LastTouchPoint { get; private set; }
 
@@ -83,6 +90,69 @@ public abstract class AnimatedCanvas : SKCanvasView
         PaintSurface += OnPaintSurface;
         EnableTouchEvents = true;
         Touch += OnTouch;
+        Focused += (_, _) => _focused = this;
+        Unfocused += (_, _) =>
+        {
+            if (_focused == this)
+                _focused = null;
+        };
+        PublishAccess();
+    }
+
+    /// <summary>
+    /// Left and Right scrub the playhead. Enter fires the same tap the pointer fires.
+    /// Returns false when no canvas is focused, so the window hook can keep the player keys.
+    /// </summary>
+    public static bool TryHandleFocusedKey(string key)
+    {
+        var canvas = _focused;
+        return canvas != null && canvas.HandleAccessKey(key);
+    }
+
+    /// <summary>Keyboard path for scrub and tap. Arrows move CurrentTime. Enter raises Tapped.</summary>
+    public bool HandleAccessKey(string key)
+    {
+        if (!CanvasAccess.TryApplyKey(key, CurrentTime, out var next, out var tap))
+            return false;
+
+        if (tap)
+        {
+            var x = Width > 0 ? (float)Width / 2f : 0f;
+            var y = Height > 0 ? (float)Height / 2f : 0f;
+            Tapped?.Invoke(LastTouchPoint ?? new SKPoint(x, y));
+            return true;
+        }
+
+        CurrentTime = next;
+        return true;
+    }
+
+    protected override void OnHandlerChanged()
+    {
+        base.OnHandlerChanged();
+        if (_native != null)
+        {
+            _native.GotFocus -= OnNativeFocus;
+            _native.LostFocus -= OnNativeBlur;
+            _native = null;
+        }
+
+        if (Handler?.PlatformView is Microsoft.UI.Xaml.FrameworkElement element)
+        {
+            element.IsTabStop = true;
+            element.UseSystemFocusVisuals = true;
+            element.GotFocus += OnNativeFocus;
+            element.LostFocus += OnNativeBlur;
+            _native = element;
+        }
+    }
+
+    private void OnNativeFocus(object sender, Microsoft.UI.Xaml.RoutedEventArgs e) => _focused = this;
+
+    private void OnNativeBlur(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        if (_focused == this)
+            _focused = null;
     }
 
     private static void OnTimeChanged(BindableObject bindable, object oldValue, object newValue)
@@ -90,6 +160,7 @@ public abstract class AnimatedCanvas : SKCanvasView
         if (bindable is AnimatedCanvas canvas)
         {
             canvas.OnTimeUpdated((double)oldValue, (double)newValue);
+            canvas.PublishAccess();
             canvas.InvalidateSurface();
         }
     }
@@ -112,6 +183,7 @@ public abstract class AnimatedCanvas : SKCanvasView
 
         // Clear with background
         canvas.Clear(GetBackgroundColor());
+        _labels.Clear();
 
         // Optional grid
         if (ShowGrid)
@@ -122,6 +194,7 @@ public abstract class AnimatedCanvas : SKCanvasView
 
         // Optional overlay (for annotations, etc.)
         OnRenderOverlay(canvas, info, CurrentTime);
+        PublishAccess();
     }
 
     /// <summary>
@@ -282,6 +355,7 @@ public abstract class AnimatedCanvas : SKCanvasView
         SKPaint textPaint,
         SKColor? backgroundColor = null)
     {
+        RememberLabel(text);
         var bgColor = backgroundColor ?? VortexColors.Surface.WithAlpha(200);
         var textWidth = textPaint.MeasureText(text);
         var padding = 4f;
@@ -296,6 +370,22 @@ public abstract class AnimatedCanvas : SKCanvasView
 
         canvas.DrawRoundRect(rect, 3, 3, bgPaint);
         canvas.DrawText(text, x, y, textPaint);
+    }
+
+    /// <summary>Redraws the accessible value from CurrentTime and the labels drawn this frame.</summary>
+    public void PublishAccess()
+    {
+        AccessibleText = CanvasAccess.Describe(CurrentTime, _labels);
+        AutomationProperties.SetName(this, "Playback canvas");
+        SemanticProperties.SetDescription(this, AccessibleText);
+    }
+
+    private void RememberLabel(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text) || _labels.Contains(text))
+            return;
+        _labels.Add(text.Trim());
+        PublishAccess();
     }
 
     /// <summary>
@@ -320,4 +410,59 @@ public abstract class AnimatedCanvas : SKCanvasView
     }
 
     #endregion
+}
+
+/// <summary>
+/// Accessible name and keyboard step for a playback canvas. No view is required.
+/// </summary>
+public static class CanvasAccess
+{
+    public const double Step = 0.01;
+
+    public static string Describe(double time, IReadOnlyList<string>? labels)
+    {
+        var clamped = double.IsFinite(time) ? Math.Clamp(time, 0, 1) : 0;
+        var percent = (int)Math.Round(clamped * 100, MidpointRounding.AwayFromZero);
+        var text = $"Playback canvas. Playhead {percent}%.";
+        if (labels == null || labels.Count == 0)
+            return text;
+
+        var unique = new List<string>();
+        foreach (var label in labels)
+        {
+            if (string.IsNullOrWhiteSpace(label))
+                continue;
+            var trimmed = label.Trim();
+            if (unique.Contains(trimmed))
+                continue;
+            unique.Add(trimmed);
+            if (unique.Count == 8)
+                break;
+        }
+
+        return unique.Count == 0 ? text : text + " Labels: " + string.Join(", ", unique) + ".";
+    }
+
+    /// <summary>
+    /// Left and Right move the playhead by one step. Enter is a tap and leaves the time unchanged.
+    /// </summary>
+    public static bool TryApplyKey(string? key, double time, out double nextTime, out bool tap)
+    {
+        nextTime = double.IsFinite(time) ? time : 0;
+        tap = false;
+        switch (key)
+        {
+            case "Left":
+                nextTime = Math.Clamp(nextTime - Step, 0, 1);
+                return true;
+            case "Right":
+                nextTime = Math.Clamp(nextTime + Step, 0, 1);
+                return true;
+            case "Enter":
+                tap = true;
+                return true;
+            default:
+                return false;
+        }
+    }
 }

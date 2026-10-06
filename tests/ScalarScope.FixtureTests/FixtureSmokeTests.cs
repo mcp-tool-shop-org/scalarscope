@@ -198,6 +198,7 @@ public class FixtureSmokeTests
         // Arrange
         var sets = FixtureLoader.DiscoverFixtureSets();
         var failures = new List<string>();
+        var pairs = 0;
 
         // Act - find baseline/optimized pairs (files with matching prefixes)
         foreach (var set in sets)
@@ -223,7 +224,11 @@ public class FixtureSmokeTests
                         var intent = ComparisonIntent.TfrtOptimization();
                         
                         var result = _comparer.Compare(baseline, optimized, intent);
-                        result.Should().NotBeNull();
+                        result.PresetId.Should().Be(TfrtRuntimePreset.PresetId);
+                        result.Deltas.Should().NotBeEmpty();
+                        result.Fingerprints.Should().NotBeNull();
+                        result.Fingerprints.Differences.Should().NotBeNull();
+                        pairs++;
                     }
                     catch (Exception ex)
                     {
@@ -234,6 +239,7 @@ public class FixtureSmokeTests
         }
 
         // Assert
+        pairs.Should().BeGreaterThan(0, "a baseline file has to find an optimized pair");
         failures.Should().BeEmpty(
             $"baseline/optimized pairs should compare: {string.Join("; ", failures)}");
     }

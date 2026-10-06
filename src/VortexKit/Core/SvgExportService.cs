@@ -35,6 +35,7 @@ public class SvgExportService
     {
         options ??= new SvgExportOptions();
         var palette = options.Palette ?? SvgColorPalette.Default;
+        var scale = LengthScale.For(data.ViewBox, options);
 
         var sb = new StringBuilder();
 
@@ -65,7 +66,7 @@ public class SvgExportService
 
         // Definitions (gradients, markers, filters)
         sb.AppendLine("  <defs>");
-        BuildDefs(sb, options, palette);
+        BuildDefs(sb, options, palette, scale);
         sb.AppendLine("  </defs>");
 
         // Background layer
@@ -80,7 +81,7 @@ public class SvgExportService
         if (options.IncludeGrid && data.Grid != null)
         {
             sb.AppendLine($"  <g id=\"layer-grid\" inkscape:groupmode=\"layer\" inkscape:label=\"Grid\">");
-            BuildGridLayer(sb, data.Grid, options, palette);
+            BuildGridLayer(sb, data.Grid, options, palette, scale);
             sb.AppendLine("  </g>");
         }
 
@@ -88,7 +89,7 @@ public class SvgExportService
         if (options.IncludeVectorField && data.VectorField != null)
         {
             sb.AppendLine($"  <g id=\"layer-vectorfield\" inkscape:groupmode=\"layer\" inkscape:label=\"Vector Field\">");
-            BuildVectorFieldLayer(sb, data.VectorField, options, palette);
+            BuildVectorFieldLayer(sb, data.VectorField, options, palette, scale);
             sb.AppendLine("  </g>");
         }
 
@@ -99,8 +100,9 @@ public class SvgExportService
             {
                 var traj = data.Trajectories[i];
                 var label = traj.Label ?? $"Trajectory {i + 1}";
-                sb.AppendLine($"  <g id=\"layer-trajectory-{i}\" inkscape:groupmode=\"layer\" inkscape:label=\"{EscapeXml(label)}\">");
-                BuildTrajectoryLayer(sb, traj, options, palette, i);
+                var glow = options.EnableGlow ? " filter=\"url(#glow)\"" : "";
+                sb.AppendLine($"  <g id=\"layer-trajectory-{i}\" inkscape:groupmode=\"layer\" inkscape:label=\"{EscapeXml(label)}\"{glow}>");
+                BuildTrajectoryLayer(sb, traj, options, palette, i, scale);
                 sb.AppendLine("  </g>");
             }
         }
@@ -117,7 +119,7 @@ public class SvgExportService
         if (options.IncludeAnnotations && data.Annotations.Count > 0)
         {
             sb.AppendLine($"  <g id=\"layer-annotations\" inkscape:groupmode=\"layer\" inkscape:label=\"Annotations\">");
-            BuildAnnotationsLayer(sb, data.Annotations, options, palette);
+            BuildAnnotationsLayer(sb, data.Annotations, options, palette, scale);
             sb.AppendLine("  </g>");
         }
 
@@ -125,7 +127,7 @@ public class SvgExportService
         if (options.IncludeMarkers && data.Markers.Count > 0)
         {
             sb.AppendLine($"  <g id=\"layer-markers\" inkscape:groupmode=\"layer\" inkscape:label=\"Markers\">");
-            BuildMarkersLayer(sb, data.Markers, options, palette);
+            BuildMarkersLayer(sb, data.Markers, options, palette, scale);
             sb.AppendLine("  </g>");
         }
 
@@ -134,13 +136,14 @@ public class SvgExportService
         return sb.ToString();
     }
 
-    private void BuildDefs(StringBuilder sb, SvgExportOptions options, SvgColorPalette palette)
+    private void BuildDefs(StringBuilder sb, SvgExportOptions options, SvgColorPalette palette, LengthScale scale)
     {
-        // Glow filter
+        // One glow for the trajectory group. Colored segments must not each
+        // reference it, or a long trace asks the renderer for thousands of blurs.
         if (options.EnableGlow)
         {
             sb.AppendLine("    <filter id=\"glow\" x=\"-50%\" y=\"-50%\" width=\"200%\" height=\"200%\">");
-            sb.AppendLine("      <feGaussianBlur in=\"SourceGraphic\" stdDeviation=\"3\" result=\"blur\" />");
+            sb.AppendLine($"      <feGaussianBlur in=\"SourceGraphic\" stdDeviation=\"{scale.Fpx(3)}\" result=\"blur\" />");
             sb.AppendLine("      <feMerge>");
             sb.AppendLine("        <feMergeNode in=\"blur\" />");
             sb.AppendLine("        <feMergeNode in=\"SourceGraphic\" />");
@@ -150,7 +153,7 @@ public class SvgExportService
 
         // Arrow marker for vector field
         var vectorField = ColorAttr(palette.VectorField);
-        sb.AppendLine($"    <marker id=\"arrow\" viewBox=\"0 0 10 10\" refX=\"9\" refY=\"5\" markerWidth=\"4\" markerHeight=\"4\" orient=\"auto-start-reverse\">");
+        sb.AppendLine($"    <marker id=\"arrow\" viewBox=\"0 0 10 10\" refX=\"9\" refY=\"5\" markerWidth=\"{scale.Fpx(8)}\" markerHeight=\"{scale.Fpx(8)}\" markerUnits=\"userSpaceOnUse\" orient=\"auto-start-reverse\">");
         sb.AppendLine($"      <path d=\"M 0 0 L 10 5 L 0 10 z\" fill=\"{vectorField}\" />");
         sb.AppendLine("    </marker>");
 
@@ -166,20 +169,21 @@ public class SvgExportService
         // gradient without x1, y1, x2, and y2 is not that mode, so none is emitted.
     }
 
-    private void BuildGridLayer(StringBuilder sb, SvgGridData grid, SvgExportOptions options, SvgColorPalette palette)
+    private void BuildGridLayer(StringBuilder sb, SvgGridData grid, SvgExportOptions options, SvgColorPalette palette, LengthScale scale)
     {
         var strokeWidth = F(options.GridStrokeWidth);
+        var dash = $"{scale.Fpx(2)},{scale.Fpx(2)}";
 
         // Major grid lines
         foreach (var line in grid.MajorLines)
         {
-            sb.AppendLine($"    <line x1=\"{F(line.X1)}\" y1=\"{F(line.Y1)}\" x2=\"{F(line.X2)}\" y2=\"{F(line.Y2)}\" stroke=\"{ColorAttr(palette.GridMajor)}\" stroke-width=\"{strokeWidth}\" />");
+            sb.AppendLine($"    <line x1=\"{F(line.X1)}\" y1=\"{F(line.Y1)}\" x2=\"{F(line.X2)}\" y2=\"{F(line.Y2)}\" stroke=\"{ColorAttr(palette.GridMajor)}\" stroke-width=\"{strokeWidth}\" vector-effect=\"non-scaling-stroke\" />");
         }
 
         // Minor grid lines
         foreach (var line in grid.MinorLines)
         {
-            sb.AppendLine($"    <line x1=\"{F(line.X1)}\" y1=\"{F(line.Y1)}\" x2=\"{F(line.X2)}\" y2=\"{F(line.Y2)}\" stroke=\"{ColorAttr(palette.GridMinor)}\" stroke-width=\"{F(options.GridStrokeWidth * 0.5)}\" stroke-dasharray=\"2,2\" />");
+            sb.AppendLine($"    <line x1=\"{F(line.X1)}\" y1=\"{F(line.Y1)}\" x2=\"{F(line.X2)}\" y2=\"{F(line.Y2)}\" stroke=\"{ColorAttr(palette.GridMinor)}\" stroke-width=\"{F(options.GridStrokeWidth * 0.5)}\" stroke-dasharray=\"{dash}\" vector-effect=\"non-scaling-stroke\" />");
         }
 
         // Axis labels
@@ -188,21 +192,22 @@ public class SvgExportService
             var font = FontAttr(options.FontFamily);
             foreach (var label in grid.Labels)
             {
-                sb.AppendLine($"    <text x=\"{F(label.X)}\" y=\"{F(label.Y)}\" fill=\"{ColorAttr(palette.Text)}\" font-size=\"{options.LabelFontSize}\" font-family=\"{font}\" text-anchor=\"middle\">{EscapeXml(label.Text)}</text>");
+                sb.AppendLine($"    <text x=\"{F(label.X)}\" y=\"{F(label.Y)}\" fill=\"{ColorAttr(palette.Text)}\" font-size=\"{scale.Fpx(options.LabelFontSize)}\" font-family=\"{font}\" text-anchor=\"middle\">{EscapeXml(label.Text)}</text>");
             }
         }
     }
 
-    private void BuildVectorFieldLayer(StringBuilder sb, SvgVectorFieldData vectorField, SvgExportOptions options, SvgColorPalette palette)
+    private void BuildVectorFieldLayer(StringBuilder sb, SvgVectorFieldData vectorField, SvgExportOptions options, SvgColorPalette palette, LengthScale scale)
     {
+        _ = scale;
         foreach (var arrow in vectorField.Arrows)
         {
             var opacity = F(Math.Min(1.0, arrow.Magnitude * options.VectorFieldOpacityScale));
-            sb.AppendLine($"    <line x1=\"{F(arrow.X)}\" y1=\"{F(arrow.Y)}\" x2=\"{F(arrow.X + arrow.Dx)}\" y2=\"{F(arrow.Y + arrow.Dy)}\" stroke=\"{ColorAttr(palette.VectorField)}\" stroke-width=\"{F(options.VectorFieldStrokeWidth)}\" marker-end=\"url(#arrow)\" opacity=\"{opacity}\" />");
+            sb.AppendLine($"    <line x1=\"{F(arrow.X)}\" y1=\"{F(arrow.Y)}\" x2=\"{F(arrow.X + arrow.Dx)}\" y2=\"{F(arrow.Y + arrow.Dy)}\" stroke=\"{ColorAttr(palette.VectorField)}\" stroke-width=\"{F(options.VectorFieldStrokeWidth)}\" marker-end=\"url(#arrow)\" vector-effect=\"non-scaling-stroke\" opacity=\"{opacity}\" />");
         }
     }
 
-    private void BuildTrajectoryLayer(StringBuilder sb, SvgTrajectoryData traj, SvgExportOptions options, SvgColorPalette palette, int index)
+    private void BuildTrajectoryLayer(StringBuilder sb, SvgTrajectoryData traj, SvgExportOptions options, SvgColorPalette palette, int index, LengthScale scale)
     {
         _ = index;
         if (traj.Points.Count < 2) return;
@@ -215,23 +220,24 @@ public class SvgExportService
                 : BuildPolylinePath(traj.Points);
             AppendStrokePath(sb, pathData, stroke, options);
             if (options.IncludeTrailMarkers)
-                AppendTrailMarkers(sb, traj.Points, _ => stroke, options);
+                AppendTrailMarkers(sb, traj.Points, _ => stroke, options, scale);
         }
         else
         {
             var colors = VertexColors(traj, options, palette);
             AppendColoredSegments(sb, traj.Points, colors, options);
             if (options.IncludeTrailMarkers)
-                AppendTrailMarkers(sb, traj.Points, i => colors[i], options);
+                AppendTrailMarkers(sb, traj.Points, i => colors[i], options, scale);
         }
 
-        // Start/end markers
+        // Start/end markers. The radius is a screen size, in the data box.
         if (options.IncludeStartEndMarkers)
         {
             var start = traj.Points[0];
             var end = traj.Points[^1];
-            sb.AppendLine($"    <circle cx=\"{F(start.X)}\" cy=\"{F(start.Y)}\" r=\"{F(options.TrajectoryStrokeWidth * 2)}\" fill=\"{ColorAttr(palette.TrajectoryStart)}\" />");
-            sb.AppendLine($"    <circle cx=\"{F(end.X)}\" cy=\"{F(end.Y)}\" r=\"{F(options.TrajectoryStrokeWidth * 2)}\" fill=\"{ColorAttr(palette.TrajectoryEnd)}\" />");
+            var radius = scale.Fpx(options.TrajectoryStrokeWidth * 2);
+            sb.AppendLine($"    <circle cx=\"{F(start.X)}\" cy=\"{F(start.Y)}\" r=\"{radius}\" fill=\"{ColorAttr(palette.TrajectoryStart)}\" />");
+            sb.AppendLine($"    <circle cx=\"{F(end.X)}\" cy=\"{F(end.Y)}\" r=\"{radius}\" fill=\"{ColorAttr(palette.TrajectoryEnd)}\" />");
         }
     }
 
@@ -246,8 +252,7 @@ public class SvgExportService
 
     private static void AppendStrokePath(StringBuilder sb, string pathData, string stroke, SvgExportOptions options)
     {
-        var filter = options.EnableGlow ? " filter=\"url(#glow)\"" : "";
-        sb.AppendLine($"    <path d=\"{pathData}\" fill=\"none\" stroke=\"{stroke}\" stroke-width=\"{F(options.TrajectoryStrokeWidth)}\" stroke-linecap=\"round\" stroke-linejoin=\"round\"{filter} />");
+        sb.AppendLine($"    <path d=\"{pathData}\" fill=\"none\" stroke=\"{stroke}\" stroke-width=\"{F(options.TrajectoryStrokeWidth)}\" stroke-linecap=\"round\" stroke-linejoin=\"round\" vector-effect=\"non-scaling-stroke\" />");
     }
 
     private void AppendColoredSegments(StringBuilder sb, List<SvgPoint> points, string[] colors, SvgExportOptions options)
@@ -277,10 +282,10 @@ public class SvgExportService
         }
     }
 
-    private static void AppendTrailMarkers(StringBuilder sb, List<SvgPoint> points, Func<int, string> colorAt, SvgExportOptions options)
+    private static void AppendTrailMarkers(StringBuilder sb, List<SvgPoint> points, Func<int, string> colorAt, SvgExportOptions options, LengthScale scale)
     {
         var interval = Math.Max(1, points.Count / Math.Max(1, options.TrailMarkerCount));
-        var radius = F(options.TrailMarkerRadius);
+        var radius = scale.Fpx(options.TrailMarkerRadius);
         for (var i = 0; i < points.Count; i += interval)
         {
             var pt = points[i];
@@ -377,18 +382,18 @@ public class SvgExportService
         }
     }
 
-    private void BuildAnnotationsLayer(StringBuilder sb, List<SvgAnnotation> annotations, SvgExportOptions options, SvgColorPalette palette)
+    private void BuildAnnotationsLayer(StringBuilder sb, List<SvgAnnotation> annotations, SvgExportOptions options, SvgColorPalette palette, LengthScale scale)
     {
         foreach (var ann in annotations)
         {
-            // Background rect for readability
             var font = FontAttr(options.FontFamily);
-            sb.AppendLine($"    <rect x=\"{F(ann.X - 2)}\" y=\"{F(ann.Y - options.AnnotationFontSize)}\" width=\"{F(ann.Text.Length * options.AnnotationFontSize * 0.6)}\" height=\"{F(options.AnnotationFontSize * 1.2)}\" fill=\"{ColorAttr(palette.AnnotationBackground)}\" rx=\"2\" />");
-            sb.AppendLine($"    <text x=\"{F(ann.X)}\" y=\"{F(ann.Y)}\" fill=\"{ColorAttr(palette.Annotation)}\" font-size=\"{options.AnnotationFontSize}\" font-family=\"{font}\">{EscapeXml(ann.Text)}</text>");
+            var fontPx = scale.Px(options.AnnotationFontSize);
+            sb.AppendLine($"    <rect x=\"{F(ann.X - scale.Px(2))}\" y=\"{F(ann.Y - fontPx)}\" width=\"{F(ann.Text.Length * fontPx * 0.6)}\" height=\"{F(fontPx * 1.2)}\" fill=\"{ColorAttr(palette.AnnotationBackground)}\" rx=\"{scale.Fpx(2)}\" />");
+            sb.AppendLine($"    <text x=\"{F(ann.X)}\" y=\"{F(ann.Y)}\" fill=\"{ColorAttr(palette.Annotation)}\" font-size=\"{F(fontPx)}\" font-family=\"{font}\">{EscapeXml(ann.Text)}</text>");
         }
     }
 
-    private void BuildMarkersLayer(StringBuilder sb, List<SvgMarker> markers, SvgExportOptions options, SvgColorPalette palette)
+    private void BuildMarkersLayer(StringBuilder sb, List<SvgMarker> markers, SvgExportOptions options, SvgColorPalette palette, LengthScale scale)
     {
         foreach (var marker in markers)
         {
@@ -402,7 +407,8 @@ public class SvgExportService
 
             if (marker.Type == SvgMarkerType.Failure)
             {
-                sb.AppendLine($"    <use href=\"#failure-marker\" x=\"{F(marker.X - 10)}\" y=\"{F(marker.Y - 10)}\" width=\"20\" height=\"20\" />");
+                var size = scale.Px(20);
+                sb.AppendLine($"    <use href=\"#failure-marker\" x=\"{F(marker.X - size / 2)}\" y=\"{F(marker.Y - size / 2)}\" width=\"{F(size)}\" height=\"{F(size)}\" />");
             }
             else
             {
@@ -411,7 +417,7 @@ public class SvgExportService
 
             if (!string.IsNullOrEmpty(marker.Label))
             {
-                sb.AppendLine($"    <text x=\"{F(marker.X + marker.Radius + 4)}\" y=\"{F(marker.Y + 4)}\" fill=\"{ColorAttr(palette.Text)}\" font-size=\"{options.MarkerLabelFontSize}\" font-family=\"{FontAttr(options.FontFamily)}\">{EscapeXml(marker.Label)}</text>");
+                sb.AppendLine($"    <text x=\"{F(marker.X + marker.Radius + scale.Px(4))}\" y=\"{F(marker.Y + scale.Px(4))}\" fill=\"{ColorAttr(palette.Text)}\" font-size=\"{scale.Fpx(options.MarkerLabelFontSize)}\" font-family=\"{FontAttr(options.FontFamily)}\">{EscapeXml(marker.Label)}</text>");
             }
         }
     }
@@ -493,6 +499,27 @@ public class SvgExportService
     }
 
     private static string F(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
+
+    /// <summary>
+    /// Screen pixels expressed in the data view box. Stroke widths that carry
+    /// vector-effect stay in pixels. Lengths that do not, such as type and blur, use this.
+    /// </summary>
+    private readonly record struct LengthScale(double UserPerPixel)
+    {
+        public static LengthScale For(SvgViewBox box, SvgExportOptions options)
+        {
+            var boxWidth = box.Width > 0 ? box.Width : 1;
+            var boxHeight = box.Height > 0 ? box.Height : 1;
+            var width = options.Width > 0 ? options.Width : 1;
+            var height = options.Height > 0 ? options.Height : 1;
+            var meet = Math.Min(width / boxWidth, height / boxHeight);
+            return new LengthScale(meet > 0 ? 1.0 / meet : 1);
+        }
+
+        public double Px(double pixels) => pixels * UserPerPixel;
+
+        public string Fpx(double pixels) => F(Px(pixels));
+    }
 
     private static string EscapeXml(string text) =>
         text.Replace("&", "&amp;")

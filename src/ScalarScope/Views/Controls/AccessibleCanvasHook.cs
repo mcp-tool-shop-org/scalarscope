@@ -36,11 +36,25 @@ public static class AccessibleCanvasHook
 
         var scale = ShellStartup.ClampTextScale(settings.TextScale);
         var pointer = settings.LargePointer ? 1.8f : 1f;
-        SemanticProperties.SetDescription(
-            view,
-            service.ScreenReaderMode
-                ? $"Canvas. Text scale {scale:P0}. Pointer scale {pointer:0.0}. Palette {service.CurrentPalette.Name}."
-                : null);
+        if (view is VortexKit.Core.AnimatedCanvas playback)
+        {
+            playback.PublishAccess();
+            if (service.ScreenReaderMode)
+            {
+                var playhead = SemanticProperties.GetDescription(view);
+                SemanticProperties.SetDescription(
+                    view,
+                    playhead + $" Text scale {scale:P0}. Pointer scale {pointer:0.0}. Palette {service.CurrentPalette.Name}.");
+            }
+        }
+        else
+        {
+            SemanticProperties.SetDescription(
+                view,
+                service.ScreenReaderMode
+                    ? $"Canvas. Text scale {scale:P0}. Pointer scale {pointer:0.0}. Palette {service.CurrentPalette.Name}."
+                    : null);
+        }
         _ = info;
     }
 

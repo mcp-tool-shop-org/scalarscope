@@ -139,6 +139,8 @@ await svg.ExportSvgAsync(
     new SvgExportOptions { Title = "Run", ColorMode = SvgColorMode.Solid });
 ```
 
+Stroke width, type, marker size, and blur are screen pixels. The view box stays the data box. `vector-effect="non-scaling-stroke"` keeps a stroke of 2 from filling that box. Glow is one filter on the trajectory group. A colored trajectory does not put that filter on every segment.
+
 `SvgColorMode.Solid` uses the trajectory color, or the palette trajectory color when that string is not `#RRGGBB` or `#RRGGBBAA`. `Time` colors each segment from `TrajectoryStart` to `TrajectoryEnd` by point index. `Velocity` and `Curvature` require `Velocities` or `Curvatures` with one value per point and color each segment from those values. The file does not reference a gradient that was not written.
 
 `SvgColorPalette` presets are `Default`, `Light`, `HighContrast`, and `Publication`.
