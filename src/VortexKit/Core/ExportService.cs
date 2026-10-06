@@ -14,6 +14,11 @@ public class ExportService
     public const int DefaultHeight = 1080;
 
     /// <summary>
+    /// A sequence stops at ten seconds of 30 fps. A longer request is refused.
+    /// </summary>
+    public const int MaxSequenceFrames = 300;
+
+    /// <summary>
     /// Render a canvas to a bitmap at a specific time.
     /// </summary>
     public SKBitmap RenderToBitmap(
@@ -61,7 +66,8 @@ public class ExportService
     public async Task<string[]> ExportSequenceAsync(
         Action<SKCanvas, SKImageInfo, double> renderAction,
         string outputDir,
-        ExportOptions? options = null)
+        ExportOptions? options = null,
+        CancellationToken cancellationToken = default)
     {
         options ??= new ExportOptions();
 
@@ -79,8 +85,11 @@ public class ExportService
         using var bitmap = new SKBitmap(info);
         using var canvas = new SKCanvas(bitmap);
 
+        try
+        {
         for (int frame = 0; frame < totalFrames; frame++)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var t = totalFrames > 1 ? (double)frame / (totalFrames - 1) : 0.0;
 
             canvas.Clear(options.BackgroundColor ?? VortexColors.Background);
@@ -95,6 +104,14 @@ public class ExportService
             paths.Add(framePath);
 
             options.ProgressCallback?.Invoke(frame + 1, totalFrames);
+        }
+        }
+        catch
+        {
+            await File.WriteAllTextAsync(
+                Path.Combine(outputDir, "sequence_partial.txt"),
+                $"Incomplete. Frames written: {paths.Count} of {totalFrames}.");
+            throw;
         }
 
         // Write info file
@@ -226,9 +243,14 @@ public class ExportService
         var totalFrames = (int)product;
         if (totalFrames < 1)
             throw new ArgumentOutOfRangeException(nameof(duration), duration, "Fps and Duration must produce at least one frame.");
+        if (totalFrames > MaxSequenceFrames)
+            throw new ArgumentOutOfRangeException(nameof(duration), duration, $"Frame count {totalFrames} exceeds {MaxSequenceFrames}.");
 
         return totalFrames;
     }
+
+    /// <summary>The frame count a sequence would write, or the refusal the export throws.</summary>
+    public static int FrameCount(int fps, double duration) => ResolveFrameCount(fps, duration);
 }
 
 /// <summary>

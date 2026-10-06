@@ -15,6 +15,12 @@ public partial class WelcomePage : ContentPage
         base.OnAppearing();
         
         // Refresh recent comparisons when page appears
+        if (!string.IsNullOrEmpty(ScalarScope.App.RecoveryNotice))
+        {
+            recoveryNotice.Text = ScalarScope.App.RecoveryNotice;
+            recoveryNotice.IsVisible = true;
+        }
+
         if (BindingContext is WelcomeViewModel vm)
         {
             vm.RefreshComparisonLog();

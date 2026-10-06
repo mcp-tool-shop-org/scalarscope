@@ -136,6 +136,18 @@ public class CrashReportingService
     }
 
     /// <summary>
+    /// The last <paramref name="maxChars"/> of a log. A long file is not loaded whole.
+    /// </summary>
+    public static async Task<string> ReadLogTailAsync(string path, int maxChars)
+    {
+        await using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+        if (stream.Length > maxChars)
+            stream.Seek(stream.Length - maxChars, SeekOrigin.Begin);
+        using var reader = new StreamReader(stream);
+        return await reader.ReadToEndAsync();
+    }
+
+    /// <summary>
     /// Generate a support bundle.
     /// </summary>
     public static async Task<string> GenerateSupportBundleAsync()
@@ -213,13 +225,9 @@ public class CrashReportingService
             foreach (var logFile in logFiles)
             {
                 sb.AppendLine($"## Log: {Path.GetFileName(logFile)}");
-                var content = await File.ReadAllTextAsync(logFile);
-                // Truncate if too long
-                if (content.Length > 10000)
-                {
-                    content = content[^10000..];
+                var content = await ReadLogTailAsync(logFile, 10000);
+                if (new FileInfo(logFile).Length > 10000)
                     sb.AppendLine("  (truncated, showing last 10000 characters)");
-                }
                 sb.AppendLine(content);
                 sb.AppendLine();
             }

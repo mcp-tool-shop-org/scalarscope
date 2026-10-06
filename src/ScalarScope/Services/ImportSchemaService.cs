@@ -128,7 +128,7 @@ public static class ImportSchemaService
         catch (JsonException ex)
         {
             result.AddError("JSON_PARSE_ERROR", $"Invalid JSON: {ex.Message}",
-                CreateJsonParseErrorExplanation(ex));
+                CreateJsonParseErrorExplanation(ex, content));
             return;
         }
         
@@ -381,8 +381,19 @@ public static class ImportSchemaService
         };
     }
     
-    private static ErrorExplanation CreateJsonParseErrorExplanation(JsonException ex)
+    private static ErrorExplanation CreateJsonParseErrorExplanation(JsonException ex, string content)
     {
+        var note = "";
+        if (ex.LineNumber is long zeroBased && zeroBased >= 0)
+        {
+            var display = zeroBased + 1;
+            var lines = content.Replace("\r\n", "\n").Split('\n');
+            var snippet = zeroBased < lines.Length ? lines[zeroBased].Trim() : "";
+            note = string.IsNullOrEmpty(snippet)
+                ? $"Error near line {display}"
+                : $"Error near line {display}: {snippet}";
+        }
+
         return new ErrorExplanation
         {
             Code = "JSON_PARSE_ERROR",
@@ -396,7 +407,7 @@ public static class ImportSchemaService
                 "Look for missing commas, brackets, or quotes",
                 "Ensure the file uses UTF-8 encoding"
             },
-            TechnicalNote = ex.LineNumber > 0 ? $"Error near line {ex.LineNumber}" : ""
+            TechnicalNote = note
         };
     }
     

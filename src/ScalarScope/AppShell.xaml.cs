@@ -11,15 +11,22 @@ public partial class AppShell : Shell
         // Register routes
         Routing.RegisterRoute("recovery", typeof(RecoveryPage));
 
-        // Check if we need to show recovery page
         if (App.NeedsRecovery)
+            Loaded += NavigateToRecovery;
+    }
+
+    private async void NavigateToRecovery(object? sender, EventArgs e)
+    {
+        Loaded -= NavigateToRecovery;
+        try
         {
-            // Navigate to recovery page after shell is loaded
-            Dispatcher.Dispatch(async () =>
-            {
-                await Task.Delay(100); // Let the shell initialize
-                await GoToAsync("recovery");
-            });
+            await GoToAsync("recovery");
+        }
+        catch (Exception ex)
+        {
+            App.RecoveryNotice = "Recovery could not open. " + ex.Message;
+            try { await GoToAsync("//welcome"); }
+            catch { /* Stay on the page that is already showing. */ }
         }
     }
 }

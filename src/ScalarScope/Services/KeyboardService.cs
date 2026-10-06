@@ -99,26 +99,9 @@ public class KeyboardService
             return true;
         }
 
-        // Export shortcut
-        if (key == "S" && !ctrl)
+        if ((key == "S" && !ctrl) || (key == "S" && ctrl) || (key == "E" && ctrl))
         {
-            _ = SafeQuickExportAsync();
-            return true;
-        }
-
-        // Ctrl+S for save/export dialog
-        if (key == "S" && ctrl)
-        {
-            _ = SafeQuickExportAsync();
-            ShortcutTriggered?.Invoke("Screenshot saved");
-            return true;
-        }
-
-        // Ctrl+E for export (common convention)
-        if (key == "E" && ctrl)
-        {
-            _ = SafeQuickExportAsync();
-            ShortcutTriggered?.Invoke("Screenshot saved");
+            _ = ExportAndAnnounceAsync();
             return true;
         }
 
@@ -133,21 +116,44 @@ public class KeyboardService
         return false;
     }
 
-    private async Task SafeQuickExportAsync()
+    /// <summary>
+    /// Success is announced only after a path comes back. A missing run is a failure.
+    /// </summary>
+    public static string ExportAnnouncement(bool hasRun, string? writtenPath, Exception? error)
     {
+        if (error != null)
+            return $"Export failed: {error.Message}";
+        if (!hasRun)
+            return "Export failed: no run is open.";
+        if (string.IsNullOrEmpty(writtenPath))
+            return "Export failed: no file was written.";
+        return "Screenshot saved";
+    }
+
+    private async Task ExportAndAnnounceAsync()
+    {
+        string? path = null;
+        Exception? error = null;
+        var hasRun = _session.Run != null;
         try
         {
-            await QuickExportAsync();
+            if (hasRun)
+                path = await QuickExportAsync();
         }
         catch (Exception ex)
         {
-            ShortcutTriggered?.Invoke($"Export failed: {ex.Message}");
+            error = ex;
         }
+
+        var message = ExportAnnouncement(hasRun, path, error);
+        if (message != "Screenshot saved")
+            ErrorLoggingService.Instance.Log(ErrorSeverity.Warning, message, "screenshot");
+        ShortcutTriggered?.Invoke(message);
     }
 
-    private async Task QuickExportAsync()
+    private async Task<string?> QuickExportAsync()
     {
-        if (_session.Run == null) return;
+        if (_session.Run == null) return null;
 
         var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
         var scalarScopeExports = Path.Combine(documentsPath, "ScalarScope Exports");
@@ -157,8 +163,7 @@ public class KeyboardService
         var outputPath = Path.Combine(scalarScopeExports, $"scalarscope_quick_{timestamp}.png");
 
         await _exportService.ExportStillAsync(_session.Run, _session.Player.Time, outputPath);
-
-        ShortcutTriggered?.Invoke($"Saved: {Path.GetFileName(outputPath)}");
+        return outputPath;
     }
 
     private static void NavigateToTab(int index)

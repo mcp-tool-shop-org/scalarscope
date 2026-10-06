@@ -276,8 +276,9 @@ public partial class VortexSessionViewModel : ObservableObject
             Player.ConfigureForRunSize(run.Trajectory?.Timesteps?.Count ?? 0);
             Player.JumpToTimeCommand.Execute(0.0);
 
-            // Add to recent files list
             UserPreferencesService.AddRecentFile(path, RunName);
+            try { ScalarScope.App.SaveSessionState(); }
+            catch (Exception ex) { ErrorLoggingService.Instance.Log(ex, "session save after load"); }
 
             // Notify all computed properties have changed
             NotifyComputedPropertiesChanged();

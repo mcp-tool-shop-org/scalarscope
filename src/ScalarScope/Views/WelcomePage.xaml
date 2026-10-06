@@ -74,6 +74,7 @@
                 
                 <!-- Section: Current Workspace -->
                 <VerticalStackLayout Grid.Row="0" Grid.ColumnSpan="2" Spacing="12">
+                    <Label x:Name="recoveryNotice" IsVisible="False" TextColor="#f0a020" FontSize="13"/>
                     <Label Text="WORKSPACE" Style="{StaticResource SectionHeader}"/>
                     
                     <Border Style="{StaticResource Card}">

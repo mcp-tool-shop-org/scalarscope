@@ -236,7 +236,7 @@ public static class FileValidationService
             if (ex.BytePositionInLine.HasValue && ex.LineNumber.HasValue)
             {
                 var lines = json.Split('\n');
-                var lineIndex = (int)ex.LineNumber.Value - 1;
+                var lineIndex = (int)ex.LineNumber.Value;
                 if (lineIndex >= 0 && lineIndex < lines.Length)
                 {
                     var line = lines[lineIndex];

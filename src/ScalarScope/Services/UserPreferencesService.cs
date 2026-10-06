@@ -12,6 +12,7 @@ public static class UserPreferencesService
         FileSystem.AppDataDirectory, "preferences.json");
 
     private static UserPreferences? _cached;
+    private static bool _loadFailed;
 
     /// <summary>
     /// Check if a specific hint has been dismissed.
@@ -418,26 +419,41 @@ public static class UserPreferencesService
 
         try
         {
-            if (File.Exists(PreferencesPath))
-            {
-                var json = File.ReadAllText(PreferencesPath);
-                _cached = JsonSerializer.Deserialize<UserPreferences>(json) ?? new UserPreferences();
-            }
-            else
+            if (!File.Exists(PreferencesPath))
             {
                 _cached = new UserPreferences();
+                _loadFailed = false;
+                return _cached;
             }
+
+            var json = File.ReadAllText(PreferencesPath);
+            var parsed = JsonSerializer.Deserialize<UserPreferences>(json)
+                ?? throw new InvalidDataException("preferences.json was empty.");
+            _cached = parsed;
+            _loadFailed = false;
         }
-        catch
+        catch (Exception ex)
         {
-            _cached = new UserPreferences();
+            _loadFailed = true;
+            _cached = null;
+            ErrorLoggingService.Instance.Log(ex, "preferences.json");
+            return new UserPreferences();
         }
 
         return _cached;
     }
 
-    private static void Save(UserPreferences prefs)
+    private static bool Save(UserPreferences prefs)
     {
+        if (_loadFailed)
+        {
+            ErrorLoggingService.Instance.Log(
+                ErrorSeverity.Warning,
+                "preferences.json was not overwritten because it could not be read.",
+                "preferences.json");
+            return false;
+        }
+
         try
         {
             var directory = Path.GetDirectoryName(PreferencesPath);
@@ -447,10 +463,12 @@ public static class UserPreferencesService
             var json = JsonSerializer.Serialize(prefs, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(PreferencesPath, json);
             _cached = prefs;
+            return true;
         }
-        catch
+        catch (Exception ex)
         {
-            // Silently fail - preferences are not critical
+            ErrorLoggingService.Instance.Log(ex, "preferences.json");
+            return false;
         }
     }
 }

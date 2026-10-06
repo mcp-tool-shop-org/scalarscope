@@ -18,7 +18,7 @@ public sealed class ErrorLoggingService
     public static ErrorLoggingService Instance => _instance.Value;
     
     private readonly string _logDirectory;
-    private readonly string _currentSessionLog;
+    private string _currentSessionLog;
     private readonly List<ErrorLogEntry> _sessionErrors = new();
     private readonly object _lock = new();
     
@@ -37,18 +37,23 @@ public sealed class ErrorLoggingService
     /// </summary>
     public int MaxLogFiles { get; set; } = 5;
     
-    private ErrorLoggingService()
+    private ErrorLoggingService(string? logDirectory = null)
     {
-        _logDirectory = Path.Combine(
+        _logDirectory = logDirectory ?? Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "ScalarScope", "logs");
         
         Directory.CreateDirectory(_logDirectory);
-        
-        _currentSessionLog = Path.Combine(
-            _logDirectory, 
-            $"scalarscope_{DateTime.UtcNow:yyyyMMdd_HHmmss}.log");
+        _currentSessionLog = NewSessionPath();
     }
+
+    /// <summary>
+    /// A log writer aimed at a directory the caller owns. The process singleton is unchanged.
+    /// </summary>
+    public static ErrorLoggingService CreateForDirectory(string logDirectory) => new(logDirectory);
+
+    private string NewSessionPath() =>
+        Path.Combine(_logDirectory, $"scalarscope_{DateTime.UtcNow:yyyyMMdd_HHmmss_fff}_{Guid.NewGuid():N}.log");
     
     /// <summary>
     /// Log an error state.
@@ -112,6 +117,8 @@ public sealed class ErrorLoggingService
         lock (_lock)
         {
             _sessionErrors.Add(entry);
+            if (_sessionErrors.Count > MaxSessionEntries)
+                _sessionErrors.RemoveAt(0);
         }
         
         WriteToFile(entry);
@@ -267,6 +274,7 @@ public sealed class ErrorLoggingService
                 var fileInfo = new FileInfo(_currentSessionLog);
                 if (fileInfo.Length > MaxLogFileSize)
                 {
+                    _currentSessionLog = NewSessionPath();
                     RotateLogs();
                 }
             }
@@ -403,5 +411,5 @@ public static class AppSession
     private static readonly string _id = Guid.NewGuid().ToString("N")[..8];
     
     public static string Id => _id;
-    public static string Version => "1.5.0"; // Will be injected at build time
+    public static string Version => VersionInfo.Version;
 }

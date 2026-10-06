@@ -74,6 +74,16 @@ public partial class PlaybackController : ObservableObject, IDisposable
     /// </summary>
     public event Action? PlaybackEnded;
 
+    /// <summary>
+    /// Raised when a tick cannot be posted. Playback has stopped.
+    /// </summary>
+    public event Action<string>? PlaybackFault;
+
+    /// <summary>
+    /// Posts one tick. Return false, or throw InvalidOperationException, when there is no UI thread.
+    /// </summary>
+    public Func<Action, bool>? TickPoster { get; set; }
+
     public PlaybackController()
     {
         _playbackTimer = new System.Timers.Timer(DefaultTickInterval);
@@ -118,6 +128,9 @@ public partial class PlaybackController : ObservableObject, IDisposable
     [RelayCommand]
     public void PlayPause()
     {
+        if (Volatile.Read(ref _disposed) != 0)
+            return;
+
         IsPlaying = !IsPlaying;
 
         if (IsPlaying)
@@ -227,29 +240,48 @@ public partial class PlaybackController : ObservableObject, IDisposable
 
     private void OnPlaybackTick(object? sender, System.Timers.ElapsedEventArgs e)
     {
-        // The timer thread must not write bound properties. Queue one UI tick and drop overlaps.
+        QueueTick(e.SignalTime);
+    }
+
+    /// <summary>The timer body, exposed so a test can post a tick without a UI thread.</summary>
+    public void QueueTick(DateTime signalTime)
+    {
         if (Volatile.Read(ref _disposed) != 0)
             return;
 
         if (Interlocked.CompareExchange(ref _tickQueued, 1, 0) != 0)
             return;
 
-        var signalTime = e.SignalTime;
         var queued = false;
         try
         {
-            MainThread.BeginInvokeOnMainThread(() => AdvancePlaybackOnUi(signalTime));
-            queued = true;
+            var poster = TickPoster ?? (action =>
+            {
+                MainThread.BeginInvokeOnMainThread(action);
+                return true;
+            });
+            queued = poster(() => AdvancePlaybackOnUi(signalTime));
+            if (!queued)
+                FaultPlayback("The playback tick could not be posted.");
         }
         catch (InvalidOperationException)
         {
-            // No UI thread in this process. Drop the tick.
+            FaultPlayback("The playback tick could not be posted.");
         }
         finally
         {
             if (!queued)
                 Interlocked.Exchange(ref _tickQueued, 0);
         }
+    }
+
+    private void FaultPlayback(string message)
+    {
+        IsPlaying = false;
+        _playbackTimer?.Stop();
+        _hasLastSignal = false;
+        Interlocked.Exchange(ref _tickQueued, 0);
+        PlaybackFault?.Invoke(message);
     }
 
     private void AdvancePlaybackOnUi(DateTime signalTime)

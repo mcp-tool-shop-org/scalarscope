@@ -252,10 +252,18 @@ public partial class TrajectoryPlayerViewModel : ObservableObject, IDisposable
         }
     }
 
+    /// <summary>One tick. A stopped player, or a non-positive clock, does not move Time.</summary>
+    public void AdvanceOneTick() => AdvancePlaybackOnUi();
+
     private void AdvancePlaybackOnUi()
     {
         try
         {
+            if (!IsPlaying)
+                return;
+            if (!(Duration > 0) || !double.IsFinite(Duration) || !(Speed > 0) || !double.IsFinite(Speed))
+                return;
+
             // Smooth speed transition (ease toward target)
             if (Math.Abs(Speed - _targetSpeed) > 0.01)
             {
@@ -283,10 +291,16 @@ public partial class TrajectoryPlayerViewModel : ObservableObject, IDisposable
                 }
             }
 
-            // Check for demo annotations at current time
             DemoAnnotationService.CheckTimeThreshold(Time);
 
-            TimeChanged?.Invoke();
+            try
+            {
+                TimeChanged?.Invoke();
+            }
+            catch (Exception ex)
+            {
+                ErrorLoggingService.Instance.Log(ex, "playback tick");
+            }
         }
         finally
         {

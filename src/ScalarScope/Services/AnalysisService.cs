@@ -145,13 +145,21 @@ public class AnalysisService
         if (trajectory.Count < 20)
             return new LyapunovAnalysis { IsValid = false, ErrorMessage = "Insufficient data" };
 
+        var dt = trajectory[1].T - trajectory[0].T;
+        if (!(dt > 0) || !double.IsFinite(dt))
+            return new LyapunovAnalysis
+            {
+                IsValid = false,
+                ErrorMessage = "First interval is not a positive time step"
+            };
+
         var points = new List<LyapunovPoint>();
         const int windowSize = 10;
         const double epsilon = 1e-6;
 
         for (int i = windowSize; i < trajectory.Count - windowSize; i++)
         {
-            var localLyapunov = EstimateLocalLyapunov(trajectory, i, windowSize, epsilon);
+            var localLyapunov = EstimateLocalLyapunov(trajectory, i, windowSize, epsilon, dt);
             points.Add(new LyapunovPoint
             {
                 Time = trajectory[i].T,
@@ -181,7 +189,8 @@ public class AnalysisService
         List<TrajectoryTimestep> trajectory,
         int centerIndex,
         int windowSize,
-        double epsilon)
+        double epsilon,
+        double dt)
     {
         // Find nearby point (within epsilon distance)
         var center = trajectory[centerIndex];
@@ -213,9 +222,7 @@ public class AnalysisService
 
         if (nearbyIndex < 0) return 0;
 
-        // Track divergence over time
         var divergences = new List<double>();
-        var dt = trajectory.Count > 1 ? trajectory[1].T - trajectory[0].T : 0.01;
 
         for (int k = 1; k <= Math.Min(windowSize, trajectory.Count - Math.Max(centerIndex, nearbyIndex) - 1); k++)
         {

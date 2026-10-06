@@ -207,10 +207,10 @@ public static class DiagnosticsService
 
         return new DiagnosticCheck
         {
-            Name = "GPU Acceleration",
-            Status = is64Bit ? CheckStatus.Pass : CheckStatus.Warning,
-            Message = is64Bit ? "64-bit process (GPU capable)" : "32-bit process",
-            Details = is64Bit ? "Hardware acceleration should be available" : "May have limited GPU support"
+            Name = "Process bitness",
+            Status = CheckStatus.Info,
+            Message = is64Bit ? "64-bit process" : "32-bit process",
+            Details = "This check does not probe a graphics device."
         };
     }
 
@@ -220,14 +220,16 @@ public static class DiagnosticsService
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "ScalarScope");
 
-        var exists = Directory.Exists(appDataPath);
+        var review = "package LocalState unavailable";
+        try { review = FileSystem.AppDataDirectory; }
+        catch { /* Unpackaged hosts may not have a package folder. */ }
 
         return new DiagnosticCheck
         {
-            Name = "App Data Directory",
-            Status = exists ? CheckStatus.Pass : CheckStatus.Info,
-            Message = exists ? "Exists" : "Will be created on first use",
-            Details = appDataPath
+            Name = "Storage",
+            Status = CheckStatus.Info,
+            Message = "Crash logs and the packaged review are different folders.",
+            Details = $"Crash logs: {appDataPath}. Preferences and comparison log: {review}"
         };
     }
 }

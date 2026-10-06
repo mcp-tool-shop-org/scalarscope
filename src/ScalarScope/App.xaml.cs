@@ -10,6 +10,11 @@ public partial class App : Application
     public static KeyboardService Keyboard { get; private set; } = null!;
     public static bool NeedsRecovery { get; private set; }
 
+    /// <summary>Shown on Home when recovery navigation itself fails.</summary>
+    public static string? RecoveryNotice { get; set; }
+
+    private static long _lastSessionSave;
+
     public App()
     {
         InitializeComponent();
@@ -45,15 +50,35 @@ public partial class App : Application
         // Initialize demo state service for living empty states
         DemoStateService.Instance.Initialize();
 
-        // Subscribe to window lifecycle for session state
+        shell.Navigated += (_, _) => SaveSessionState();
+        Session.Player.TimeChanged += SaveSessionThrottled;
+        Comparison.Player.TimeChanged += SaveSessionThrottled;
+
         window.Destroying += OnWindowDestroying;
 
         return window;
     }
 
+    private static void SaveSessionThrottled()
+    {
+        var now = Environment.TickCount64;
+        if (now - _lastSessionSave < 2000)
+            return;
+        _lastSessionSave = now;
+        SaveSessionState();
+    }
+
     private void OnWindowDestroying(object? sender, EventArgs e)
     {
-        // Mark clean shutdown
+        try { SaveSessionState(); }
+        catch (Exception ex) { ErrorLoggingService.Instance.Log(ex, "session save on close"); }
+
+        try { Session.Player.Dispose(); }
+        catch (Exception ex) { ErrorLoggingService.Instance.Log(ex, "session player dispose"); }
+
+        try { Comparison.Player.Dispose(); }
+        catch (Exception ex) { ErrorLoggingService.Instance.Log(ex, "comparison player dispose"); }
+
         CrashReportingService.MarkCleanShutdown();
     }
 

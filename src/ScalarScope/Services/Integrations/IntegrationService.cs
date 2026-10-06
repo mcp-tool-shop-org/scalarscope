@@ -1,3 +1,4 @@
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -16,9 +17,9 @@ public class IntegrationService
     private readonly HttpClient _httpClient;
     private readonly JsonSerializerOptions _jsonOptions;
 
-    public IntegrationService()
+    public IntegrationService(HttpClient? httpClient = null)
     {
-        _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
+        _httpClient = httpClient ?? new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
         _jsonOptions = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -38,12 +39,9 @@ public class IntegrationService
             if (string.IsNullOrEmpty(config.ApiKey))
                 return ImportResult.Failure("W&B API key is required");
 
-            _httpClient.DefaultRequestHeaders.Clear();
-            _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {config.ApiKey}");
-
-            // Fetch run metadata
             var metaUrl = $"https://api.wandb.ai/v1/runs/{config.Entity}/{config.Project}/{config.RunId}";
-            var response = await _httpClient.GetAsync(metaUrl);
+            using var metaRequest = AuthorizedGet(metaUrl, config.ApiKey);
+            var response = await _httpClient.SendAsync(metaRequest);
 
             if (!response.IsSuccessStatusCode)
                 return ImportResult.Failure($"Failed to fetch run: {response.StatusCode}");
@@ -53,7 +51,8 @@ public class IntegrationService
 
             // Fetch history (scalar data)
             var historyUrl = $"https://api.wandb.ai/v1/runs/{config.Entity}/{config.Project}/{config.RunId}/history";
-            var historyResponse = await _httpClient.GetAsync(historyUrl);
+            using var historyRequest = AuthorizedGet(historyUrl, config.ApiKey);
+            var historyResponse = await _httpClient.SendAsync(historyRequest);
 
             if (!historyResponse.IsSuccessStatusCode)
                 return ImportResult.Failure($"Failed to fetch history: {historyResponse.StatusCode}");
@@ -155,41 +154,22 @@ public class IntegrationService
         });
     }
 
+    /// <summary>
+    /// A GET whose bearer token lives on this request, not on a shared client.
+    /// </summary>
+    public static HttpRequestMessage AuthorizedGet(string url, string apiKey)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, url);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+        return request;
+    }
+
     private static void ParseTensorBoardEvents(string eventFile, IntegrationRunData data, string[] tags)
     {
-        // TensorBoard event files are protobuf format
-        // For a real implementation, we'd use Google.Protobuf
-        // This is a simplified placeholder that reads the binary format
-
-        try
-        {
-            using var stream = File.OpenRead(eventFile);
-            using var reader = new BinaryReader(stream);
-
-            // TensorBoard events have a specific format:
-            // - 8 bytes: length (little-endian uint64)
-            // - 4 bytes: masked CRC of length
-            // - N bytes: data (serialized Event proto)
-            // - 4 bytes: masked CRC of data
-
-            // For actual implementation, use the TensorFlow.NET or similar library
-            // This placeholder just demonstrates the structure
-
-            // Placeholder: create some sample data
-            for (int i = 0; i < 100; i++)
-            {
-                var step = new Dictionary<string, double>();
-                foreach (var tag in tags)
-                {
-                    step[tag] = Math.Sin(i * 0.1) + (i * 0.01); // Placeholder
-                }
-                data.Steps.Add(step);
-            }
-        }
-        catch
-        {
-            // Skip unreadable files
-        }
+        _ = data;
+        _ = tags;
+        throw new NotSupportedException(
+            $"TensorBoard event file is not parsed: {Path.GetFileName(eventFile)}");
     }
 
     #endregion
@@ -218,29 +198,39 @@ public class IntegrationService
             // Get metrics history
             var metrics = new Dictionary<string, List<(int Step, double Value)>>();
 
+            var missing = new List<string>();
             foreach (var metricKey in config.MetricKeys)
             {
                 var metricsUrl = $"{baseUrl}/api/2.0/mlflow/metrics/get-history?run_id={config.RunId}&metric_key={metricKey}";
-                var metricsResponse = await _httpClient.GetAsync(metricsUrl);
+                using var metricsRequest = new HttpRequestMessage(HttpMethod.Get, metricsUrl);
+                var metricsResponse = await _httpClient.SendAsync(metricsRequest);
 
-                if (metricsResponse.IsSuccessStatusCode)
+                if (!metricsResponse.IsSuccessStatusCode)
                 {
-                    var metricsJson = await metricsResponse.Content.ReadAsStringAsync();
-                    var metricsData = JsonSerializer.Deserialize<MLflowMetricsResponse>(metricsJson, _jsonOptions);
-
-                    if (metricsData?.Metrics != null)
-                    {
-                        metrics[metricKey] = metricsData.Metrics
-                            .Select(m => ((int)m.Step, m.Value))
-                            .ToList();
-                    }
+                    missing.Add(metricKey);
+                    continue;
                 }
+
+                var metricsJson = await metricsResponse.Content.ReadAsStringAsync();
+                var metricsData = JsonSerializer.Deserialize<MLflowMetricsResponse>(metricsJson, _jsonOptions);
+
+                if (metricsData?.Metrics == null)
+                {
+                    missing.Add(metricKey);
+                    continue;
+                }
+
+                metrics[metricKey] = metricsData.Metrics
+                    .Select(m => ((int)m.Step, m.Value))
+                    .ToList();
             }
 
-            // Convert to internal format
-            var data = ConvertMLflowData(runData?.Run, metrics);
+            if (config.MetricKeys.Length > 0 && metrics.Count == 0)
+                return ImportResult.Failure("MLflow metrics were not read: " + string.Join(", ", missing));
 
-            return ImportResult.Success(data, $"Imported {data.PointCount} steps from MLflow run '{runData?.Run?.Info?.RunName ?? config.RunId}'");
+            var data = ConvertMLflowData(runData?.Run, metrics);
+            var note = missing.Count == 0 ? "" : " Missing: " + string.Join(", ", missing) + ".";
+            return ImportResult.Success(data, $"Imported {data.PointCount} steps from MLflow run '{runData?.Run?.Info?.RunName ?? config.RunId}'.{note}");
         }
         catch (Exception ex)
         {

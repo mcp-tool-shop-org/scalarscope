@@ -56,42 +56,46 @@ public partial class RecoveryPage : ContentPage
 
         // Load the session state and restore
         var sessionState = CrashReportingService.GetLastSessionState();
+        var loadSucceeded = false;
+        var fileWasPresent = false;
+        string? loadError = null;
         if (sessionState != null && !string.IsNullOrEmpty(sessionState.LoadedFilePath))
         {
-            try
+            fileWasPresent = File.Exists(sessionState.LoadedFilePath);
+            if (fileWasPresent)
             {
-                // Check if file still exists
-                if (File.Exists(sessionState.LoadedFilePath))
+                try
                 {
-                    // Load the file
                     await App.Session.LoadFromFileAsync(sessionState.LoadedFilePath);
-
-                    // Restore playback position
-                    if (App.Session.HasRun)
+                    loadSucceeded = App.Session.HasRun;
+                    if (!loadSucceeded)
+                        loadError = string.IsNullOrEmpty(App.Session.LoadError)
+                            ? "the file did not load"
+                            : App.Session.LoadError;
+                    else
                     {
                         App.Session.Player.JumpToTimeCommand.Execute(sessionState.PlaybackTime);
-
-                        // Resume playback if it was playing
                         if (sessionState.IsPlaying)
-                        {
                             App.Session.Player.PlayPauseCommand.Execute(null);
-                        }
                     }
                 }
-            }
-            catch
-            {
-                // Failed to restore - continue to normal navigation
+                catch (Exception ex)
+                {
+                    loadError = ex.Message;
+                }
             }
         }
 
-        CrashReportingService.ClearSessionState();
+        if (RecoveryResume.ShouldClearSession(loadSucceeded))
+            CrashReportingService.ClearSessionState();
 
-        var hasFile = sessionState != null
-            && !string.IsNullOrEmpty(sessionState.LoadedFilePath)
-            && File.Exists(sessionState.LoadedFilePath);
+        var hasFile = fileWasPresent && loadSucceeded;
+        var route = ShellDestinations.Resume(sessionState?.CurrentPage, hasFile);
+        var alert = RecoveryResume.Alert(loadSucceeded, fileWasPresent, loadError, route);
+        if (!string.IsNullOrEmpty(alert))
+            await DisplayAlert("Could not resume", alert, "OK");
 
-        await GoToTab(ShellDestinations.Resume(sessionState?.CurrentPage, hasFile), hasFile);
+        await GoToTab(route, hasFile);
     }
 
     private async void OnStartFreshClicked(object sender, EventArgs e)
