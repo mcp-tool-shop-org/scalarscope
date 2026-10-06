@@ -12,6 +12,7 @@ pub mod runtrace;
 pub mod shape;
 pub mod stats;
 pub mod ui;
+pub mod views;
 
 pub use open::{open_path, open_text, Loaded, Side};
 pub use review::{pair, Pair};

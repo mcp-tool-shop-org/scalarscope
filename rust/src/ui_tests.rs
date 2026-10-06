@@ -32,7 +32,8 @@ fn blank(history: Option<PathBuf>) -> ScalarScopeApp {
         right: None,
         opened: None,
         note: String::new(),
-        distribution: false,
+        view: super::View::Series,
+        threshold: None,
         history_dir: history,
         recent: Vec::new(),
         files: Vec::new(),
@@ -118,8 +119,45 @@ fn the_inference_page_draws_the_series_the_spread_and_the_distribution() {
     app.text_scale = 1.25;
     show(&mut app);
     assert!(app.note.is_empty());
-    app.distribution = true;
+    for (view, _) in super::View::ALL {
+        app.view = view;
+        show(&mut app);
+    }
+}
+
+fn long_csv(level: f64, seed: u64) -> String {
+    let mut rng = crate::stats::Rng::new(seed);
+    let mut lines = vec!["step,latency_ms".to_string()];
+    for step in 0..400 {
+        let jitter = ((rng.next_u64() % 1000) as f64 / 1000.0 - 0.5) * 0.1;
+        let spike = if step % 97 == 50 { 3.0 } else { 1.0 };
+        lines.push(format!("{step},{}", level * (1.0 + jitter) * spike + 20.0 * (-(step as f64) / 15.0).exp()));
+    }
+    lines.join("
+")
+}
+
+#[test]
+fn every_view_draws_a_long_pair_and_the_threshold_reads_both_runs() {
+    let mut app = blank(None);
+    app.left = Some(loaded("baseline.csv", &long_csv(12.0, 1)));
+    app.right = Some(loaded("optimized.csv", &long_csv(8.0, 2)));
+    for (view, _) in super::View::ALL {
+        app.view = view;
+        show(&mut app);
+        assert!(app.note.is_empty(), "{view:?}: {}", app.note);
+    }
+    app.threshold = Some(10.0);
+    app.view = super::View::Distribution;
     show(&mut app);
+}
+
+#[test]
+fn percentile_labels_name_the_nines() {
+    assert_eq!(super::percentile_label(0.0), "p0");
+    assert_eq!(super::percentile_label(1.0), "p90");
+    assert_eq!(super::percentile_label(2.0), "p99");
+    assert_eq!(super::percentile_label(3.0), "p99.9");
 }
 
 #[test]

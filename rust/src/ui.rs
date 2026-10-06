@@ -3,7 +3,7 @@
 use std::path::Path;
 
 use eframe::egui::{self, Color32, RichText};
-use egui_plot::{Line, Plot, PlotPoints, Points, Polygon, VLine};
+use egui_plot::{HLine, Line, LineStyle, Plot, PlotPoints, Points, Polygon, VLine};
 
 use crate::bundle::{self, OpenedBundle};
 use crate::history::{self, LogEntry};
@@ -11,6 +11,32 @@ use crate::open::{open_path, Loaded, Side};
 use crate::prefs::{self, SavedView};
 use crate::readings::Band;
 use crate::review::{self, InferenceReview, Pair, TrainingReview};
+use crate::views;
+
+/// The inference views. Each answers one reading question; none animates.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum View {
+    /// Latency by step, with the spread band, anomaly marks and each run's levels.
+    Series,
+    /// The empirical CDF, with a threshold to read P(latency > x), and the quantile dots.
+    Distribution,
+    /// B − A by percentile, with intervals and a zero line.
+    Difference,
+    /// Latency against percentile on a log tail axis.
+    Spectrum,
+    /// Step × latency, per run, on a shared scale.
+    HeatMap,
+}
+
+impl View {
+    pub const ALL: [(View, &'static str); 5] = [
+        (View::Series, "Series"),
+        (View::Distribution, "Distribution"),
+        (View::Difference, "Difference"),
+        (View::Spectrum, "Spectrum"),
+        (View::HeatMap, "Heat map"),
+    ];
+}
 
 #[cfg(test)]
 thread_local! {
@@ -88,7 +114,9 @@ pub struct ScalarScopeApp {
     right: Option<Loaded>,
     opened: Option<OpenedBundle>,
     note: String,
-    distribution: bool,
+    view: View,
+    /// The latency the distribution view reads P(latency > x) at; A's p95 until set.
+    threshold: Option<f64>,
     /// Set only when this process is the Store package. An unpackaged run leaves LocalState alone.
     history_dir: Option<std::path::PathBuf>,
     recent: Vec<LogEntry>,
@@ -112,7 +140,8 @@ impl Default for ScalarScopeApp {
             right: None,
             opened: None,
             note: String::new(),
-            distribution: false,
+            view: View::Series,
+            threshold: None,
             history_dir,
             recent,
             files: saved.recent,
@@ -322,8 +351,9 @@ impl ScalarScopeApp {
     fn draw_inference(&mut self, ui: &mut egui::Ui, review: &InferenceReview) {
         let paint = self.paint;
         ui.horizontal(|ui| {
-            ui.label(RichText::new("Series").color(paint.left));
-            ui.toggle_value(&mut self.distribution, "Distribution");
+            for (view, name) in View::ALL {
+                ui.selectable_value(&mut self.view, view, name);
+            }
         });
         ui.label(RichText::new(&review.left_text).color(paint.note));
         ui.label(RichText::new(&review.right_text).color(paint.note));
@@ -335,17 +365,32 @@ impl ScalarScopeApp {
         for line in &review.notices {
             ui.label(RichText::new(line).color(paint.note));
         }
-        let distribution = self.distribution;
+        match self.view {
+            View::Series => {}
+            View::Distribution => {
+                self.draw_distribution(ui, review);
+                return self.draw_caption(ui, review);
+            }
+            View::Difference => {
+                draw_difference(ui, review, paint);
+                return self.draw_caption(ui, review);
+            }
+            View::Spectrum => {
+                draw_spectrum(ui, review, paint);
+                return self.draw_caption(ui, review);
+            }
+            View::HeatMap => {
+                draw_heat_maps(ui, review, paint);
+                return self.draw_caption(ui, review);
+            }
+        }
         Plot::new("review")
             .height(360.0)
             .legend(egui_plot::Legend::default())
-            .x_axis_label(if distribution { "latency_ms" } else { "step" })
-            .y_axis_label(if distribution { "empirical CDF" } else { "ms" })
+            .x_axis_label("step")
+            .y_axis_label("ms")
             .show(ui, |plot| {
-                if distribution {
-                    plot.line(series_line("A distribution", paint.left, cdf_points(&review.left_cdf)));
-                    plot.line(series_line("B distribution", paint.right, cdf_points(&review.right_cdf)));
-                } else {
+                {
                     for (name, color, band) in [("A spread", paint.left, &review.left_band), ("B spread", paint.right, &review.right_band)] {
                         let fill = Color32::from_rgba_unmultiplied(color.r(), color.g(), color.b(), 72);
                         for polygon in band_polygons(band) {
@@ -362,9 +407,15 @@ impl ScalarScopeApp {
                     if let Some(step) = review.right_steady {
                         plot.vline(VLine::new("B steady", step as f64).color(paint.note).width(1.0));
                     }
+                    for (name, color, segments) in [("A levels", paint.left, &review.left_segments), ("B levels", paint.right, &review.right_segments)] {
+                        for segment in segments.iter() {
+                            let points = vec![[segment.start as f64, segment.level], [segment.end.saturating_sub(1) as f64, segment.level]];
+                            plot.line(Line::new(name, PlotPoints::new(points)).color(color).width(1.0).style(LineStyle::dashed_loose()));
+                        }
+                    }
                 }
             });
-        if !distribution && !review.left_throughput.is_empty() && !review.right_throughput.is_empty() {
+        if !review.left_throughput.is_empty() && !review.right_throughput.is_empty() {
             ui.label(RichText::new("Throughput, items/s, same steps, own scale.").color(paint.note));
             Plot::new("throughput")
                 .height(140.0)
@@ -374,7 +425,7 @@ impl ScalarScopeApp {
                     plot.line(series_line("B throughput", paint.right, plain_points(&review.right_throughput)));
                 });
         }
-        if !distribution && !review.left_memory.is_empty() && !review.right_memory.is_empty() {
+        if !review.left_memory.is_empty() && !review.right_memory.is_empty() {
             ui.label(RichText::new("Memory, MiB, same steps, own scale.").color(paint.note));
             Plot::new("memory")
                 .height(120.0)
@@ -384,8 +435,153 @@ impl ScalarScopeApp {
                     plot.line(series_line("B memory", paint.right, plain_points(&review.right_memory)));
                 });
         }
+        self.draw_caption(ui, review);
+    }
+
+    fn draw_caption(&self, ui: &mut egui::Ui, review: &InferenceReview) {
         ui.add_space(6.0);
-        ui.label(RichText::new(&review.caption).color(paint.note));
+        ui.label(RichText::new(&review.caption).color(self.paint.note));
+    }
+
+    /// The CDF with a threshold the reader drags, its exceedance read-out, and the quantile dots.
+    fn draw_distribution(&mut self, ui: &mut egui::Ui, review: &InferenceReview) {
+        let paint = self.paint;
+        let threshold = self.threshold.or(review.left_p95).unwrap_or(0.0);
+        let mut moved = None;
+        Plot::new("distribution")
+            .height(320.0)
+            .legend(egui_plot::Legend::default())
+            .allow_drag(false)
+            .x_axis_label("latency_ms")
+            .y_axis_label("empirical CDF")
+            .show(ui, |plot| {
+                plot.line(series_line("A distribution", paint.left, cdf_points(&review.left_cdf)));
+                plot.line(series_line("B distribution", paint.right, cdf_points(&review.right_cdf)));
+                plot.vline(VLine::new("threshold", threshold).color(paint.mark).width(1.5));
+                let response = plot.response();
+                if response.clicked() || response.dragged() {
+                    moved = plot.pointer_coordinate().map(|point| point.x);
+                }
+            });
+        if let Some(x) = moved {
+            self.threshold = Some(x);
+        }
+        let share = |values: &[Option<f64>]| {
+            views::exceedance(values, threshold).map_or("none".to_string(), |share| format!("{:.1}%", share * 100.0))
+        };
+        ui.label(
+            RichText::new(format!(
+                "P(latency > {threshold:.3} ms): A {} · B {}. Click or drag on the plot to move the threshold.",
+                share(&review.left),
+                share(&review.right)
+            ))
+            .color(Color32::WHITE),
+        );
+        let (left_dots, right_dots) = (views::quantile_strip(&review.left), views::quantile_strip(&review.right));
+        if !left_dots.is_empty() && !right_dots.is_empty() {
+            ui.label(RichText::new("Quantile dots: each dot is 5% of the samples in this window.").color(paint.note));
+            Plot::new("quantile-dots")
+                .height(90.0)
+                .allow_drag(false)
+                .show_axes([true, false])
+                .include_y(-0.5)
+                .include_y(1.5)
+                .x_axis_label("latency_ms")
+                .show(ui, |plot| {
+                    let row = |dots: &[f64], y: f64| dots.iter().map(|dot| [*dot, y]).collect::<Vec<_>>();
+                    plot.points(Points::new("A dots", PlotPoints::new(row(&left_dots, 1.0))).color(paint.left).radius(4.0));
+                    plot.points(Points::new("B dots", PlotPoints::new(row(&right_dots, 0.0))).color(paint.right).radius(4.0));
+                });
+        }
+    }
+}
+
+/// A percentile label for a position on the nines axis: 0.3 is p50, 1 is p90, 2 is p99.
+fn percentile_label(nines: f64) -> String {
+    let percent = 100.0 * (1.0 - 10f64.powf(-nines));
+    let text = format!("{percent:.1}");
+    format!("p{}", text.trim_end_matches('0').trim_end_matches('.'))
+}
+
+/// Grid marks on the nines axis at the percentiles people read: p0, p50, p75, p90, p95, p99, p99.9.
+fn percentile_marks(input: egui_plot::GridInput) -> Vec<egui_plot::GridMark> {
+    [0.0, 0.5, 0.75, 0.9, 0.95, 0.99, 0.999]
+        .into_iter()
+        .map(views::nines)
+        .filter(|value| *value >= input.bounds.0 && *value <= input.bounds.1)
+        .map(|value| egui_plot::GridMark { value, step_size: 1.0 })
+        .collect()
+}
+
+fn draw_difference(ui: &mut egui::Ui, review: &InferenceReview, paint: Paint) {
+    if review.difference.is_empty() {
+        ui.label(RichText::new("No percentile has enough steady samples on both sides for a difference.").color(paint.note));
+        return;
+    }
+    ui.label(
+        RichText::new("B − A in ms by percentile, over the steady samples. The bar is the 95% interval, within one run per side; below zero, B is faster.")
+            .color(paint.note),
+    );
+    Plot::new("difference")
+        .height(320.0)
+        .x_axis_label("percentile")
+        .y_axis_label("B − A, ms")
+        .x_grid_spacer(percentile_marks)
+        .x_axis_formatter(|mark, _| percentile_label(mark.value))
+        .show(ui, |plot| {
+            plot.hline(HLine::new("no difference", 0.0).color(paint.note).width(1.0));
+            for point in &review.difference {
+                let x = views::nines(point.probability);
+                plot.line(Line::new("interval", PlotPoints::new(vec![[x, point.low], [x, point.high]])).color(paint.right).width(3.0));
+            }
+            let estimates: Vec<[f64; 2]> = review.difference.iter().map(|point| [views::nines(point.probability), point.estimate]).collect();
+            plot.points(Points::new("B − A", PlotPoints::new(estimates)).color(paint.mark).radius(5.0));
+        });
+}
+
+fn draw_spectrum(ui: &mut egui::Ui, review: &InferenceReview, paint: Paint) {
+    ui.label(
+        RichText::new("Latency by percentile on a log tail axis. Each line stops at the highest percentile its sample count bounds.")
+            .color(paint.note),
+    );
+    Plot::new("spectrum")
+        .height(320.0)
+        .legend(egui_plot::Legend::default())
+        .x_axis_label("percentile")
+        .y_axis_label("ms")
+        .x_grid_spacer(percentile_marks)
+        .x_axis_formatter(|mark, _| percentile_label(mark.value))
+        .show(ui, |plot| {
+            plot.line(series_line("A", paint.left, views::spectrum(&review.left)));
+            plot.line(series_line("B", paint.right, views::spectrum(&review.right)));
+        });
+}
+
+fn draw_heat_maps(ui: &mut egui::Ui, review: &InferenceReview, paint: Paint) {
+    let Some(range) = views::heat_range(&review.left, &review.right) else {
+        ui.label(RichText::new("Too few samples for a heat map.").color(paint.note));
+        return;
+    };
+    ui.label(
+        RichText::new("Where the samples fall, step by step. Each column is that stretch's own distribution; the scale is shared, and samples outside p0.5–p99.5 sit on the edge rows.")
+            .color(paint.note),
+    );
+    for (name, color, values) in [("A", paint.left, &review.left), ("B", paint.right, &review.right)] {
+        ui.label(RichText::new(name).color(color));
+        Plot::new(format!("heat-{name}"))
+            .height(160.0)
+            .include_y(range.0)
+            .include_y(range.1)
+            .x_axis_label("step")
+            .y_axis_label("ms")
+            .show(ui, |plot| {
+                for cell in views::heat_cells(values, range) {
+                    let alpha = (40.0 + 215.0 * cell.share).round() as u8;
+                    let fill = Color32::from_rgba_unmultiplied(color.r(), color.g(), color.b(), alpha);
+                    let corners = vec![[cell.x0, cell.y0], [cell.x1, cell.y0], [cell.x1, cell.y1], [cell.x0, cell.y1]];
+                    plot.polygon(Polygon::new(name, PlotPoints::new(corners)).fill_color(fill).stroke(egui::Stroke::new(0.0, color)));
+                }
+            });
     }
 }
 
