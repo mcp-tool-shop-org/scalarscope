@@ -66,6 +66,25 @@ pub struct TrainingEntry {
 pub enum Side {
     Inference(InferenceRun),
     Training(TrainingEntry),
+    Geometry(GeometrySide),
+}
+
+/// An ASPIRE geometry export and the warnings reading it raised.
+#[derive(Clone, Debug, PartialEq)]
+pub struct GeometrySide {
+    pub run: crate::geometry::GeometryRun,
+    pub warnings: Vec<String>,
+}
+
+impl Side {
+    /// The name the page shows for this side.
+    pub fn name(&self) -> String {
+        match self {
+            Side::Inference(run) => run.label.clone(),
+            Side::Training(entry) => entry.run_id.clone(),
+            Side::Geometry(geometry) => geometry.run.name(),
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -86,12 +105,12 @@ pub fn open_paths(paths: &[std::path::PathBuf]) -> Result<Loaded, String> {
     for path in rest {
         match open_path(path)?.side {
             Side::Inference(run) => replicates.push(run),
-            Side::Training(_) => return Err(SEVERAL_INFERENCE.to_string()),
+            Side::Training(_) | Side::Geometry(_) => return Err(SEVERAL_INFERENCE.to_string()),
         }
     }
     match &mut loaded.side {
         Side::Inference(run) => run.replicates.extend(replicates),
-        Side::Training(_) => return Err(SEVERAL_INFERENCE.to_string()),
+        Side::Training(_) | Side::Geometry(_) => return Err(SEVERAL_INFERENCE.to_string()),
     }
     Ok(loaded)
 }
@@ -202,7 +221,7 @@ fn open_run_set(folder: &Path, label: &str) -> Option<Loaded> {
     entries.sort();
     let mut runs = entries.iter().filter(|path| path.is_dir()).filter_map(|path| match open_folder(path).ok()?.side {
         Side::Inference(run) => Some(run),
-        Side::Training(_) => None,
+        Side::Training(_) | Side::Geometry(_) => None,
     });
     let mut first = runs.next()?;
     first.replicates = runs.collect();
@@ -368,10 +387,9 @@ fn open_json(value: Value, label: &str) -> Result<Side, String> {
     match &value {
         Value::Object(map) if map.contains_key("traceEvents") => open_trace(map, label),
         Value::Object(map) if runtrace::looks_like_runtrace(map) => open_runtrace(map, label),
-        Value::Object(map) if map.contains_key("trajectory") => Err(
-            "This is a geometry run. This Rust review opens an inference trace or a backpropagate training history."
-                .to_string(),
-        ),
+        Value::Object(_) if crate::geometry::looks_like_geometry(&value) => {
+            crate::geometry::read(&value).map(|opened| Side::Geometry(GeometrySide { run: opened.run, warnings: opened.warnings }))
+        }
         Value::Object(map) if bench_array(map).is_some() => open_benchmark(&value, label),
         _ if is_training(&value) => open_training(&value, label),
         Value::Object(_) => Err(

@@ -175,7 +175,7 @@ It works like RunForge's (`docs/sidecar-workbench.md` in runforge), on the share
 | 1. Inputs | RunTrace read and validate, fingerprints, `.gz`, memory/CPU/GPU, `.log`, folders, guardrails, TFRT preset shown | The three 2.0 oracles pass in Rust: the golden pair, nearly identical and broken |
 | 2. Statistics | S1–S6, the interval ΔTc, wall-clock alignment, the difference/spectrum/threshold/strip/heat-map/segment views | Tests for each statistic against hand-computed values. The golden pair keeps its 2.0 verdicts, or the spec records why one changes |
 | 3. Product shell | Delta tiles and Why, Welcome with a sample, Guide, Settings with Light/Dark/System and accessibility, shortcuts, review mode, PNG/SVG export, bundle compatibility in both directions | A 2.0 user's files, bundles and preferences open. The Store QA items in `STORE_LISTING.md` pass |
-| 4a. Geometry exporter (D1) | In `aspire-ai`, record per step the student's pooled hidden state and each teacher dimension's score, then write the 2.0 `GeometryRun` export: a 2-D projection fitted over the run, velocity, curvature, effective dimension, eigen spectrum, evaluators and failures | A short training run writes an export that ScalarScope 2.0 opens. Its fields match the two 2.0 samples (`Resources/Raw/Samples/*_professors.json`) |
+| 4a. Geometry exporter (D1) | In `aspire-si` (the restored `aspire-ai`), record per step the student's pooled hidden state and each teacher dimension's score, then write the 2.0 `GeometryRun` export: a 2-D projection fitted over the run, velocity, curvature, effective dimension, eigen spectrum, evaluators and failures | A short training run writes an export that ScalarScope 2.0 opens. Its fields match the two 2.0 samples (`Resources/Raw/Samples/*_professors.json`) |
 | 4b. Geometry views (D1) | Geometry import and deltas with 2.0 defaults, static trajectory/eigen/evaluator/failure views, optional playback, frame export | The 2.0 geometry tests pass in Rust. The demo pair and an export from 4a render |
 | 5. Workbench and history | The shared crate (D2), knobs, measures, hypotheses, evidence, envelope, history change points | The RunForge workbench tests pass on the shared crate. A live session on the golden folders ends with program-set states |
 
@@ -197,6 +197,26 @@ The band became the p10–p90 of an 11-sample centred window and the marks becam
 **The golden pair.** 2.0's `expected_assertions.json` says ΔF fires, because the optimized run's first sample (40 ms) is a 3-sigma outlier of the whole series. That sample is warmup. Under the 3.0 rule ΔF is quiet. `rust/tests/runtrace_tests.rs` asserts the 2.0 oracle still says "fired" and that 3.0 does not. Every other golden assertion holds.
 
 **Phase 3.** S3 keeps the 2.0 3-sigma rule as a setting that bundles record. It is on the Settings page (`AnomalyRule` in `preferences.json`), and the caption names the rule a review used.
+
+## Geometry: open questions from the port
+
+Phase 4b ports 2.0's five geometry deltas exactly, including behaviour that looks wrong. Each is
+marked `C# BUG?` in `rust/src/geometry_deltas.rs`, and each keeps 2.0's answer until it is
+decided. The tests pin 2.0's results, so a change here is deliberate and shows up as a failing
+oracle.
+
+| # | Rule | 2.0 does | Question |
+|---|---|---|---|
+| G1 | ByConvergence alignment | Pins its own constants instead of reading `ConvergenceConfig` | Should alignment follow the config ΔTc uses? |
+| G2 | First-instability anchor | Thresholds the mean of *signed* curvature; the stability rule uses absolute curvature | Use absolute curvature in both? |
+| G3 | ΔF step | Multiplies normalised time by the step count, not count − 1 | A last-step failure reports one step past the end |
+| G4 | ΔTc sign | The delta is +1 whichever run converged | Sign it by run? |
+| G5 | ΔĀ name | "Evaluator agreement" is λ1/Σλ, how concentrated the spectrum is | Rename, or measure agreement? |
+| G6 | ΔĀ direction | Which path is "higher" comes from the whole-run mean; the size comes from the longest segment | The two can disagree |
+| G7 | ΔO anchor on a tie | The anchor goes to the left run, the words to Path B | Only reachable with DeltaFloor ≤ 0 |
+| G8 | ΔF persistence | Three recorded failures, hard-coded; time from the third, kind from the first | Read `PersistenceWindow`; one failure's time and kind |
+| G9 | ΔĀ missing steps | A step without enough eigenvalues counts as alignment 0 | Leave such steps out? |
+| G10 | ΔO threshold | Adaptive per run: max(1.5 × median, 1 × robust sigma) of that run's own absolute curvature | A very straight run gets a tiny threshold and is called unstable for one small curl. Seen on the aspire-si demo pair: the steady run is flagged, the regressing one is not. A threshold shared by both runs would compare like with like |
 
 ## Corrections
 

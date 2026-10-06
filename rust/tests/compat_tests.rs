@@ -55,3 +55,25 @@ fn the_bundle_2_0_reads_back_is_the_one_this_review_writes() {
     let committed = fs::read(&path).expect("tests/Fixtures/Bundles/rust-inference-review.scbundle");
     assert!(committed == sealed.bytes, "the review writes different bytes now; rewrite the fixture and rerun the 2.0 import test");
 }
+
+#[test]
+fn a_geometry_review_has_2_0_deltas_as_tiles_and_round_trips_through_a_bundle() {
+    use scalarscope::review::Pair;
+    let sample = |name: &str| fs::read_to_string(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../src/ScalarScope/Resources/Raw/Samples").join(name)).unwrap();
+    let left = open_text(&sample("orthogonal_professors.json"), "a").unwrap();
+    let right = open_text(&sample("correlated_professors.json"), "b").unwrap();
+    let built = pair(&left, &right).unwrap();
+    let Pair::Geometry(review) = &built else { panic!("geometry") };
+    let fired: Vec<&str> = review.explanations.iter().filter(|tile| tile.status == "fired").map(|tile| tile.symbol.as_str()).collect();
+    assert_eq!(fired.len(), 4, "{fired:?}");
+    assert!(review.verdict.starts_with("Only Path A experienced correctness_dip"), "{}", review.verdict);
+    let sealed = seal(&document_from_pair(&built), "2026-10-06T00:00:00Z").unwrap();
+    let path = std::env::temp_dir().join(format!("scalarscope-geometry-{}.scbundle", std::process::id()));
+    fs::write(&path, &sealed.bytes).unwrap();
+    let opened = open_file(&path).unwrap();
+    assert!(opened.verified);
+    assert_eq!(opened.review.fired.len(), 4);
+    let Some(Pair::Geometry(again)) = scalarscope::bundle::stored_pair(&opened.review) else { panic!("stored geometry") };
+    assert_eq!(again.verdict, review.verdict);
+    assert_eq!(again.deltas, review.deltas);
+}

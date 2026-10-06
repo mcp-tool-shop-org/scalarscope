@@ -95,7 +95,7 @@ fn open_path_uses_the_file_stem_and_refuses_a_missing_file() {
 }
 
 #[test]
-fn a_geometry_file_and_a_json_that_is_not_a_run_are_refused() {
+fn a_malformed_geometry_export_and_a_json_that_is_not_a_run_are_refused() {
     let geometry = r#"{"trajectory":{"timesteps":[0]}}"#;
     assert!(open_text(geometry, "path").unwrap_err().contains("geometry"));
     assert!(open_text(r#"{"hello":1}"#, "notes").unwrap_err().contains("not a profiler trace"));
@@ -374,6 +374,7 @@ fn stored_drawings_come_back_and_an_unknown_kind_does_not_become_a_chart() {
         notices: Vec::new(),
         headline: String::new(),
         explanations: Vec::new(),
+        geometry: None,
         verdict: String::new(),
         fired: Vec::new(),
         caption: String::new(),
@@ -528,6 +529,7 @@ fn write_file_and_open_file_round_trip_and_report_a_missing_path() {
             notices: Vec::new(),
             headline: String::new(),
             explanations: Vec::new(),
+            geometry: None,
             verdict: String::new(),
             fired: Vec::new(),
             caption: String::new(),

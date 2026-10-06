@@ -94,10 +94,13 @@ pub struct Finding {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Anchor {
-    /// `series` or `distribution`.
+    /// `series`, `warmup`, `distribution`, or `geometry`.
     pub view: String,
     pub from: usize,
     pub to: usize,
+    /// For the geometry page: the time the scrub moves to.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub time: Option<f64>,
 }
 
 /// One delta's tile and its "Why" panel, whether it fired, stayed quiet, or was withheld.
@@ -128,6 +131,24 @@ pub struct TrainingReview {
 pub enum Pair {
     Inference(InferenceReview),
     Training(TrainingReview),
+    Geometry(GeometryReview),
+}
+
+/// Two ASPIRE training-dynamics runs side by side.
+#[derive(Clone, Debug, PartialEq)]
+pub struct GeometryReview {
+    pub left_label: String,
+    pub right_label: String,
+    pub left: crate::geometry::GeometryRun,
+    pub right: crate::geometry::GeometryRun,
+    /// Warnings from reading either file, each naming its run.
+    pub warnings: Vec<String>,
+    /// 2.0's five geometry deltas, suppressed ones included.
+    pub deltas: Vec<crate::geometry_deltas::GeometryDelta>,
+    /// 2.0's comparative summary of the meaningful deltas.
+    pub verdict: String,
+    /// One tile per delta.
+    pub explanations: Vec<Explanation>,
 }
 
 /// Choices that change how a review reads its samples. Recorded in the caption, so a stored
@@ -148,8 +169,9 @@ pub fn pair_with(left: &Side, right: &Side, options: Options) -> Result<Pair, St
             Ok(Pair::Inference(inference(left, right, options.anomaly)))
         }
         (Side::Training(left), Side::Training(right)) => Ok(Pair::Training(training(left, right))),
+        (Side::Geometry(left), Side::Geometry(right)) => Ok(Pair::Geometry(geometry_review(left, right))),
         _ => Err(
-            "One side is a training history and the other is an inference trace. Load two of the same kind."
+            "The two sides are different kinds (an inference trace, a training history, or a geometry export). Load two of the same kind."
                 .to_string(),
         ),
     }
@@ -290,7 +312,7 @@ fn explain(
             param("B", format!("{b} in {nb}")),
         ],
         anchor: match (right_marks.first(), right_marks.last()) {
-            (Some(from), Some(to)) => Some(Anchor { view: "series".to_string(), from: *from, to: *to + 1 }),
+            (Some(from), Some(to)) => Some(Anchor { view: "series".to_string(), from: *from, to: *to + 1, time: None }),
             _ => None,
         },
     });
@@ -334,7 +356,7 @@ fn explain(
             param("Penalties", "3, 4 and 6 × ln n"),
         ],
         anchor: match (starts.iter().min(), starts.iter().max()) {
-            (Some(from), Some(to)) => Some(Anchor { view: "warmup".to_string(), from: *from, to: *to + 1 }),
+            (Some(from), Some(to)) => Some(Anchor { view: "warmup".to_string(), from: *from, to: *to + 1, time: None }),
             _ => None,
         },
     });
@@ -363,7 +385,7 @@ fn explain(
             param("Interval", format!("95%, {} moving-block resamples, seed fixed", stats::BOOTSTRAP_REPLICATES)),
             param("Fires when", "the interval excludes 1"),
         ],
-        anchor: Some(Anchor { view: "distribution".to_string(), from: 0, to: count }),
+        anchor: Some(Anchor { view: "distribution".to_string(), from: 0, to: count, time: None }),
     });
     tiles
 }
@@ -727,6 +749,84 @@ fn index_of_step(run: &InferenceRun, step: Option<i64>) -> usize {
     step.map_or(0, |step| run.steps.iter().position(|value| *value >= step).unwrap_or(run.steps.len()))
 }
 
+
+fn geometry_review(left: &crate::open::GeometrySide, right: &crate::open::GeometrySide) -> GeometryReview {
+    let (left_label, right_label) = (left.run.name(), right.run.name());
+    let warnings = left
+        .warnings
+        .iter()
+        .map(|warning| format!("{left_label}: {warning}"))
+        .chain(right.warnings.iter().map(|warning| format!("{right_label}: {warning}")))
+        .collect();
+    geometry_with_deltas(left_label, right_label, left.run.clone(), right.run.clone(), warnings)
+}
+
+/// A geometry review with 2.0's deltas: step alignment, read at the end of the runs, default
+/// thresholds, exactly as 2.0 computed them (tests/Fixtures/Bundles holds 2.0's own answers).
+pub fn geometry_with_deltas(
+    left_label: String,
+    right_label: String,
+    left: crate::geometry::GeometryRun,
+    right: crate::geometry::GeometryRun,
+    warnings: Vec<String>,
+) -> GeometryReview {
+    use crate::geometry_deltas::{self as deltas, DeltaStatus};
+    let result = deltas::compute_with_summary(&left, &right, deltas::Alignment::ByStep, 1.0, &deltas::DeltaConfig::default());
+    let explanations = result
+        .deltas
+        .iter()
+        .map(|delta| {
+            let number = |value: Option<f64>| value.map(|value| format!("{value:.3}"));
+            let mut parameters = vec![
+                [left_label.clone(), format!("{:.3}", delta.left_value)],
+                [right_label.clone(), format!("{:.3}", delta.right_value)],
+                ["Difference".to_string(), format!("{:.3}", delta.delta)],
+                ["2.0 confidence".to_string(), format!("{:.2}", delta.confidence)],
+            ];
+            for (name, value) in [
+                ("Stabilizes at (A)", delta.tc_a.map(|step| step.to_string())),
+                ("Stabilizes at (B)", delta.tc_b.map(|step| step.to_string())),
+                ("Dominance onset (A)", delta.td_a.map(|step| step.to_string())),
+                ("Dominance onset (B)", delta.td_b.map(|step| step.to_string())),
+                ("Instability score (A)", number(delta.score_a)),
+                ("Instability score (B)", number(delta.score_b)),
+            ] {
+                if let Some(value) = value {
+                    parameters.push([name.to_string(), value]);
+                }
+            }
+            Explanation {
+                symbol: delta.symbol.clone(),
+                status: match delta.status {
+                    DeltaStatus::Present => "fired",
+                    DeltaStatus::Suppressed => "quiet",
+                    DeltaStatus::Indeterminate => "withheld",
+                }
+                .to_string(),
+                headline: delta.summary_sentence.clone().filter(|line| !line.is_empty()).unwrap_or_else(|| delta.explanation.clone()),
+                why: std::iter::once(delta.explanation.clone())
+                    .chain(delta.notes.iter().cloned())
+                    .chain(std::iter::once(
+                        "This is 2.0's geometry rule, ported exactly and checked against 2.0's own results; read at the end of the runs.".to_string(),
+                    ))
+                    .collect::<Vec<_>>()
+                    .join(" "),
+                parameters,
+                anchor: delta.visual_anchor_time.map(|time| Anchor { view: "geometry".to_string(), from: 0, to: 0, time: Some(time) }),
+            }
+        })
+        .collect();
+    GeometryReview {
+        left_label,
+        right_label,
+        left,
+        right,
+        warnings,
+        verdict: result.comparative_summary,
+        deltas: result.deltas,
+        explanations,
+    }
+}
 
 fn training(left: &TrainingEntry, right: &TrainingEntry) -> TrainingReview {
     let caption = "Training loss, stored samples. Backpropagate keeps at most 100 points by uniform index sampling before it writes the file. final_loss is a separate number and is not appended to this curve. This is not an inference review, so ΔTc, ΔO, ΔF, ΔĀ, and ΔTd are not computed.".to_string();

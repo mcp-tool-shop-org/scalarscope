@@ -42,6 +42,7 @@ fn blank(history: Option<PathBuf>) -> ScalarScopeApp {
         page: super::Page::Compare,
         guide_query: String::new(),
         pending_png: None,
+        scrub: None,
         settings: prefs::ReviewPrefs::default(),
         history_dir: history,
         recent: Vec::new(),
@@ -308,6 +309,26 @@ fn each_view_exports_an_svg_and_a_png_round_trips() {
 }
 
 #[test]
+fn a_geometry_pair_draws_and_the_scrub_moves() {
+    let sample = |name: &str| {
+        let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../src/ScalarScope/Resources/Raw/Samples").join(name);
+        fs::read_to_string(path).unwrap()
+    };
+    let mut app = blank(None);
+    app.left = Some(loaded("orthogonal.json", &sample("orthogonal_professors.json")));
+    app.right = Some(loaded("correlated.json", &sample("correlated_professors.json")));
+    show(&mut app);
+    assert!(app.note.is_empty(), "{}", app.note);
+    let Some((_, Ok(crate::review::Pair::Geometry(review)))) = app.built.clone() else { panic!("a geometry pair") };
+    assert_eq!(review.left_label, "sample_orthogonal_001");
+    app.scrub = Some(0.0);
+    show(&mut app);
+    app.right = Some(loaded("trace.csv", &latency_csv(false)));
+    show(&mut app);
+    assert!(app.note.contains("same kind"), "{}", app.note);
+}
+
+#[test]
 fn percentile_labels_name_the_nines() {
     assert_eq!(super::percentile_label(0.0), "p0");
     assert_eq!(super::percentile_label(1.0), "p90");
@@ -372,6 +393,7 @@ fn a_stored_review_draws_inference_training_and_findings_text() {
             notices: Vec::new(),
             headline: String::new(),
             explanations: Vec::new(),
+            geometry: None,
             verdict: "ΔF Introduced 1 new runtime anomalies".to_string(),
             fired: vec!["ΔF".to_string()],
             caption: "The series was not stored.".to_string(),

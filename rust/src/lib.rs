@@ -2,6 +2,8 @@
 //! histories are different instruments, and this crate keeps them apart.
 
 pub mod bundle;
+pub mod geometry;
+pub mod geometry_deltas;
 pub mod history;
 pub mod milestones;
 pub mod open;
