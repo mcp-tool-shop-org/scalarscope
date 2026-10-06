@@ -62,6 +62,15 @@ pub struct InferenceReview {
     /// Each run's levels in this window's sample indices.
     pub left_segments: Vec<Segment>,
     pub right_segments: Vec<Segment>,
+    /// ΔF, ΔTc and ΔO, each with its status and why.
+    pub explanations: Vec<Explanation>,
+    /// The samples before the window (the warmup the alignment cut), so the warmup view can show
+    /// each run from its first sample.
+    pub left_lead: Vec<f64>,
+    pub right_lead: Vec<f64>,
+    /// Each run's settle range in sample indices from its first sample, as ΔTc read it.
+    pub left_settle: Option<(usize, usize)>,
+    pub right_settle: Option<(usize, usize)>,
 }
 
 /// One delta the inference page actually fired. The numbers are the same
@@ -79,6 +88,31 @@ pub struct Finding {
     pub right: f64,
     pub delta: f64,
     pub units: String,
+}
+
+/// Where "Show me" takes the reader: a view, and a stretch of the review window in sample indices.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Anchor {
+    /// `series` or `distribution`.
+    pub view: String,
+    pub from: usize,
+    pub to: usize,
+}
+
+/// One delta's tile and its "Why" panel, whether it fired, stayed quiet, or was withheld.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Explanation {
+    pub symbol: String,
+    /// `fired`, `quiet`, or `withheld`.
+    pub status: String,
+    pub headline: String,
+    /// The rule and this pair's numbers, in plain words.
+    pub why: String,
+    pub parameters: Vec<[String; 2]>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub anchor: Option<Anchor>,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -123,6 +157,7 @@ fn inference(left: &InferenceRun, right: &InferenceRun) -> InferenceReview {
     let (left_gpu, right_gpu) = beside(&left.gpu_percent, &right.gpu_percent, left, right, skip_left, skip_right, count);
     let shapes = (shape::run_shape(&left.latency_ms), shape::run_shape(&right.latency_ms));
     let (findings, verdict) = inference_verdict(left, right, &shapes);
+    let explanations = explain(left, right, &shapes, &findings, (skip_left, skip_right, count));
     let fired = findings.iter().map(|row| row.symbol.clone()).collect();
     let mut caption = format!(
         "Preset tensorflowrt-runtime-v1 (inference runtime). latency_ms (ms). {summary} The band is the p10–p90 of an 11-sample centred window, the spread of the samples, not a confidence interval. Marks are samples more than {limit} robust deviations (1.4826 × MAD) from the median of this window. Ratios and their 95% intervals come from {replicates} moving-block bootstrap resamples (block length the cube root of the sample count, seed fixed); they cover the variation within each run, not between runs. A percentile is printed only when enough samples bound it. p50, p95, and p99 are nearest-rank. The distribution is the empirical CDF of these same samples. ΔTd and ΔĀ stay off this page.",
@@ -177,7 +212,148 @@ fn inference(left: &InferenceRun, right: &InferenceRun) -> InferenceReview {
         right: right_values,
         caption,
         notices: notices(left, right, &shapes),
+        explanations,
+        left_lead: left.latency_ms[..skip_left.min(left.latency_ms.len())].to_vec(),
+        right_lead: right.latency_ms[..skip_right.min(right.latency_ms.len())].to_vec(),
+        left_settle: settle_range(left, &shapes.0),
+        right_settle: settle_range(right, &shapes.1),
     }
+}
+
+/// Where a run settles, as ΔTc reads it: the step stated in its file, or its detected range.
+fn settle_range(run: &InferenceRun, shape: &RunShape) -> Option<(usize, usize)> {
+    if stored_milestones(run) {
+        let index = index_of_step(run, run.steady_step);
+        return (index < run.latency_ms.len()).then_some((index, index));
+    }
+    shape.steady_range
+}
+
+fn param(name: &str, value: impl Into<String>) -> [String; 2] {
+    [name.to_string(), value.into()]
+}
+
+/// The tiles. The numbers are recomputed from the same samples with the same seed as the verdict,
+/// so a tile cannot disagree with it.
+fn explain(
+    left: &InferenceRun,
+    right: &InferenceRun,
+    shapes: &(RunShape, RunShape),
+    findings: &[Finding],
+    (_skip_left, skip_right, count): (usize, usize, usize),
+) -> Vec<Explanation> {
+    let fired = |symbol: &str| findings.iter().find(|row| row.symbol == symbol);
+    let (tail_left, tail_right) = (steady_tail(left), steady_tail(right));
+    let enough = tail_left.len() >= shape::MIN_SAMPLES && tail_right.len() >= shape::MIN_SAMPLES;
+    let mut tiles = Vec::new();
+
+    // ΔF
+    let anomalies = |tail: &[f64]| stats::mad_indices(&tail.iter().map(|value| Some(*value)).collect::<Vec<_>>()).len();
+    let (a, b) = (anomalies(&tail_left), anomalies(&tail_right));
+    let (na, nb) = (tail_left.len(), tail_right.len());
+    let p_value = stats::more_anomalies(a, na, b, nb);
+    let (status, why) = match (fired("ΔF"), enough, p_value) {
+        (Some(_), _, Some(p)) => (
+            "fired",
+            format!("B has {b} anomalies in {nb} steady samples and A has {a} in {na}. If both ran at the same anomaly rate, a split at least this lopsided would happen with probability {p:.3} (one-sided exact test), which is below {ANOMALY_LEVEL}."),
+        ),
+        (_, false, _) => ("quiet", format!("ΔF needs {} steady samples per side; A has {na} and B has {nb}.", shape::MIN_SAMPLES)),
+        (_, true, None) => ("quiet", format!("B has {b} anomalies in {nb} steady samples and A has {a} in {na}: B does not have more for its sample count.")),
+        (_, true, Some(p)) => (
+            "quiet",
+            format!("B has {b} anomalies in {nb} steady samples and A has {a} in {na}. With equal rates, a split at least this lopsided has probability {p:.3}, which is not below {ANOMALY_LEVEL}, so it is within chance."),
+        ),
+    };
+    let right_marks = stats::mad_indices(&window(&right.latency_ms, skip_right, count));
+    tiles.push(Explanation {
+        symbol: "ΔF".to_string(),
+        status: status.to_string(),
+        headline: fired("ΔF").map_or_else(|| "No new runtime anomalies beyond chance".to_string(), |row| row.sentence.clone()),
+        why: format!("{why} An anomaly is a sample more than {} robust deviations (1.4826 × MAD) from its run's median. Warmup samples are not counted.", stats::MAD_LIMIT),
+        parameters: vec![
+            param("Rule", format!("beyond {} × 1.4826 × MAD of the median", stats::MAD_LIMIT)),
+            param("Samples", "steady samples only"),
+            param("Level", format!("one-sided p < {ANOMALY_LEVEL}")),
+            param("A", format!("{a} in {na}")),
+            param("B", format!("{b} in {nb}")),
+        ],
+        anchor: match (right_marks.first(), right_marks.last()) {
+            (Some(from), Some(to)) => Some(Anchor { view: "series".to_string(), from: *from, to: *to + 1 }),
+            _ => None,
+        },
+    });
+
+    // ΔTc
+    let tc = delta_tc(left, right, shapes);
+    let range_text = |run: &InferenceRun, shape: &RunShape| match shape.steady_range {
+        Some((low, high)) => format!("{}, steps {}–{}", shape.shape.label(), step_at(run, low), step_at(run, high)),
+        None => shape.shape.label().to_string(),
+    };
+    let stated = stored_milestones(left) && stored_milestones(right);
+    let (status, headline, why) = match &tc {
+        Tc::Fired { text, .. } if stated => ("fired", text.clone(), "Both files state their steady-state step, and those steps are compared as written, as the 2.0 comparer did.".to_string()),
+        Tc::Fired { text, .. } => (
+            "fired",
+            text.clone(),
+            "Each run's steady start is a range: from where an 11-sample rolling median first reaches the steady level, to the latest PELT change point across penalties 3, 4 and 6 · ln n. The two ranges do not overlap.".to_string(),
+        ),
+        Tc::Withheld(text) => ("withheld", "No stabilization time to compare".to_string(), text.clone()),
+        Tc::Quiet if stated => ("quiet", "Same steady-state step".to_string(), "Both files state the same steady-state step.".to_string()),
+        Tc::Quiet => (
+            "quiet",
+            "Settles at about the same point".to_string(),
+            "The two steady-start ranges overlap, so a difference between them could be where a segment was cut rather than a change in warmup.".to_string(),
+        ),
+    };
+    let starts: Vec<usize> = [settle_range(left, &shapes.0), settle_range(right, &shapes.1)]
+        .into_iter()
+        .flatten()
+        .flat_map(|(low, high)| [low, high])
+        .collect();
+    tiles.push(Explanation {
+        symbol: "ΔTc".to_string(),
+        status: status.to_string(),
+        headline,
+        why,
+        parameters: vec![
+            param("A", range_text(left, &shapes.0)),
+            param("B", range_text(right, &shapes.1)),
+            param("Detector", "PELT on log-latency, normal mean and variance cost"),
+            param("Penalties", "3, 4 and 6 × ln n"),
+        ],
+        anchor: match (starts.iter().min(), starts.iter().max()) {
+            (Some(from), Some(to)) => Some(Anchor { view: "warmup".to_string(), from: *from, to: *to + 1 }),
+            _ => None,
+        },
+    });
+
+    // ΔO
+    let spread = |tail: &[f64]| stats::relative_spread(&mut tail.to_vec());
+    let interval = stats::spread_ratio_interval(&tail_left, &tail_right, stats::BOOTSTRAP_SEED).filter(|_| enough);
+    let spreads = format!(
+        "Relative spread, (p90 − p10) / p50 of the steady samples: A {}, B {}.",
+        spread(&tail_left).map_or("none".to_string(), |value| format!("{value:.3}")),
+        spread(&tail_right).map_or("none".to_string(), |value| format!("{value:.3}"))
+    );
+    let (status, why) = match (fired("ΔO"), interval) {
+        (Some(_), Some(interval)) => ("fired", format!("{spreads} B/A is {} and its 95% interval from {} block-bootstrap resamples excludes 1.", interval_text(&interval), stats::BOOTSTRAP_REPLICATES)),
+        (_, Some(interval)) => ("quiet", format!("{spreads} B/A is {} and its 95% interval includes 1, so the change is within the variation.", interval_text(&interval))),
+        _ if !enough => ("quiet", format!("{spreads} ΔO needs {} steady samples per side.", shape::MIN_SAMPLES)),
+        _ => ("quiet", format!("{spreads} A's spread is 0, so there is no ratio to take.")),
+    };
+    tiles.push(Explanation {
+        symbol: "ΔO".to_string(),
+        status: status.to_string(),
+        headline: fired("ΔO").map_or_else(|| "Runtime variability unchanged".to_string(), |row| row.sentence.clone()),
+        why,
+        parameters: vec![
+            param("Measure", "(p90 − p10) / p50, steady samples"),
+            param("Interval", format!("95%, {} moving-block resamples, seed fixed", stats::BOOTSTRAP_REPLICATES)),
+            param("Fires when", "the interval excludes 1"),
+        ],
+        anchor: Some(Anchor { view: "distribution".to_string(), from: 0, to: count }),
+    });
+    tiles
 }
 
 /// The samples from the steady-state step on, or the whole run when it has none.

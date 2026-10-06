@@ -26,11 +26,14 @@ pub enum View {
     Spectrum,
     /// Step × latency, per run, on a shared scale.
     HeatMap,
+    /// Each run from its first sample, with where it settles shaded.
+    Warmup,
 }
 
 impl View {
-    pub const ALL: [(View, &'static str); 5] = [
+    pub const ALL: [(View, &'static str); 6] = [
         (View::Series, "Series"),
+        (View::Warmup, "Warmup"),
         (View::Distribution, "Distribution"),
         (View::Difference, "Difference"),
         (View::Spectrum, "Spectrum"),
@@ -120,6 +123,15 @@ pub struct ScalarScopeApp {
     threshold: Option<f64>,
     /// Draw the series against seconds since each run's first sample instead of the step.
     elapsed_axis: bool,
+    /// The delta whose "Why" panel is open.
+    why: Option<String>,
+    /// The stretch of the window "Show me" shaded, in sample indices.
+    highlight: Option<(usize, usize)>,
+    /// The review built from the two loaded sides, kept until either side changes. Building it
+    /// runs the bootstraps, so it is not rebuilt every frame.
+    built: Option<(String, Result<Pair, String>)>,
+    /// The hash of the bundle saved last, for "Copy hash".
+    saved_hash: Option<String>,
     /// Set only when this process is the Store package. An unpackaged run leaves LocalState alone.
     history_dir: Option<std::path::PathBuf>,
     recent: Vec<LogEntry>,
@@ -146,6 +158,10 @@ impl Default for ScalarScopeApp {
             view: View::Series,
             threshold: None,
             elapsed_axis: false,
+            why: None,
+            highlight: None,
+            built: None,
+            saved_hash: None,
             history_dir,
             recent,
             files: saved.recent,
@@ -175,18 +191,19 @@ impl ScalarScopeApp {
             ui.ctx().set_visuals(visuals);
         }
         let paint = self.paint;
+        let reviewing = self.opened.is_some();
         ui.horizontal(|ui| {
             ui.heading(RichText::new("ScalarScope").color(paint.mark));
-            if ui.button("Open path A").clicked() {
+            if ui.add_enabled(!reviewing, egui::Button::new("Open path A")).clicked() {
                 self.load(true, false);
             }
-            if ui.button("Folder A").on_hover_text("Open a run folder for side A").clicked() {
+            if ui.add_enabled(!reviewing, egui::Button::new("Folder A")).on_hover_text("Open a run folder for side A").clicked() {
                 self.load(true, true);
             }
-            if ui.button("Open path B").clicked() {
+            if ui.add_enabled(!reviewing, egui::Button::new("Open path B")).clicked() {
                 self.load(false, false);
             }
-            if ui.button("Folder B").on_hover_text("Open a run folder for side B").clicked() {
+            if ui.add_enabled(!reviewing, egui::Button::new("Folder B")).on_hover_text("Open a run folder for side B").clicked() {
                 self.load(false, true);
             }
             if ui.button("Open bundle").clicked() {
@@ -209,30 +226,28 @@ impl ScalarScopeApp {
         if let Some(label) = paint.label {
             ui.label(RichText::new(format!("Series colors follow the saved {label} palette.")).color(paint.note));
         }
+        if reviewing {
+            egui::Frame::group(ui.style()).show(ui, |ui| {
+                ui.horizontal(|ui| {
+                    ui.label(RichText::new("Review mode: a stored review is open. Loading runs is off until you close it.").color(paint.mark));
+                    if ui.button("Close review").clicked() {
+                        self.opened = None;
+                    }
+                });
+            });
+        }
 
         let opened = self.opened.clone();
-        if opened.is_none() {
-            let mismatch = match (&self.left, &self.right) {
-                (Some(left), Some(right)) => review::pair(&left.side, &right.side).err(),
-                _ => None,
-            };
-            if let Some(error) = mismatch {
-                self.note = error;
-            }
+        let current = if opened.is_none() { self.current_pair() } else { None };
+        if let Some(Err(error)) = &current {
+            self.note = error.clone();
         }
         if !self.note.is_empty() {
             ui.add_space(6.0);
             ui.label(RichText::new(&self.note).color(paint.mark));
         }
 
-        let built = if self.opened.is_none() {
-            match (&self.left, &self.right) {
-                (Some(left), Some(right)) => review::pair(&left.side, &right.side).ok(),
-                _ => None,
-            }
-        } else {
-            None
-        };
+        let built = current.and_then(Result::ok);
         if let Some(pair) = &built {
             let left_path = self.left.as_ref().map(|item| item.path.clone()).unwrap_or_default();
             let right_path = self.right.as_ref().map(|item| item.path.clone()).unwrap_or_default();
@@ -241,7 +256,12 @@ impl ScalarScopeApp {
 
         ui.add_space(8.0);
         if let Some(opened) = opened {
-            ui.label(RichText::new(format!("Stored review · {}", &opened.bundle_hash[..16])).color(paint.note));
+            ui.horizontal(|ui| {
+                ui.label(RichText::new(format!("Stored review · {}", &opened.bundle_hash[..16])).color(paint.note));
+                if ui.button("Copy hash").on_hover_text("Copy the full SHA-256 content check").clicked() {
+                    ui.ctx().copy_text(opened.bundle_hash.clone());
+                }
+            });
             ui.label(RichText::new(bundle::CONTENT_CHECK).color(paint.note));
             ui.add_space(6.0);
             match bundle::stored_pair(&opened.review) {
@@ -276,6 +296,8 @@ impl ScalarScopeApp {
         let Some(paths) = picked.filter(|paths| !paths.is_empty()) else {
             return;
         };
+        self.built = None;
+        self.highlight = None;
         match open_paths(&paths) {
             Ok(loaded) => {
                 self.opened = None;
@@ -339,6 +361,7 @@ impl ScalarScopeApp {
             Ok(sealed) => match bundle::write_file(&path, &sealed) {
                 Ok(()) => {
                     self.note = format!("Saved the stored review. Content check {}.", sealed.bundle_hash);
+                    self.saved_hash = Some(sealed.bundle_hash.clone());
                     if let Some(dir) = self.history_dir.clone() {
                         match history::attach_bundle(&path.display().to_string(), Some(&sealed.bundle_hash), &dir) {
                             Ok(_) => self.refresh_recent(),
@@ -369,6 +392,7 @@ impl ScalarScopeApp {
         for line in &review.notices {
             ui.label(RichText::new(line).color(paint.note));
         }
+        self.draw_tiles(ui, review);
         match self.view {
             View::Series => {}
             View::Distribution => {
@@ -385,6 +409,10 @@ impl ScalarScopeApp {
             }
             View::HeatMap => {
                 draw_heat_maps(ui, review, paint);
+                return self.draw_caption(ui, review);
+            }
+            View::Warmup => {
+                draw_warmup(ui, review, paint);
                 return self.draw_caption(ui, review);
             }
         }
@@ -409,6 +437,10 @@ impl ScalarScopeApp {
                         for polygon in band_polygons(band) {
                             plot.polygon(Polygon::new(name, PlotPoints::new(at_x(polygon, xs))).fill_color(fill).stroke(egui::Stroke::new(0.0, color)));
                         }
+                    }
+                    if let Some((from, to)) = self.highlight {
+                        let range = x_of(from, left_x)..=x_of(to.saturating_sub(1).max(from), left_x);
+                        plot.span(egui_plot::Span::new("shown", range).fill(Color32::from_rgba_unmultiplied(paint.mark.r(), paint.mark.g(), paint.mark.b(), 40)));
                     }
                     plot.line(series_line("A", paint.left, at_x(value_points(&review.left), left_x)));
                     plot.line(series_line("B", paint.right, at_x(value_points(&review.right), right_x)));
@@ -464,6 +496,77 @@ impl ScalarScopeApp {
                 });
         }
         self.draw_caption(ui, review);
+    }
+
+    /// The two sides' review, built when either side changed since the last frame.
+    fn current_pair(&mut self) -> Option<Result<Pair, String>> {
+        let (Some(left), Some(right)) = (&self.left, &self.right) else {
+            self.built = None;
+            return None;
+        };
+        let key = format!("{}|{}|{:?}|{:?}", left.path, right.path, side_name(&self.left, ""), side_name(&self.right, ""));
+        if self.built.as_ref().map(|(cached, _)| cached) != Some(&key) {
+            self.built = Some((key, review::pair(&left.side, &right.side)));
+        }
+        self.built.as_ref().map(|(_, pair)| pair.clone())
+    }
+
+    /// One tile per delta. A tile opens its "Why" panel.
+    fn draw_tiles(&mut self, ui: &mut egui::Ui, review: &InferenceReview) {
+        if review.explanations.is_empty() {
+            return;
+        }
+        let paint = self.paint;
+        ui.add_space(4.0);
+        ui.horizontal_wrapped(|ui| {
+            for tile in &review.explanations {
+                let color = match tile.status.as_str() {
+                    "fired" => paint.mark,
+                    "withheld" => paint.note,
+                    _ => Color32::GRAY,
+                };
+                let open = self.why.as_deref() == Some(tile.symbol.as_str());
+                let text = RichText::new(format!("{} {} · {}", tile.symbol, tile.status, tile.headline)).color(color);
+                if ui.selectable_label(open, text).on_hover_text("Why did this fire, or not?").clicked() {
+                    self.why = if open { None } else { Some(tile.symbol.clone()) };
+                }
+            }
+        });
+        let Some(tile) = review.explanations.iter().find(|tile| Some(tile.symbol.as_str()) == self.why.as_deref()) else {
+            return;
+        };
+        egui::Frame::group(ui.style()).show(ui, |ui| {
+            ui.set_width(ui.available_width());
+            ui.label(RichText::new(format!("{} {}: {}", tile.symbol, tile.status, tile.headline)).color(Color32::WHITE).strong());
+            ui.add(egui::Label::new(RichText::new(&tile.why).color(paint.note)).wrap());
+            egui::Grid::new(format!("why-{}", tile.symbol)).num_columns(2).show(ui, |ui| {
+                for [name, value] in &tile.parameters {
+                    ui.label(RichText::new(name).color(paint.note));
+                    ui.label(value);
+                    ui.end_row();
+                }
+            });
+            ui.horizontal(|ui| {
+                if ui.button("Copy finding").clicked() {
+                    let parameters: Vec<String> = tile.parameters.iter().map(|[name, value]| format!("{name}: {value}")).collect();
+                    ui.ctx().copy_text(format!("{} {}: {}\n{}\n{}", tile.symbol, tile.status, tile.headline, tile.why, parameters.join("\n")));
+                }
+                if let Some(anchor) = &tile.anchor {
+                    if ui.button("Show me").clicked() {
+                        self.view = match anchor.view.as_str() {
+                            "distribution" => View::Distribution,
+                            "warmup" => View::Warmup,
+                            _ => View::Series,
+                        };
+                        self.highlight = (anchor.view == "series").then_some((anchor.from, anchor.to));
+                    }
+                }
+                if ui.button("Close").clicked() {
+                    self.why = None;
+                    self.highlight = None;
+                }
+            });
+        });
     }
 
     fn draw_caption(&self, ui: &mut egui::Ui, review: &InferenceReview) {
@@ -582,6 +685,32 @@ fn draw_spectrum(ui: &mut egui::Ui, review: &InferenceReview, paint: Paint) {
         .show(ui, |plot| {
             plot.line(series_line("A", paint.left, views::spectrum(&review.left)));
             plot.line(series_line("B", paint.right, views::spectrum(&review.right)));
+        });
+}
+
+/// Each run from its first sample: the warmup the series view leaves out, and where ΔTc reads
+/// each run as settled, shaded in that run's color.
+fn draw_warmup(ui: &mut egui::Ui, review: &InferenceReview, paint: Paint) {
+    ui.label(
+        RichText::new("Each run from its first sample. The shaded stretch is where it settles: a range when it is detected, one step when the file states it.")
+            .color(paint.note),
+    );
+    let full = |lead: &[f64], window: &[Option<f64>]| -> Vec<Option<f64>> { lead.iter().map(|value| Some(*value)).chain(window.iter().copied()).collect() };
+    let (left, right) = (full(&review.left_lead, &review.left), full(&review.right_lead, &review.right));
+    Plot::new("warmup")
+        .height(360.0)
+        .legend(egui_plot::Legend::default())
+        .x_axis_label("sample from the run's first")
+        .y_axis_label("ms")
+        .show(ui, |plot| {
+            for (name, color, settle) in [("A settles", paint.left, review.left_settle), ("B settles", paint.right, review.right_settle)] {
+                if let Some((low, high)) = settle {
+                    let fill = Color32::from_rgba_unmultiplied(color.r(), color.g(), color.b(), 50);
+                    plot.span(egui_plot::Span::new(name, low as f64..=high.max(low) as f64 + 0.5).fill(fill));
+                }
+            }
+            plot.line(series_line("A", paint.left, value_points(&left)));
+            plot.line(series_line("B", paint.right, value_points(&right)));
         });
 }
 

@@ -52,6 +52,9 @@ pub struct StoredReview {
     /// The ratio headline. Left out when empty, like `notices`.
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub headline: String,
+    /// The delta tiles. Left out when empty.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub explanations: Vec<crate::review::Explanation>,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, serde::Deserialize)]
@@ -73,6 +76,14 @@ pub struct StoredSeries {
     pub right_throughput: Vec<f64>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub difference: Vec<crate::views::DifferencePoint>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub left_lead: Vec<f64>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub right_lead: Vec<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub left_settle: Option<(usize, usize)>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub right_settle: Option<(usize, usize)>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub left_segments: Vec<crate::views::Segment>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
@@ -434,6 +445,10 @@ pub fn stored_pair(review: &StoredReview) -> Option<Pair> {
                 right_gpu: series.right_gpu.clone(),
                 difference: series.difference.clone(),
                 left_segments: series.left_segments.clone(),
+                left_lead: series.left_lead.clone(),
+                right_lead: series.right_lead.clone(),
+                left_settle: series.left_settle,
+                right_settle: series.right_settle,
                 right_segments: series.right_segments.clone(),
                 right_memory: series.right_memory.clone(),
                 left_cdf: pairs(&series.left_cdf),
@@ -452,6 +467,7 @@ pub fn stored_pair(review: &StoredReview) -> Option<Pair> {
                 right_text: review.right_text.clone(),
                 notices: review.notices.clone(),
                 headline: review.headline.clone(),
+                explanations: review.explanations.clone(),
             }))
         }
         "training" => {
@@ -543,6 +559,17 @@ fn inference_review(review: &InferenceReview) -> StoredReview {
         kind: "inference".to_string(),
         notices: review.notices.iter().map(|line| scrub(line, &labels)).collect(),
         headline: review.headline.clone(),
+        // A tile's text can name the runs, and a run's label can carry a folder.
+        explanations: review
+            .explanations
+            .iter()
+            .map(|tile| crate::review::Explanation {
+                headline: scrub(&tile.headline, &labels),
+                why: scrub(&tile.why, &labels),
+                parameters: tile.parameters.iter().map(|[name, value]| [name.clone(), scrub(value, &labels)]).collect(),
+                ..tile.clone()
+            })
+            .collect(),
         verdict: scrub(&review.verdict, &labels),
         fired: review.fired.clone(),
         caption: scrub(&review.caption, &labels),
@@ -573,6 +600,10 @@ fn inference_review(review: &InferenceReview) -> StoredReview {
             right_gpu: review.right_gpu.clone(),
             difference: review.difference.clone(),
             left_segments: review.left_segments.clone(),
+            left_lead: review.left_lead.clone(),
+            right_lead: review.right_lead.clone(),
+            left_settle: review.left_settle,
+            right_settle: review.right_settle,
             right_segments: review.right_segments.clone(),
             right_memory: review.right_memory.clone(),
             left_cdf: store_pairs(&review.left_cdf),
@@ -594,6 +625,7 @@ fn training_review(review: &TrainingReview) -> StoredReview {
         kind: "training".to_string(),
         notices: Vec::new(),
         headline: String::new(),
+        explanations: Vec::new(),
         verdict: String::new(),
         fired: Vec::new(),
         caption: scrub(&review.caption, &labels),
@@ -647,6 +679,7 @@ fn findings_only(entries: &[(String, Vec<u8>)]) -> Result<StoredReview, String> 
         kind: "findings".to_string(),
         notices: Vec::new(),
         headline: String::new(),
+        explanations: Vec::new(),
         verdict,
         fired,
         caption: "This bundle stores the findings. It does not store the series, so the chart is not drawn from another file.".to_string(),
