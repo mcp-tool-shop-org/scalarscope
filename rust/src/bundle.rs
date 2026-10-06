@@ -78,6 +78,18 @@ pub struct StoredSeries {
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub right_segments: Vec<crate::views::Segment>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub left_elapsed: Vec<f64>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub right_elapsed: Vec<f64>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub left_cpu: Vec<f64>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub right_cpu: Vec<f64>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub left_gpu: Vec<f64>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub right_gpu: Vec<f64>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub left_memory: Vec<f64>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub right_memory: Vec<f64>,
@@ -414,6 +426,12 @@ pub fn stored_pair(review: &StoredReview) -> Option<Pair> {
                 left_throughput: series.left_throughput.clone(),
                 right_throughput: series.right_throughput.clone(),
                 left_memory: series.left_memory.clone(),
+                left_elapsed: series.left_elapsed.clone(),
+                right_elapsed: series.right_elapsed.clone(),
+                left_cpu: series.left_cpu.clone(),
+                right_cpu: series.right_cpu.clone(),
+                left_gpu: series.left_gpu.clone(),
+                right_gpu: series.right_gpu.clone(),
                 difference: series.difference.clone(),
                 left_segments: series.left_segments.clone(),
                 right_segments: series.right_segments.clone(),
@@ -547,6 +565,12 @@ fn inference_review(review: &InferenceReview) -> StoredReview {
             left_throughput: review.left_throughput.clone(),
             right_throughput: review.right_throughput.clone(),
             left_memory: review.left_memory.clone(),
+            left_elapsed: review.left_elapsed.clone(),
+            right_elapsed: review.right_elapsed.clone(),
+            left_cpu: review.left_cpu.clone(),
+            right_cpu: review.right_cpu.clone(),
+            left_gpu: review.left_gpu.clone(),
+            right_gpu: review.right_gpu.clone(),
             difference: review.difference.clone(),
             left_segments: review.left_segments.clone(),
             right_segments: review.right_segments.clone(),

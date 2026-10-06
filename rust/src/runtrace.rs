@@ -22,6 +22,9 @@ pub const LATENCY_NAMES: [&str; 5] = ["latency_ms", "latency", "inference_latenc
 pub const THROUGHPUT_NAMES: [&str; 5] = ["throughput_items_per_sec", "throughput", "items_per_sec", "samples_per_sec", "qps"];
 /// Memory names; `memory_bytes` and `gpu_memory_bytes` are converted to MiB.
 pub const MEMORY_NAMES: [&str; 4] = ["memory_mb", "memory_bytes", "peak_memory", "gpu_memory_bytes"];
+/// Utilization names, in percent, as the TFRT preset mapped them.
+pub const CPU_NAMES: [&str; 3] = ["cpu_percent", "cpu_utilization", "cpu_usage"];
+pub const GPU_NAMES: [&str; 3] = ["gpu_percent", "gpu_utilization", "gpu_usage"];
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Severity {
@@ -88,6 +91,8 @@ pub struct RunTrace {
     pub framework: String,
     pub steps: Vec<i64>,
     pub wall_time_seconds: Option<usize>,
+    /// The wall-clock seconds at each step, when the file has them and they are all numbers.
+    pub wall_seconds: Option<Vec<f64>>,
     pub epoch: Option<usize>,
     pub scalars: Vec<Scalar>,
     pub milestones: Vec<Milestone>,
@@ -187,6 +192,10 @@ pub fn parse(map: &Map<String, Value>) -> Result<RunTrace, String> {
         framework: text(map.get("framework")),
         steps,
         wall_time_seconds: length_of("wallTimeSeconds"),
+        wall_seconds: timeline
+            .and_then(|timeline| timeline.get("wallTimeSeconds"))
+            .and_then(Value::as_array)
+            .and_then(|items| items.iter().map(Value::as_f64).collect::<Option<Vec<f64>>>()),
         epoch: length_of("epoch"),
         scalars,
         milestones,

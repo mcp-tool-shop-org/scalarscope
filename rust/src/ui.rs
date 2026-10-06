@@ -118,6 +118,8 @@ pub struct ScalarScopeApp {
     view: View,
     /// The latency the distribution view reads P(latency > x) at; A's p95 until set.
     threshold: Option<f64>,
+    /// Draw the series against seconds since each run's first sample instead of the step.
+    elapsed_axis: bool,
     /// Set only when this process is the Store package. An unpackaged run leaves LocalState alone.
     history_dir: Option<std::path::PathBuf>,
     recent: Vec<LogEntry>,
@@ -143,6 +145,7 @@ impl Default for ScalarScopeApp {
             note: String::new(),
             view: View::Series,
             threshold: None,
+            elapsed_axis: false,
             history_dir,
             recent,
             files: saved.recent,
@@ -385,32 +388,41 @@ impl ScalarScopeApp {
                 return self.draw_caption(ui, review);
             }
         }
+        let timed = !review.left_elapsed.is_empty() && !review.right_elapsed.is_empty();
+        if timed {
+            ui.checkbox(&mut self.elapsed_axis, "Elapsed seconds on x (each run from its own first sample)");
+        }
+        let (left_x, right_x) = if timed && self.elapsed_axis {
+            (Some(review.left_elapsed.as_slice()), Some(review.right_elapsed.as_slice()))
+        } else {
+            (None, None)
+        };
         Plot::new("review")
             .height(360.0)
             .legend(egui_plot::Legend::default())
-            .x_axis_label("step")
+            .x_axis_label(if left_x.is_some() { "elapsed s" } else { "step" })
             .y_axis_label("ms")
             .show(ui, |plot| {
                 {
-                    for (name, color, band) in [("A spread", paint.left, &review.left_band), ("B spread", paint.right, &review.right_band)] {
+                    for (name, color, band, xs) in [("A spread", paint.left, &review.left_band, left_x), ("B spread", paint.right, &review.right_band, right_x)] {
                         let fill = Color32::from_rgba_unmultiplied(color.r(), color.g(), color.b(), 72);
                         for polygon in band_polygons(band) {
-                            plot.polygon(Polygon::new(name, PlotPoints::new(polygon)).fill_color(fill).stroke(egui::Stroke::new(0.0, color)));
+                            plot.polygon(Polygon::new(name, PlotPoints::new(at_x(polygon, xs))).fill_color(fill).stroke(egui::Stroke::new(0.0, color)));
                         }
                     }
-                    plot.line(series_line("A", paint.left, value_points(&review.left)));
-                    plot.line(series_line("B", paint.right, value_points(&review.right)));
-                    plot.points(mark_points("A marks", &review.left, &review.left_marks, paint.mark));
-                    plot.points(mark_points("B marks", &review.right, &review.right_marks, paint.mark));
+                    plot.line(series_line("A", paint.left, at_x(value_points(&review.left), left_x)));
+                    plot.line(series_line("B", paint.right, at_x(value_points(&review.right), right_x)));
+                    plot.points(Points::new("A marks", PlotPoints::new(at_x(mark_coords(&review.left, &review.left_marks), left_x))).color(paint.mark).radius(4.0));
+                    plot.points(Points::new("B marks", PlotPoints::new(at_x(mark_coords(&review.right, &review.right_marks), right_x))).color(paint.mark).radius(4.0));
                     if let Some(step) = review.left_steady {
-                        plot.vline(VLine::new("A steady", step as f64).color(paint.note).width(1.0));
+                        plot.vline(VLine::new("A steady", x_of(step, left_x)).color(paint.note).width(1.0));
                     }
                     if let Some(step) = review.right_steady {
-                        plot.vline(VLine::new("B steady", step as f64).color(paint.note).width(1.0));
+                        plot.vline(VLine::new("B steady", x_of(step, right_x)).color(paint.note).width(1.0));
                     }
-                    for (name, color, segments) in [("A levels", paint.left, &review.left_segments), ("B levels", paint.right, &review.right_segments)] {
+                    for (name, color, segments, xs) in [("A levels", paint.left, &review.left_segments, left_x), ("B levels", paint.right, &review.right_segments, right_x)] {
                         for segment in segments.iter() {
-                            let points = vec![[segment.start as f64, segment.level], [segment.end.saturating_sub(1) as f64, segment.level]];
+                            let points = vec![[x_of(segment.start, xs), segment.level], [x_of(segment.end.saturating_sub(1), xs), segment.level]];
                             plot.line(Line::new(name, PlotPoints::new(points)).color(color).width(1.0).style(LineStyle::dashed_loose()));
                         }
                     }
@@ -424,6 +436,21 @@ impl ScalarScopeApp {
                 .show(ui, |plot| {
                     plot.line(series_line("A throughput", paint.left, plain_points(&review.left_throughput)));
                     plot.line(series_line("B throughput", paint.right, plain_points(&review.right_throughput)));
+                });
+        }
+        let utilization = (!review.left_cpu.is_empty() && !review.right_cpu.is_empty()) || (!review.left_gpu.is_empty() && !review.right_gpu.is_empty());
+        if utilization {
+            ui.label(RichText::new("Utilization, %, same steps: CPU solid, GPU dashed.").color(paint.note));
+            Plot::new("utilization")
+                .height(120.0)
+                .include_y(0.0)
+                .include_y(100.0)
+                .y_axis_label("%")
+                .show(ui, |plot| {
+                    plot.line(series_line("A CPU", paint.left, plain_points(&review.left_cpu)));
+                    plot.line(series_line("B CPU", paint.right, plain_points(&review.right_cpu)));
+                    plot.line(series_line("A GPU", paint.left, plain_points(&review.left_gpu)).style(LineStyle::dashed_loose()));
+                    plot.line(series_line("B GPU", paint.right, plain_points(&review.right_gpu)).style(LineStyle::dashed_loose()));
                 });
         }
         if !review.left_memory.is_empty() && !review.right_memory.is_empty() {
@@ -622,12 +649,24 @@ fn cdf_points(points: &[(f64, f64)]) -> Vec<[f64; 2]> {
     points.iter().map(|(value, probability)| [*value, *probability]).collect()
 }
 
-fn mark_points(name: &str, values: &[Option<f64>], marks: &[usize], color: Color32) -> Points<'static> {
-    let points = marks
+/// The x of a sample index: its elapsed seconds when the axis is time, else the index.
+fn x_of(index: usize, xs: Option<&[f64]>) -> f64 {
+    xs.and_then(|xs| xs.get(index).copied()).unwrap_or(index as f64)
+}
+
+/// Points whose x is a sample index, moved onto the elapsed-time axis when there is one.
+fn at_x(points: Vec<[f64; 2]>, xs: Option<&[f64]>) -> Vec<[f64; 2]> {
+    if xs.is_none() {
+        return points;
+    }
+    points.into_iter().map(|[x, y]| [x_of(x.max(0.0) as usize, xs), y]).collect()
+}
+
+fn mark_coords(values: &[Option<f64>], marks: &[usize]) -> Vec<[f64; 2]> {
+    marks
         .iter()
         .filter_map(|index| values.get(*index).copied().flatten().map(|sample| [*index as f64, sample]))
-        .collect::<Vec<_>>();
-    Points::new(name, PlotPoints::new(points)).color(color).radius(4.0)
+        .collect()
 }
 
 /// The band as one trapezoid per pair of neighbouring steps that both have a band.

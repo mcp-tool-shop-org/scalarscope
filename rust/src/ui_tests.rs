@@ -34,6 +34,7 @@ fn blank(history: Option<PathBuf>) -> ScalarScopeApp {
         note: String::new(),
         view: super::View::Series,
         threshold: None,
+        elapsed_axis: false,
         history_dir: history,
         recent: Vec::new(),
         files: Vec::new(),
@@ -150,6 +151,25 @@ fn every_view_draws_a_long_pair_and_the_threshold_reads_both_runs() {
     app.threshold = Some(10.0);
     app.view = super::View::Distribution;
     show(&mut app);
+}
+
+#[test]
+fn the_series_draws_on_elapsed_seconds_with_utilization() {
+    let timed = |level: f64| -> String {
+        let mut lines = vec!["step,latency_ms,time_s,cpu_percent,gpu_percent".to_string()];
+        for step in 0..120 {
+            lines.push(format!("{step},{},{},{},{}", level + (step % 5) as f64 * 0.1, step as f64 * 0.02, 30 + step % 7, 80));
+        }
+        lines.join("
+")
+    };
+    let mut app = blank(None);
+    app.left = Some(loaded("a.csv", &timed(12.0)));
+    app.right = Some(loaded("b.csv", &timed(9.0)));
+    show(&mut app);
+    app.elapsed_axis = true;
+    show(&mut app);
+    assert!(app.note.is_empty(), "{}", app.note);
 }
 
 #[test]
@@ -532,7 +552,9 @@ fn a_gap_in_the_spread_splits_the_band_and_a_bad_hex_is_black() {
 
 #[test]
 fn mark_points_skip_an_index_the_series_does_not_have() {
-    let _points = super::mark_points("A marks", &[Some(1.0), None], &[0, 4], Color32::WHITE);
+    assert_eq!(super::mark_coords(&[Some(1.0), None], &[0, 4]), vec![[0.0, 1.0]]);
+    assert_eq!(super::at_x(vec![[1.0, 5.0]], Some(&[0.0, 2.5])), vec![[2.5, 5.0]]);
+    assert_eq!(super::x_of(3, None), 3.0);
     let _line = super::series_line("A", Color32::WHITE, vec![[0.0, 1.0]]);
     assert_eq!(super::value_points(&[Some(1.0), None]), vec![[0.0, 1.0]]);
     assert_eq!(super::plain_points(&[2.0]), vec![[0.0, 2.0]]);

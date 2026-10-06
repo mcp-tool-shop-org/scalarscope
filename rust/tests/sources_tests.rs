@@ -155,3 +155,35 @@ fn a_folder_of_run_folders_is_a_set_of_repeats() {
     fs::write(dir.join("benchmark.csv"), csv(5.0)).unwrap();
     assert!(inference(open_path(&dir).unwrap().side).replicates.is_empty());
 }
+
+#[test]
+fn a_csv_carries_elapsed_seconds_and_utilization() {
+    let rows: String = (0..30).map(|step| format!("{step},{},{},{},{}\n", 10.0 + (step % 2) as f64, 100.0 + step as f64 * 0.05, 40 + step % 3, 90)).collect();
+    let text = format!("step,latency_ms,time_s,cpu_percent,gpu_util\n{rows}");
+    let run = inference(scalarscope::open::open_text(&text, "timed").unwrap());
+    assert_eq!(run.elapsed_s.len(), 30);
+    assert_eq!(run.elapsed_s[0], 0.0, "elapsed counts from the first sample");
+    assert!((run.elapsed_s[29] - 1.45).abs() < 1e-9);
+    assert_eq!(run.cpu_percent[0], 40.0);
+    assert_eq!(run.gpu_percent[5], 90.0);
+}
+
+#[test]
+fn profiler_timestamps_become_elapsed_seconds() {
+    let run = inference(scalarscope::open::open_text(&trace_json(), "trace").unwrap());
+    assert_eq!(run.elapsed_s.len(), run.latency_ms.len());
+    assert!((run.elapsed_s[1] - 0.01).abs() < 1e-12, "{:?}", &run.elapsed_s[..3]);
+}
+
+#[test]
+fn a_runtrace_with_wall_time_and_utilization() {
+    let path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../tests/Fixtures/InferenceOptimization/baseline_tfrt_runtrace.json");
+    let mut value: serde_json::Value = serde_json::from_str(&fs::read_to_string(path).unwrap()).unwrap();
+    value["timeline"]["wallTimeSeconds"] = serde_json::json!((0..20).map(|step| 5.0 + step as f64 * 0.5).collect::<Vec<_>>());
+    value["scalars"]["series"].as_array_mut().unwrap().push(serde_json::json!({
+        "name": "gpu_utilization", "unit": "percent", "sourceKey": "x", "aggregation": "none", "values": vec![75; 20]
+    }));
+    let run = inference(scalarscope::open::open_text(&value.to_string(), "wall").unwrap());
+    assert_eq!((run.elapsed_s[0], run.elapsed_s[19]), (0.0, 9.5));
+    assert_eq!(run.gpu_percent, vec![75.0; 20]);
+}

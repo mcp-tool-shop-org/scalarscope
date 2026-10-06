@@ -27,6 +27,11 @@ pub struct InferenceRun {
     pub steady_step: Option<i64>,
     /// Memory in MiB at the same steps, or empty.
     pub memory_mb: Vec<f64>,
+    /// Seconds since the run's first sample, at the same steps, or empty when unknown.
+    pub elapsed_s: Vec<f64>,
+    /// CPU and GPU utilization in percent at the same steps, or empty.
+    pub cpu_percent: Vec<f64>,
+    pub gpu_percent: Vec<f64>,
     /// Present when the run came from a stored RunTrace.
     pub trace: Option<TraceInfo>,
     /// More runs of the same side (repeats of the same configuration). The headline and the
@@ -384,30 +389,47 @@ fn open_trace(map: &serde_json::Map<String, Value>, label: &str) -> Result<Side,
     // A complete ProfilerStep is one inference. Nested ops, including a
     // TensorRT event inside that step, are not more samples. A trace with
     // no such step still uses the TensorRT or inference name filter.
-    let steps = step_durations(events);
-    let latency = if steps.is_empty() {
-        named_inference_durations(events)
-    } else {
-        steps
-    };
+    let steps = step_events(events);
+    let chosen = if steps.is_empty() { named_inference_events(events) } else { steps };
+    let latency: Vec<f64> = chosen.iter().filter_map(|event| duration_ms(event)).collect();
+    // Each step's start, in seconds from the first, when every chosen event has a timestamp.
+    let mut elapsed_s: Vec<f64> = chosen
+        .iter()
+        .filter(|event| duration_ms(event).is_some())
+        .map(|event| event.get("ts").and_then(Value::as_f64).filter(|ts| ts.is_finite()).map(|ts| ts / 1_000_000.0))
+        .collect::<Option<Vec<f64>>>()
+        .unwrap_or_default();
+    from_start(&mut elapsed_s);
     if latency.is_empty() {
         return Err(
             "This profiler trace has no numeric latency. A complete ProfilerStep is one inference. Without one, event names have to contain TensorRT or inference."
                 .to_string(),
         );
     }
-    Ok(Side::Inference(series(label, latency, Vec::new())))
+    let run = series(label, latency, Vec::new());
+    Ok(Side::Inference(InferenceRun {
+        elapsed_s: if elapsed_s.len() == run.latency_ms.len() { elapsed_s } else { Vec::new() },
+        ..run
+    }))
 }
 
-fn step_durations(events: &[Value]) -> Vec<f64> {
+/// Shift times so the first sample is at 0 s.
+fn from_start(seconds: &mut [f64]) {
+    if let Some(first) = seconds.first().copied() {
+        for value in seconds.iter_mut() {
+            *value -= first;
+        }
+    }
+}
+
+fn step_events(events: &[Value]) -> Vec<&Value> {
     events
         .iter()
         .filter(|event| is_complete(event) && event_name(event).is_some_and(is_profiler_step))
-        .filter_map(duration_ms)
         .collect()
 }
 
-fn named_inference_durations(events: &[Value]) -> Vec<f64> {
+fn named_inference_events(events: &[Value]) -> Vec<&Value> {
     events
         .iter()
         .filter(|event| {
@@ -416,7 +438,6 @@ fn named_inference_durations(events: &[Value]) -> Vec<f64> {
                 lowered.contains("tensorrt") || lowered.contains("inference")
             })
         })
-        .filter_map(duration_ms)
         .collect()
 }
 
@@ -494,6 +515,10 @@ fn open_csv(text: &str, label: &str) -> Result<Side, String> {
         .ok_or_else(|| "The CSV has no latency column.".to_string())?;
     let step_at = column(&header, &["step", "iteration", "batch"]);
     let throughput_at = column(&header, &["throughput", "items_per_sec", "samples_per_sec"]);
+    let elapsed_at = column(&header, &["elapsed_s", "wall_time_s", "time_s", "timestamp_s"]);
+    let cpu_at = column(&header, &["cpu_percent", "cpu_utilization", "cpu_usage", "cpu"]);
+    let gpu_at = column(&header, &["gpu_percent", "gpu_utilization", "gpu_usage", "gpu_util", "gpu"]);
+    let (mut elapsed, mut cpu, mut gpu) = (Vec::new(), Vec::new(), Vec::new());
     let mut steps = Vec::new();
     let mut latency = Vec::new();
     let mut throughput = Vec::new();
@@ -521,6 +546,11 @@ fn open_csv(text: &str, label: &str) -> Result<Side, String> {
                 throughput.push(rate);
             }
         }
+        for (at, values) in [(elapsed_at, &mut elapsed), (cpu_at, &mut cpu), (gpu_at, &mut gpu)] {
+            if let Some(value) = at.and_then(|index| cells.get(index)).and_then(|cell| cell.parse::<f64>().ok()).filter(|value| value.is_finite()) {
+                values.push(value);
+            }
+        }
     }
     if latency.is_empty() {
         return Err("This CSV has no numeric latency.".to_string());
@@ -528,11 +558,20 @@ fn open_csv(text: &str, label: &str) -> Result<Side, String> {
     if throughput.len() != latency.len() {
         throughput.clear();
     }
+    for values in [&mut elapsed, &mut cpu, &mut gpu] {
+        if values.len() != latency.len() {
+            values.clear();
+        }
+    }
+    from_start(&mut elapsed);
     Ok(Side::Inference(finish(InferenceRun {
         label: label.to_string(),
         steps,
         latency_ms: latency,
         throughput,
+        elapsed_s: elapsed,
+        cpu_percent: cpu,
+        gpu_percent: gpu,
         warmup_end: None,
         steady_step: None,
         memory_mb: Vec::new(),
@@ -611,6 +650,9 @@ fn series(label: &str, latency: Vec<f64>, throughput: Vec<f64>) -> InferenceRun 
         warmup_end: None,
         steady_step: None,
         memory_mb: Vec::new(),
+        elapsed_s: Vec::new(),
+        cpu_percent: Vec::new(),
+        gpu_percent: Vec::new(),
         trace: None,
         replicates: Vec::new(),
     })
@@ -636,11 +678,15 @@ fn open_runtrace(map: &serde_json::Map<String, Value>, label: &str) -> Result<Si
         .ok_or_else(|| "This RunTrace has no latency series.".to_string())?;
     let throughput = runtrace::series(&trace, &runtrace::THROUGHPUT_NAMES);
     let memory = runtrace::series(&trace, &runtrace::MEMORY_NAMES);
+    let cpu = runtrace::series(&trace, &runtrace::CPU_NAMES);
+    let gpu = runtrace::series(&trace, &runtrace::GPU_NAMES);
+    let wall = trace.wall_seconds.as_ref().filter(|wall| wall.len() == trace.steps.len());
     let memory_scale = memory.map_or(1.0, |series| if series.name.ends_with("_bytes") { 1.0 / 1_048_576.0 } else { 1.0 });
     let mut steps = Vec::new();
     let mut latency_ms = Vec::new();
     let mut rates = Vec::new();
     let mut memory_mb = Vec::new();
+    let (mut cpu_percent, mut gpu_percent, mut elapsed_s) = (Vec::new(), Vec::new(), Vec::new());
     for (index, sample) in latency.values.iter().enumerate() {
         let Some(sample) = sample.filter(|value| value.is_finite()) else {
             continue;
@@ -656,6 +702,15 @@ fn open_runtrace(map: &serde_json::Map<String, Value>, label: &str) -> Result<Si
         if let Some(memory) = at(memory) {
             memory_mb.push(memory * memory_scale);
         }
+        if let Some(value) = at(cpu) {
+            cpu_percent.push(value);
+        }
+        if let Some(value) = at(gpu) {
+            gpu_percent.push(value);
+        }
+        if let Some(seconds) = wall.and_then(|wall| wall.get(index)).filter(|value| value.is_finite()) {
+            elapsed_s.push(*seconds);
+        }
     }
     if latency_ms.is_empty() {
         return Err("This RunTrace has no numeric latency.".to_string());
@@ -663,9 +718,12 @@ fn open_runtrace(map: &serde_json::Map<String, Value>, label: &str) -> Result<Si
     if rates.len() != latency_ms.len() {
         rates.clear();
     }
-    if memory_mb.len() != latency_ms.len() {
-        memory_mb.clear();
+    for values in [&mut memory_mb, &mut cpu_percent, &mut gpu_percent, &mut elapsed_s] {
+        if values.len() != latency_ms.len() {
+            values.clear();
+        }
     }
+    from_start(&mut elapsed_s);
     let stored_warmup = runtrace::milestone(&trace, "warmup_end");
     let stored_steady = runtrace::milestone(&trace, "steady_state_start");
     let stored = stored_warmup.is_some() || stored_steady.is_some();
@@ -675,6 +733,9 @@ fn open_runtrace(map: &serde_json::Map<String, Value>, label: &str) -> Result<Si
         latency_ms,
         throughput: rates,
         memory_mb,
+        cpu_percent,
+        gpu_percent,
+        elapsed_s,
         trace: Some(TraceInfo {
             run_id: trace.run_id.clone(),
             fingerprints: trace.fingerprints.clone(),
