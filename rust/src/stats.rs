@@ -122,6 +122,29 @@ pub fn ratio_interval(a: &[f64], b: &[f64], probability: f64, seed: u64) -> Opti
     })
 }
 
+/// B − A at one quantile, with a percentile interval from independent moving-block resamples.
+pub fn difference_interval(a: &[f64], b: &[f64], probability: f64, seed: u64) -> Option<Interval> {
+    let qa = quantile_unsorted(&mut a.to_vec(), probability)?;
+    let qb = quantile_unsorted(&mut b.to_vec(), probability)?;
+    let mut rng = Rng::new(seed ^ probability.to_bits() ^ 0xD1FF);
+    let (block_a, block_b) = (block_length(a.len()), block_length(b.len()));
+    let (mut resample_a, mut resample_b) = (Vec::with_capacity(a.len()), Vec::with_capacity(b.len()));
+    let mut differences = Vec::with_capacity(BOOTSTRAP_REPLICATES);
+    for _ in 0..BOOTSTRAP_REPLICATES {
+        block_resample(a, block_a, &mut rng, &mut resample_a);
+        block_resample(b, block_b, &mut rng, &mut resample_b);
+        if let (Some(ra), Some(rb)) = (quantile_unsorted(&mut resample_a, probability), quantile_unsorted(&mut resample_b, probability)) {
+            differences.push(rb - ra);
+        }
+    }
+    let tail = (1.0 - CONFIDENCE) / 2.0;
+    Some(Interval {
+        estimate: qb - qa,
+        low: quantile_unsorted(&mut differences.clone(), tail)?,
+        high: quantile_unsorted(&mut differences, 1.0 - tail)?,
+    })
+}
+
 /// The relative spread of a run, (p90 − p10) / p50, so a faster run with the same proportional
 /// jitter is not called steadier.
 pub fn relative_spread(values: &mut [f64]) -> Option<f64> {

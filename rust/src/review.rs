@@ -10,6 +10,7 @@ use crate::readings::{self, Band};
 use crate::runtrace;
 use crate::shape::{self, RunShape};
 use crate::stats::{self, Interval, Support};
+use crate::views::{self, DifferencePoint, Segment};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct InferenceReview {
@@ -48,6 +49,11 @@ pub struct InferenceReview {
     pub notices: Vec<String>,
     /// B against A at p50, p90 and p99 over the steady samples, each with its interval.
     pub headline: String,
+    /// B − A by percentile over the steady samples, where both runs support the percentile.
+    pub difference: Vec<DifferencePoint>,
+    /// Each run's levels in this window's sample indices.
+    pub left_segments: Vec<Segment>,
+    pub right_segments: Vec<Segment>,
 }
 
 /// One delta the inference page actually fired. The numbers are the same
@@ -119,6 +125,9 @@ fn inference(left: &InferenceRun, right: &InferenceRun) -> InferenceReview {
         left_text: describe(left, &left_values, &left_finite, &shapes.0),
         right_text: describe(right, &right_values, &right_finite, &shapes.1),
         headline: headline(&steady_tail(left), &steady_tail(right)),
+        difference: views::difference(&steady_tail(left), &steady_tail(right)),
+        left_segments: views::window_segments(&left.latency_ms, &shapes.0.segments, skip_left, count),
+        right_segments: views::window_segments(&right.latency_ms, &shapes.1.segments, skip_right, count),
         left_label: left.label.clone(),
         right_label: right.label.clone(),
         signal: "latency_ms".to_string(),
