@@ -13,7 +13,7 @@ export const config: SiteConfig = {
     headline: 'ML inference runs,',
     headlineAccent: 'compared with rigor.',
     description: 'Stop eyeballing logs. ScalarScope loads two TFRT traces side by side, fires canonical delta analysis only when differences are statistically meaningful, and exports .scbundle archives. A matching SHA-256 is a content check, not a signature.',
-    primaryCta: { href: '#quickstart', label: 'Get from Microsoft Store' },
+    primaryCta: { href: 'https://apps.microsoft.com/detail/9P3HT1PHBKQK', label: 'Get from Microsoft Store' },
     secondaryCta: { href: 'handbook/', label: 'Read the Handbook' },
     previews: [
       {

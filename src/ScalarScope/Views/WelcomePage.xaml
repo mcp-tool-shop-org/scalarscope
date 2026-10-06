@@ -139,7 +139,7 @@
                             <Label Text="📦" FontSize="20" VerticalOptions="Start"/>
                             <VerticalStackLayout Grid.Column="1" Spacing="2">
                                 <Label Text="Export" Style="{StaticResource ItemTitle}"/>
-                                <Label Text="Create reproducible bundles with SHA-256 integrity. Share findings without sharing raw data."
+                                <Label Text="Export a bundle. Its SHA-256 is a content check, not a signature."
                                        Style="{StaticResource ItemDescription}"/>
                             </VerticalStackLayout>
                         </Grid>
@@ -151,7 +151,7 @@
                             <Label Text="🔍" FontSize="20" VerticalOptions="Start"/>
                             <VerticalStackLayout Grid.Column="1" Spacing="2">
                                 <Label Text="Review" Style="{StaticResource ItemTitle}"/>
-                                <Label Text="Open bundles from colleagues. The entire analysis is frozen and verified against the original hash."
+                                <Label Text="Open a bundle to see the stored review. A matching hash checks the bytes. It is not a signature."
                                        Style="{StaticResource ItemDescription}"/>
                             </VerticalStackLayout>
                         </Grid>

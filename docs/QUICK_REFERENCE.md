@@ -10,9 +10,8 @@
 | `Home` | Jump to start |
 | `End` | Jump to end |
 | `+` `-` | Speed up / down |
-| `S` | Quick screenshot |
-| `Ctrl+S` | Quick screenshot |
-| `Ctrl+E` | Quick screenshot (export) |
+| `S` or `Ctrl+S` | Tries to write a PNG when a run is open. No notification is shown. |
+| `Ctrl+E` | Not mapped. The Windows key hook does not send E. |
 | `1`–`6` | Request routes overview, trajectory, scalars, geometry, compare, and failures. Not Home, Compare, Guide, or Settings. Pressing 1 does not open Home. |
 
 ## Tabs

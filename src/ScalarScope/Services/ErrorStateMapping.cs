@@ -57,8 +57,8 @@ public static class ErrorStateMapping
                 Severity = ErrorSeverity.Error,
                 TechnicalMessage = "File format does not match expected schema",
                 UserTitle = "Unrecognized File Format",
-                UserExplanation = "This file doesn't appear to be a valid training run. Make sure you're opening a file exported from your training system.",
-                SuggestedActions = ["Verify the file is a valid training export", "Check if the file was corrupted", "Try a different file"],
+                UserExplanation = "This file is not a geometry run or a latency trace. A geometry run opens as .json. A latency trace opens as .csv or .json. A training history is not a latency trace.",
+                SuggestedActions = ["A geometry run opens as .json", "A latency trace opens as .csv or .json", "A training history is not a latency trace"],
                 IsRecoverable = true
             },
             new()

@@ -218,7 +218,7 @@
                         <VerticalStackLayout Grid.Column="0" Spacing="5">
                             <Label Text="Path A: Orthogonal"
                                    FontAttributes="Bold"
-                                   TextColor="#ff6b6b"/>
+                                   TextColor="#4ecdc4"/>
                             <Label Text="Professors with independent criteria (r ≈ 0). Eigenvalues stayed distributed. No unified axis emerged."
                                    TextColor="{AppThemeBinding Light=#666666, Dark=#AAAAAA}"
                                    FontSize="12"
@@ -228,7 +228,7 @@
                         <VerticalStackLayout Grid.Column="1" Spacing="5">
                             <Label Text="Path B: Correlated"
                                    FontAttributes="Bold"
-                                   TextColor="#4ecdc4"/>
+                                   TextColor="#ff6b6b"/>
                             <Label Text="Professors sharing latent quality (r ≈ 0.87). λ₁ dominated the spectrum. Model converged to shared axis."
                                    TextColor="{AppThemeBinding Light=#666666, Dark=#AAAAAA}"
                                    FontSize="12"

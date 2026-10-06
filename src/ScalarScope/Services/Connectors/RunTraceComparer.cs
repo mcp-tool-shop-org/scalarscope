@@ -469,7 +469,12 @@ public static class ExecutiveSummaryGenerator
         }
         else
         {
-            sb.AppendLine("After optimization, stabilization time shows no significant change.");
+            var row = result.Deltas.FirstOrDefault(d => d.DeltaType == "ΔTc");
+            var withheld = row == null
+                || (row.Interpretation?.Contains("steady state not detected", StringComparison.Ordinal) ?? true);
+            sb.AppendLine(withheld
+                ? "Steady state was not detected, so this summary does not report a change in stabilization time."
+                : "Both runs recorded a steady-state start at the same step. Stabilization time is unchanged.");
         }
         
         if (dto != null)
@@ -491,14 +496,18 @@ public static class ExecutiveSummaryGenerator
         }
         else
         {
-            sb.AppendLine("No runtime failures were detected.");
+            var row = result.Deltas.FirstOrDefault(d => d.DeltaType == "ΔF");
+            var interpretation = row?.Interpretation;
+            if (interpretation != null && interpretation.Contains("elimination does not fire", StringComparison.Ordinal))
+                sb.AppendLine(interpretation.TrimEnd('.') + ".");
+            else if (interpretation != null && interpretation.Contains("No change in runtime anomalies", StringComparison.Ordinal))
+                sb.AppendLine("The 3-sigma outlier counts match. ΔF did not fire. A tie is not a report that no failures occurred.");
+            else
+                sb.AppendLine("This summary does not report a runtime-failure result. ΔF fires only when the optimized run has more 3-sigma outliers.");
         }
         
         sb.AppendLine();
-        
-        // Conditions
-        sb.AppendLine("Measurements reflect identical inputs and hardware conditions, ");
-        sb.AppendLine("with differences attributable to runtime optimization.");
+        sb.AppendLine(ConditionsSentence(result));
         
         // Warnings
         if (result.Warnings.Count > 0)
@@ -531,6 +540,29 @@ public static class ExecutiveSummaryGenerator
         var suffix = suppressedCount > 0 ? $" ({suppressedCount} suppressed)" : "";
         
         return $"{firedCount} significant delta(s): {deltas}{suffix}";
+    }
+
+    /// <summary>
+    /// Report the fingerprint comparison. A missing or differing dataset, code,
+    /// or environment fingerprint is not called a match.
+    /// </summary>
+    private static string ConditionsSentence(ComparisonResult result)
+    {
+        if (result.ComparisonBlocked
+            || result.Fingerprints.Issues.Any(issue => issue.Severity == ComparisonIssueSeverity.Error))
+            return "This summary does not establish that the inputs and hardware matched.";
+
+        var diffs = result.Fingerprints.Differences;
+        if (diffs.Any(d => d.Category is "dataset" or "code" or "environment"))
+            return "This summary does not establish that the inputs and hardware matched. A dataset, code, or environment fingerprint is absent or differs.";
+
+        if (diffs.Count == 0)
+            return "The recorded fingerprints match. A match checks those recorded strings. It is not a signature, and it does not establish a fact the traces did not record.";
+
+        if (diffs.All(d => d.Category == "model"))
+            return "The recorded dataset, code, and environment fingerprints match. The model fingerprint differs, which this comparison treats as the optimization. A match is a content check, not a signature.";
+
+        return "This summary does not establish that the inputs and hardware matched.";
     }
 }
 

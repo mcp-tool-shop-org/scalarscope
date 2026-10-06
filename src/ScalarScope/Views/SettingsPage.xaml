@@ -283,10 +283,10 @@
                     <!-- Recent Files Limit -->
                     <Grid ColumnDefinitions="*,Auto" RowSpacing="4">
                         <VerticalStackLayout>
-                            <Label Text="Recent Files Limit"
+                            <Label Text="Stored path limit"
                                    FontAttributes="Bold"
                                    TextColor="{AppThemeBinding Light=#333333, Dark=#FFFFFF}" />
-                            <Label Text="Maximum files to remember"
+                            <Label Text="How many stored paths to keep. Home, Compare, Guide, and Settings do not show that list."
                                    FontSize="12"
                                    TextColor="{AppThemeBinding Light=#666666, Dark=#888888}" />
                         </VerticalStackLayout>
@@ -294,7 +294,7 @@
                                 ItemsSource="{Binding RecentFilesOptions}"
                                 SelectedIndex="{Binding RecentFilesLimitIndex}"
                                 WidthRequest="140"
-                                SemanticProperties.Description="Recent files limit selection" />
+                                SemanticProperties.Description="Stored path limit. This shell does not show that list." />
                     </Grid>
 
                     <BoxView HeightRequest="1" Color="{AppThemeBinding Light=#EEEEEE, Dark=#2a2a4e}" />
@@ -302,10 +302,10 @@
                     <!-- Clear Recent Files -->
                     <Grid ColumnDefinitions="*,Auto">
                         <VerticalStackLayout>
-                            <Label Text="Recent Files"
+                            <Label Text="Stored paths"
                                    FontAttributes="Bold"
                                    TextColor="{AppThemeBinding Light=#333333, Dark=#FFFFFF}" />
-                            <Label Text="Clear the recent files list"
+                            <Label Text="Clears the stored list. It does not clear the comparison log on Home."
                                    FontSize="12"
                                    TextColor="{AppThemeBinding Light=#666666, Dark=#888888}" />
                         </VerticalStackLayout>
@@ -316,7 +316,7 @@
                                 TextColor="{AppThemeBinding Light=#333333, Dark=#FFFFFF}"
                                 Padding="16,8"
                                 CornerRadius="6"
-                                SemanticProperties.Description="Clear recent files list" />
+                                SemanticProperties.Description="Clears stored paths. This shell does not show that list." />
                     </Grid>
                 </VerticalStackLayout>
             </Border>
@@ -402,10 +402,10 @@
                     <!-- Reset Demo -->
                     <Grid ColumnDefinitions="*,Auto">
                         <VerticalStackLayout>
-                            <Label Text="First-Run Experience"
+                            <Label Text="First-run flag"
                                    FontAttributes="Bold"
                                    TextColor="{AppThemeBinding Light=#333333, Dark=#FFFFFF}" />
-                            <Label Text="Show the welcome demo again"
+                            <Label Text="Clears the first-run flag. The demo does not start."
                                    FontSize="12"
                                    TextColor="{AppThemeBinding Light=#666666, Dark=#888888}" />
                         </VerticalStackLayout>
@@ -416,7 +416,7 @@
                                 TextColor="{AppThemeBinding Light=#333333, Dark=#FFFFFF}"
                                 Padding="16,8"
                                 CornerRadius="6"
-                                SemanticProperties.Description="Reset first-run demo state" />
+                                SemanticProperties.Description="Clear the first-run flag. The demo does not start." />
                     </Grid>
 
                     <BoxView HeightRequest="1" Color="{AppThemeBinding Light=#EEEEEE, Dark=#2a2a4e}" />
@@ -505,7 +505,7 @@
                                FontAttributes="Bold"
                                FontSize="13"
                                TextColor="{AppThemeBinding Light=#333333, Dark=#FFFFFF}"/>
-                        <Label Text="When you export a comparison, ScalarScope creates a unique cryptographic hash (e.g., SHA-256). This hash acts as a fingerprint—if anyone modifies the bundle, the hash won't match, ensuring reproducibility and audit integrity."
+                        <Label Text="A bundle export writes a SHA-256 of the archived bytes. A matching hash is a content check, not a signature. Rewriting the bytes and the hash together still matches."
                                FontSize="12"
                                TextColor="{AppThemeBinding Light=#666666, Dark=#888888}"
                                LineBreakMode="WordWrap"/>

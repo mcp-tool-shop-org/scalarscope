@@ -85,7 +85,7 @@ When two runs have different lengths, ScalarScope aligns them before comparison.
 | `Up` / `+` | Increase playback speed |
 | `Down` / `-` | Decrease playback speed |
 | `0` | Reset speed to 1x |
-| `Ctrl+S` or `Ctrl+E` | Quick export (PNG saved to the export folder from Settings, or Documents/ScalarScope Exports when none is set) |
+| `S` or `Ctrl+S` | Tries to write a PNG to the export folder from Settings, or Documents/ScalarScope Exports when none is set. No notification is shown. Ctrl+E is not mapped. |
 | `1`–`6` | Request routes overview, trajectory, scalars, geometry, compare, and failures. Not Home, Compare, Guide, or Settings. Pressing 1 does not open Home. |
 | `?` | Open Guide tab |
 

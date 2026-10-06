@@ -64,8 +64,8 @@ After installation, verify the app works correctly:
 - **Expected**: Smooth animation, responsive controls
 
 ### Step 4: Test Export
-- Press S to take screenshot
-- **Expected**: Screenshot saved, notification appears
+- Press S. The Windows key hook maps S. Ctrl+E is not mapped.
+- **Expected**: When a run is open, S tries to write a PNG. No notification is shown.
 
 ## Upgrade Procedure
 

@@ -4,10 +4,6 @@
 
 The other languages are older translations of the .NET app page. The retired repository name, the live Pages badge, the NuGet badge, and `dotnet add package VortexKit` are removed there. This English page is the current one.
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/mcp-tool-shop-org/brand/main/logos/ScalarScope-Desktop/readme.png" alt="ScalarScope" width="400">
-</p>
-
 # ScalarScope
 
 > Part of [MCP Tool Shop](https://mcptoolshop.com)
@@ -291,7 +287,7 @@ cargo llvm-cov --offline --locked --all-targets --fail-under-lines 90
 | `Up` / `+` | Increase playback speed |
 | `Down` / `-` | Decrease playback speed |
 | `0` | Reset speed to 1x |
-| `Ctrl+S` / `Ctrl+E` | Quick export (PNG to Documents) |
+| `S` or `Ctrl+S` | Tries to write a PNG to the export folder from Settings, or Documents/ScalarScope Exports when none is set. No notification is shown. Ctrl+E is not mapped. |
 | `1`–`6` | Request routes overview, trajectory, scalars, geometry, compare, and failures. Not Home, Compare, Guide, or Settings. Pressing 1 does not open Home. |
 | `?` | Open help / guide |
 
