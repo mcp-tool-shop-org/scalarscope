@@ -45,6 +45,10 @@ pub struct StoredReview {
     pub inference: Option<StoredSeries>,
     #[serde(default)]
     pub training: Option<StoredTraining>,
+    /// Fingerprint, validation and guardrail notes. Left out of the file when empty, so a
+    /// review without them keeps the bytes and hash it had before this field existed.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub notices: Vec<String>,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, serde::Deserialize)]
@@ -410,6 +414,7 @@ pub fn stored_pair(review: &StoredReview) -> Option<Pair> {
                 caption: review.caption.clone(),
                 left_text: review.left_text.clone(),
                 right_text: review.right_text.clone(),
+                notices: review.notices.clone(),
             }))
         }
         "training" => {
@@ -499,6 +504,7 @@ fn inference_review(review: &InferenceReview) -> StoredReview {
     let labels = [review.left_label.as_str(), review.right_label.as_str()];
     StoredReview {
         kind: "inference".to_string(),
+        notices: review.notices.iter().map(|line| scrub(line, &labels)).collect(),
         verdict: scrub(&review.verdict, &labels),
         fired: review.fired.clone(),
         caption: scrub(&review.caption, &labels),
@@ -537,6 +543,7 @@ fn training_review(review: &TrainingReview) -> StoredReview {
     let labels = [review.left.run_id.as_str(), review.right.run_id.as_str()];
     StoredReview {
         kind: "training".to_string(),
+        notices: Vec::new(),
         verdict: String::new(),
         fired: Vec::new(),
         caption: scrub(&review.caption, &labels),
@@ -588,6 +595,7 @@ fn findings_only(entries: &[(String, Vec<u8>)]) -> Result<StoredReview, String> 
     };
     Ok(StoredReview {
         kind: "findings".to_string(),
+        notices: Vec::new(),
         verdict,
         fired,
         caption: "This bundle stores the findings. It does not store the series, so the chart is not drawn from another file.".to_string(),

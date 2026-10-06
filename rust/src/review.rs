@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::open::{InferenceRun, Side, TrainingEntry};
 use crate::readings::{self, Band};
+use crate::runtrace;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct InferenceReview {
@@ -38,6 +39,8 @@ pub struct InferenceReview {
     pub caption: String,
     pub left_text: String,
     pub right_text: String,
+    /// Fingerprint, validation and guardrail notes, one per line. Empty for a plain file.
+    pub notices: Vec<String>,
 }
 
 /// One delta the inference page actually fired. The numbers are the same
@@ -74,7 +77,10 @@ pub enum Pair {
 
 pub fn pair(left: &Side, right: &Side) -> Result<Pair, String> {
     match (left, right) {
-        (Side::Inference(left), Side::Inference(right)) => Ok(Pair::Inference(inference(left, right))),
+        (Side::Inference(left), Side::Inference(right)) => {
+            blocked(left, right)?;
+            Ok(Pair::Inference(inference(left, right)))
+        }
         (Side::Training(left), Side::Training(right)) => Ok(Pair::Training(training(left, right))),
         _ => Err(
             "One side is a training history and the other is an inference trace. Load two of the same kind."
@@ -127,7 +133,53 @@ fn inference(left: &InferenceRun, right: &InferenceRun) -> InferenceReview {
         left: left_values,
         right: right_values,
         caption,
+        notices: notices(left, right),
     }
+}
+
+/// A broken timeline on either side stops the comparison before any delta is computed,
+/// with the message the .NET app showed.
+fn blocked(left: &InferenceRun, right: &InferenceRun) -> Result<(), String> {
+    let (Some(left_trace), Some(right_trace)) = (&left.trace, &right.trace) else {
+        let broken = [left, right]
+            .into_iter()
+            .find(|run| run.trace.as_ref().is_some_and(|trace| trace.validation.timeline_rejects()));
+        return match broken {
+            Some(run) => Err(runtrace::blocked_side_message(&run.label, run.trace.as_ref().map(|trace| &trace.validation))),
+            None => Ok(()),
+        };
+    };
+    if !left_trace.validation.timeline_rejects() && !right_trace.validation.timeline_rejects() {
+        return Ok(());
+    }
+    Err(runtrace::blocked_message(
+        (&left.label, &left_trace.run_id, &left_trace.validation),
+        (&right.label, &right_trace.run_id, &right_trace.validation),
+    ))
+}
+
+fn notices(left: &InferenceRun, right: &InferenceRun) -> Vec<String> {
+    let mut lines = Vec::new();
+    if let (Some(left_trace), Some(right_trace)) = (&left.trace, &right.trace) {
+        for note in runtrace::compare_fingerprints(&left_trace.fingerprints, &right_trace.fingerprints) {
+            lines.push(match note.code {
+                Some(code) => format!("{} ({code})", note.message),
+                None => note.message,
+            });
+        }
+    }
+    for run in [left, right] {
+        let Some(trace) = &run.trace else {
+            continue;
+        };
+        for issue in trace.validation.errors.iter().chain(&trace.validation.warnings) {
+            lines.push(format!("{}: {} ({})", run.label, issue.message, issue.code));
+        }
+        for note in &trace.guardrails {
+            lines.push(format!("{}: {note}", run.label));
+        }
+    }
+    lines
 }
 
 fn inference_verdict(left: &InferenceRun, right: &InferenceRun) -> (Vec<Finding>, String) {
@@ -159,8 +211,8 @@ fn inference_verdict(left: &InferenceRun, right: &InferenceRun) -> (Vec<Finding>
         Tc::Quiet => {}
     }
 
-    let spread_left = population_std_from(&left.latency_ms, left.steady_step.unwrap_or(0).max(0) as usize);
-    let spread_right = population_std_from(&right.latency_ms, right.steady_step.unwrap_or(0).max(0) as usize);
+    let spread_left = population_std_from(&left.latency_ms, index_of_step(left, left.steady_step));
+    let spread_right = population_std_from(&right.latency_ms, index_of_step(right, right.steady_step));
     let scale = spread_left.max(spread_right);
     if (spread_right - spread_left).abs() > 0.01 * scale {
         let text = if spread_right < spread_left {
@@ -276,6 +328,11 @@ fn count_outliers(values: &[f64]) -> usize {
     let standard_deviation = (finite.iter().map(|value| (value - mean).powi(2)).sum::<f64>() / finite.len() as f64).sqrt();
     let threshold = 3.0 * standard_deviation;
     finite.iter().filter(|value| (*value - mean).abs() > threshold).count()
+}
+
+/// The first sample at or after `step`, or the start when there is no milestone.
+fn index_of_step(run: &InferenceRun, step: Option<i64>) -> usize {
+    step.map_or(0, |step| run.steps.iter().position(|value| *value >= step).unwrap_or(run.steps.len()))
 }
 
 fn population_std_from(values: &[f64], start: usize) -> f64 {

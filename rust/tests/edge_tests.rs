@@ -35,6 +35,8 @@ fn inference(label: &str, latency: Vec<f64>, steady: Option<i64>, warmup: Option
         throughput,
         warmup_end: warmup,
         steady_step: steady,
+        memory_mb: Vec::new(),
+        trace: None,
     })
 }
 
@@ -196,6 +198,8 @@ fn a_step_list_that_does_not_match_the_samples_is_not_a_stabilization_time() {
         throughput: vec![1.0],
         warmup_end: None,
         steady_step: None,
+        memory_mb: Vec::new(),
+        trace: None,
     };
     let right = InferenceRun {
         label: "right".to_string(),
@@ -204,6 +208,8 @@ fn a_step_list_that_does_not_match_the_samples_is_not_a_stabilization_time() {
         throughput: Vec::new(),
         warmup_end: None,
         steady_step: None,
+        memory_mb: Vec::new(),
+        trace: None,
     };
     let Pair::Inference(review) = pair(&Side::Inference(left.clone()), &Side::Inference(right)).unwrap() else { panic!("inference") };
     assert!(review.verdict.contains("not a stabilization time"));
@@ -220,6 +226,8 @@ fn a_step_list_that_does_not_match_the_samples_is_not_a_stabilization_time() {
         throughput: Vec::new(),
         warmup_end: None,
         steady_step: Some(2),
+        memory_mb: Vec::new(),
+        trace: None,
     };
     let Pair::Inference(review) = pair(&Side::Inference(left), &Side::Inference(right)).unwrap() else { panic!("inference") };
     assert!(!review.fired.iter().any(|symbol| symbol == "ΔO"));
@@ -341,6 +349,7 @@ fn stored_drawings_come_back_and_an_unknown_kind_does_not_become_a_chart() {
 
     let hand = StoredReview {
         kind: "inference".to_string(),
+        notices: Vec::new(),
         verdict: String::new(),
         fired: Vec::new(),
         caption: String::new(),
@@ -477,6 +486,7 @@ fn write_file_and_open_file_round_trip_and_report_a_missing_path() {
     let empty = BundleDocument {
         review: StoredReview {
             kind: "findings".to_string(),
+            notices: Vec::new(),
             verdict: String::new(),
             fired: Vec::new(),
             caption: String::new(),

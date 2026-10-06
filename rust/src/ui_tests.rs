@@ -176,6 +176,7 @@ fn a_stored_review_draws_inference_training_and_findings_text() {
         bundle_hash: "0123456789abcdef0123456789abcdef".to_string(),
         review: StoredReview {
             kind: "findings".to_string(),
+            notices: Vec::new(),
             verdict: "ΔF Introduced 1 new runtime anomalies".to_string(),
             fired: vec!["ΔF".to_string()],
             caption: "The series was not stored.".to_string(),

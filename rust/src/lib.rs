@@ -8,6 +8,7 @@ pub mod open;
 pub mod prefs;
 pub mod readings;
 pub mod review;
+pub mod runtrace;
 pub mod ui;
 
 pub use open::{open_path, open_text, Loaded, Side};

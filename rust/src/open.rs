@@ -1,8 +1,12 @@
 //! What a file is allowed to become.
 //!
-//! An inference file contributes a latency series. A backpropagate
-//! `run_history.json` contributes the stored training-loss samples of one
-//! entry. Geometry stays out of this shell.
+//! An inference file contributes a latency series. A stored RunTrace also brings its
+//! milestones, fingerprints and validation. A backpropagate `run_history.json`
+//! contributes the stored training-loss samples of one entry. Geometry stays out of
+//! this shell.
+//!
+//! A milestone (`warmup_end`, `steady_step`) is a step number from `steps`, never a
+//! sample index.
 
 use std::fs;
 use std::path::Path;
@@ -10,8 +14,9 @@ use std::path::Path;
 use serde_json::Value;
 
 use crate::milestones::{detect_steady_start, detect_warmup_end};
+use crate::runtrace::{self, TraceInfo};
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct InferenceRun {
     pub label: String,
     pub steps: Vec<i64>,
@@ -19,6 +24,10 @@ pub struct InferenceRun {
     pub throughput: Vec<f64>,
     pub warmup_end: Option<i64>,
     pub steady_step: Option<i64>,
+    /// Memory in MiB at the same steps, or empty.
+    pub memory_mb: Vec<f64>,
+    /// Present when the run came from a stored RunTrace.
+    pub trace: Option<TraceInfo>,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -75,6 +84,7 @@ pub fn open_text(text: &str, label: &str) -> Result<Side, String> {
 fn open_json(value: Value, label: &str) -> Result<Side, String> {
     match &value {
         Value::Object(map) if map.contains_key("traceEvents") => open_trace(map, label),
+        Value::Object(map) if runtrace::looks_like_runtrace(map) => open_runtrace(map, label),
         Value::Object(map) if map.contains_key("trajectory") => Err(
             "This is a geometry run. This Rust review opens an inference trace or a backpropagate training history."
                 .to_string(),
@@ -247,6 +257,8 @@ fn open_csv(text: &str, label: &str) -> Result<Side, String> {
         throughput,
         warmup_end: None,
         steady_step: None,
+        memory_mb: Vec::new(),
+        trace: None,
     })))
 }
 
@@ -319,16 +331,87 @@ fn series(label: &str, latency: Vec<f64>, throughput: Vec<f64>) -> InferenceRun 
         throughput,
         warmup_end: None,
         steady_step: None,
+        memory_mb: Vec::new(),
+        trace: None,
     })
 }
 
 fn finish(mut run: InferenceRun) -> InferenceRun {
     let warmup = detect_warmup_end(&run.latency_ms);
-    run.warmup_end = warmup.map(|step| step as i64);
+    let step_at = |index: usize| run.steps.get(index).copied().unwrap_or(index as i64);
+    run.warmup_end = warmup.map(step_at);
     run.steady_step = warmup
-        .and_then(|step| detect_steady_start(&run.latency_ms, step))
-        .map(|step| step as i64);
+        .and_then(|index| detect_steady_start(&run.latency_ms, index))
+        .map(step_at);
     run
+}
+
+/// A stored RunTrace. Its own milestones are used as written; only a trace without
+/// them falls back to detection from the latency values.
+fn open_runtrace(map: &serde_json::Map<String, Value>, label: &str) -> Result<Side, String> {
+    let trace = runtrace::parse(map)?;
+    let validation = runtrace::validate(&trace);
+    let latency = runtrace::series(&trace, &runtrace::LATENCY_NAMES)
+        .ok_or_else(|| "This RunTrace has no latency series.".to_string())?;
+    let throughput = runtrace::series(&trace, &runtrace::THROUGHPUT_NAMES);
+    let memory = runtrace::series(&trace, &runtrace::MEMORY_NAMES);
+    let memory_scale = memory.map_or(1.0, |series| if series.name.ends_with("_bytes") { 1.0 / 1_048_576.0 } else { 1.0 });
+    let mut steps = Vec::new();
+    let mut latency_ms = Vec::new();
+    let mut rates = Vec::new();
+    let mut memory_mb = Vec::new();
+    for (index, sample) in latency.values.iter().enumerate() {
+        let Some(sample) = sample.filter(|value| value.is_finite()) else {
+            continue;
+        };
+        steps.push(trace.steps.get(index).copied().unwrap_or(index as i64));
+        latency_ms.push(sample);
+        let at = |series: Option<&runtrace::Scalar>| {
+            series.and_then(|series| series.values.get(index).copied().flatten()).filter(|value| value.is_finite())
+        };
+        if let Some(rate) = at(throughput) {
+            rates.push(rate);
+        }
+        if let Some(memory) = at(memory) {
+            memory_mb.push(memory * memory_scale);
+        }
+    }
+    if latency_ms.is_empty() {
+        return Err("This RunTrace has no numeric latency.".to_string());
+    }
+    if rates.len() != latency_ms.len() {
+        rates.clear();
+    }
+    if memory_mb.len() != latency_ms.len() {
+        memory_mb.clear();
+    }
+    let stored_warmup = runtrace::milestone(&trace, "warmup_end");
+    let stored_steady = runtrace::milestone(&trace, "steady_state_start");
+    let stored = stored_warmup.is_some() || stored_steady.is_some();
+    let run = InferenceRun {
+        label: if trace.label.trim().is_empty() { label.to_string() } else { trace.label.clone() },
+        steps,
+        latency_ms,
+        throughput: rates,
+        memory_mb,
+        trace: Some(TraceInfo {
+            run_id: trace.run_id.clone(),
+            fingerprints: trace.fingerprints.clone(),
+            guardrails: runtrace::guardrails(&trace),
+            validation,
+            stored_milestones: stored,
+        }),
+        ..InferenceRun::default()
+    };
+    Ok(Side::Inference(if stored {
+        InferenceRun {
+            warmup_end: stored_warmup,
+            steady_step: stored_steady,
+            ..run
+        }
+    } else {
+        finish(run)
+    }))
 }
 
 fn bench_array(map: &serde_json::Map<String, Value>) -> Option<&Vec<Value>> {

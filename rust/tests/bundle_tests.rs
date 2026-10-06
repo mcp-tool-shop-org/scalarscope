@@ -255,6 +255,8 @@ fn marked(label: &str, latency: Vec<f64>, steady: Option<i64>) -> Side {
         throughput: Vec::new(),
         warmup_end: None,
         steady_step: steady,
+        memory_mb: Vec::new(),
+        trace: None,
     })
 }
 
