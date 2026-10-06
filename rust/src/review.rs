@@ -124,8 +124,11 @@ fn inference(left: &InferenceRun, right: &InferenceRun) -> InferenceReview {
     InferenceReview {
         left_text: describe(left, &left_values, &left_finite, &shapes.0),
         right_text: describe(right, &right_values, &right_finite, &shapes.1),
-        headline: headline(&steady_tail(left), &steady_tail(right)),
-        difference: views::difference(&steady_tail(left), &steady_tail(right)),
+        headline: headline(left, right),
+        difference: {
+            let (a, b) = (steady_tails(left), steady_tails(right));
+            views::difference(&slices(&a), &slices(&b))
+        },
         left_segments: views::window_segments(&left.latency_ms, &shapes.0.segments, skip_left, count),
         right_segments: views::window_segments(&right.latency_ms, &shapes.1.segments, skip_right, count),
         left_label: left.label.clone(),
@@ -166,19 +169,33 @@ fn steady_tail(run: &InferenceRun) -> Vec<f64> {
     run.latency_ms[start.min(run.latency_ms.len())..].iter().copied().filter(|value| value.is_finite()).collect()
 }
 
+/// The steady samples of a run and of each of its replicates.
+fn steady_tails(run: &InferenceRun) -> Vec<Vec<f64>> {
+    run.runs().into_iter().map(steady_tail).collect()
+}
+
+fn slices(runs: &[Vec<f64>]) -> Vec<&[f64]> {
+    runs.iter().map(Vec::as_slice).collect()
+}
+
 fn interval_text(interval: &Interval) -> String {
     format!("{:.2} ({:.2}–{:.2})", interval.estimate, interval.low, interval.high)
 }
 
 /// B/A at p50, p90 and p99 with intervals, and which percentiles have too few samples.
-fn headline(a: &[f64], b: &[f64]) -> String {
-    if a.len() < shape::MIN_SAMPLES || b.len() < shape::MIN_SAMPLES {
-        return format!("B/A: a ratio needs {} steady samples per side.", shape::MIN_SAMPLES);
+fn headline(left: &InferenceRun, right: &InferenceRun) -> String {
+    let (tails_a, tails_b) = (steady_tails(left), steady_tails(right));
+    let (a, b) = (slices(&tails_a), slices(&tails_b));
+    if a.iter().chain(&b).any(|run| run.len() < shape::MIN_SAMPLES) {
+        return format!("B/A: a ratio needs {} steady samples in every run.", shape::MIN_SAMPLES);
     }
+    let (runs_a, runs_b) = (a.len(), b.len());
+    let pooled = |runs: &[&[f64]]| runs.iter().map(|run| run.len()).sum::<usize>();
+    let (count_a, count_b) = (pooled(&a), pooled(&b));
     let mut parts = Vec::new();
     let mut short = Vec::new();
     for (name, probability) in [("p50", 0.5), ("p90", 0.9), ("p99", 0.99)] {
-        let needed = [a.len(), b.len()]
+        let needed = [count_a, count_b]
             .into_iter()
             .filter_map(|count| match stats::quantile_support(count, probability) {
                 Support::TooFew { needed } => Some(needed),
@@ -189,14 +206,26 @@ fn headline(a: &[f64], b: &[f64]) -> String {
             short.push(format!("{name} needs {needed} steady samples per side"));
             continue;
         }
-        if let Some(interval) = stats::ratio_interval(a, b, probability, stats::BOOTSTRAP_SEED) {
+        if let Some(interval) = stats::runs_interval(&a, &b, probability, stats::Contrast::Ratio, stats::BOOTSTRAP_SEED) {
             parts.push(format!("{name} {}", interval_text(&interval)));
         }
     }
+    // Run-to-run variation is often larger than the variation within a run (C1, C6), so the
+    // headline says which one its interval covers.
+    let scope = if runs_a == 1 && runs_b == 1 {
+        "within one run per side; indicative, since run-to-run variation is not measured".to_string()
+    } else if runs_a.min(runs_b) < stats::MIN_RUNS {
+        format!(
+            "across {runs_a} and {runs_b} runs; indicative below {} runs per side",
+            stats::MIN_RUNS
+        )
+    } else {
+        format!("across {runs_a} and {runs_b} runs")
+    };
     let mut text = if parts.is_empty() {
         "B/A: too few steady samples for a ratio.".to_string()
     } else {
-        format!("B/A {}, within one run per side.", parts.join(" · "))
+        format!("B/A {}, {scope}.", parts.join(" · "))
     };
     if !short.is_empty() {
         text.push_str(&format!(" Not shown: {}.", short.join(", ")));
@@ -545,9 +574,14 @@ fn describe(run: &InferenceRun, values: &[Option<f64>], sorted: &[f64], shape: &
             None => shape.shape.label().to_string(),
         }
     };
+    let label = if run.replicates.is_empty() {
+        run.label.clone()
+    } else {
+        format!("{} (first of {} runs; the deltas and this plot use it)", run.label, run.replicates.len() + 1)
+    };
     format!(
         "{} · latency_ms · {} samples · p50 {} · p95 {} · p99 {} · {marks} anomaly marks · {settles}",
-        run.label,
+        label,
         values.len(),
         percentile(0.50),
         percentile(0.95),

@@ -7,7 +7,7 @@ use egui_plot::{HLine, Line, LineStyle, Plot, PlotPoints, Points, Polygon, VLine
 
 use crate::bundle::{self, OpenedBundle};
 use crate::history::{self, LogEntry};
-use crate::open::{open_path, Loaded, Side};
+use crate::open::{open_path, open_paths, Loaded, Side};
 use crate::prefs::{self, SavedView};
 use crate::readings::Band;
 use crate::review::{self, InferenceReview, Pair, TrainingReview};
@@ -74,11 +74,12 @@ fn queue_save(path: Option<std::path::PathBuf>) {
     NEXT_SAVE.with(|slot| *slot.borrow_mut() = Some(path));
 }
 
-fn pick_run() -> Option<std::path::PathBuf> {
+/// One or more run files. Several picked together are repeats of one side.
+fn pick_runs() -> Option<Vec<std::path::PathBuf>> {
     if let Some(queued) = take_pick() {
-        return queued;
+        return queued.map(|path| vec![path]);
     }
-    rfd::FileDialog::new().add_filter("Run", &["json", "csv", "log", "gz"]).pick_file()
+    rfd::FileDialog::new().add_filter("Run", &["json", "csv", "log", "gz"]).pick_files()
 }
 
 fn pick_run_folder() -> Option<std::path::PathBuf> {
@@ -268,11 +269,11 @@ impl ScalarScopeApp {
 
 impl ScalarScopeApp {
     fn load(&mut self, left: bool, folder: bool) {
-        let picked = if folder { pick_run_folder() } else { pick_run() };
-        let Some(path) = picked else {
+        let picked = if folder { pick_run_folder().map(|path| vec![path]) } else { pick_runs() };
+        let Some(paths) = picked.filter(|paths| !paths.is_empty()) else {
             return;
         };
-        match open_path(&path) {
+        match open_paths(&paths) {
             Ok(loaded) => {
                 self.opened = None;
                 let remembered = self.remember_opened_file(&loaded);

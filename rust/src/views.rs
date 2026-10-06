@@ -41,13 +41,16 @@ fn supported(count: usize, probability: f64) -> bool {
     matches!(stats::quantile_support(count, probability), Support::Ranks { .. })
 }
 
-/// B − A at each of [`DIFFERENCE_PROBABILITIES`] both runs can support.
-pub fn difference(a: &[f64], b: &[f64]) -> Vec<DifferencePoint> {
+/// B − A at each of [`DIFFERENCE_PROBABILITIES`] both sides can support. Each side is one or
+/// more runs; with several, the interval resamples runs as well as samples.
+pub fn difference(a: &[&[f64]], b: &[&[f64]]) -> Vec<DifferencePoint> {
+    let count = |runs: &[&[f64]]| runs.iter().map(|run| run.len()).sum::<usize>();
+    let (count_a, count_b) = (count(a), count(b));
     DIFFERENCE_PROBABILITIES
         .iter()
-        .filter(|probability| supported(a.len(), **probability) && supported(b.len(), **probability))
+        .filter(|probability| supported(count_a, **probability) && supported(count_b, **probability))
         .filter_map(|probability| {
-            let interval = stats::difference_interval(a, b, *probability, stats::BOOTSTRAP_SEED)?;
+            let interval = stats::runs_interval(a, b, *probability, stats::Contrast::Difference, stats::BOOTSTRAP_SEED)?;
             Some(DifferencePoint {
                 probability: *probability,
                 estimate: interval.estimate,
@@ -202,7 +205,7 @@ mod tests {
     fn the_difference_skips_percentiles_too_few_samples_support() {
         let a: Vec<f64> = (0..400).map(|i| 10.0 + (i % 9) as f64 * 0.1).collect();
         let b: Vec<f64> = a.iter().map(|value| value - 2.0).collect();
-        let points = difference(&a, &b);
+        let points = difference(&[&a], &[&b]);
         let probabilities: Vec<f64> = points.iter().map(|point| point.probability).collect();
         assert_eq!(probabilities, vec![0.5, 0.75, 0.9, 0.95, 0.99]);
         assert!(points.iter().all(|point| (point.estimate + 2.0).abs() < 1e-9 && point.low <= point.high));

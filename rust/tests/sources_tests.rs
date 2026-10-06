@@ -114,3 +114,44 @@ fn an_empty_folder_says_what_it_looked_for() {
     fs::write(dir.join("notes.txt"), "nothing").unwrap();
     assert!(open_path(&dir).unwrap_err().contains("no profiler trace"));
 }
+
+fn csv(level: f64) -> String {
+    let rows: String = (0..60).map(|step| format!("{step},{}\n", level + (step % 3) as f64 * 0.1)).collect();
+    format!("step,latency_ms\n{rows}")
+}
+
+#[test]
+fn several_picked_files_are_repeats_of_one_side() {
+    let dir = scratch("several");
+    let paths: Vec<PathBuf> = (0..3)
+        .map(|index| {
+            let path = dir.join(format!("run-{index}.csv"));
+            fs::write(&path, csv(10.0 + index as f64)).unwrap();
+            path
+        })
+        .collect();
+    let run = inference(scalarscope::open::open_paths(&paths).unwrap().side);
+    assert_eq!(run.label, "run-0");
+    assert_eq!(run.replicates.len(), 2);
+    assert_eq!(run.runs().len(), 3);
+    assert!(scalarscope::open::open_paths(&[]).is_err());
+    let history = dir.join("run_history.json");
+    fs::write(&history, r#"[{"run_id":"r","status":"completed","loss_history":[1.0,0.5]}]"#).unwrap();
+    assert!(scalarscope::open::open_paths(&[paths[0].clone(), history]).unwrap_err().contains("inference run"));
+}
+
+#[test]
+fn a_folder_of_run_folders_is_a_set_of_repeats() {
+    let dir = scratch("set");
+    for index in 0..3 {
+        let run = dir.join(format!("seed-{index}"));
+        fs::create_dir_all(&run).unwrap();
+        fs::write(run.join("benchmark.csv"), csv(10.0 + index as f64)).unwrap();
+    }
+    let run = inference(open_path(&dir).unwrap().side);
+    assert_eq!(run.replicates.len(), 2);
+    assert_eq!(run.label, dir.file_name().unwrap().to_str().unwrap());
+    // A file at the top keeps the 2.0 rule: the folder is one run.
+    fs::write(dir.join("benchmark.csv"), csv(5.0)).unwrap();
+    assert!(inference(open_path(&dir).unwrap().side).replicates.is_empty());
+}

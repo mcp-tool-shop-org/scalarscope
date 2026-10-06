@@ -37,6 +37,7 @@ fn inference(label: &str, latency: Vec<f64>, steady: Option<i64>, warmup: Option
         steady_step: steady,
         memory_mb: Vec::new(),
         trace: None,
+        replicates: Vec::new(),
     })
 }
 
@@ -204,6 +205,7 @@ fn a_step_list_that_does_not_match_the_samples_is_not_a_stabilization_time() {
         steady_step: None,
         memory_mb: Vec::new(),
         trace: None,
+        replicates: Vec::new(),
     };
     let right = InferenceRun {
         label: "right".to_string(),
@@ -214,6 +216,7 @@ fn a_step_list_that_does_not_match_the_samples_is_not_a_stabilization_time() {
         steady_step: None,
         memory_mb: Vec::new(),
         trace: None,
+        replicates: Vec::new(),
     };
     let Pair::Inference(review) = pair(&Side::Inference(left.clone()), &Side::Inference(right)).unwrap() else { panic!("inference") };
     // Two and three samples are too short to tell where a run settles.
@@ -233,6 +236,7 @@ fn a_step_list_that_does_not_match_the_samples_is_not_a_stabilization_time() {
         steady_step: Some(2),
         memory_mb: Vec::new(),
         trace: None,
+        replicates: Vec::new(),
     };
     let Pair::Inference(review) = pair(&Side::Inference(left), &Side::Inference(right)).unwrap() else { panic!("inference") };
     assert!(!review.fired.iter().any(|symbol| symbol == "ΔO"));

@@ -271,6 +271,7 @@ fn marked(label: &str, latency: Vec<f64>, steady: Option<i64>) -> Side {
         steady_step: steady,
         memory_mb: Vec::new(),
         trace: None,
+        replicates: Vec::new(),
     })
 }
 
@@ -319,8 +320,33 @@ fn delta_tc_stays_quiet_when_the_ranges_overlap() {
 fn the_headline_is_a_ratio_with_an_interval_and_names_short_percentiles() {
     let Pair::Inference(review) = pair(&decay(0.0, 12.0, 1.0, 5), &decay(0.0, 9.0, 1.0, 6)).unwrap() else { panic!("inference") };
     assert!(review.headline.starts_with("B/A p50 0.7"), "{}", review.headline);
+    assert!(review.headline.contains("within one run per side; indicative"), "{}", review.headline);
     assert!(review.headline.contains("p99"), "{}", review.headline);
     let short = |n: usize| open_text(&format!("step,latency_ms\n{}", (0..n).map(|s| format!("{s},10\n")).collect::<String>()), "short").unwrap();
     let Pair::Inference(review) = pair(&short(60), &short(60)).unwrap() else { panic!("inference") };
     assert!(review.headline.contains("p99 needs 368 steady samples per side"), "{}", review.headline);
+}
+
+fn with_repeats(first: Side, more: Vec<Side>) -> Side {
+    let Side::Inference(mut run) = first else { panic!("inference") };
+    run.replicates = more
+        .into_iter()
+        .map(|side| match side {
+            Side::Inference(run) => run,
+            Side::Training(_) => panic!("inference"),
+        })
+        .collect();
+    Side::Inference(run)
+}
+
+#[test]
+fn several_runs_per_side_widen_the_headline_and_drop_indicative_at_three() {
+    let a = with_repeats(decay(0.0, 12.0, 1.0, 10), vec![decay(0.0, 12.6, 1.0, 11), decay(0.0, 11.4, 1.0, 12)]);
+    let b = with_repeats(decay(0.0, 9.0, 1.0, 13), vec![decay(0.0, 9.45, 1.0, 14), decay(0.0, 8.55, 1.0, 15)]);
+    let Pair::Inference(review) = pair(&a, &b).unwrap() else { panic!("inference") };
+    assert!(review.headline.contains("across 3 and 3 runs.") && !review.headline.contains("indicative"), "{}", review.headline);
+    assert!(review.left_text.contains("first of 3 runs"), "{}", review.left_text);
+    let two = with_repeats(decay(0.0, 12.0, 1.0, 16), vec![decay(0.0, 12.6, 1.0, 17)]);
+    let Pair::Inference(review) = pair(&two, &b).unwrap() else { panic!("inference") };
+    assert!(review.headline.contains("across 2 and 3 runs; indicative below 3"), "{}", review.headline);
 }
