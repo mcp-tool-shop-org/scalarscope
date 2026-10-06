@@ -31,6 +31,14 @@ pub struct InferenceReview {
     /// Memory in MiB at the same steps, when both sides recorded it.
     pub left_memory: Vec<f64>,
     pub right_memory: Vec<f64>,
+    /// Seconds since each run's first sample, at the same steps, when both sides have them.
+    pub left_elapsed: Vec<f64>,
+    pub right_elapsed: Vec<f64>,
+    /// CPU and GPU utilization in percent, when both sides recorded it.
+    pub left_cpu: Vec<f64>,
+    pub right_cpu: Vec<f64>,
+    pub left_gpu: Vec<f64>,
+    pub right_gpu: Vec<f64>,
     pub left_cdf: Vec<(f64, f64)>,
     pub right_cdf: Vec<(f64, f64)>,
     pub left_p50: Option<f64>,
@@ -110,6 +118,9 @@ fn inference(left: &InferenceRun, right: &InferenceRun) -> InferenceReview {
     let right_finite = readings::finite_sorted(&right_values);
     let (left_throughput, right_throughput) = beside(&left.throughput, &right.throughput, left, right, skip_left, skip_right, count);
     let (left_memory, right_memory) = beside(&left.memory_mb, &right.memory_mb, left, right, skip_left, skip_right, count);
+    let (left_elapsed, right_elapsed) = beside(&left.elapsed_s, &right.elapsed_s, left, right, skip_left, skip_right, count);
+    let (left_cpu, right_cpu) = beside(&left.cpu_percent, &right.cpu_percent, left, right, skip_left, skip_right, count);
+    let (left_gpu, right_gpu) = beside(&left.gpu_percent, &right.gpu_percent, left, right, skip_left, skip_right, count);
     let shapes = (shape::run_shape(&left.latency_ms), shape::run_shape(&right.latency_ms));
     let (findings, verdict) = inference_verdict(left, right, &shapes);
     let fired = findings.iter().map(|row| row.symbol.clone()).collect();
@@ -145,6 +156,12 @@ fn inference(left: &InferenceRun, right: &InferenceRun) -> InferenceReview {
         right_throughput,
         left_memory,
         right_memory,
+        left_elapsed,
+        right_elapsed,
+        left_cpu,
+        right_cpu,
+        left_gpu,
+        right_gpu,
         left_cdf: readings::empirical_cdf(&left_finite),
         right_cdf: readings::empirical_cdf(&right_finite),
         left_p50: readings::percentile(&left_finite, 0.50),
@@ -176,6 +193,15 @@ fn steady_tails(run: &InferenceRun) -> Vec<Vec<f64>> {
 
 fn slices(runs: &[Vec<f64>]) -> Vec<&[f64]> {
     runs.iter().map(Vec::as_slice).collect()
+}
+
+/// The wall-clock time of a settle range, " (2.1–3.4 s)", when the run has elapsed seconds.
+fn seconds_at(run: &InferenceRun, low: usize, high: usize) -> String {
+    match (run.elapsed_s.get(low), run.elapsed_s.get(high)) {
+        (Some(from), Some(_)) if low == high => format!(" ({from:.2} s)"),
+        (Some(from), Some(to)) => format!(" ({from:.2}–{to:.2} s)"),
+        _ => String::new(),
+    }
 }
 
 fn interval_text(interval: &Interval) -> String {
@@ -256,6 +282,36 @@ fn blocked(left: &InferenceRun, right: &InferenceRun) -> Result<(), String> {
 
 fn notices(left: &InferenceRun, right: &InferenceRun, shapes: &(RunShape, RunShape)) -> Vec<String> {
     let mut lines = Vec::new();
+    // ΔTc counts steps. When step times differ, settling can compare differently in seconds, so
+    // when both runs have elapsed time and the seconds tell a different story from the steps, the
+    // page says so. Steps stated in a file are used as stated.
+    let settle = |run: &InferenceRun, shape: &RunShape| -> Option<(usize, usize)> {
+        if stored_milestones(run) {
+            let index = index_of_step(run, run.steady_step);
+            return (index < run.latency_ms.len()).then_some((index, index));
+        }
+        shape.steady_range
+    };
+    if let (Some((left_low, left_high)), Some((right_low, right_high))) = (settle(left, &shapes.0), settle(right, &shapes.1)) {
+        let seconds = |run: &InferenceRun, low: usize, high: usize| Some((*run.elapsed_s.get(low)?, *run.elapsed_s.get(high)?));
+        let steps_apart = step_at(left, left_high) < step_at(right, right_low) || step_at(right, right_high) < step_at(left, left_low);
+        if let (Some((a_low, a_high)), Some((b_low, b_high))) = (seconds(left, left_low, left_high), seconds(right, right_low, right_high)) {
+            let apart = a_high < b_low || b_high < a_low;
+            if apart == steps_apart {
+                return notices_rest(left, right, shapes, lines);
+            }
+            lines.push(format!(
+                "In elapsed time, {} settles at {a_low:.2}–{a_high:.2} s and {} at {b_low:.2}–{b_high:.2} s; the ranges {}.",
+                left.label,
+                right.label,
+                if apart { "do not overlap" } else { "overlap" }
+            ));
+        }
+    }
+    notices_rest(left, right, shapes, lines)
+}
+
+fn notices_rest(left: &InferenceRun, right: &InferenceRun, shapes: &(RunShape, RunShape), mut lines: Vec<String>) -> Vec<String> {
     for (run, shape) in [(left, &shapes.0), (right, &shapes.1)] {
         if run.trace.as_ref().is_some_and(|trace| trace.stored_milestones) {
             continue;
@@ -569,8 +625,14 @@ fn describe(run: &InferenceRun, values: &[Option<f64>], sorted: &[f64], shape: &
         }
     } else {
         match shape.steady_range {
-            Some((low, high)) if low == high => format!("{}, settles at step {}", shape.shape.label(), step_at(run, low)),
-            Some((low, high)) => format!("{}, settles between steps {} and {}", shape.shape.label(), step_at(run, low), step_at(run, high)),
+            Some((low, high)) if low == high => format!("{}, settles at step {}{}", shape.shape.label(), step_at(run, low), seconds_at(run, low, low)),
+            Some((low, high)) => format!(
+                "{}, settles between steps {} and {}{}",
+                shape.shape.label(),
+                step_at(run, low),
+                step_at(run, high),
+                seconds_at(run, low, high)
+            ),
             None => shape.shape.label().to_string(),
         }
     };

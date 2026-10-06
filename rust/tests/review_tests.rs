@@ -270,6 +270,9 @@ fn marked(label: &str, latency: Vec<f64>, steady: Option<i64>) -> Side {
         warmup_end: None,
         steady_step: steady,
         memory_mb: Vec::new(),
+        elapsed_s: Vec::new(),
+        cpu_percent: Vec::new(),
+        gpu_percent: Vec::new(),
         trace: None,
         replicates: Vec::new(),
     })
@@ -349,4 +352,25 @@ fn several_runs_per_side_widen_the_headline_and_drop_indicative_at_three() {
     let two = with_repeats(decay(0.0, 12.0, 1.0, 16), vec![decay(0.0, 12.6, 1.0, 17)]);
     let Pair::Inference(review) = pair(&two, &b).unwrap() else { panic!("inference") };
     assert!(review.headline.contains("across 2 and 3 runs; indicative below 3"), "{}", review.headline);
+}
+
+#[test]
+fn settling_is_compared_in_seconds_when_both_runs_have_time() {
+    let timed = |level: f64, step_seconds: f64, seed: u64| -> Side {
+        let mut rng = scalarscope::stats::Rng::new(seed);
+        let rows: String = (0..400)
+            .map(|step| {
+                let noise = ((rng.next_u64() % 1000) as f64 / 1000.0 - 0.5) * 0.06;
+                let latency = level * (1.0 + noise) + 30.0 * (-(step as f64) / 12.0).exp();
+                format!("{step},{latency},{}\n", step as f64 * step_seconds)
+            })
+            .collect();
+        open_text(&format!("step,latency_ms,time_s\n{rows}"), "timed").unwrap()
+    };
+    // Same settling in steps, but B's steps take a third of the time.
+    let Pair::Inference(review) = pair(&timed(12.0, 0.03, 1), &timed(12.0, 0.01, 2)).unwrap() else { panic!("inference") };
+    let line = review.notices.iter().find(|line| line.starts_with("In elapsed time")).expect("a seconds line");
+    assert!(line.contains("do not overlap"), "{line}");
+    assert!(!review.fired.contains(&"ΔTc".to_string()), "ΔTc counts steps: {}", review.verdict);
+    assert!(review.left_text.contains(" s)"), "{}", review.left_text);
 }
