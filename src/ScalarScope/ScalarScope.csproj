@@ -36,7 +36,10 @@
 		<Copyright>Copyright © 2025-2026 ScalarScope Project</Copyright>
 		<PackageTags>visualization;machine-learning;training;skiasharp;maui</PackageTags>
 
-		<!-- Windows packaging for Microsoft Store -->
+		<!-- This MAUI project is not the Partner Center upload.
+		     That upload is the Rust pack from packaging/pack.ps1:
+		     ScalarScope_3.0.0.0_x64.msix, ScalarScope_3.0.0.0_Store.msixupload, and checksums.txt.
+		     Name, Publisher, and Version stay the Store identity. -->
 		<WindowsPackageType>MSIX</WindowsPackageType>
 		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 		<SelfContained>true</SelfContained>
@@ -78,5 +81,9 @@
 	<ItemGroup>
 		<ProjectReference Include="..\VortexKit\VortexKit.csproj" />
 	</ItemGroup>
+
+	<Target Name="RejectMauiAsStoreUpload" BeforeTargets="Publish">
+		<Error Text="This project is not the Partner Center upload. packaging/pack.ps1 packs the Rust review as ScalarScope_3.0.0.0_Store.msixupload. Do not publish this MAUI app as that upload." />
+	</Target>
 
 </Project>

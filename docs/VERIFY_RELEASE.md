@@ -45,15 +45,18 @@ The store file is `ScalarScope_3.0.0.0_Store.msixupload`. It is a zip of the uns
 
 After Partner Center publishes, the installed app's publisher display name is `mcp-tool-shop`.
 
-## Build from source
+## Build the Store pack
+
+The Partner Center upload is the Rust pack, not a publish of the MAUI project.
 
 ```powershell
 git clone https://github.com/mcp-tool-shop-org/scalarscope.git
 cd scalarscope
-dotnet publish src/ScalarScope/ScalarScope.csproj -c Release -f net9.0-windows10.0.19041.0 -p:AppxPackageSigningEnabled=false
+cargo build --release --locked --manifest-path rust/Cargo.toml
+./packaging/pack.ps1
 ```
 
-The MSIX lands under `src/ScalarScope/bin/Release/net9.0-windows10.0.19041.0/win-x64/AppPackages/`.
+The script writes `release/ScalarScope_3.0.0.0_x64.msix`, `release/ScalarScope_3.0.0.0_Store.msixupload`, and `release/checksums.txt`. A publish of `src/ScalarScope` is not that upload.
 
 ## If the hash does not match
 

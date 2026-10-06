@@ -137,6 +137,21 @@ jobs:
       shell: pwsh
       run: |
         ./packaging/pack.ps1
-        if (-not (Test-Path release/ScalarScope_3.0.0.0_x64.msix)) {
-          throw "release/ScalarScope_3.0.0.0_x64.msix is missing."
+        foreach ($name in @(
+          'release/ScalarScope_3.0.0.0_x64.msix',
+          'release/ScalarScope_3.0.0.0_Store.msixupload',
+          'release/checksums.txt'
+        )) {
+          if (-not (Test-Path $name)) { throw "$name is missing." }
         }
+
+    - name: Upload the Store pack
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      with:
+        name: scalarscope-store-3.0.0.0
+        if-no-files-found: error
+        retention-days: 14
+        path: |
+          release/ScalarScope_3.0.0.0_x64.msix
+          release/ScalarScope_3.0.0.0_Store.msixupload
+          release/checksums.txt

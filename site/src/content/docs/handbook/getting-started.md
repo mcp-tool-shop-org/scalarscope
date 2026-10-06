@@ -5,15 +5,71 @@ sidebar:
   order: 1
 ---
 
+## The review this repo builds
+
+The program you build here is the Rust review. From this repo:
+
+```bash
+cargo run --manifest-path rust/Cargo.toml
+```
+
+The window has four buttons: **Open path A**, **Open path B**, **Open bundle**, and **Save bundle**. An inference file is a latency CSV, a benchmark JSON, or a Chrome trace. A training file is a backpropagate `run_history.json`. The [Rust review](/scalarscope/handbook/rust-review/) page is the short guide. The Store copy is still the previous .NET package.
+
+## Files the review opens
+
+A latency CSV needs a latency column. `latency_ms`, `latency`, and `time_ms` are the names it reads:
+
+```csv
+step,latency_ms
+0,12.5
+1,11.8
+```
+
+A benchmark JSON puts samples in `results`, `iterations`, or `benchmarks`. Each sample needs `latency_ms` or `latency`:
+
+```json
+{
+  "results": [
+    { "latency_ms": 12.5 },
+    { "latency_ms": 11.8 }
+  ]
+}
+```
+
+A Chrome trace uses `traceEvents`. A complete `ProfilerStep` is one inference. `dur` is microseconds:
+
+```json
+{
+  "traceEvents": [
+    { "name": "ProfilerStep#1", "ph": "X", "dur": 12500 }
+  ]
+}
+```
+
+A training file is a backpropagate `run_history.json`. The review draws `loss_history`. `final_loss` stays its own number. It is not another sample on that curve:
+
+```json
+[
+  {
+    "run_id": "example",
+    "status": "completed",
+    "loss_history": [1.2, 0.8],
+    "final_loss": 0.8
+  }
+]
+```
+
 ## Install from the Microsoft Store
 
-The easiest way to get ScalarScope:
+The listing is still the previous .NET package. The easiest way to get that package:
 
 1. Visit the [Microsoft Store listing](https://apps.microsoft.com/detail/9P3HT1PHBKQK) (Store ID: `9P3HT1PHBKQK`)
 2. Click Install
 3. Requires Windows 10 (build 17763) or later
 
-## Your first comparison
+## Your first comparison on the Store package
+
+These steps are the four-tab shell on the Store. They are not the Rust review buttons.
 
 1. Open ScalarScope — the **Home** tab shows your workspace status
 2. Click **Compare Two Runs** to open the Compare tab
@@ -41,17 +97,23 @@ Switch tabs by clicking the tab bar. Number keys `1`–`6` request the routes ov
 
 ## Build from source
 
+The review:
+
 ```bash
-# Prerequisites:
+git clone https://github.com/mcp-tool-shop-org/scalarscope.git
+cd scalarscope
+cargo run --manifest-path rust/Cargo.toml
+```
+
+`dotnet run --project src/ScalarScope` builds the previous .NET shell. It is not the program the release packs.
+
+```bash
+# Prerequisites for that shell:
 #   .NET 9.0 SDK (global.json pins 9.0.100)
 #   dotnet workload install maui-windows
 
-git clone https://github.com/mcp-tool-shop-org/scalarscope.git
-cd scalarscope
 dotnet restore
 dotnet build
-
-# Run the desktop app
 dotnet run --project src/ScalarScope
 ```
 

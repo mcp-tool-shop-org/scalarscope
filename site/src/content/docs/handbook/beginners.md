@@ -23,12 +23,20 @@ The tool is built for TensorFlow-TRT inference workloads but the underlying delt
 
 ### From source
 
-```bash
-# Install .NET 9.0 SDK, then:
-dotnet workload install maui-windows
+The program this repo builds is the Rust review:
 
+```bash
 git clone https://github.com/mcp-tool-shop-org/scalarscope.git
 cd scalarscope
+cargo run --manifest-path rust/Cargo.toml
+```
+
+The window has **Open path A**, **Open path B**, **Open bundle**, and **Save bundle**. The Store copy is still the previous .NET package. See [Getting Started](/scalarscope/handbook/getting-started/) for a latency CSV, a benchmark JSON, a profiler trace, and a `run_history.json`.
+
+`dotnet run --project src/ScalarScope` builds that previous shell:
+
+```bash
+dotnet workload install maui-windows
 dotnet restore
 dotnet build
 dotnet run --project src/ScalarScope
@@ -109,7 +117,7 @@ All settings are stored locally in your app data directory and persist between s
 No. ScalarScope is a visualization and analysis tool. It reads inference traces and computes deltas on the CPU. No GPU is required.
 
 **Q: What file formats does ScalarScope accept?**
-ScalarScope uses the RunTrace format (JSON-based, schema version 1.0.0). The TFRT connector reads TensorFlow-TRT log directories. You can also open `.scbundle` review bundles or load the built-in demo.
+The Rust review opens a latency CSV, a benchmark JSON, a Chrome profiler trace, or a backpropagate `run_history.json`. [Getting Started](/scalarscope/handbook/getting-started/) has one short example of each. Open bundle reads a `.scbundle`. The Store package is still the previous .NET app.
 
 **Q: Does ScalarScope send any data externally?**
 No. ScalarScope has zero telemetry and zero analytics. All data stays local unless you explicitly export a bundle and share it yourself. See the [Privacy Policy](https://github.com/mcp-tool-shop-org/scalarscope/blob/main/PRIVACY.md) for details.

@@ -70,8 +70,12 @@ export const config: SiteConfig = {
       title: 'Quick start',
       cards: [
         {
+          title: 'Rust review',
+          code: 'cargo run --manifest-path rust/Cargo.toml\n\n# Open path A, Open path B, Open bundle, Save bundle\n# Inference: latency CSV, benchmark JSON, or a Chrome trace\n# Training: backpropagate run_history.json. Loss stays loss.\n# The Store copy is still the previous .NET package.',
+        },
+        {
           title: 'Install from Microsoft Store',
-          code: '# Store ID: 9P3HT1PHBKQK\n# https://apps.microsoft.com/detail/9P3HT1PHBKQK\n\n1. Click "Compare Two Runs"\n2. Load baseline TFRT trace (before)\n3. Load optimized TFRT trace (after)\n4. Review deltas in the Compare tab\n5. Export .scbundle for reproducible sharing',
+          code: '# Store ID: 9P3HT1PHBKQK\n# https://apps.microsoft.com/detail/9P3HT1PHBKQK\n# This listing is still the previous .NET package.\n\n1. Click "Compare Two Runs"\n2. Load baseline TFRT trace (before)\n3. Load optimized TFRT trace (after)\n4. Review deltas in the Compare tab\n5. Export .scbundle for reproducible sharing',
         },
         {
           title: 'VortexKit in this repo',
@@ -83,7 +87,7 @@ export const config: SiteConfig = {
         },
         {
           title: 'Build from source',
-          code: 'git clone https://github.com/mcp-tool-shop-org/scalarscope\ncd scalarscope\n\n# Requires .NET 9 + MAUI workload\ndotnet workload install maui-windows\ndotnet build ScalarScope.sln\n\n# Run tests\ndotnet test',
+          code: 'git clone https://github.com/mcp-tool-shop-org/scalarscope\ncd scalarscope\n\n# The review this repo packs\ncargo run --manifest-path rust/Cargo.toml\n\n# The previous .NET shell, not the Store upload\ndotnet run --project src/ScalarScope',
         },
       ],
     },
