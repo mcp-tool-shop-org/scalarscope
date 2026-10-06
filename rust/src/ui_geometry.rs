@@ -85,6 +85,8 @@ impl ScalarScopeApp {
         for warning in &review.warnings {
             ui.label(RichText::new(warning).color(paint.note));
         }
+        ui.label(RichText::new(&review.verdict).color(paint.text));
+        self.draw_tiles(ui, &review.explanations);
         let Some((start, end)) = time_range(&review.left, &review.right) else {
             ui.label(RichText::new("Neither run has a trajectory to draw.").color(paint.note));
             return;

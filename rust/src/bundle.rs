@@ -571,13 +571,15 @@ pub fn stored_pair(review: &StoredReview) -> Option<Pair> {
         }
         "geometry" => {
             let stored = review.geometry.as_ref()?;
-            Some(Pair::Geometry(crate::review::GeometryReview {
-                left_label: review.left_text.clone(),
-                right_label: review.right_text.clone(),
-                left: stored.left.clone(),
-                right: stored.right.clone(),
-                warnings: review.notices.clone(),
-            }))
+            // The runs are stored in full; the deltas are recomputed from them by the same ported
+            // rules, so they match what was saved.
+            Some(Pair::Geometry(crate::review::geometry_with_deltas(
+                review.left_text.clone(),
+                review.right_text.clone(),
+                stored.left.clone(),
+                stored.right.clone(),
+                review.notices.clone(),
+            )))
         }
         "training" => {
             let training = review.training.as_ref()?;
@@ -730,19 +732,35 @@ fn inference_review(review: &InferenceReview) -> StoredReview {
 }
 
 fn geometry_document(review: &crate::review::GeometryReview) -> StoredReview {
+    use crate::geometry_deltas::DeltaStatus;
+    let present: Vec<&crate::geometry_deltas::GeometryDelta> = review.deltas.iter().filter(|delta| delta.status == DeltaStatus::Present).collect();
     StoredReview {
         kind: "geometry".to_string(),
-        verdict: String::new(),
-        fired: Vec::new(),
+        verdict: review.verdict.clone(),
+        fired: present.iter().map(|delta| delta.symbol.clone()).collect(),
         caption: "Two ASPIRE training-dynamics runs, stored in full so the review redraws exactly.".to_string(),
         left_text: review.left_label.clone(),
         right_text: review.right_label.clone(),
-        findings: Vec::new(),
+        // 2.0's deltas.json rows, so a 2.0 reader sees the same findings.
+        findings: present
+            .iter()
+            .map(|delta| crate::review::Finding {
+                symbol: delta.symbol.clone(),
+                id: delta.id.clone(),
+                name: delta.name.clone(),
+                kind: format!("{:?}", delta.delta_type),
+                sentence: delta.summary_sentence.clone().filter(|line| !line.is_empty()).unwrap_or_else(|| delta.explanation.clone()),
+                left: delta.left_value,
+                right: delta.right_value,
+                delta: delta.delta,
+                units: delta.units.clone().unwrap_or_default(),
+            })
+            .collect(),
         inference: None,
         training: None,
         notices: review.warnings.clone(),
         headline: String::new(),
-        explanations: Vec::new(),
+        explanations: review.explanations.clone(),
         geometry: Some(StoredGeometry { left: review.left.clone(), right: review.right.clone() }),
     }
 }

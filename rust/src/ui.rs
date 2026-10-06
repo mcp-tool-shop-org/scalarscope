@@ -819,6 +819,9 @@ impl ScalarScopeApp {
                 }
                 if let Some(anchor) = &tile.anchor {
                     if ui.button("Show me").clicked() {
+                        if anchor.view == "geometry" {
+                            self.scrub = anchor.time;
+                        }
                         self.view = match anchor.view.as_str() {
                             "distribution" => View::Distribution,
                             "warmup" => View::Warmup,
