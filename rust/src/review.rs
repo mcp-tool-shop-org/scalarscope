@@ -8,6 +8,8 @@ use serde::{Deserialize, Serialize};
 use crate::open::{InferenceRun, Side, TrainingEntry};
 use crate::readings::{self, Band};
 use crate::runtrace;
+use crate::shape::{self, RunShape};
+use crate::stats::{self, Interval, Support};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct InferenceReview {
@@ -44,6 +46,8 @@ pub struct InferenceReview {
     pub right_text: String,
     /// Fingerprint, validation and guardrail notes, one per line. Empty for a plain file.
     pub notices: Vec<String>,
+    /// B against A at p50, p90 and p99 over the steady samples, each with its interval.
+    pub headline: String,
 }
 
 /// One delta the inference page actually fired. The numbers are the same
@@ -100,25 +104,29 @@ fn inference(left: &InferenceRun, right: &InferenceRun) -> InferenceReview {
     let right_finite = readings::finite_sorted(&right_values);
     let (left_throughput, right_throughput) = beside(&left.throughput, &right.throughput, left, right, skip_left, skip_right, count);
     let (left_memory, right_memory) = beside(&left.memory_mb, &right.memory_mb, left, right, skip_left, skip_right, count);
-    let (findings, verdict) = inference_verdict(left, right);
+    let shapes = (shape::run_shape(&left.latency_ms), shape::run_shape(&right.latency_ms));
+    let (findings, verdict) = inference_verdict(left, right, &shapes);
     let fired = findings.iter().map(|row| row.symbol.clone()).collect();
     let mut caption = format!(
-        "Preset tensorflowrt-runtime-v1 (inference runtime). latency_ms (ms). {summary} The band is a centered 5-sample rolling mean ± population standard deviation, not a confidence interval. Marks are 3-sigma on this window. p50, p95, and p99 are nearest-rank. The distribution is the empirical CDF of these same samples. ΔTd and ΔĀ stay off this page."
+        "Preset tensorflowrt-runtime-v1 (inference runtime). latency_ms (ms). {summary} The band is the p10–p90 of an 11-sample centred window, the spread of the samples, not a confidence interval. Marks are samples more than {limit} robust deviations (1.4826 × MAD) from the median of this window. Ratios and their 95% intervals come from {replicates} moving-block bootstrap resamples (block length the cube root of the sample count, seed fixed); they cover the variation within each run, not between runs. A percentile is printed only when enough samples bound it. p50, p95, and p99 are nearest-rank. The distribution is the empirical CDF of these same samples. ΔTd and ΔĀ stay off this page.",
+        limit = stats::MAD_LIMIT,
+        replicates = stats::BOOTSTRAP_REPLICATES,
     );
     if left.steady_step.is_some() && right.steady_step.is_some() {
         caption.push_str(" The vertical line is the steady-state milestone.");
     }
     InferenceReview {
-        left_text: describe(&left.label, &left_values, &left_finite),
-        right_text: describe(&right.label, &right_values, &right_finite),
+        left_text: describe(left, &left_values, &left_finite, &shapes.0),
+        right_text: describe(right, &right_values, &right_finite, &shapes.1),
+        headline: headline(&steady_tail(left), &steady_tail(right)),
         left_label: left.label.clone(),
         right_label: right.label.clone(),
         signal: "latency_ms".to_string(),
         unit: "ms".to_string(),
-        left_band: readings::deviation_band(&left_values),
-        right_band: readings::deviation_band(&right_values),
-        left_marks: readings::three_sigma_indices(&left_values),
-        right_marks: readings::three_sigma_indices(&right_values),
+        left_band: stats::quantile_band(&left_values),
+        right_band: stats::quantile_band(&right_values),
+        left_marks: stats::mad_indices(&left_values),
+        right_marks: stats::mad_indices(&right_values),
         left_steady: readings::steady_index(&left.steps, skip_left, count, left.steady_step.filter(|_| right.steady_step.is_some())),
         right_steady: readings::steady_index(&right.steps, skip_right, count, right.steady_step.filter(|_| left.steady_step.is_some())),
         left_throughput,
@@ -139,8 +147,52 @@ fn inference(left: &InferenceRun, right: &InferenceRun) -> InferenceReview {
         left: left_values,
         right: right_values,
         caption,
-        notices: notices(left, right),
+        notices: notices(left, right, &shapes),
     }
+}
+
+/// The samples from the steady-state step on, or the whole run when it has none.
+fn steady_tail(run: &InferenceRun) -> Vec<f64> {
+    let start = index_of_step(run, run.steady_step);
+    run.latency_ms[start.min(run.latency_ms.len())..].iter().copied().filter(|value| value.is_finite()).collect()
+}
+
+fn interval_text(interval: &Interval) -> String {
+    format!("{:.2} ({:.2}–{:.2})", interval.estimate, interval.low, interval.high)
+}
+
+/// B/A at p50, p90 and p99 with intervals, and which percentiles have too few samples.
+fn headline(a: &[f64], b: &[f64]) -> String {
+    if a.len() < shape::MIN_SAMPLES || b.len() < shape::MIN_SAMPLES {
+        return format!("B/A: a ratio needs {} steady samples per side.", shape::MIN_SAMPLES);
+    }
+    let mut parts = Vec::new();
+    let mut short = Vec::new();
+    for (name, probability) in [("p50", 0.5), ("p90", 0.9), ("p99", 0.99)] {
+        let needed = [a.len(), b.len()]
+            .into_iter()
+            .filter_map(|count| match stats::quantile_support(count, probability) {
+                Support::TooFew { needed } => Some(needed),
+                Support::Ranks { .. } => None,
+            })
+            .max();
+        if let Some(needed) = needed {
+            short.push(format!("{name} needs {needed} steady samples per side"));
+            continue;
+        }
+        if let Some(interval) = stats::ratio_interval(a, b, probability, stats::BOOTSTRAP_SEED) {
+            parts.push(format!("{name} {}", interval_text(&interval)));
+        }
+    }
+    let mut text = if parts.is_empty() {
+        "B/A: too few steady samples for a ratio.".to_string()
+    } else {
+        format!("B/A {}, within one run per side.", parts.join(" · "))
+    };
+    if !short.is_empty() {
+        text.push_str(&format!(" Not shown: {}.", short.join(", ")));
+    }
+    text
 }
 
 /// A broken timeline on either side stops the comparison before any delta is computed,
@@ -164,8 +216,27 @@ fn blocked(left: &InferenceRun, right: &InferenceRun) -> Result<(), String> {
     ))
 }
 
-fn notices(left: &InferenceRun, right: &InferenceRun) -> Vec<String> {
+fn notices(left: &InferenceRun, right: &InferenceRun, shapes: &(RunShape, RunShape)) -> Vec<String> {
     let mut lines = Vec::new();
+    for (run, shape) in [(left, &shapes.0), (right, &shapes.1)] {
+        if run.trace.as_ref().is_some_and(|trace| trace.stored_milestones) {
+            continue;
+        }
+        let Some((low, high)) = shape.steady_range else {
+            continue;
+        };
+        let heuristic = crate::milestones::detect_warmup_end(&run.latency_ms)
+            .and_then(|warmup| crate::milestones::detect_steady_start(&run.latency_ms, warmup));
+        if let Some(index) = heuristic.filter(|index| *index < low || *index > high) {
+            lines.push(format!(
+                "{}: the 2.0 window heuristic puts steady state at step {}, outside the detected range {}–{}. Read the stabilization time with care.",
+                run.label,
+                step_at(run, index),
+                step_at(run, low),
+                step_at(run, high)
+            ));
+        }
+    }
     if let (Some(left_trace), Some(right_trace)) = (&left.trace, &right.trace) {
         for note in runtrace::compare_fingerprints(&left_trace.fingerprints, &right_trace.fingerprints) {
             lines.push(match note.code {
@@ -188,28 +259,43 @@ fn notices(left: &InferenceRun, right: &InferenceRun) -> Vec<String> {
     lines
 }
 
-fn inference_verdict(left: &InferenceRun, right: &InferenceRun) -> (Vec<Finding>, String) {
+/// The one-sided level at which ΔF calls an excess of anomalies more than chance.
+pub const ANOMALY_LEVEL: f64 = 0.05;
+
+fn inference_verdict(left: &InferenceRun, right: &InferenceRun, shapes: &(RunShape, RunShape)) -> (Vec<Finding>, String) {
     let mut findings = Vec::new();
     let mut withheld = Vec::new();
+    let (tail_left, tail_right) = (steady_tail(left), steady_tail(right));
+    // A resample of a handful of samples is the same handful, so an interval from it is a point.
+    let enough = tail_left.len() >= shape::MIN_SAMPLES && tail_right.len() >= shape::MIN_SAMPLES;
 
-    let outliers_left = count_outliers(&left.latency_ms);
-    let outliers_right = count_outliers(&right.latency_ms);
-    if outliers_right > outliers_left {
-        let introduced = outliers_right - outliers_left;
-        findings.push(finding(
-            "ΔF",
-            if introduced == 1 {
+    // ΔF counts anomalies in the steady samples only: a warmup sample is startup cost, not a
+    // runtime anomaly (C3). It fires when B's excess is beyond chance given both sample counts.
+    let anomalies = |tail: &[f64]| stats::mad_indices(&tail.iter().map(|value| Some(*value)).collect::<Vec<_>>()).len();
+    let (outliers_left, outliers_right) = (anomalies(&tail_left), anomalies(&tail_right));
+    if let Some(p_value) = stats::more_anomalies(outliers_left, tail_left.len(), outliers_right, tail_right.len()).filter(|_| enough) {
+        if p_value < ANOMALY_LEVEL {
+            let introduced = outliers_right.saturating_sub(outliers_left);
+            let sentence = if introduced == 1 {
                 "Introduced 1 new runtime anomaly".to_string()
             } else {
                 format!("Introduced {introduced} new runtime anomalies")
-            },
-            outliers_left as f64,
-            outliers_right as f64,
-            "count",
-        ));
+            };
+            findings.push(finding(
+                "ΔF",
+                format!(
+                    "{sentence} ({outliers_right} in {} steady samples against {outliers_left} in {}; one-sided p {p_value:.3})",
+                    tail_right.len(),
+                    tail_left.len()
+                ),
+                outliers_left as f64,
+                outliers_right as f64,
+                "count",
+            ));
+        }
     }
 
-    match delta_tc(left, right) {
+    match delta_tc(left, right, shapes) {
         Tc::Fired { text, left_step, right_step } => findings.push(finding(
             "ΔTc",
             text,
@@ -221,16 +307,21 @@ fn inference_verdict(left: &InferenceRun, right: &InferenceRun) -> (Vec<Finding>
         Tc::Quiet => {}
     }
 
-    let spread_left = population_std_from(&left.latency_ms, index_of_step(left, left.steady_step));
-    let spread_right = population_std_from(&right.latency_ms, index_of_step(right, right.steady_step));
-    let scale = spread_left.max(spread_right);
-    if (spread_right - spread_left).abs() > 0.01 * scale {
-        let text = if spread_right < spread_left {
-            "Reduced runtime variability".to_string()
-        } else {
-            "Increased runtime variability".to_string()
-        };
-        findings.push(finding("ΔO", text, spread_left, spread_right, "ms"));
+    // ΔO compares the relative spread of the steady samples, (p90 − p10) / p50, and fires only
+    // when the interval on B's over A's excludes 1. Relative, so a faster run with the same
+    // proportional jitter is not called steadier.
+    if let Some(interval) = stats::spread_ratio_interval(&tail_left, &tail_right, stats::BOOTSTRAP_SEED).filter(|_| enough) {
+        if interval.excludes(1.0) {
+            let text = if interval.estimate < 1.0 { "Reduced runtime variability" } else { "Increased runtime variability" };
+            let width = |tail: &[f64]| stats::relative_spread(&mut tail.to_vec()).unwrap_or(0.0);
+            findings.push(finding(
+                "ΔO",
+                format!("{text}: relative spread (p10–p90 / p50) × {}", interval_text(&interval)),
+                width(&tail_left),
+                width(&tail_right),
+                "ratio",
+            ));
+        }
     }
 
     let order = ["ΔF", "ΔTc", "ΔO"];
@@ -281,10 +372,6 @@ enum Tc {
     Quiet,
 }
 
-/// A difference in steady-state step below this is noise in the milestone, not a timing
-/// change. The .NET app used the same floor (`ResolutionSteps = 3`).
-pub const TC_RESOLUTION_STEPS: i64 = 3;
-
 fn steps_text(count: i64) -> String {
     if count == 1 {
         "1 step".to_string()
@@ -293,51 +380,64 @@ fn steps_text(count: i64) -> String {
     }
 }
 
-fn delta_tc(left: &InferenceRun, right: &InferenceRun) -> Tc {
-    let both = left.steady_step.is_some() && right.steady_step.is_some();
-    let left_step = left.steady_step.unwrap_or_else(|| last_step(left));
-    let right_step = right.steady_step.unwrap_or_else(|| last_step(right));
-    let difference = right_step - left_step;
-    if difference == 0 {
-        return Tc::Quiet;
+fn stored_milestones(run: &InferenceRun) -> bool {
+    run.trace.as_ref().is_some_and(|trace| trace.stored_milestones) && run.steady_step.is_some()
+}
+
+/// The step at a sample index.
+fn step_at(run: &InferenceRun, index: usize) -> i64 {
+    run.steps.get(index).copied().unwrap_or(index as i64)
+}
+
+/// ΔTc. When both files state their steady-state step, those steps are compared as the 2.0
+/// comparer did. Otherwise each run's shape decides: only a flat run or one that warms up has a
+/// stabilization time (W1), and ΔTc fires only when the two steady-start ranges do not overlap
+/// (W3), so the difference is not an artifact of where a segment was cut.
+fn delta_tc(left: &InferenceRun, right: &InferenceRun, shapes: &(RunShape, RunShape)) -> Tc {
+    if stored_milestones(left) && stored_milestones(right) {
+        let (left_step, right_step) = (left.steady_step.unwrap_or(0), right.steady_step.unwrap_or(0));
+        let difference = right_step - left_step;
+        if difference == 0 {
+            return Tc::Quiet;
+        }
+        let text = if difference < 0 {
+            format!("Stabilizes {} earlier (steps stated in the files)", steps_text(difference.abs()))
+        } else {
+            format!("Stabilizes {} later (steps stated in the files)", steps_text(difference))
+        };
+        return Tc::Fired { text, left_step, right_step };
     }
-    if !both {
-        return Tc::Withheld(
-            "ΔTc is withheld. A steady-state milestone is missing, so the last step is not a stabilization time.".to_string(),
-        );
-    }
-    if difference.abs() < TC_RESOLUTION_STEPS {
-        return Tc::Quiet;
-    }
-    let text = if difference < 0 {
-        format!("Stabilizes {} earlier", steps_text(difference.abs()))
-    } else {
-        format!("Stabilizes {} later", steps_text(difference))
+    let (left_shape, right_shape) = shapes;
+    let (Some((left_low, left_high)), Some((right_low, right_high))) = (left_shape.steady_range, right_shape.steady_range) else {
+        return Tc::Withheld(format!(
+            "ΔTc is withheld. {} is {} and {} is {}; only a flat run or one that warms up has a stabilization time.",
+            left.label,
+            left_shape.shape.label(),
+            right.label,
+            right_shape.shape.label()
+        ));
     };
-    Tc::Fired {
-        text,
-        left_step,
-        right_step,
+    let (left_low, left_high) = (step_at(left, left_low), step_at(left, left_high));
+    let (right_low, right_high) = (step_at(right, right_low), step_at(right, right_high));
+    if left_low <= right_high && right_low <= left_high {
+        return Tc::Quiet;
     }
-}
-
-fn last_step(run: &InferenceRun) -> i64 {
-    if run.steps.len() == run.latency_ms.len() {
-        run.steps.last().copied().unwrap_or(0)
+    let left_step = step_at(left, left_shape.steady.unwrap_or(0));
+    let right_step = step_at(right, right_shape.steady.unwrap_or(0));
+    let (nearest, farthest) = if right_high < left_low {
+        (left_low - right_high, left_high - right_low)
     } else {
-        run.latency_ms.len().saturating_sub(1) as i64
-    }
-}
-
-fn count_outliers(values: &[f64]) -> usize {
-    let finite: Vec<f64> = values.iter().copied().filter(|value| value.is_finite()).collect();
-    if finite.len() < 3 {
-        return 0;
-    }
-    let mean = finite.iter().sum::<f64>() / finite.len() as f64;
-    let standard_deviation = (finite.iter().map(|value| (value - mean).powi(2)).sum::<f64>() / finite.len() as f64).sqrt();
-    let threshold = 3.0 * standard_deviation;
-    finite.iter().filter(|value| (*value - mean).abs() > threshold).count()
+        (right_low - left_high, right_high - left_low)
+    };
+    let direction = if right_high < left_low { "earlier" } else { "later" };
+    let text = format!(
+        "Stabilizes {}–{} {direction} ({} settles at step {left_low}–{left_high}, {} at {right_low}–{right_high})",
+        nearest,
+        steps_text(farthest),
+        left.label,
+        right.label
+    );
+    Tc::Fired { text, left_step, right_step }
 }
 
 /// The first sample at or after `step`, or the start when there is no milestone.
@@ -345,14 +445,6 @@ fn index_of_step(run: &InferenceRun, step: Option<i64>) -> usize {
     step.map_or(0, |step| run.steps.iter().position(|value| *value >= step).unwrap_or(run.steps.len()))
 }
 
-fn population_std_from(values: &[f64], start: usize) -> f64 {
-    let tail: Vec<f64> = values.iter().skip(start).copied().filter(|value| value.is_finite()).collect();
-    if tail.len() < 2 {
-        return 0.0;
-    }
-    let mean = tail.iter().sum::<f64>() / tail.len() as f64;
-    (tail.iter().map(|value| (value - mean).powi(2)).sum::<f64>() / tail.len() as f64).sqrt()
-}
 
 fn training(left: &TrainingEntry, right: &TrainingEntry) -> TrainingReview {
     let caption = "Training loss, stored samples. Backpropagate keeps at most 100 points by uniform index sampling before it writes the file. final_loss is a separate number and is not appended to this curve. This is not an inference review, so ΔTc, ΔO, ΔF, ΔĀ, and ΔTd are not computed.".to_string();
@@ -426,14 +518,31 @@ fn beside(
     )
 }
 
-fn describe(label: &str, values: &[Option<f64>], sorted: &[f64]) -> String {
-    let marks = readings::three_sigma_indices(values).len();
+fn describe(run: &InferenceRun, values: &[Option<f64>], sorted: &[f64], shape: &RunShape) -> String {
+    let marks = stats::mad_indices(values).len();
+    let percentile = |probability: f64| match stats::quantile_support(sorted.len(), probability) {
+        Support::Ranks { .. } => format!("{} ms", fmt(readings::percentile(sorted, probability))),
+        Support::TooFew { needed } => format!("needs {needed} samples"),
+    };
+    let settles = if run.trace.as_ref().is_some_and(|trace| trace.stored_milestones) {
+        match run.steady_step {
+            Some(step) => format!("steady from step {step} (stated in the file)"),
+            None => "no steady step stated in the file".to_string(),
+        }
+    } else {
+        match shape.steady_range {
+            Some((low, high)) if low == high => format!("{}, settles at step {}", shape.shape.label(), step_at(run, low)),
+            Some((low, high)) => format!("{}, settles between steps {} and {}", shape.shape.label(), step_at(run, low), step_at(run, high)),
+            None => shape.shape.label().to_string(),
+        }
+    };
     format!(
-        "{label} · latency_ms · {} samples · p50 {} ms · p95 {} ms · p99 {} ms · {marks} anomaly marks",
+        "{} · latency_ms · {} samples · p50 {} · p95 {} · p99 {} · {marks} anomaly marks · {settles}",
+        run.label,
         values.len(),
-        fmt(readings::percentile(sorted, 0.50)),
-        fmt(readings::percentile(sorted, 0.95)),
-        fmt(readings::percentile(sorted, 0.99)),
+        percentile(0.50),
+        percentile(0.95),
+        percentile(0.99),
     )
 }
 

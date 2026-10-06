@@ -216,7 +216,8 @@ fn a_step_list_that_does_not_match_the_samples_is_not_a_stabilization_time() {
         trace: None,
     };
     let Pair::Inference(review) = pair(&Side::Inference(left.clone()), &Side::Inference(right)).unwrap() else { panic!("inference") };
-    assert!(review.verdict.contains("not a stabilization time"));
+    // Two and three samples are too short to tell where a run settles.
+    assert!(review.verdict.contains("ΔTc is withheld") && review.verdict.contains("too short to tell"), "{}", review.verdict);
     assert!(!review.verdict.contains("Stabilizes"));
     assert!(review.left_throughput.is_empty());
 
@@ -254,13 +255,14 @@ fn alignment_uses_warmup_when_steady_state_is_missing_and_the_first_step_otherwi
     let left = inference("left", vec![10.0; 8], Some(1), Some(0), Vec::new());
     let right = inference("right", vec![12.0; 8], Some(4), Some(0), Vec::new());
     let Pair::Inference(review) = pair(&left, &right).unwrap() else { panic!("inference") };
-    assert!(review.verdict.contains("Stabilizes 3 steps later") || review.fired.iter().any(|symbol| symbol == "ΔTc"));
+    // Steps set by hand are not stated in a file, and eight samples are too short to tell.
+    assert!(review.verdict.contains("ΔTc is withheld"), "{}", review.verdict);
     assert!(review.caption.contains("vertical line"));
 
     let left = inference("left", vec![10.0; 8], Some(6), None, Vec::new());
     let right = inference("right", vec![12.0; 8], Some(1), None, Vec::new());
     let Pair::Inference(review) = pair(&left, &right).unwrap() else { panic!("inference") };
-    assert!(review.verdict.contains("earlier"));
+    assert!(review.verdict.contains("ΔTc is withheld"), "{}", review.verdict);
 }
 
 #[test]
@@ -354,6 +356,7 @@ fn stored_drawings_come_back_and_an_unknown_kind_does_not_become_a_chart() {
     let hand = StoredReview {
         kind: "inference".to_string(),
         notices: Vec::new(),
+        headline: String::new(),
         verdict: String::new(),
         fired: Vec::new(),
         caption: String::new(),
@@ -493,6 +496,7 @@ fn write_file_and_open_file_round_trip_and_report_a_missing_path() {
         review: StoredReview {
             kind: "findings".to_string(),
             notices: Vec::new(),
+            headline: String::new(),
             verdict: String::new(),
             fired: Vec::new(),
             caption: String::new(),

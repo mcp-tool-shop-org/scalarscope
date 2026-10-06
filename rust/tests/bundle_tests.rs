@@ -49,7 +49,7 @@ fn sealed_bundle_reopens_the_stored_review() {
 
     let deltas = String::from_utf8(entry(&entries, "findings/deltas.json")).unwrap();
     assert!(deltas.contains("FailurePresence"));
-    assert!(deltas.contains("Introduced 1 new runtime anomaly"));
+    assert!(deltas.contains("Introduced 8 new runtime anomalies"));
     assert!(!deltas.contains("confidence"));
     assert!(!deltas.contains("StructuralEmergence"));
 
@@ -65,7 +65,8 @@ fn sealed_bundle_reopens_the_stored_review() {
     let opened = open_bytes(&sealed.bytes).unwrap();
     let Pair::Inference(live) = spike() else { panic!("inference") };
     assert_eq!(opened.review.verdict, live.verdict);
-    assert_eq!(opened.review.fired, vec!["ΔF".to_string(), "ΔO".to_string()]);
+    // Spikes are ΔF; the spread of the typical samples (ΔO) did not change.
+    assert_eq!(opened.review.fired, vec!["ΔF".to_string()]);
     assert_eq!(opened.review.inference.unwrap().left, live.left);
 }
 
@@ -239,10 +240,14 @@ fn entry(entries: &[(String, Vec<u8>)], path: &str) -> Vec<u8> {
     entries.iter().find(|(name, _)| name == path).unwrap().1.clone()
 }
 
+/// Eight spikes in 200 samples against none: an excess ΔF calls beyond chance (p = 0.5^8).
+/// A single spike is not enough for that, so it no longer fires.
 fn spike() -> Pair {
-    let calm = vec![10.0; 20];
-    let mut spiked = vec![10.0; 19];
-    spiked.push(100.0);
+    let calm = vec![10.0; 200];
+    let mut spiked = vec![10.0; 200];
+    for index in [20, 45, 70, 95, 120, 145, 170, 195] {
+        spiked[index] = 100.0;
+    }
     pair(&marked("a", calm, None), &marked("b", spiked, None)).unwrap()
 }
 
