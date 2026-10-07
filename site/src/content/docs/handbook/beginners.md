@@ -5,25 +5,25 @@ sidebar:
   order: 99
 ---
 
-New to ScalarScope? This page walks you through the core concepts and workflows, starting from zero.
+New to ScalarScope? This page walks you through the core ideas, starting from zero.
 
 ## What does this tool do?
 
-ScalarScope compares two ML inference runs side by side and tells you exactly what changed. Instead of manually scrolling through logs looking for differences, an inference comparison shows three deltas, and only when the difference is statistically meaningful. You get a clear answer: "these things changed, and here's the evidence."
+ScalarScope compares two machine-learning runs and tells you how run B differs from run A. It also tells you how sure that answer is. Instead of scrolling through two logs, you get:
+- a headline ratio with an interval;
+- a tile for each kind of difference, saying whether it fired and why;
+- views that show the evidence.
 
-The tool is built for TensorFlow-TRT inference workloads but the underlying delta analysis works on any pair of time-series traces. Results are exportable as `.scbundle` archives. A matching SHA-256 is a content check, not a signature.
+What the data cannot support is held back, with the reason.
 
 ## Installation
 
-### Microsoft Store (recommended)
+### Microsoft Store
 
-1. Open the [Microsoft Store listing](https://apps.microsoft.com/detail/9P3HT1PHBKQK)
-2. Click **Install**
-3. Requires Windows 10 (build 17763) or later
+1. Open the [Microsoft Store listing](https://apps.microsoft.com/detail/9P3HT1PHBKQK).
+2. Click **Install**. ScalarScope needs Windows 10 version 1809 (build 17763) or later, x64.
 
 ### From source
-
-The program this repo builds is the Rust review:
 
 ```bash
 git clone https://github.com/mcp-tool-shop-org/scalarscope.git
@@ -31,102 +31,76 @@ cd scalarscope
 cargo run --manifest-path rust/Cargo.toml
 ```
 
-The window has **Open path A**, **Open path B**, **Open bundle**, and **Save bundle**. The Store copy is still the previous .NET package. See [Getting Started](/scalarscope/handbook/getting-started/) for a latency CSV, a benchmark JSON, a profiler trace, and a `run_history.json`.
-
-`dotnet run --project src/ScalarScope` builds that previous shell:
-
-```bash
-dotnet workload install maui-windows
-dotnet restore
-dotnet build
-dotnet run --project src/ScalarScope
-```
-
 ## Your first comparison
 
-Follow these steps to compare two inference traces:
+1. ScalarScope opens on **Welcome**. Click **Try the sample comparison**. Two built-in runs of one model, before and after an optimization, open on **Compare**.
+2. **Read the headline.** "B/A p50 0.65 (0.65–0.66)" means B's median latency is 65% of A's, and the 95% interval runs from 0.65 to 0.66. With one run per side the headline calls itself indicative: run-to-run variation is not measured.
+3. **Read the tiles.** ΔF, ΔTc and ΔO each say fired, quiet or withheld. Click one for **Why**, and **Show me** to move to the evidence.
+4. **Switch views** with `1` to `6`: Series, Warmup, Distribution, Difference, Spectrum, Heat map.
+5. **Keep the review** with **Save bundle**. **Open bundle** shows it again exactly as saved.
 
-1. **Launch ScalarScope** — the Home tab shows your workspace status
-2. **Click "Compare Two Runs"** — this opens the Compare tab
-3. **Load the baseline trace** — select the TFRT trace from before your optimization
-4. **Load the optimized trace** — select the TFRT trace from after your optimization
-5. **Read the deltas** — the Delta Zone shows which differences are meaningful, with confidence scores and explanations
-6. **Click "Show Me"** on any delta to jump to the relevant view and see the evidence highlighted
-7. **Export a bundle** — click Export Bundle to create a `.scbundle` file you can share with your team
+To compare your own runs, use **Open path A** and **Open path B**. ScalarScope opens:
+- a latency CSV;
+- a benchmark JSON;
+- a Chrome profiler trace;
+- a runtime log or a RunTrace JSON;
+- a backpropagate `run_history.json`;
+- an ASPIRE geometry export.
 
-If you do not have your own traces yet, click **Try Example** on the Home tab. This loads a built-in demo comparison so you can explore the full interface.
+[Getting Started](/scalarscope/handbook/getting-started/) has a short example of each.
 
-## Key concepts
+## Key ideas
+
+### Intervals, not just numbers
+
+A ratio of 0.65 could be noise. The interval says how much the ratio would move if the run were repeated. ScalarScope estimates it by resampling the run in blocks, because neighbouring samples are not independent. Open several runs per side, three or more, and the interval covers run-to-run variation too.
 
 ### Deltas
 
-A delta represents a statistically meaningful difference between two runs. On an inference comparison this page shows three:
+A delta is one kind of difference: new anomalies (ΔF), a different settle point (ΔTc), or different variability (ΔO). Each fires only on its stated rule. [Delta Analysis](/scalarscope/handbook/delta-analysis/) gives the rules.
 
-- **ΔTc (Convergence Time)** — steps to stable latency
-- **ΔO (Output Variability)** — runtime instability
-- **ΔF (Failure Rate)** — failure rate
+### Withheld
 
-ΔĀ (average latency) and ΔTd (total duration) stay off the inference page.
-
-Each delta includes a confidence score (0 to 1) and a human-readable explanation. Deltas that do not reach statistical significance are automatically suppressed — you never see noise.
-
-### Runtime presets
-
-The TFRT preset is designed for TensorFlow-TRT inference workloads. It maps inference signals (latency, throughput, memory, CPU/GPU load) and suppresses training-only deltas (ΔĀ and ΔTd) that are irrelevant for inference comparison.
+When the data cannot carry a reading, ScalarScope says so instead of guessing. For example:
+- a percentile with too few samples behind it;
+- a geometry delta that would read time on steps that are not time.
 
 ### Bundles
 
-A `.scbundle` is a self-contained archive of your comparison results. Every file inside is hashed with SHA-256. A matching bundle hash is a content check, not a signature. When a colleague opens your bundle, Review Mode activates automatically — they see the stored results without recomputing anything.
-
-### Alignment
-
-When two runs have different lengths, ScalarScope aligns them before comparison. Three alignment modes are available: step-based (default for same-length runs), convergence-onset (aligns when signals stabilize), and first-instability (aligns at the first oscillation event).
+A `.scbundle` is a self-contained archive of a review. A matching SHA-256 is a content check, not a signature: it says the bytes are intact, not who wrote them.
 
 ## Keyboard shortcuts
 
 | Shortcut | Action |
 |----------|--------|
-| `Space` | Play / Pause playback |
-| `Left` / `Right` | Step backward / forward (1%) |
-| `Shift+Left` / `Shift+Right` | Fine step (0.1%) |
-| `Home` / `End` | Jump to start / end |
-| `Up` / `+` | Increase playback speed |
-| `Down` / `-` | Decrease playback speed |
-| `0` | Reset speed to 1x |
-| `S` or `Ctrl+S` | Tries to write a PNG to the export folder from Settings, or Documents/ScalarScope Exports when none is set. No notification is shown. Ctrl+E is not mapped. |
-| `1`–`6` | Request routes overview, trajectory, scalars, geometry, compare, and failures. Not Home, Compare, Guide, or Settings. Pressing 1 does not open Home. |
-| `?` | Open Guide tab |
+| `F1` | Guide |
+| `Ctrl+,` | Settings |
+| `Ctrl+H` | Welcome |
+| `1`–`6` | On Compare: Series, Warmup, Distribution, Difference, Spectrum, Heat map |
+| `Esc` | Close the Why panel |
 
-## Configuration
+## Settings
 
-Open the **Settings** tab to adjust:
+The **Settings** tab has the theme (Follow Windows, Light or Dark), color-vision palettes, high contrast, text scale, the recent-files limit and the anomaly rule. 2.0's choices carry over.
 
-- **Theme** — System, Light, or Dark
-- **Playback** — default speed, auto-play on load
-- **Export** — default output resolution and export folder
-- **Accessibility** — high contrast mode, color vision simulation (deuteranopia, protanopia, tritanopia, monochrome), screen reader support, adjustable text scale (75% to 200%), large pointer mode
-- **Session** — auto-load last session, recent files limit (5, 10, or 20)
-
-The Settings tab writes these controls, and the four-tab shell reads them when it starts. The Rust review applies color vision, high contrast, and text scale. It does not offer screen reader descriptions or a larger pointer.
-
-All settings are stored locally in your app data directory and persist between sessions. If the preferences file cannot be read, ScalarScope leaves that file unchanged and Settings says so. Click **Reset All Settings** to return everything to defaults.
+Accessibility in the Rust review: it applies color vision, high contrast and text scale. It does not offer screen reader descriptions or a larger pointer; 2.0's settings for those are kept in the file but not applied. If the preferences file cannot be read, ScalarScope leaves that file unchanged and Settings says so.
 
 ## FAQ
 
-**Q: Do I need a GPU to run ScalarScope?**
-No. ScalarScope is a visualization and analysis tool. It reads inference traces and computes deltas on the CPU. No GPU is required.
+**Q: Do I need a GPU?**
+No. ScalarScope reads the files and computes on the CPU. The Workbench's Ask uses a local model through Ollama, which may use your GPU, but nothing else in the app needs it.
 
 **Q: What file formats does ScalarScope accept?**
-The Rust review opens a latency CSV, a benchmark JSON, a Chrome profiler trace, or a backpropagate `run_history.json`. [Getting Started](/scalarscope/handbook/getting-started/) has one short example of each. Open bundle reads a `.scbundle`. The Store package is still the previous .NET app.
+A latency CSV, a benchmark JSON, a Chrome profiler trace, a runtime log, a RunTrace JSON, a backpropagate `run_history.json`, an ASPIRE geometry export, and a `.scbundle` from 3.x or 2.0. [Getting Started](/scalarscope/handbook/getting-started/) has one short example of each.
 
-**Q: Does ScalarScope send any data externally?**
-No. ScalarScope has zero telemetry and zero analytics. All data stays local unless you explicitly export a bundle and share it yourself. See the [Privacy Policy](https://github.com/mcp-tool-shop-org/scalarscope/blob/main/PRIVACY.md) for details.
+**Q: Does ScalarScope send any data?**
+No. There is no telemetry, no analytics and no account. The only connection the app can make is the Workbench's Ask, to a local Ollama at `127.0.0.1` on this computer. Cloud models are refused. See the [Privacy Policy](https://github.com/mcp-tool-shop-org/scalarscope/blob/main/PRIVACY.md).
 
-**Q: Can I use VortexKit without ScalarScope?**
-VortexKit lives in `src/VortexKit` in this repo. It is not a NuGet package. See the [VortexKit page](/scalarscope/handbook/vortexkit/) for the types.
+**Q: I used ScalarScope 2.0. What carries over?**
+Your settings, your recent files and your saved bundles. 2.0 comparison bundles open with their stored deltas. 2.0 inference reviews open marked as unverified, because 2.0 saved them without a content check.
 
-**Q: What happens if a bundle has been tampered with?**
-Review Mode verifies every file against its embedded SHA-256 hash. If any file has been modified, the integrity check fails and a warning is displayed. The bundle contents are still shown, but the verification status is flagged.
+**Q: What happens if a bundle has been changed?**
+The SHA-256 no longer matches, and ScalarScope does not open it: the page says the bundle hash does not match these bytes. A 2.0 inference review, which 2.0 saved without a content check, is the one exception: it opens marked as unverified.
 
 **Q: How do I report a bug?**
-Open an issue at [github.com/mcp-tool-shop-org/scalarscope/issues](https://github.com/mcp-tool-shop-org/scalarscope/issues/new).
+Open an issue at [github.com/mcp-tool-shop-org/scalarscope/issues](https://github.com/mcp-tool-shop-org/scalarscope/issues/new), or use **Report an issue** in Settings.

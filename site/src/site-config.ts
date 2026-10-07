@@ -2,31 +2,31 @@ import type { SiteConfig } from '@mcptoolshop/site-theme';
 
 export const config: SiteConfig = {
   title: 'ScalarScope',
-  description: 'A Windows review of two machine-learning runs. The program this repo builds is the Rust review. The Store listing is still the previous package.',
+  description: 'Compare two machine-learning runs on Windows, and see how sure the comparison is: inference traces, training histories and ASPIRE geometry, with a local workbench. Nothing leaves the machine.',
   logoBadge: 'SS',
   brandName: 'ScalarScope',
   repoUrl: 'https://github.com/mcp-tool-shop-org/scalarscope',
   footerText: 'MIT Licensed — built by <a href="https://github.com/mcp-tool-shop-org" style="color:var(--color-muted);text-decoration:underline">mcp-tool-shop-org</a>',
 
   hero: {
-    badge: 'Rust review · Windows',
-    headline: 'ML inference runs,',
-    headlineAccent: 'compared with rigor.',
-    description: 'The program this repo builds is the Rust review. It opens two inference files, or a training history whose loss stays loss. The Store listing is still the previous .NET package. A matching SHA-256 is a content check, not a signature.',
+    badge: 'Version 3.1.0 · Windows',
+    headline: 'Two ML runs,',
+    headlineAccent: 'compared with intervals.',
+    description: 'ScalarScope says how run B differs from run A, gives each difference an interval or its reason, and holds back what the data cannot support. Inference traces, training histories and ASPIRE geometry exports. It works offline. A matching SHA-256 is a content check, not a signature.',
     primaryCta: { href: 'https://apps.microsoft.com/detail/9P3HT1PHBKQK', label: 'Get from Microsoft Store' },
     secondaryCta: { href: 'handbook/', label: 'Read the Handbook' },
     previews: [
       {
         label: 'Install',
-        code: '# Microsoft Store (ID: 9P3HT1PHBKQK)\n# https://apps.microsoft.com/detail/9P3HT1PHBKQK\n\n# VortexKit ships in this repo at src/VortexKit.\n# It is not a NuGet package.',
+        code: '# Microsoft Store (ID: 9P3HT1PHBKQK)\n# https://apps.microsoft.com/detail/9P3HT1PHBKQK\n# Windows 10 1809 or later, x64\n\n# Or from source\ncargo run --manifest-path rust/Cargo.toml',
       },
       {
-        label: 'VortexKit',
-        code: 'using VortexKit.Core;\n\n// Shared timeline across all canvases\nvar player = new PlaybackController { Duration = 10.0, Loop = true };\nplayer.TimeChanged += () =>\n{\n    trajectoryCanvas.CurrentTime = player.Time;\n    eigenCanvas.CurrentTime      = player.Time;\n    scalarsCanvas.CurrentTime    = player.Time;\n};',
+        label: 'Headline',
+        code: '# The built-in sample comparison\nB/A p50 0.65 (0.65–0.66) · p90 0.65 (0.64–0.66)\nwithin one run per side; indicative.\nNot shown: p99 needs 368 steady samples per side.\n\nΔF quiet · ΔTc quiet · ΔO quiet',
       },
       {
-        label: 'Export bundle',
-        code: '// ComparisonBundleService.ExportAsync(bundle, outputPath)\n// writes a .scbundle (manifest, findings, repro).\n// SHA-256 of those bytes is a content check, not a signature.\n// VortexKit ExportService.ExportComparisonAsync writes a PNG,\n// not an .scbundle.',
+        label: 'Open a pair',
+        code: '# From the command line\nscalarscope samples/inference/baseline.runtrace.json \\\n            samples/inference/optimized.runtrace.json',
       },
     ],
   },
@@ -35,33 +35,54 @@ export const config: SiteConfig = {
     {
       kind: 'features',
       id: 'features',
-      title: 'Replace eyeballing with structure',
-      subtitle: 'Every comparison is reproducible. Every delta is earned.',
+      title: 'A comparison that says how sure it is',
+      subtitle: 'Every number is computed by the program. Every withheld reading says why.',
       features: [
         {
-          title: 'Apples-to-apples comparison',
-          desc: 'Open two inference files, or two training histories. On an inference pair the review reports ΔF and ΔO, and ΔTc only when both sides have a steady-state milestone.',
+          title: 'Ratios with intervals',
+          desc: 'B/A at p50, p90 and p99, each with a 95% block-bootstrap interval. Several runs per side resample whole runs too. A percentile without enough samples is not printed.',
         },
         {
-          title: 'Canonical delta analysis',
-          desc: 'On an inference comparison this page shows ΔTc (steps to stable latency), ΔO (runtime instability), and ΔF (failure rate). ΔĀ (average latency) and ΔTd (total duration) stay off this page.',
+          title: 'Deltas that earn their place',
+          desc: 'ΔF (new anomalies), ΔTc (stabilization) and ΔO (variability) each fire on a stated rule. A tile says whether it fired, stayed quiet or was withheld, and Show me moves to the evidence.',
         },
         {
-          title: 'Reproducible .scbundle exports',
-          desc: 'Export .scbundle archives with a SHA-256 content check, frozen deltas, and provenance metadata. A matching hash is not a signature. Open in Review mode and the stored result is shown, not re-derived.',
+          title: 'Reviews you can reopen',
+          desc: 'Save a .scbundle and reopen it exactly as saved. Bundles, settings and recent files from 2.0 carry over. A matching SHA-256 checks the bytes; it does not say who wrote them.',
         },
       ],
     },
     {
       kind: 'data-table',
-      id: 'deltas',
-      title: 'Inference deltas',
-      subtitle: 'ΔĀ (average latency) and ΔTd (total duration) stay off this page.',
-      columns: ['Delta', 'Measures'],
+      id: 'inputs',
+      title: 'What it opens',
+      subtitle: 'Getting Started in the handbook has a short example of each.',
+      columns: ['Kind', 'Files'],
       rows: [
-        ['ΔTc', 'Steps to stable latency'],
-        ['ΔO', 'Runtime instability'],
-        ['ΔF', 'Failure rate'],
+        ['Inference', 'Latency CSV, benchmark JSON, Chrome or PyTorch profiler trace, runtime log, RunTrace JSON, run folder'],
+        ['Training', 'backpropagate run_history.json'],
+        ['Geometry', 'ASPIRE geometry export from aspire-si (schema 1.x)'],
+        ['Review', '.scbundle from 3.x or 2.0'],
+      ],
+    },
+    {
+      kind: 'features',
+      id: 'beyond',
+      title: 'Geometry, a workbench and a history',
+      subtitle: 'New in 3.1.0.',
+      features: [
+        {
+          title: 'ASPIRE geometry',
+          desc: 'Two training runs side by side: trajectory, evaluator scores, eigen spectrum and failures, with five geometry deltas. When an export says its steps are not time, or its scores were replayed, the readings that depend on them are withheld with that reason.',
+        },
+        {
+          title: 'A local workbench',
+          desc: 'Open runs that differ in a setting and ask a local model, through Ollama on this computer, to measure them and propose what the setting does. The program tests every hypothesis and sets every verdict; the model\'s note is labelled as its words.',
+        },
+        {
+          title: 'History of reviews',
+          desc: 'In the Store package, finished comparisons are grouped by the runs\' dataset and model. Each measure is drawn across them, with the points where it shifted and the code or environment changes beside them.',
+        },
       ],
     },
     {
@@ -70,44 +91,36 @@ export const config: SiteConfig = {
       title: 'Quick start',
       cards: [
         {
-          title: 'Rust review',
-          code: 'cargo run --manifest-path rust/Cargo.toml\n\n# Open path A, Open path B, Open bundle, Save bundle\n# Inference: latency CSV, benchmark JSON, or a Chrome trace\n# Training: backpropagate run_history.json. Loss stays loss.\n# The Store copy is still the previous .NET package.',
-        },
-        {
-          title: 'Install from Microsoft Store',
-          code: '# Store ID: 9P3HT1PHBKQK\n# https://apps.microsoft.com/detail/9P3HT1PHBKQK\n# This listing is still the previous .NET package.\n\n1. Click "Compare Two Runs"\n2. Load baseline TFRT trace (before)\n3. Load optimized TFRT trace (after)\n4. Review deltas in the Compare tab\n5. Export .scbundle for reproducible sharing',
-        },
-        {
-          title: 'VortexKit in this repo',
-          code: '# src/VortexKit — not published to NuGet\n\n// Reusable visualization framework:\n// - Time-synced playback across canvases\n// - Animated SkiaSharp rendering\n// - Comparison views + annotation overlays\n// - SVG/PNG export\n// - Semantic color system',
-        },
-        {
-          title: 'Custom canvas with VortexKit',
-          code: 'public class MyTrajectoryCanvas : AnimatedCanvas\n{\n    protected override void OnRender(\n        SKCanvas canvas,\n        SKImageInfo info,\n        double time)\n    {\n        // SkiaSharp rendering at current timeline position\n        // Automatically synchronized with other canvases\n        // via shared PlaybackController\n    }\n}',
+          title: 'Install from the Microsoft Store',
+          code: '# Store ID: 9P3HT1PHBKQK\n# https://apps.microsoft.com/detail/9P3HT1PHBKQK\n\n1. Welcome → Try the sample comparison\n2. Or Compare → Open path A, Open path B\n3. Click a tile for Why and Show me\n4. Save bundle to keep the review',
         },
         {
           title: 'Build from source',
-          code: 'git clone https://github.com/mcp-tool-shop-org/scalarscope\ncd scalarscope\n\n# The review this repo packs\ncargo run --manifest-path rust/Cargo.toml\n\n# The previous .NET shell, not the Store upload\ndotnet run --project src/ScalarScope',
+          code: 'git clone https://github.com/mcp-tool-shop-org/scalarscope\ncd scalarscope\ncargo run --manifest-path rust/Cargo.toml\n\n# Sample files: samples/ (see TESTING.md)',
+        },
+        {
+          title: 'Keyboard',
+          code: 'F1       Guide\nCtrl+,   Settings\nCtrl+H   Welcome\n1–6      Series, Warmup, Distribution,\n         Difference, Spectrum, Heat map\nEsc      Close the Why panel',
         },
       ],
     },
     {
       kind: 'features',
-      id: 'design',
-      title: 'Designed for serious ML workflows',
-      subtitle: 'Scientific rigor without the spreadsheet.',
+      id: 'privacy',
+      title: 'Local by design',
+      subtitle: 'No account, no telemetry, no analytics.',
       features: [
         {
-          title: 'Review mode',
-          desc: 'Open any .scbundle and the stored review is shown, not re-derived. A matching SHA-256 checks the archived bytes. It is a content check, not a signature.',
+          title: 'Nothing leaves the machine',
+          desc: 'The only connection the app can make is the Workbench\'s Ask, to a local Ollama at 127.0.0.1. Cloud models are refused.',
         },
         {
-          title: 'Privacy first',
-          desc: 'Zero telemetry, zero analytics, zero network calls. All comparison data stays on your machine unless you explicitly export a bundle. No accounts, no subscriptions.',
+          title: 'Your files stay yours',
+          desc: 'ScalarScope reads the files you open. The Store package keeps its comparison log, settings and workbench memory in its own app folder, and writes a bundle or picture only where you choose.',
         },
         {
-          title: 'VortexKit for your own tools',
-          desc: 'The visualization framework powering ScalarScope lives in src/VortexKit in this repo. It is not on NuGet. It builds time-synced animated canvases, comparison views, and export pipelines.',
+          title: 'Checked against 2.0',
+          desc: 'The 2.0 results are kept as test oracles. Where 3.x answers differently, the changelog and the spec say what changed and why.',
         },
       ],
     },

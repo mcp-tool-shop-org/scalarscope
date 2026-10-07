@@ -53,6 +53,7 @@ fn blank(history: Option<PathBuf>) -> ScalarScopeApp {
         sitting_key: String::new(),
         bench: Default::default(),
         history: Default::default(),
+        capture: None,
     }
 }
 
@@ -891,4 +892,30 @@ fn the_geometry_page_draws_the_real_drift_pair_unordered() {
     // A path that does not open leaves its side empty with the reason.
     app.open_pair(&fixture("missing.json"), &fixture("real-local-teacher.geometry.json"));
     assert!(app.left.is_none() && !app.note.is_empty());
+}
+
+#[test]
+fn capture_mode_sets_the_page_and_view_and_counts_down() {
+    let mut app = blank(None);
+    let out = directory().join("shot.png");
+    let folder = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/workbench");
+    app.capture(out.clone(), "workbench", Some(3), Some("ΔF".to_string()), Some(&folder), Some(1.3));
+    assert_eq!(app.text_scale, 1.3);
+    assert_eq!(app.page, super::Page::Workbench);
+    assert_eq!(app.view, super::View::Distribution);
+    assert_eq!(app.bench.runs.len(), 9);
+    for _ in 0..40 {
+        show(&mut app);
+    }
+    // The screenshot is asked for; with no renderer in a test it never arrives, so the path waits.
+    assert_eq!(app.pending_png.as_deref(), Some(out.as_path()));
+    for (page, expected) in [("welcome", super::Page::Welcome), ("history", super::Page::History), ("guide", super::Page::Guide), ("settings", super::Page::Settings), ("compare", super::Page::Compare)] {
+        let mut other = blank(None);
+        other.capture(directory().join("x.png"), page, None, None, None, Some(9.0));
+        assert_eq!(other.text_scale, 1.0, "a scale out of range is ignored");
+        assert_eq!(other.page, expected);
+    }
+    let mut missing = blank(None);
+    missing.capture(directory().join("x.png"), "workbench", Some(9), None, Some(&directory()), None);
+    assert!(missing.note.contains("No inference run"));
 }

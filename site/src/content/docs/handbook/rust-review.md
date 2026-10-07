@@ -1,34 +1,52 @@
 ---
-title: Rust review
-description: The program this repo builds, and the files it opens.
+title: The review
+description: Compare in ScalarScope 3.1.0, the files it opens, and how it is built.
 sidebar:
   order: 2
 ---
 
-The app you build from this repo is the Rust program in `rust/`. The release workflow packs that program as the unsigned 3.0.0.0 MSIX. The Store copy is still the previous .NET package until that upload.
+ScalarScope 3.1.0 is the Rust program in `rust/`. It is the Microsoft Store package `mcp-tool-shop.ScalarScope`, version 3.1.0.0, an update of listing `9P3HT1PHBKQK`.
 
 ## Run it
 
-From this repo:
+Install it from the Store. Or, from this repo:
 
 ```bash
 cargo run --manifest-path rust/Cargo.toml
 ```
 
-The window has four buttons: **Open path A**, **Open path B**, **Open bundle**, and **Save bundle**.
+`scalarscope <path A> <path B>` opens a pair at launch.
 
-Open path A and Open path B take one file each. An inference file is a latency CSV, a benchmark JSON, or a Chrome trace. A training file is a backpropagate `run_history.json`, and it is drawn as training loss. Loss stays loss. Inference deltas are not computed on a training history.
+**Compare** has four buttons: **Open path A**, **Open path B**, **Open bundle** and **Save bundle**.
+- **Folder A** and **Folder B** open a run folder, or a folder of runs that are repeats of one configuration.
+- **An inference file** is a latency CSV, a benchmark JSON, a Chrome or PyTorch profiler trace, a runtime log or a RunTrace JSON.
+- **A training file** is a backpropagate `run_history.json`. It is drawn as training loss. Loss stays loss: inference deltas are not computed on a training history.
+- **A geometry file** is an ASPIRE export from aspire-si; see [Geometry](/scalarscope/handbook/geometry/).
 
-Save bundle writes the review on the page. Open bundle shows that stored review again. The hash is SHA-256 of the archived file bytes. A matching hash is a content check, not a signature.
-
-Short examples of the four files are on [Getting Started](/scalarscope/handbook/getting-started/).
+Short examples of each file are on [Getting Started](/scalarscope/handbook/getting-started/).
 
 ## What an inference pair reports
 
-An inference pair reports ΔF and ΔO from the latency series. ΔTc is reported only when both files have a steady-state milestone. Without that milestone the last step is not called a stabilization time. ΔTd and ΔĀ stay off the inference page.
+- **The headline** is B/A at p50, p90 and p99, each with a 95% moving-block bootstrap interval.
+  - With one run per side, it says the interval covers variation within that run only, and calls itself indicative.
+  - A percentile without enough samples behind it is named and not printed; p99 needs 368.
+  - A ratio needs 20 steady samples in every run.
+- **Three tiles,** ΔF, ΔTc and ΔO, each say whether the delta fired, stayed quiet or was withheld. **Why** gives the rule, this pair's numbers and the parameters. **Show me** moves to the view the delta is about. The rules are on [Delta Analysis](/scalarscope/handbook/delta-analysis/).
+- **Six views,** chosen with `1` to `6`:
+  - **Series:** latency from the steady state, with the p10–p90 band and the anomaly marks.
+  - **Warmup:** each run from its first sample, with where it settles shaded.
+  - **Distribution:** the CDF with a threshold you drag, and 20 quantile dots.
+  - **Difference:** B − A by percentile, with intervals.
+  - **Spectrum:** a log tail axis.
+  - **Heat map:** step × latency on a shared scale.
 
-A complete `ProfilerStep` in a Chrome trace is one inference. The ops inside that step are not extra samples. A trace with no step still uses events whose names contain TensorRT or inference.
+A complete `ProfilerStep` in a Chrome trace is one inference. The ops inside that step are not extra samples.
+
+## Saving and exporting
+
+- **Save bundle** writes the review as a `.scbundle`. The hash is SHA-256 of the archived file bytes. A matching hash is a content check, not a signature.
+- **Export SVG** writes the current view as a vector drawing. **Export PNG** saves a picture of the window.
 
 ## The package
 
-`packaging/pack.ps1` builds the unsigned `ScalarScope_3.0.0.0_x64.msix`, the `ScalarScope_3.0.0.0_Store.msixupload`, and `checksums.txt`. The package name is `mcp-tool-shop.ScalarScope`, the publisher is `CN=5305D976-6952-4F00-9C21-3A5DB090359F`, and the architecture is x64. It is not uploaded. The copy on the Store is still the previous .NET package. That package is the four-tab shell: Home, Compare, Guide, and Settings.
+`packaging/pack.ps1` builds `ScalarScope_3.1.0.0_x64.msix`, `ScalarScope_3.1.0.0_Store.msixupload` and `checksums.txt` from the release binary. It reads the version from `packaging/AppxManifest.xml`. Partner Center signs the upload. The package name is `mcp-tool-shop.ScalarScope`, the publisher is `CN=5305D976-6952-4F00-9C21-3A5DB090359F`, and the architecture is x64.

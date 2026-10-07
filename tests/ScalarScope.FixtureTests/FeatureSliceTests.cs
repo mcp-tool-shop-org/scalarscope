@@ -14,7 +14,9 @@ public class FeatureSliceTests
         review.Should().Contain("Open path B");
         review.Should().Contain("Open bundle");
         review.Should().Contain("Save bundle");
-        review.Should().Contain("The Store copy is still the previous .NET package");
+        // 3.1.0 is the Store package; the pages must not say the Store still has the .NET app.
+        review.Should().Contain("an update of listing `9P3HT1PHBKQK`");
+        review.Should().NotContain("still the previous .NET");
         review.Should().Contain("run_history.json");
         review.Should().Contain("Loss stays loss");
 
@@ -27,12 +29,13 @@ public class FeatureSliceTests
         {
             var page = Read(relative);
             page.Should().Contain("cargo run --manifest-path rust/Cargo.toml");
-            page.Should().Contain("previous .NET");
+            page.Should().NotContain("still the previous .NET");
         }
 
         var index = Read("site/src/content/docs/handbook/index.md");
         index.Should().Contain("Rust review");
-        index.Should().Contain("still the previous .NET package");
+        index.Should().Contain("an update of the same listing");
+        index.Should().NotContain("still the previous .NET");
     }
 
     [Fact]
@@ -63,16 +66,16 @@ public class FeatureSliceTests
         var packAt = build.IndexOf("pack-review:", StringComparison.Ordinal);
         packAt.Should().BeGreaterThan(0);
         var pack = build[packAt..];
-        pack.Should().Contain("release/ScalarScope_3.0.0.0_x64.msix");
-        pack.Should().Contain("release/ScalarScope_3.0.0.0_Store.msixupload");
+        pack.Should().Contain("release/ScalarScope_3.1.0.0_x64.msix");
+        pack.Should().Contain("release/ScalarScope_3.1.0.0_Store.msixupload");
         pack.Should().Contain("release/checksums.txt");
         pack.Should().Contain("if-no-files-found: error");
-        pack.Should().Contain("name: scalarscope-store-3.0.0.0");
+        pack.Should().Contain("name: scalarscope-store-3.1.0.0");
         pack.Should().NotContain("dotnet publish");
 
         var verify = Read("docs/VERIFY_RELEASE.md");
         verify.Should().Contain("./packaging/pack.ps1");
-        verify.Should().Contain("release/ScalarScope_3.0.0.0_Store.msixupload");
+        verify.Should().Contain("release/ScalarScope_3.1.0.0_Store.msixupload");
         verify.Should().NotContain("dotnet publish src/ScalarScope/ScalarScope.csproj");
     }
 
@@ -81,8 +84,8 @@ public class FeatureSliceTests
     {
         var project = Read("src/ScalarScope/ScalarScope.csproj");
         project.Should().Contain("<WindowsPackageType>MSIX</WindowsPackageType>");
-        project.Should().Contain("<ApplicationDisplayVersion>3.0.0</ApplicationDisplayVersion>");
-        project.Should().Contain("<Version>3.0.0.0</Version>");
+        project.Should().Contain("<ApplicationDisplayVersion>3.1.0</ApplicationDisplayVersion>");
+        project.Should().Contain("<Version>3.1.0.0</Version>");
         project.Should().Contain("not the Partner Center upload");
         project.Should().Contain("RejectMauiAsStoreUpload");
         project.Should().Contain("Do not publish this MAUI app as that upload.");

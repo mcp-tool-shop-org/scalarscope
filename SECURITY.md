@@ -4,7 +4,8 @@
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 3.0.x (display version 3.0.0) | :white_check_mark: |
+| 3.1.x (display version 3.1.0) | :white_check_mark: |
+| 3.0.x (never released)        | :x:                |
 | < 3.0   | :x:                |
 
 ## Reporting a Vulnerability

@@ -100,8 +100,8 @@ ScalarScope reads geometry exports (`.json`) from aspire-engine:
 }
 ```
 
-Generate with: `python -m aspire.export.geometry_export`
+Generate with aspire-si: `aspire train --geometry` (schema 1.1 states its step axis and score source).
 
 ---
 
-*ScalarScope 3.0.0 | Scientific instrument for evaluative learning dynamics*
+*ScalarScope 3.1.0 | Scientific instrument for evaluative learning dynamics*

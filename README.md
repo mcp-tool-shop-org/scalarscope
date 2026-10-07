@@ -16,307 +16,148 @@
   <a href="https://apps.microsoft.com/detail/9P3HT1PHBKQK"><img src="https://img.shields.io/badge/Microsoft%20Store-9P3HT1PHBKQK-0078D4?style=flat-square&logo=microsoft" alt="Microsoft Store"></a>
 </p>
 
-**A review of two machine-learning runs.** The app you build from this repo is the Rust program in `rust/`. The release workflow packs that program as the unsigned 3.0.0.0 MSIX. The package name and publisher stay the same. That file is not uploaded. The Store copy is still the previous .NET package until that upload.
+**Compare two machine-learning runs, and see how sure the comparison is.** ScalarScope opens two inference traces, two training histories, or two ASPIRE geometry exports. It says how run B differs from run A, gives each difference an interval or its reason, and holds back what the data cannot support.
 
-Package version **3.0.0.0**. Store updates of [9P3HT1PHBKQK](https://apps.microsoft.com/detail/9P3HT1PHBKQK) keep the name `mcp-tool-shop.ScalarScope` and the publisher `CN=5305D976-6952-4F00-9C21-3A5DB090359F`.
+Version **3.1.0** is a rewrite in Rust. It is the Windows app on the Microsoft Store as [9P3HT1PHBKQK](https://apps.microsoft.com/detail/9P3HT1PHBKQK), as package 3.1.0.0, an update of the same listing. The package name `mcp-tool-shop.ScalarScope` and the publisher `CN=5305D976-6952-4F00-9C21-3A5DB090359F` are unchanged, so files, saved reviews and settings from 2.0 carry over.
 
 ## Trust model
 
-The review reads the two files you open. A packaged run also reads and writes `comparison-log.json` and `preferences.json` in that package's LocalState folder. A bundle is written only to the path you pick.
-
-It does not send those files anywhere. There is no account, no telemetry, and no analytics. Plugins in that folder are left in place and are not loaded. The hash on a bundle checks the archived bytes. It is a content check, not a signature, and it does not say who wrote the file.
-
-The program needs permission to read the files you pick and to write the bundle you save.
-
----
-
-## Why ScalarScope?
-
-Most ML teams eyeball logs. ScalarScope replaces that with structured, reproducible comparison.
-
-The bullets below describe the published .NET package. The Rust review draws an inference series or a backpropagate training-loss curve. On an inference pair it reports ΔF and ΔO, and ΔTc only when both sides have a steady-state milestone. When both milestones exist, the series draws a vertical line there. It writes a `.scbundle` in the Phase 7.2 layout. Reopening that file shows the stored review. The hash is SHA-256 of the archived file bytes, and `integrity.json` is the seal. A matching hash is a content check, not a signature. A packaged run keeps `comparison-log.json` and `preferences.json` in that package's LocalState folder, the same files the .NET app wrote. Series colors follow a saved color-vision mode. Recent files and saved views from that folder reopen here. Plugins in that folder are left in place and are not loaded. An unpackaged run does not write that folder.
-
-- **Apples-to-apples comparison** — Load two inference traces side by side and see exactly what changed
-- **Canonical delta analysis** — Five delta types (ΔTc, ΔO, ΔF, ΔĀ, ΔTd) fire only when differences are statistically meaningful
-- **Runtime presets** — The TFRT preset auto-suppresses irrelevant metrics so you focus on what matters for TensorFlow-TRT workloads
-- **Reproducible bundles** — Export `.scbundle` archives with SHA-256 integrity, frozen deltas, and full provenance metadata
-- **Review mode** — Open a bundle without recomputing. A matching SHA-256 is a content check, not a signature.
-- **Privacy first** — Zero telemetry, zero analytics, all data stays local unless you explicitly export
+- **What it reads.** The files you open. The Store package also reads and writes `comparison-log.json`, `preferences.json` and `workbench.json` in its own LocalState folder, the folder 2.0 used. An unpackaged build writes none of them.
+- **What it writes.** A bundle, a picture or a session record, only to a path you pick.
+- **Network.** There is no account, no telemetry and no analytics. The one connection the app can make is from the Workbench tab, and only when you press **Ask**: to a local Ollama at `127.0.0.1` on this computer. Ollama's cloud models are refused. Nothing leaves the machine.
+- **Bundles.** A matching SHA-256 is a content check, not a signature. It says the bytes are intact. It does not say who wrote the file.
+- **Plugins.** Plugins left in the 2.0 folder are not loaded.
 
 ---
 
-## VortexKit
+## What it does
 
-VortexKit is the visualization library in `src/VortexKit`. It is part of this repo. It is not published to NuGet.
+**Inference: two runs of latency per step.**
+- **The headline** is B/A at p50, p90 and p99. Each ratio carries a 95% moving-block bootstrap interval.
+- **Several runs per side** can be opened. The interval then resamples whole runs too, and it is called indicative below three runs per side.
+- **A percentile without enough samples** behind it is not printed; p99 needs 368.
+- **Three deltas,** each with a tile that says whether it fired, stayed quiet or was withheld, and why:
+  - **ΔF (new anomalies)** counts steady samples beyond 5 robust deviations. It fires only when B's excess is beyond chance.
+  - **ΔO (variability)** fires when the interval on B's relative spread over A's excludes 1.
+  - **ΔTc (stabilization)** gives each run a shape. It fires only when both settle and their settle ranges do not overlap.
+- **Six views:** Series, Warmup, Distribution with a threshold you drag, Difference by percentile, Spectrum and Heat map. None animates.
 
-It covers time-synced playback, animated SkiaSharp canvases, comparison views, annotation overlays, SVG and PNG export, and a semantic color system.
+**Training.** A backpropagate `run_history.json` is drawn as training loss, with held-out loss, perplexity and task metrics beside it. Inference deltas are not computed on it.
+
+**Geometry: two ASPIRE training runs.**
+- **What it reads:** the geometry export that [aspire-si](https://github.com/mcp-tool-shop-org/aspire-si) writes, with its trajectory, evaluator scores, eigen spectrum and failures.
+- **Five deltas:** ΔF, ΔTc, ΔTd, ΔĀ (spectrum concentration) and ΔO. They are ported from 2.0 and checked against 2.0's own results, with the corrections recorded in [the spec](docs/parity-and-beyond.spec.md).
+- **Export contract (schema 1.1).** An export can state that its steps are checkpoints × items rather than time, or that its scores were replayed. When it does, the deltas that read time or score dips are withheld with that reason, and the headline speaks only from the deltas that stand. Older exports read as before.
+
+**Workbench.**
+- **Open many runs** that differ in a setting, such as batch size or precision.
+- **Ask:** a local model that can call tools measures the runs with formulas and proposes what each setting does.
+- **The program sets every number and verdict.** A hypothesis is tested by an exact rank test on each set of runs. Verdicts across sets come only at checkpoints, by e-BH at a 5% false discovery rate.
+- **Your call first.** You can write your own call before asking. The model's note is shown under the verdicts, labelled as its words.
+
+**History.** In the Store package, the comparisons you finish are grouped by side B's dataset and model. Each measure is drawn across those reviews, with the points where its level shifted. A code or environment change beside a shift is named, and called a coincidence, not a cause. The log keeps the last 40 reviews.
+
+**Bundles and saved state.**
+- **Save bundle** writes the review as a `.scbundle`. **Open bundle** shows it exactly as saved, in review mode.
+- **2.0 bundles** open: comparison bundles with their stored deltas, and inference reviews marked unverified.
+- **2.0's settings** carry over: theme, color-vision palettes, high contrast, text scale, the recent-file limit and the anomaly rule.
+- **Export** the current view as SVG, or the window as PNG.
 
 ---
 
-## Quick Start
-
-### Rust review
-
-From this repo:
-
-```
-cargo run --manifest-path rust/Cargo.toml
-```
-
-Open two inference files, or two backpropagate `run_history.json` files. An inference file is a latency CSV, a benchmark JSON, or a Chrome trace. A complete `ProfilerStep` in that trace is one inference, and the ops inside it are not extra samples. A trace with no step still uses events whose names contain TensorRT or inference. A training file is drawn as training loss. Held-out loss, perplexity, and task metrics sit with that curve. `final_loss` is shown as its own number. An inference pair reports ΔF and ΔO from the latency series. ΔTc is reported only when both files have a steady-state milestone. Without that milestone the last step is not called a stabilization time, and the series does not draw a steady-state line. ΔTd and ΔĀ stay off the inference page. Inference deltas are not computed on a training history. Save bundle writes the review on the page. Open bundle shows that stored review again. The hash matches the .NET Phase 7.2 check. A match means the bytes are intact. It is not a signature.
-
-`packaging/pack.ps1` builds the unsigned `ScalarScope_3.0.0.0_x64.msix` from the release binary. The package name is `mcp-tool-shop.ScalarScope`, the publisher is `CN=5305D976-6952-4F00-9C21-3A5DB090359F`, and the architecture is x64. It is not uploaded. The copy on the Store is still the previous .NET package.
+## Quick start
 
 ### From the Microsoft Store
 
-1. Install **ScalarScope** from the [Microsoft Store](https://apps.microsoft.com/detail/9P3HT1PHBKQK) (Store ID: `9P3HT1PHBKQK`)
-2. Click **Compare Two Runs**
-3. Load a baseline trace: a latency CSV, a benchmark JSON, or a profiler `trace.json`
-4. Load the optimized trace in the same kind of file
-5. Review deltas in the **Compare** tab
-6. Export a `.scbundle` for reproducible sharing
+1. Install **ScalarScope** from the [Microsoft Store](https://apps.microsoft.com/detail/9P3HT1PHBKQK). It needs Windows 10 version 1809 (build 17763) or later, x64.
+2. On **Welcome**, click **Try the sample comparison**. Or click **Compare two runs** and open path A and path B.
+3. Read the headline, then click a tile for **Why** and **Show me**.
 
-### Using VortexKit
+Sample files to try, an inference pair, a geometry pair and a folder of runs for the Workbench, are in [`samples/`](samples/). [TESTING.md](TESTING.md) says which to open where.
 
-```csharp
-using VortexKit.Core;
-
-// 1. Create a shared playback controller (0.0 -> 1.0 timeline)
-var player = new PlaybackController { Duration = 10.0, Loop = true };
-
-// 2. Bind multiple animated canvases to the same controller
-player.TimeChanged += () =>
-{
-    trajectoryCanvas.CurrentTime = player.Time;
-    eigenCanvas.CurrentTime      = player.Time;
-    scalarsCanvas.CurrentTime    = player.Time;
-};
-
-// 3. Subclass AnimatedCanvas for custom rendering
-public class MyTrajectoryCanvas : AnimatedCanvas
-{
-    protected override void OnRender(SKCanvas canvas, SKImageInfo info, double time)
-    {
-        // Your SkiaSharp rendering at the current time position
-    }
-}
-
-// 4. Export a side-by-side comparison as PNG
-var exporter = new ExportService();
-await exporter.ExportComparisonAsync(
-    leftRender, rightRender, time: 0.5,
-    outputPath: "comparison.png",
-    new ComparisonExportOptions
-    {
-        Width = 1920, Height = 1080,
-        LeftLabel = "Baseline", RightLabel = "Optimized",
-        ShowLabels = true
-    });
-
-// 5. Export as layered SVG (Inkscape-compatible)
-var svgExporter = new SvgExportService();
-await svgExporter.ExportSvgAsync(svgData, "trajectory.svg",
-    new SvgExportOptions
-    {
-        Palette = SvgColorPalette.Publication,
-        UseCatmullRomSplines = true,
-        EnableGlow = false
-    });
-```
-
----
-
-## Features
-
-### Delta Analysis — Five Canonical Delta Types
-
-Every comparison produces a set of canonical deltas. Each delta fires only when the difference is statistically meaningful; irrelevant deltas are suppressed automatically.
-
-| Delta | Full Name | What It Measures | Fires When |
-|-------|-----------|------------------|------------|
-| **ΔTc** | Convergence Time | Steps to reach stable latency | Steady-state reached at different steps (3+ step separation) |
-| **ΔO** | Output Variability | Oscillation / runtime instability | Area-above-threshold score differs beyond noise floor |
-| **ΔF** | Failure Rate | Anomaly frequency | Failure frequency or kind differs between runs |
-| **ΔĀ** | Average Latency | Mean metric value | Mean differs meaningfully (suppressed in TFRT preset) |
-| **ΔTd** | Total Duration | Wall-clock time / structural emergence | Duration or dominance onset differs (suppressed in TFRT preset) |
-
-### Runtime Presets — TFRT
-
-The built-in **TensorFlow-TRT** preset (`tensorflowrt-runtime-v1`) maps inference-specific signals (latency, throughput, memory, CPU/GPU load) and suppresses training-only deltas (ΔĀ, ΔTd) that have no meaning for inference comparison. Guardrails warn when warmup exceeds 50% of the run or when only aggregated stats are available.
-
-### Reproducible Bundles
-
-Export results as `.scbundle` archives (ComparisonBundle v1.0.0):
-
-- **`manifest.json`** — bundle metadata, app version, comparison labels, alignment mode
-- **`repro/repro.json`** — input fingerprints, preset hash, determinism seed, environment info
-- **`findings/deltas.json`** — canonical deltas with confidence scores, anchors, and trigger types
-- **`findings/why.json`** — human-readable explanations, guardrails, parameter chips
-- **`findings/summary.md`** — auto-generated Markdown summary
-- **Integrity** — every file hashed with SHA-256. The bundle hash is a content check, not a signature.
-
-### Review Mode
-
-Open any `.scbundle` without recomputing. A matching SHA-256 is a content check, not a signature. The stored deltas are shown as stored.
-
-### VortexKit Visualization Framework
-
-VortexKit is the visualization library in `src/VortexKit`. It ships with this repo. It is not a NuGet package.
-
-| Component | What It Does |
-|-----------|-------------|
-| `PlaybackController` | Shared 0→1 timeline with play/pause/step/loop, speed presets (0.25x—4x), ~60 fps tick |
-| `AnimatedCanvas` | Abstract `SKCanvasView` base with time-synced invalidation, grid drawing, touch/drag events, coordinate helpers |
-| `ITimeSeries<T>` / `TimeSeries<T>` | Generic time-series with index↔time mapping and trail enumeration |
-| `ExportService` | Single-frame PNG, frame sequences (with ffmpeg hints), and side-by-side comparison export |
-| `SvgExportService` | Full-vector SVG export with Inkscape layers, Catmull-Rom splines, heatmaps, vector fields, and four color palettes (Default, Light, HighContrast, Publication) |
-| `IAnnotation` | Typed annotations (Phase, Warning, Insight, Failure, Custom) with theoretical basis and priority |
-| `VortexColors` | Semantic color palette — background layers, accent semantics, severity coding, eigenvalue palette, lerp/gradient helpers |
-
----
-
-## Installation
-
-### Microsoft Store (recommended)
-
-**Store ID:** `9P3HT1PHBKQK`
-
-[Get it from the Microsoft Store](https://apps.microsoft.com/detail/9P3HT1PHBKQK)
-
-Requires Windows 10 (build 17763) or later.
-
-### From Source
+### From source
 
 ```bash
-# Prerequisites:
-#   .NET 9.0 SDK (global.json pins 9.0.100)
-#   Visual Studio 2022 with MAUI workload, or:
-#     dotnet workload install maui-windows
-
 git clone https://github.com/mcp-tool-shop-org/scalarscope.git
 cd scalarscope
-dotnet restore
-dotnet build
-
-# Run the desktop app
-dotnet run --project src/ScalarScope
+cargo run --release --manifest-path rust/Cargo.toml
 ```
+
+`scalarscope <path A> <path B>` opens a pair at launch.
+
+### What you can open
+
+| Kind | Files |
+|---|---|
+| Inference | A latency CSV, a benchmark JSON, a Chrome or PyTorch profiler trace (`.json` or `.json.gz`), a runtime log, a ScalarScope RunTrace JSON, or a run folder |
+| Training | A backpropagate `run_history.json` |
+| Geometry | An ASPIRE geometry export (aspire-si, schema 1.x) |
+| Review | A `.scbundle` from 3.x or 2.0 |
+
+Getting Started in the [handbook](https://mcp-tool-shop-org.github.io/scalarscope/handbook/getting-started/) has a short example of each file.
 
 ---
 
-## Project Structure
+## Keyboard shortcuts
 
-```
-scalarscope/
-├── src/
-│   ├── ScalarScope/                    # .NET MAUI desktop app
-│   │   ├── Models/                     # GeometryRun, InsightEvent
-│   │   ├── ViewModels/                 # Welcome, Comparison, Export, Settings, TrajectoryPlayer, VortexSession
-│   │   ├── Views/                      # XAML pages + 19 custom controls
-│   │   │   ├── WelcomePage.xaml        # First-60-seconds onboarding (Home tab)
-│   │   │   ├── ComparisonPage.xaml     # Side-by-side delta comparison (Compare tab)
-│   │   │   ├── HelpPage.xaml           # Interpretation guide (Guide tab)
-│   │   │   ├── SettingsPage.xaml       # Preferences and about (Settings tab)
-│   │   │   └── Controls/              # DeltaZone, BundleExportPanel, PlaybackControl, etc.
-│   │   ├── Services/
-│   │   │   ├── Connectors/            # RunTraceComparer, TfrtRuntimePreset, validation
-│   │   │   ├── Bundles/               # BundleBuilder, BundleExporter, integrity, schemas
-│   │   │   ├── Evidence/              # Comparison evidence reports, detector diagnostics
-│   │   │   ├── Plugins/               # PluginManager
-│   │   │   ├── CanonicalDeltaService.cs
-│   │   │   ├── DeltaTypes.cs          # 5 canonical deltas + detector configs
-│   │   │   ├── DeterminismService.cs  # Reproducible seed management
-│   │   │   ├── FlowFieldService.cs    # Vector field computation
-│   │   │   └── ...                    # 70+ service files
-│   │   └── Resources/
-│   │       ├── Styles/DesignSystem.xaml # Unified visual grammar
-│   │       └── Raw/Samples/            # Built-in example traces
-│   │
-│   └── VortexKit/                      # Visualization library in this repo
-│       ├── Core/
-│       │   ├── AnimatedCanvas.cs       # Time-synced SkiaSharp canvas base
-│       │   ├── PlaybackController.cs   # Shared playback timeline
-│       │   ├── ITimeSeries.cs          # Generic time-series interface
-│       │   ├── ExportService.cs        # PNG frame/sequence export
-│       │   └── SvgExportService.cs     # Layered SVG export
-│       ├── Annotations/
-│       │   └── IAnnotation.cs          # Typed annotation system
-│       └── Theme/
-│           └── VortexColors.cs         # Semantic color palette
-│
-├── tests/
-│   ├── ScalarScope.FixtureTests/       # Golden-file fixture tests
-│   ├── ScalarScope.DeterminismTests/   # Reproducibility verification
-│   ├── ScalarScope.SoakTests/          # Long-running stability tests
-│   └── Fixtures/                       # Shared test data
-│
-├── docs/                               # Design docs, results, limitations
-├── .github/workflows/
-│   ├── build.yml                       # CI: restore, build, format check, pack, artifacts
-│   ├── publish.yml                     # NuGet publish
-│   └── release.yml                     # GitHub Release + Store submission
-├── global.json                         # .NET SDK 9.0.100
-├── ScalarScope.sln                     # Solution file
-├── CHANGELOG.md                        # Keep-a-Changelog format
-├── PRIVACY.md                          # Privacy policy (no telemetry)
-├── SECURITY.md                         # Security policy
-└── STORE_LISTING.md                    # Microsoft Store listing copy
-```
+| Shortcut | Action |
+|---|---|
+| `F1` | Guide |
+| `Ctrl+,` | Settings |
+| `Ctrl+H` | Welcome |
+| `1`–`6` | On Compare: Series, Warmup, Distribution, Difference, Spectrum, Heat map |
+| `Esc` | Close the Why panel |
 
 ---
 
 ## Testing
 
 ```bash
-# Run all tests
-dotnet test
-
-# Fixture smoke tests only
-dotnet test --filter Category=FixtureSmoke
-
-# Determinism tests (verifies reproducible deltas)
-dotnet test --filter Category=Determinism
-
-# With coverage
-dotnet test --collect:"XPlat Code Coverage"
-
-# Rust review. Line coverage has to stay above 90%.
+# The review: 213 tests. Line coverage must stay above 90%.
 cd rust
-cargo llvm-cov --offline --locked --all-targets --fail-under-lines 90
+cargo test
+cargo llvm-cov --locked --all-targets --fail-under-lines 90
+
+# The .NET fixture tests: the 2.0 oracles, bundle compatibility and the version surfaces (134 tests)
+dotnet test tests/ScalarScope.FixtureTests
 ```
+
+The .NET project in `src/ScalarScope` is the 2.0 app. It stays in the repo as the reference that 3.x is checked against. The Store package is built from `rust/` by `packaging/pack.ps1`, and the MAUI project refuses to be published as that upload.
 
 ---
 
-## Keyboard Shortcuts
+## Project structure
 
-| Shortcut | Action |
-|----------|--------|
-| `Space` | Play / Pause |
-| `Left` / `Right` | Step backward / forward (1%) |
-| `Shift+Left` / `Shift+Right` | Fine step (0.1%) |
-| `Home` / `End` | Jump to start / end |
-| `Up` / `+` | Increase playback speed |
-| `Down` / `-` | Decrease playback speed |
-| `0` | Reset speed to 1x |
-| `S` or `Ctrl+S` | Tries to write a PNG to the export folder from Settings, or Documents/ScalarScope Exports when none is set. No notification is shown. Ctrl+E is not mapped. |
-| `1`–`6` | Request routes overview, trajectory, scalars, geometry, compare, and failures. Not Home, Compare, Guide, or Settings. Pressing 1 does not open Home. |
-| `?` | Open help / guide |
+```
+scalarscope/
+├── rust/                 # The app: ScalarScope 3.x (egui)
+│   ├── src/              # review, geometry, workbench, history, bundles, settings, UI
+│   └── tests/            # Rust tests and fixtures (real and simulated aspire-si exports, the knob folder)
+├── samples/              # Files a first-time user or tester can open
+├── packaging/            # AppxManifest.xml and pack.ps1 (the Store package)
+├── src/ScalarScope/      # The 2.0 .NET app, kept as the reference
+├── src/VortexKit/        # 2.0's visualization library
+├── tests/                # .NET fixture tests and the 2.0 fixtures
+├── site/                 # Landing page and handbook
+└── docs/                 # The 3.x spec, receipts and release notes
+```
 
 ---
 
 ## Related
 
-- [Handbook](https://mcp-tool-shop-org.github.io/scalarscope/handbook/) — The guide for the review
-- [RESULTS_AND_LIMITATIONS.md](docs/RESULTS_AND_LIMITATIONS.md) — Full experimental results
-- [CHANGELOG.md](CHANGELOG.md) — Release history
-- [PRIVACY.md](PRIVACY.md) — Privacy policy
-- [ROADMAP.md](ROADMAP.md) — An older unchecked plan, not the current review
+- [Handbook](https://mcp-tool-shop-org.github.io/scalarscope/handbook/): the guide to the review
+- [Parity and beyond](docs/parity-and-beyond.spec.md): what 3.x keeps from 2.0, what it changes and why, with sources
+- [CHANGELOG.md](CHANGELOG.md): release history
+- [PRIVACY.md](PRIVACY.md): privacy policy
+- [TESTING.md](TESTING.md): how to test this release
+- [The workbench](https://github.com/mcp-tool-shop-org/runforge): shared with RunForge
 
 ---
 
 ## License
 
-[MIT](LICENSE) — Copyright (c) 2025-2026 ScalarScope Project (mcp-tool-shop-org)
+[MIT](LICENSE). Copyright (c) 2025-2026 ScalarScope Project (mcp-tool-shop-org)
 
 <p align="center">
   Built by <a href="https://mcp-tool-shop.github.io/">MCP Tool Shop</a>

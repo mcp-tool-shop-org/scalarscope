@@ -8,7 +8,7 @@
 
   <!-- Partner Center product identity for store 9P3HT1PHBKQK.
        Name, Publisher, and PublisherDisplayName are the update key. Do not change them. -->
-  <Identity Name="mcp-tool-shop.ScalarScope" Publisher="CN=5305D976-6952-4F00-9C21-3A5DB090359F" Version="3.0.0.0" />
+  <Identity Name="mcp-tool-shop.ScalarScope" Publisher="CN=5305D976-6952-4F00-9C21-3A5DB090359F" Version="3.1.0.0" />
 
   <mp:PhoneIdentity PhoneProductId="6E489031-EBC6-4933-96C1-7892A18A229B" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 

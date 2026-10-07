@@ -35,30 +35,56 @@
   ],
   "changes": {
     "fileCounts": {
-      "added": 8,
-      "changed": 9,
+      "added": 43,
+      "changed": 48,
       "moved": 0,
-      "parts": 3,
+      "parts": 8,
       "removed": 0
     },
     "items": [
       {
         "kind": "door",
-        "sentence": "Coverage now also runs rust/tests/trends_tests.rs.",
+        "sentence": "Coverage now also runs rust/tests/samples_tests.rs.",
         "subjects": [
           ".github/workflows/coverage.yml",
-          "rust/tests/trends_tests.rs"
+          "rust/tests/samples_tests.rs"
         ]
       },
       {
+        "kind": "unassigned",
+        "sentence": "samples/README.md is new and belongs to no part, so atlas check fails on it against the previous map.",
+        "subjects": [
+          "samples/README.md"
+        ]
+      },
+      {
+        "kind": "unassigned",
+        "sentence": "samples/geometry/composite-teacher.drift.geometry.json is new and belongs to no part, so atlas check fails on it against the previous map.",
+        "subjects": [
+          "samples/geometry/composite-teacher.drift.geometry.json"
+        ]
+      },
+      {
+        "kind": "unassigned",
+        "sentence": "samples/geometry/composite-teacher.geometry.json is new and belongs to no part, so atlas check fails on it against the previous map.",
+        "subjects": [
+          "samples/geometry/composite-teacher.geometry.json"
+        ]
+      },
+      {
+        "kind": "unassigned",
+        "sentence": "And 13 more new files that belong to no part.",
+        "subjects": []
+      },
+      {
         "kind": "counts",
-        "sentence": "8 files added and 9 changed content, across 3 parts.",
+        "sentence": "43 files added and 48 changed content, across 8 parts.",
         "subjects": []
       }
     ],
     "since": {
-      "commit": "893523cfe5cfaa0cf89185d96c84e5494dbd0007",
-      "generatedAt": "2026-10-07T01:55:55.420Z"
+      "commit": "975415be0d0d26172bae62e253f1395706ad6367",
+      "generatedAt": "2026-10-07T02:11:43.887Z"
     },
     "unchanged": false
   },
@@ -81,7 +107,22 @@
     {
       "a": "rust/src/review.rs",
       "b": "rust/src/ui.rs",
-      "either": 21,
+      "either": 24,
+      "partLabels": [
+        "rust",
+        "rust"
+      ],
+      "parts": [
+        "rust",
+        "rust"
+      ],
+      "relation": "inside",
+      "shared": 16
+    },
+    {
+      "a": "rust/src/ui.rs",
+      "b": "rust/src/ui_tests.rs",
+      "either": 25,
       "partLabels": [
         "rust",
         "rust"
@@ -94,24 +135,9 @@
       "shared": 15
     },
     {
-      "a": "rust/src/ui.rs",
-      "b": "rust/src/ui_tests.rs",
-      "either": 22,
-      "partLabels": [
-        "rust",
-        "rust"
-      ],
-      "parts": [
-        "rust",
-        "rust"
-      ],
-      "relation": "inside",
-      "shared": 14
-    },
-    {
       "a": "rust/src/ui_tests.rs",
       "b": "rust/tests/edge_tests.rs",
-      "either": 16,
+      "either": 17,
       "partLabels": [
         "rust",
         "rust"
@@ -126,7 +152,7 @@
     {
       "a": "rust/src/review.rs",
       "b": "rust/tests/review_tests.rs",
-      "either": 17,
+      "either": 18,
       "partLabels": [
         "rust",
         "rust"
@@ -144,9 +170,9 @@
     "Window: 180 days; a pair counts from 3 shared commits, since 8 source files reach 10 revisions; the floor rises to 10 when 25 do."
   ],
   "changesTogetherWithTests": 0,
-  "commit": "975415be0d0d26172bae62e253f1395706ad6367",
+  "commit": "d06cf13b2b5c2b6a95de1f21307c79889b35339a",
   "defaultBranch": "main",
-  "derived": "10 parts, mostly C# (181 files), Rust (38), CSS (2), PowerShell (2), TypeScript (2), Astro (1), JavaScript (1), Python (1) and shell (1). Work enters through 7 doors; the busiest is Build and Test, which reaches 4 parts. It deploys a site to GitHub Pages. People run scalarscope.",
+  "derived": "10 parts, mostly C# (181 files), Rust (39), CSS (2), PowerShell (2), TypeScript (2), Astro (1), JavaScript (1), Python (1) and shell (1). Work enters through 7 doors; the busiest is Build and Test, which reaches 4 parts. It deploys a site to GitHub Pages. People run scalarscope.",
   "doors": [
     {
       "builds": [
@@ -254,7 +280,7 @@
         {
           "boundary": "rust",
           "depth": 0,
-          "files": 35
+          "files": 36
         }
       ],
       "runs": [
@@ -274,12 +300,13 @@
         "rust/tests/prefs_tests.rs",
         "rust/tests/review_tests.rs",
         "rust/tests/runtrace_tests.rs",
+        "rust/tests/samples_tests.rs",
         "rust/tests/sources_tests.rs",
         "rust/tests/trends_tests.rs",
         "rust/tests/workbench_tests.rs"
       ],
-      "runsCount": 19,
-      "runsMore": 16,
+      "runsCount": 20,
+      "runsMore": 17,
       "sends": [
         "uploads coverage to Codecov"
       ],
@@ -410,11 +437,12 @@
   "edges": [],
   "engine": "1.24.0",
   "generated": [],
-  "generatedAt": "2026-10-07T02:11:43.887Z",
+  "generatedAt": "2026-10-07T04:18:30.716Z",
   "limits": [
     "5 writes and 4 reads use paths built at run time and are not named here.",
     "5 writes and 12 reads go to a path their caller passes, not to this repository.",
     "1 write goes to a temporary directory, not to this repository.",
+    "16 files belong to no part: samples/README.md, samples/geometry/composite-teacher.drift.geometry.json, samples/geometry/composite-teacher.geometry.json and 13 more.",
     "Statistics confidence is low: fewer than 25 source files reach 10 revisions in the window."
   ],
   "mainDoor": ".github/workflows/build.yml",
@@ -443,9 +471,9 @@
   "startReason": "This path follows scalarscope (a command people run) from its entry, since Build and Test only checks code.",
   "summary": "A review of two machine-learning runs. The app is the Rust program in rust/, packed as an MSIX for the Microsoft Store; src/ holds the earlier .NET MAUI app the Store copy still runs.",
   "summaryFrom": "person",
-  "testFiles": 70,
+  "testFiles": 75,
   "testedBy": {
-    "rust": 19
+    "rust": 20
   },
   "unnamedWrites": 5,
   "unread": [],

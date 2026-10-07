@@ -5,7 +5,7 @@ All notable changes to ScalarScope will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [3.1.0] - 2026-10-07
 
 ### Fixed
 - Evaluator labels on the geometry trajectory no longer overlap when two evaluators point the same way.
@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - `scalarscope <path A> <path B>` opens that pair on Compare at launch.
+- `samples/` holds an inference pair, a geometry pair from two real aspire-si runs, and a folder of simulated runs for the Workbench. `TESTING.md` walks through each in under a minute. A test keeps each sample identical to the fixture it comes from.
+- A capture mode for the Store screenshots, off unless `SCALARSCOPE_CAPTURE` is set (`docs/store/README.md`).
 - The geometry export contract (schema 1.1): `run_metadata.step_axis`, `checkpoints` and `scalar_source`. When a run's steps are checkpoints × items rather than time, ΔTc, ΔO and ΔF are withheld with that reason, and the trajectory is drawn as unordered points per checkpoint. When its scores are replayed or fixed per item, ΔF is withheld. The headline speaks only from deltas that stand, and the header and score panels state the layout. Files that state neither field read exactly as before.
 - Fixtures from real aspire-si training runs (`rust/tests/fixtures/aspire-si/real-*`): per-step and drift exports of a local-teacher run and a composite-teacher run. Tests check that they open in full and that the evaluator-spectrum reading holds.
 - A Workbench tab, on the workbench RunForge shares with it. Open runs there, or use the runs being compared. Press Ask and a local model that can call tools (Ollama on this computer; cloud models are refused) measures the runs, builds formula tools and proposes what each knob does. ScalarScope computes every number and sets every verdict: a hypothesis is not testable, confounded, inconclusive, supported or refuted on one set of runs, and verdicts across sets come only at checkpoints, by e-BH at a 5% false discovery rate. The page puts the program's verdicts first, with how many hypotheses were tried and how many hold. It then has a box for your own call before you ask, and the model's note labelled as its words. It also lists the measures the model never looked at, and Save session record writes the model, its digest, every call and answer, and no paths.
@@ -22,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `rust/tests/fixtures/workbench`: nine simulated runs (batch 1, 4 and 8, three seeds each) with their generator, labelled as simulated.
 
 ### Changed
+- The version is 3.1.0 (package 3.1.0.0). 3.0.0 was never released. `packaging/pack.ps1` takes the package version from `AppxManifest.xml`, and a test holds the two manifests, the script and `Cargo.toml` together.
 - The geometry delta ΔĀ is called **Spectrum concentration**. 2.0 called it evaluator agreement, but it measures how much of the evaluators' spread sits in one direction (λ1/Σλ), not whether they agree. Its tile, explanation, summary and Guide text say so. Its id and symbol are unchanged, so 2.0 bundles still match.
 - ΔF names the failure it dates. With several recorded failures, 2.0 gave the time of the third but the kind of the first, so a sentence could read "correctness_dip near step 6" when the failure at step 6 was a tradeoffs_failure. Both now come from the same failure. How many failures make one persistent follows the persistence window setting (three by default, as before).
 - Smaller geometry fixes, none of which changes a result on the 2.0 samples:

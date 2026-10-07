@@ -6,131 +6,94 @@
 **Publisher display name:** mcp-tool-shop  
 **Package Family Name:** mcp-tool-shop.ScalarScope_yn6b8xqrexa5j  
 **Package SID:** S-1-15-2-850189134-3642041993-2632034504-2327210781-2703906947-3194312410-3859322172  
-**Display version:** 3.0.0 (`ApplicationDisplayVersion`. Settings > About shows 3.0.0.)
-**ApplicationVersion:** 30 (package integer, not the About string)
-**Package identity version:** 3.0.0.0 (`Package.appxmanifest` Identity Version and csproj `Version`)
+**Display version:** 3.1.0 (the crate version. Settings > About shows "ScalarScope 3.1.0 (package 3.1.0.0 …)".)
+**ApplicationVersion:** 31 (package integer, not the About string)
+**Package identity version:** 3.1.0.0 (`packaging/AppxManifest.xml`, which `pack.ps1` reads, and the MAUI `Package.appxmanifest`, held equal by a test)
 
 Packages already in the Partner Center submission:
 
 - `ScalarScope_1.0.3.0_x64.msix`
 - `ScalarScope_v2.0.0_Store.msixupload`
 
-The next upload is `ScalarScope_3.0.0.0_Store.msixupload`. Its package version is `3.0.0.0`, which is above both of those.
+The next upload is `ScalarScope_3.1.0.0_Store.msixupload`. Its package version is `3.1.0.0`, which is above both of those. 3.0.0.0 was never uploaded.
 
 ---
 
 ## Short Description (200 characters max)
 
-Compare inference optimization runs with scientific rigor. Measure convergence, latency, and throughput deltas. Export reproducible review bundles.
+Compare two ML runs and see how sure the comparison is: inference latency with intervals, training loss, ASPIRE geometry, and a local workbench. Offline; nothing leaves your PC.
 
 ---
 
 ## Full Description
 
-ScalarScope is a precision instrument for comparing machine learning inference runs. Whether you're optimizing TensorFlow-RT models, tuning ONNX deployments, or benchmarking PyTorch inference—ScalarScope gives you the scientific rigor to prove your optimizations work.
+ScalarScope compares two machine-learning runs and says how run B differs from run A, with an interval or a stated reason for each difference. It holds back what the data cannot support.
 
-**Key Features:**
+**Inference runs.** Open two latency traces: a CSV, a benchmark JSON, a Chrome or PyTorch profiler trace, a runtime log, or a RunTrace.
+- **The headline** is B/A at p50, p90 and p99, each with a 95% bootstrap interval. A percentile without enough samples is named, not printed.
+- **Three deltas,** for new anomalies, settle point and variability, each say whether they fired, stayed quiet or were withheld, and why.
+- **Six views:** series, warmup, distribution, difference by percentile, tail spectrum and heat map.
 
-- **Compare Two Runs**: Load before/after inference traces and see exactly what changed. Convergence time, latency distribution, throughput gains—all measured with statistical confidence.
+**Training and geometry.**
+- **Training:** a backpropagate run history is drawn as training loss.
+- **Geometry:** two ASPIRE training runs side by side, with their trajectory, evaluator scores and eigen spectrum. When an export says its steps are not time, or its scores were replayed, the readings that depend on them are withheld with that reason.
 
-- **Delta Analysis (ΔTc, ΔF, ΔO)**: Canonical deltas fire when differences are scientifically significant. No false positives, no overclaiming. The band on a trace is a spread of the samples, not a confidence interval. Findings include guardrails.
+**Workbench.** Open runs that differ in a setting, such as batch size or precision. Ask a local model, through Ollama on your own computer, to measure them and propose what the setting does. ScalarScope tests every hypothesis and sets every verdict. The model's note is labelled as its words.
 
-- **Runtime Presets**: TFRT Runtime Preset automatically suppresses metrics that don't apply to inference workloads, so you only see what matters.
+**History.** Finished comparisons are grouped by project, and each measure is drawn across them with the points where it shifted.
 
-- **Reproducible Bundles**: Export your comparison as an `.scbundle`. A matching SHA-256 checks the file bytes. It is a content check, not a signature.
+**Reviews you can reopen.** Save a review as a bundle and reopen it exactly as saved. A matching SHA-256 is a content check, not a signature. Bundles, settings and recent files from ScalarScope 2.0 carry over.
 
-- **Review Mode**: Open bundles from colleagues without recomputing. The entire analysis is frozen and verified against the original hash.
-
-**Privacy First:**  
-ScalarScope collects no telemetry, sends no analytics, and stores all data locally. Your inference traces and comparisons never leave your machine unless you explicitly export them.
+**Private by design.** No account, no telemetry and no analytics. The only connection ScalarScope can make is the Workbench's Ask, to a local Ollama at 127.0.0.1. Cloud models are refused, so nothing leaves your machine.
 
 ---
 
 ## Feature Bullets (5)
 
-1. Compare inference runs with scientific rigor. The band is a spread, not a confidence interval.
-2. Canonical delta analysis (ΔTc convergence, ΔO variability, ΔF failures)
-3. TFRT Runtime Preset for TensorFlow-RT optimization workflows
-4. Reproducible bundles with a SHA-256 content check
-5. 100% offline—no telemetry, no cloud, no sign-in required
+1. Compare two ML runs: B/A at p50, p90 and p99 with intervals
+2. Deltas that say whether they fired, stayed quiet or were withheld, and why
+3. ASPIRE training geometry, with readings withheld when the data cannot carry them
+4. A local workbench: a model on your PC proposes, ScalarScope tests and decides
+5. Fully offline: no telemetry, no account, no cloud
 
 ---
 
-## Screenshots Required
+## Screenshots
 
-### Screenshot 1: Welcome Page
-**Description:** Clean landing page with "Compare Two Runs" and "Open Bundle" CTAs.
-**Alt Text:** ScalarScope welcome screen showing primary actions
-
-### Screenshot 2: Side-by-Side Comparison
-**Description:** Two inference runs (Before/After) with timeline alignment.
-**Alt Text:** Comparing baseline vs optimized inference runs with visual timeline
-
-### Screenshot 3: Delta Tiles
-**Description:** ΔTc (convergence) and ΔO (variability) deltas with values.
-**Alt Text:** Delta analysis showing significant improvements
-
-### Screenshot 4: Why Panel
-**Description:** Expanded "Why did this fire?" panel showing trigger conditions.
-**Alt Text:** Detailed explanation of why a delta was flagged as significant
-
-### Screenshot 5: Review Mode
-**Description:** Banner showing bundle hash and review mode status.
-**Alt Text:** Viewing a reproducible bundle in review mode
-
-### Screenshot 6: Export Dialog
-**Description:** Bundle export with hash preview and export options.
-**Alt Text:** Exporting comparison as reproducible bundle
-
-### Screenshot 7: Interpretation Guide
-**Description:** Help page with delta glossary and examples.
-**Alt Text:** Interpretation guide explaining delta meanings
-
-### Screenshot 8: Settings & About
-**Description:** About section showing version, privacy, and bundle hash explanation.
-**Alt Text:** Settings page with privacy statement
+The listing screenshots are in `docs/store/`, taken from the release build on the files in `samples/`. Their order and captions are in `docs/store/README.md`.
 
 ---
 
 ## QA Runbook (Final Pre-Release)
 
+The quick checks a certification tester can run are in `TESTING.md`, on the files in `samples/`.
+
 ### Install Flow
 1. [ ] Download from Microsoft Store (9P3HT1PHBKQK)
-2. [ ] Launch ScalarScope
-3. [ ] Verify Welcome page appears with CTAs
-4. [ ] Check Settings > About shows 3.0.0. The package identity version is 3.0.0.0. ApplicationVersion is 30.
+2. [ ] Launch ScalarScope. Welcome appears with Try the sample comparison, Compare two runs and Open a review bundle.
+3. [ ] Settings > About shows ScalarScope 3.1.0, package 3.1.0.0.
 
 ### Core Workflow
-5. [ ] Click "Compare Two Runs"
-6. [ ] Load baseline TFRT trace (JSON)
-7. [ ] Load optimized TFRT trace (JSON)
-8. [ ] Verify side-by-side display
-9. [ ] Verify deltas. ΔTc is expected only when both traces have a steady-state milestone. A missing milestone must not appear as a stabilization time.
-10. [ ] Click delta tile → Why panel opens
-11. [ ] Click "Show Me" → scrolls to anchor
+4. [ ] Try the sample comparison: Compare shows the headline, three tiles and the series.
+5. [ ] Open path A and B with `samples/inference/baseline.runtrace.json` and `optimized.runtrace.json`.
+6. [ ] Verify deltas. These files state their steady-state milestone, so ΔTc reads it: it fires, 6 steps earlier. A missing milestone must not appear as a stabilization time.
+7. [ ] Click a delta tile: the Why panel opens. Click Show me: the view moves to the anchor.
+8. [ ] Open the geometry pair in `samples/geometry` (`.drift` files): ΔF, ΔTc and ΔO show withheld, with the reason.
 
-### Export Flow
-12. [ ] Open Bundle Export panel
-13. [ ] Click "Export Bundle"
-14. [ ] Verify .scbundle file created
-15. [ ] Copy bundle hash
+### Export and Review Flow
+9. [ ] Save bundle writes a `.scbundle`. Copy hash copies its SHA-256.
+10. [ ] Open bundle on that file: review mode banner, load buttons disabled, same hash.
+11. [ ] Export SVG and Export PNG write files where chosen.
 
-### Review Flow
-16. [ ] Click "Open Review Bundle" on Welcome page
-17. [ ] Select .scbundle file
-18. [ ] Verify Review Mode banner appears
-19. [ ] Verify Load buttons are disabled
-20. [ ] Verify bundle hash matches original
-
-### Settings & About
-21. [ ] Open Settings tab
-22. [ ] Verify About section visible
-23. [ ] Verify privacy statement present
-24. [ ] Test "Report Issue" link opens GitHub
+### Workbench, History and Settings
+12. [ ] Workbench: Open runs… with the nine files in `samples/workbench`. Batch size is listed as varying, and Try a formula `p50` gives a value per run.
+13. [ ] Ask without Ollama running says the local model is not running.
+14. [ ] History lists the reviews logged in steps 4–6.
+15. [ ] Settings: theme change applies at once; Report an issue opens GitHub.
 
 ### Uninstall
-25. [ ] Uninstall from Windows Settings
-26. [ ] Verify clean removal (no leftover files)
+16. [ ] Uninstall from Windows Settings
+17. [ ] Verify clean removal (no leftover files)
 
 ---
 
@@ -153,9 +116,18 @@ ScalarScope collects no telemetry, sends no analytics, and stores all data local
 
 ---
 
-## Release Notes (v3.0.0.0)
+## Release Notes (v3.1.0.0)
 
-The next Partner Center upload. Name, publisher, and publisher display name are the same product. The package version moves to 3.0.0.0 because the 3.x line is a sweeping change over the published 2.x build.
+ScalarScope 3.1 is a rewrite. It is the same product, name and publisher, and your 2.0 files, bundles and settings carry over.
+
+- **Inference comparisons say how sure they are.** B/A at p50, p90 and p99 comes with an interval, percentiles without enough samples are not printed, and several runs per side measure run-to-run variation.
+- **Deltas give their reasons.** Each tile says fired, quiet or withheld, with the rule and this pair's numbers. Show me moves to the evidence.
+- **Six views:** series, warmup, distribution with a threshold, difference by percentile, tail spectrum and heat map.
+- **ASPIRE training geometry,** with readings withheld when an export says its steps are not time or its scores were replayed.
+- **A local workbench and a history** of your comparisons.
+- **Light theme, SVG and PNG export,** and keyboard shortcuts.
+
+The full list is in CHANGELOG.md.
 
 ## Release Notes (v2.0.0)
 

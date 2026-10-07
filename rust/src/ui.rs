@@ -193,6 +193,8 @@ pub struct ScalarScopeApp {
     bench: bench_page::BenchState,
     /// The History page.
     history: history_page::HistoryState,
+    /// Capture mode for listing art: frames to wait, then the PNG to write, then close.
+    capture: Option<(u32, std::path::PathBuf)>,
 }
 
 impl Default for ScalarScopeApp {
@@ -229,6 +231,7 @@ impl Default for ScalarScopeApp {
             sitting_key: String::new(),
             bench: Default::default(),
             history: Default::default(),
+            capture: None,
         }
     }
 }
@@ -252,6 +255,7 @@ impl ScalarScopeApp {
         self.apply_theme(ui.ctx());
         self.handle_shortcuts(ui.ctx());
         self.receive_screenshot(ui.ctx());
+        self.run_capture(ui.ctx());
         let paint = self.paint;
         ui.horizontal(|ui| {
             ui.heading(RichText::new("ScalarScope").color(paint.mark));
@@ -396,6 +400,54 @@ impl ScalarScopeApp {
 
     /// Open a pair named on the command line (`scalarscope <path A> <path B>`), as if each had
     /// been picked. A path that does not open leaves its side empty with the reason shown.
+    /// Capture mode, used to make the Store listing's screenshots from the release build on the
+    /// files in `samples/` (`docs/store/README.md`). The page, the view, an open Why panel and the
+    /// Workbench's runs are set, the window is drawn for a few frames, and a PNG of it is written
+    /// to `out`; then the window closes. Nothing is captured unless this is called.
+    pub fn capture(&mut self, out: std::path::PathBuf, page: &str, view: Option<usize>, why: Option<String>, bench: Option<&std::path::Path>, scale: Option<f32>) {
+        if let Some(scale) = scale.filter(|scale| (0.75..=2.0).contains(scale)) {
+            self.text_scale = scale;
+        }
+        self.page = match page {
+            "welcome" => Page::Welcome,
+            "workbench" => Page::Workbench,
+            "history" => Page::History,
+            "guide" => Page::Guide,
+            "settings" => Page::Settings,
+            _ => Page::Compare,
+        };
+        if let Some(index) = view.filter(|index| (1..=View::ALL.len()).contains(index)) {
+            let order = [View::Series, View::Warmup, View::Distribution, View::Difference, View::Spectrum, View::HeatMap];
+            self.view = order[index - 1];
+        }
+        self.why = why;
+        if let Some(folder) = bench {
+            match bench_page::open_runs(&[folder.to_path_buf()]) {
+                Ok(runs) => self.bench.runs = runs,
+                Err(error) => self.note = error,
+            }
+        }
+        self.capture = Some((30, out));
+    }
+
+    /// Count the capture down, ask for the screenshot, and close once it is written.
+    fn run_capture(&mut self, ctx: &egui::Context) {
+        let Some((frames, out)) = self.capture.as_mut() else {
+            return;
+        };
+        ctx.request_repaint();
+        if *frames > 1 {
+            *frames -= 1;
+        } else if *frames == 1 {
+            *frames = 0;
+            self.pending_png = Some(out.clone());
+            ctx.send_viewport_cmd(egui::ViewportCommand::Screenshot(egui::UserData::default()));
+        } else if self.pending_png.is_none() {
+            self.capture = None;
+            ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+        }
+    }
+
     pub fn open_pair(&mut self, left: &std::path::Path, right: &std::path::Path) {
         self.load_paths(true, &[left.to_path_buf()]);
         let left_error = self.left.is_none().then(|| self.note.clone());
@@ -793,7 +845,7 @@ impl ScalarScopeApp {
         }
         ui.add_space(8.0);
         ui.heading("About");
-        ui.label(format!("ScalarScope {} (package 3.0.0.0, Microsoft Store 9P3HT1PHBKQK)", env!("CARGO_PKG_VERSION")));
+        ui.label(format!("ScalarScope {0} (package {0}.0, Microsoft Store 9P3HT1PHBKQK)", env!("CARGO_PKG_VERSION")));
         ui.label(RichText::new("Privacy: ScalarScope reads only the files you open and writes only the bundles you save and its own settings and history in its package folder. It sends nothing anywhere: no account, no telemetry, no analytics.").color(paint.note));
         ui.horizontal(|ui| {
             ui.hyperlink_to("Report an issue", ISSUES_URL);

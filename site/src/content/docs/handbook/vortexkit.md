@@ -2,10 +2,10 @@
 title: VortexKit
 description: The standalone visualization framework for .NET MAUI apps.
 sidebar:
-  order: 4
+  order: 8
 ---
 
-VortexKit is the visualization engine in `src/VortexKit`. It ships with this repo. It is not a NuGet package. It builds time-synced animated canvases, comparison views, and export pipelines.
+VortexKit is the visualization engine of the 2.0 .NET app, in `src/VortexKit`. It stays in this repo with that app. It is not a NuGet package, and ScalarScope 3.x, the Rust review, does not use it. It builds time-synced animated canvases, comparison views, and export pipelines for .NET MAUI.
 
 ## Components
 

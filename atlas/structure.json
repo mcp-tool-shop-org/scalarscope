@@ -25,7 +25,7 @@
           "path": ".github/PULL_REQUEST_TEMPLATE.md"
         },
         {
-          "hash": "1a5fc76851f2ba48dc0953f6566a6f6caf1a902fcc35a1caa91922ad452982bd",
+          "hash": "f8f05c324ee5f7e5291a77727518e23a5676ca5e8f7bbe47cd915ecfd7122496",
           "path": ".github/workflows/build.yml"
         },
         {
@@ -41,7 +41,7 @@
           "path": ".github/workflows/publish.yml"
         },
         {
-          "hash": "92bd908c4dd8917a2dbe3ae2027ffdc57edcd3962eaeae800bba1b86ffc4f277",
+          "hash": "a91a988073d3627291ffaec198cdbf7fa8716df4faa0e74bc4bf89b02d53849a",
           "path": ".github/workflows/release.yml"
         }
       ],
@@ -132,7 +132,7 @@
       "externals": 0,
       "files": [
         {
-          "hash": "29cce2ee93bc4ff66f809a8188c00d41ea23d709c149f5d1827e1483c093f454",
+          "hash": "14ba46a6634323ce1d370a1ea9e9659164bbd6c282b236d18cf0b610bce34f61",
           "path": "docs/BETA_GUIDE.md"
         },
         {
@@ -152,7 +152,7 @@
           "path": "docs/DETERMINISM.md"
         },
         {
-          "hash": "9f57c3b7104589086579b727bee424fd5a419dc7daaadbe723753a580698d441",
+          "hash": "e8a43224e391e0465a3f0afeefc24cb4f275bd7e3685ecbfc419d73acdd36582",
           "path": "docs/INSTALL_RUNBOOK.md"
         },
         {
@@ -168,11 +168,11 @@
           "path": "docs/PHASE12_AUDIT.md"
         },
         {
-          "hash": "cd29fd714d1739af9b89907c5533a839a42fca71cff5ac1648c098f267d21cc9",
+          "hash": "e5d116156741f2fc6b380d2126f9e2bafdf2858986ecb949dc826e0d8b470b5f",
           "path": "docs/QUICK_REFERENCE.md"
         },
         {
-          "hash": "466d61e924c8ad8b63629f92e586d1cc645c025b6c37dddc22b4a545cf4a0182",
+          "hash": "d1603993393e5b12e62aa722182b0201c51d9391725162242dc7397991516eb7",
           "path": "docs/RELEASE_PROCESS.md"
         },
         {
@@ -200,7 +200,7 @@
           "path": "docs/THESIS.md"
         },
         {
-          "hash": "dca03fc75989366c5fdec3ce9491c02b8d74e98eab347c10c9a4e2b73522ef92",
+          "hash": "f63d6ba2b8791986960780414e7ef2f634984da4e82dd6a265824167234fe137",
           "path": "docs/VERIFY_RELEASE.md"
         },
         {
@@ -208,16 +208,60 @@
           "path": "docs/_config.yml"
         },
         {
-          "hash": "0dcc0239fbee82fa54f47ff7cbced3c15aa5e5f83673ee8d0fa64c90418f519d",
+          "hash": "9a8441c52fdc0271485dfd25ad120402dd4b6981663091534cc2ab1a85d919b8",
           "path": "docs/index.md"
         },
         {
-          "hash": "06ac5c1b5e71358843badf8bdde71f8a5520a74b2afad72b2a381edcad1c2de8",
+          "hash": "073fa6bb9f5b85d133cb99cfd877fee6e343e9d7ee3bcab6e03e47caec1679a5",
           "path": "docs/parity-and-beyond.spec.md"
         },
         {
-          "hash": "c8acb091ebc84b50daad582b29fa5ccebf8d7460fcbd3eb9fdf43826f19212ea",
+          "hash": "e006917490f5f9cb1404e589743e6584614ac733f4ee19fe7b738306de95fadd",
           "path": "docs/receipts/README.md"
+        },
+        {
+          "hash": "0aa5b58c93206c43f63975c7716c098b4d6bdf8a2ccb03f43a81e0554311cb16",
+          "path": "docs/receipts/geometry/README.md"
+        },
+        {
+          "hash": "97a9e70bf18cb384a1c6f385fdb0d4a611c2a80521643fbf89a54af39b43cb13",
+          "path": "docs/receipts/geometry/real-drift-pair-1.1.png"
+        },
+        {
+          "hash": "68f413b0fc5560db20b0b5e3cb384af1f8fa58f2656b29f0646e6938282c90e8",
+          "path": "docs/receipts/geometry/real-drift-pair.png"
+        },
+        {
+          "hash": "e7048f464f23e98cee15d6387d1ea9d50e6539a2d5e87f58c6fa728ced5dadbc",
+          "path": "docs/receipts/geometry/real-per-step-pair-1.1.png"
+        },
+        {
+          "hash": "3106288614e7fcb67a8d00fdd5f7053b88b1a2f48d456222fe6c47f436ea06ee",
+          "path": "docs/receipts/geometry/real-per-step-pair.png"
+        },
+        {
+          "hash": "2e1c15bda7519039b7d95d7b01485f92f36d9a3ee124973116df718d668df6c1",
+          "path": "docs/receipts/run2/workbench-golden-pair.json"
+        },
+        {
+          "hash": "1d08a18705d65bb797b7ef0ddb1dc0483d1334e12e544da3ec1fb0a473c18b15",
+          "path": "docs/receipts/run2/workbench-knob-folder.json"
+        },
+        {
+          "hash": "091c79ab1854f2a8af7c098229ac0e98a83be14ebbbd17e39e70316fd1d3b452",
+          "path": "docs/receipts/run3/workbench-golden-pair.json"
+        },
+        {
+          "hash": "3b6de21f8d9ad6ed0e055ab0f57bb8ffdf1df9b7a47c77cc22913ac1ae4e988e",
+          "path": "docs/receipts/run3/workbench-knob-folder.json"
+        },
+        {
+          "hash": "f174388d7789fbb7ed303ebb1eec7a26f79e51a583d74f2b4506e0bd37bc6e7d",
+          "path": "docs/receipts/run4/workbench-golden-pair.json"
+        },
+        {
+          "hash": "a9d0c4b880264772b4a0817fb38fc57f85a6f706f0659137c14d526b329b8573",
+          "path": "docs/receipts/run4/workbench-knob-folder.json"
         },
         {
           "hash": "cf2562ed46a485525e2b390cebb48092e3799c704192e2b5bf439c7eb5063ca6",
@@ -226,6 +270,34 @@
         {
           "hash": "adde229d8e96774668421caa7d44031c9d7722fcc7e751a888183e238561d94a",
           "path": "docs/receipts/workbench-knob-folder.json"
+        },
+        {
+          "hash": "756d280bea4d68fd736984ce10c9295e837fe03a6f5ff5464bf454d63bad6137",
+          "path": "docs/store/1-compare-headline.png"
+        },
+        {
+          "hash": "4ee602b6d33f1c11873c6ab608c0976b28758546a4afe7de021f20e9ed8189b5",
+          "path": "docs/store/2-distribution-why.png"
+        },
+        {
+          "hash": "518b2362900905d0f0c489cc88078340dcf7ac1a53669ccce618c7efb5c6a9e1",
+          "path": "docs/store/3-heat-map.png"
+        },
+        {
+          "hash": "bc4bb79b2af49e67240d53f9eeb786686fe7974b928f6793bafb1c7c0ded1156",
+          "path": "docs/store/4-geometry-drift.png"
+        },
+        {
+          "hash": "678d46ae8cae9065d2ea1b0a9f923e2d2ace25918bc5986625305d307323a9b2",
+          "path": "docs/store/5-workbench.png"
+        },
+        {
+          "hash": "b234ca1c788cf344aab951852517d98932cc5caaa934e19e03f32c6b07df30bf",
+          "path": "docs/store/6-guide.png"
+        },
+        {
+          "hash": "ad89b656055018057c7bd5f0b00d8a07141e7daf28cd7898d810caeec23959c7",
+          "path": "docs/store/README.md"
         }
       ],
       "globs": [
@@ -247,7 +319,7 @@
       "externals": 0,
       "files": [
         {
-          "hash": "bca2f6947590e78ae6530f364bcabf12679a6f0b57cbbf80575f769920c87f52",
+          "hash": "3c4581837900d0ec7b341a6fc482d39b3c94ace666c47b113fce0ecdf2a4f0b6",
           "path": "packaging/AppxManifest.xml"
         },
         {
@@ -279,7 +351,7 @@
           "path": "packaging/assets/splashSplashScreen.png"
         },
         {
-          "hash": "6c859228839f2c2b73bdcb00c0c86e38a8822f518bdfec6b81afeae33c0f76cc",
+          "hash": "00a56b251d20176e04ccbb016194430517c101b9932101a0a7ca29077de9f0c4",
           "path": "packaging/pack.ps1"
         }
       ],
@@ -306,11 +378,11 @@
           "path": ".gitignore"
         },
         {
-          "hash": "623cd1ddbaf427efe470d777163d816152b987535c8852a923bb5ac6f8d7e788",
+          "hash": "33292aa447028294ac9864a7af6add32460e8441d0ab6ad8e97ead0786385e99",
           "path": "CHANGELOG.md"
         },
         {
-          "hash": "4121345c49a4e8f691803607baa84f22e341a56bfc0dc950412b631c08a56430",
+          "hash": "925cb206637b9e0a2cb11128b0a15bf5953330e2aa8b9192d88a61ed9cf359f6",
           "path": "FINAL_SHIP_VERIFICATION.md"
         },
         {
@@ -318,7 +390,7 @@
           "path": "LICENSE"
         },
         {
-          "hash": "8ff7b28630bd453b39eaa19b531ca1f38641e64387c68ae969c46a4d70e1ade6",
+          "hash": "0cf294e01cd1e9a6c3b72b234626a73262a633b51b4004d2fb66428939a04c0b",
           "path": "PRIVACY.md"
         },
         {
@@ -342,7 +414,7 @@
           "path": "README.ja.md"
         },
         {
-          "hash": "e83421658cce318ee4bedd29cde091dc042b75e6b35b68b193569b870841d5cc",
+          "hash": "0b68c673463e89408930f5e25aeeccacd2061151cd6541ffeee4c015f058dba8",
           "path": "README.md"
         },
         {
@@ -362,7 +434,7 @@
           "path": "SCORECARD.md"
         },
         {
-          "hash": "8334db1b8594a81e3bb64a3080f601e19d1cb1c178e50aa9434cb1e84bab3c4a",
+          "hash": "aa36a2737089e1216ab70f857b03d0e5a9781287f5834518330850ae9de4f761",
           "path": "SECURITY.md"
         },
         {
@@ -370,7 +442,7 @@
           "path": "SHIP_GATE.md"
         },
         {
-          "hash": "d199249c5650e64a0a3020556c73e69bb89048354c59264dec34d54d7ec39977",
+          "hash": "26a699b174e63569a26e568587aad88d15e88355e34499df11c07b7a27e84e07",
           "path": "STORE_LISTING.md"
         },
         {
@@ -380,6 +452,10 @@
         {
           "hash": "3456e61161af3014be74550b230456b10abe5ab61a51ee291117c63ecd7d3f39",
           "path": "ScalarScope_UI_Reference_Pack_v2.zip"
+        },
+        {
+          "hash": "24da1048bf08fb5e801b3aab2bea0b8ad3d06d89d9d5101841af4b2972e7b0de",
+          "path": "TESTING.md"
         },
         {
           "hash": "3d1de8e075917ce065dafdeef9925d28c03944e36c08d4b6c9a3b39cdd27a4bc",
@@ -394,7 +470,7 @@
           "path": "logo.png"
         },
         {
-          "hash": "33f5c0dcfae8883f9c9401dbe0cc995181400adb69b83463bc55de2d6dd394ec",
+          "hash": "c54f0d5a2355e1a0e7c07c5d988b3db609044e2b0afd8d7b1725545aabca4d1d",
           "path": "passport.json"
         },
         {
@@ -432,11 +508,11 @@
       "externals": 0,
       "files": [
         {
-          "hash": "cb816a5e317d8192f0457ec12d046650116153afb9f5b421d227ac4c379952c9",
+          "hash": "f1d1a6db1e3822446f559cbb1e8d9f44af2962906139147fa9a9f46c9ebc0eb8",
           "path": "rust/Cargo.lock"
         },
         {
-          "hash": "4efd9ddb9f50478dab5aa3d65862e216f3cd15eb93fc31387688c9eaeefed825",
+          "hash": "c7c63cb769dd65d961863fde7984e2f21fe740d598a89cf550f68d6306c921bb",
           "path": "rust/Cargo.toml"
         },
         {
@@ -707,7 +783,7 @@
               "line": 1035
             }
           ],
-          "hash": "1d5cca9cc0e24a48a9f731f7384e585cdb486b64eb0643f568b2a0262db1ef0c",
+          "hash": "b162feb4a2c9aa052ba8c873a552d0c6820bc2db3a8ac3b9d0399054a21347e2",
           "importOrder": [
             "rust/src/readings.rs",
             "rust/src/review.rs",
@@ -735,10 +811,10 @@
             {
               "in": "read",
               "kind": "err",
-              "line": 235
+              "line": 263
             }
           ],
-          "hash": "d16e9b9f6da2b97d4895db4bc662220d24f4c580f449c5f26bd716b786d6da97",
+          "hash": "f862e1e2ab2407097746cc6d6f919f3b33699f1e0e3b5a246fe283227a858da2",
           "path": "rust/src/geometry.rs",
           "testsInside": true
         },
@@ -752,9 +828,10 @@
             "create_alignment_map_with",
             "dotnet_double",
             "fixed",
-            "robust_sigma"
+            "robust_sigma",
+            "withhold_by_layout"
           ],
-          "hash": "b7eab851cce132dee4ee17af7349b915ac69cc0caf861599c954c2a4430f70e4",
+          "hash": "cb3a7b5683ec4634b9c5572988b39576b4540383c0b39d1730250e03b91dd293",
           "importsFiles": [
             "rust/src/geometry.rs"
           ],
@@ -821,7 +898,7 @@
         {
           "entry": "main",
           "entryRule": 1,
-          "hash": "8d83cc7b60ab946b322b5a5aa7c48a49ff49f5d31e172fa1864a119d84db3b86",
+          "hash": "f51c86afc2ff23efb390f83ff48ee4edca07866c36d522e290bcab8ca2975ad4",
           "importsFiles": [
             "rust/src/ui.rs"
           ],
@@ -831,14 +908,14 @@
             {
               "calls": [
                 {
-                  "line": 14,
+                  "line": 17,
                   "name": "install_style",
                   "target": {
                     "file": "rust/src/ui.rs"
                   }
                 },
                 {
-                  "line": 15,
+                  "line": 18,
                   "name": "default",
                   "receiver": "ScalarScopeApp",
                   "target": {
@@ -2033,7 +2110,7 @@
               "line": 487
             }
           ],
-          "hash": "9b15a193bc777a796763f9443d845e0fdbb58f57770653bd45205d658a490e65",
+          "hash": "a63fbb461ee1d72df4a5ce0ed30542765b5cc1c2fe55fc3923b7803183084b73",
           "importOrder": [
             "rust/src/open.rs",
             "rust/src/readings.rs",
@@ -2178,90 +2255,95 @@
             {
               "in": "page",
               "kind": "match-err",
-              "line": 321
+              "line": 325
             },
             {
-              "in": "load",
+              "in": "capture",
               "kind": "match-err",
-              "line": 410
+              "line": 427
+            },
+            {
+              "in": "load_paths",
+              "kind": "match-err",
+              "line": 478
             },
             {
               "in": "open_bundle",
               "kind": "match-err",
-              "line": 433
+              "line": 501
             },
             {
               "in": "save_bundle",
               "kind": "match-err",
-              "line": 447
+              "line": 515
             },
             {
               "in": "save_bundle",
               "kind": "match-err",
-              "line": 464
+              "line": 532
             },
             {
               "in": "save_bundle",
               "kind": "match-err",
-              "line": 468
+              "line": 536
             },
             {
               "in": "save_bundle",
               "kind": "match-err",
-              "line": 470
+              "line": 538
             },
             {
               "in": "export_svg",
               "kind": "match-err",
-              "line": 655
+              "line": 723
             },
             {
               "in": "receive_screenshot",
               "kind": "match-err",
-              "line": 679
+              "line": 747
             },
             {
               "in": "settings_changed",
               "kind": "match-err",
-              "line": 718
+              "line": 786
             },
             {
               "in": "draw_settings",
               "kind": "match-err",
-              "line": 765
+              "line": 833
             },
             {
               "in": "remember",
               "kind": "match-err",
-              "line": 1159
+              "line": 1227
             },
             {
               "in": "open_saved_path",
               "kind": "match-err",
-              "line": 1287
+              "line": 1355
             },
             {
               "in": "remember_opened_file",
               "kind": "match-err",
-              "line": 1301
+              "line": 1369
             },
             {
               "in": "reopen",
               "kind": "match-err",
-              "line": 1318
+              "line": 1386
             },
             {
               "in": "reopen",
               "kind": "match-err",
-              "line": 1333
+              "line": 1401
             },
             {
               "in": "reopen",
               "kind": "match-err",
-              "line": 1333
+              "line": 1401
             }
           ],
-          "hash": "dc984788ba1d17efd5d29497f83e5d9974647d2695d0380accf86bb395ae79a7",
+          "hash": "57021d06fff0247b2802e45d5491b5706df693b680fc77d883bf44904b8bffc0",
           "importOrder": [
             "rust/src/bundle.rs",
             "rust/src/history.rs",
@@ -2301,7 +2383,7 @@
             {
               "calls": [
                 {
-                  "line": 946,
+                  "line": 1014,
                   "name": "nines",
                   "target": {
                     "file": "rust/src/views.rs"
@@ -2316,7 +2398,7 @@
             {
               "calls": [
                 {
-                  "line": 967,
+                  "line": 1035,
                   "name": "spectrum",
                   "target": {
                     "file": "rust/src/views.rs"
@@ -2331,14 +2413,14 @@
             {
               "calls": [
                 {
-                  "line": 999,
+                  "line": 1067,
                   "name": "heat_range",
                   "target": {
                     "file": "rust/src/views.rs"
                   }
                 },
                 {
-                  "line": 1016,
+                  "line": 1084,
                   "name": "heat_cells",
                   "target": {
                     "file": "rust/src/views.rs"
@@ -2353,7 +2435,7 @@
             {
               "calls": [
                 {
-                  "line": 1400,
+                  "line": 1468,
                   "name": "stored_pair",
                   "target": {
                     "file": "rust/src/bundle.rs"
@@ -2374,7 +2456,7 @@
             "reach",
             "time_range"
           ],
-          "hash": "23fb0d2f9351526de7dbaa1f86d2706c65f8e78a81332acbd487112db29569bb",
+          "hash": "2054e6e05430e710609a9cfa39174d7b646bc89f2580b2f86c58eaab8e5e1d54",
           "importOrder": [
             "rust/src/ui.rs",
             "rust/src/geometry.rs",
@@ -2430,10 +2512,10 @@
             {
               "in": "the_workbench_page_asks_for_runs_then_weighs_a_picked_folder",
               "kind": "match-err",
-              "line": 768
+              "line": 769
             }
           ],
-          "hash": "9b388b3cf448942cf8b750b2e5098b88abaf2f62f025fce13ec8275c950a8a37",
+          "hash": "469787c32c7ac758d8684a0f9571c78a23f0d81f3bce46249eb8acf4421a79fd",
           "importOrder": [
             "rust/src/bundle.rs",
             "rust/src/history.rs",
@@ -2581,35 +2663,35 @@
             {
               "in": "measure",
               "kind": "err",
-              "line": 83
+              "line": 86
             },
             {
               "in": "measure",
               "kind": "err",
-              "line": 89
+              "line": 92
             },
             {
               "in": "measure",
               "kind": "err",
-              "line": 106
+              "line": 109
             },
             {
               "in": "measure",
               "kind": "err",
-              "line": 113
+              "line": 116
             },
             {
               "in": "steady_quantile",
               "kind": "err",
-              "line": 162
+              "line": 173
             },
             {
               "in": "steady_quantile",
               "kind": "err",
-              "line": 166
+              "line": 177
             }
           ],
-          "hash": "dbf6c4dca43c0684ff825f433cb3cf5dac1ea2d7520e492fdbfe59eb6157e2a9",
+          "hash": "4b252630cf7e1695810688ab7a742198d4fd194e3c19ec19ff4a6d3c5c43446e",
           "importsFiles": [
             "rust/src/open.rs",
             "rust/src/stats.rs"
@@ -2619,7 +2701,7 @@
             {
               "calls": [
                 {
-                  "line": 165,
+                  "line": 176,
                   "name": "quantile_support",
                   "target": {
                     "file": "rust/src/stats.rs"
@@ -2634,7 +2716,7 @@
             {
               "calls": [
                 {
-                  "line": 165,
+                  "line": 176,
                   "name": "quantile_support",
                   "target": {
                     "file": "rust/src/stats.rs"
@@ -2650,8 +2732,15 @@
           ]
         },
         {
-          "hash": "5db842cddeda984eb002f5459520112826749dbdd9e516fe83c0e40a0861a3c1",
+          "hash": "5ffea9ac3ee64c24a70f3910676b4943dfb335fedd90bc3c2191468050776d1a",
+          "importOrder": [
+            "rust/src/geometry_deltas.rs",
+            "rust/src/open.rs",
+            "rust/src/review.rs",
+            "rust/src/geometry.rs"
+          ],
           "importsFiles": [
+            "rust/src/geometry.rs",
             "rust/src/geometry_deltas.rs",
             "rust/src/open.rs",
             "rust/src/review.rs"
@@ -2696,6 +2785,22 @@
           "library": "rust/src/lib.rs",
           "path": "rust/tests/edge_tests.rs",
           "testsInside": true
+        },
+        {
+          "hash": "156c2a5dc7c6e814b605a051bba9152dd85352313285b848336caa96cc8834da",
+          "path": "rust/tests/fixtures/aspire-si/real-composite-teacher.drift.geometry.json"
+        },
+        {
+          "hash": "5b17c7488d621de4bc24bf13a2cd1febccd1df3283f7da058f4d4e776223102a",
+          "path": "rust/tests/fixtures/aspire-si/real-composite-teacher.geometry.json"
+        },
+        {
+          "hash": "61e8e637750638f1c15d4262006c07a238958620961189c8b9baf70be4b97038",
+          "path": "rust/tests/fixtures/aspire-si/real-local-teacher.drift.geometry.json"
+        },
+        {
+          "hash": "03501c053c5b8be18e7f0c8cf49928918505bb4da87aec3bc1ef4194a13e35b1",
+          "path": "rust/tests/fixtures/aspire-si/real-local-teacher.geometry.json"
         },
         {
           "hash": "e7e17e1d87e54f1c47e1fb67f8f557ec7064a476da4666cf61637ec74fc176ef",
@@ -2813,6 +2918,16 @@
           "testsInside": true
         },
         {
+          "hash": "40e3276133ec422bae0dcbe31a4a1dad59b41a6aa671763b442ccc6022408d8c",
+          "importsFiles": [
+            "rust/src/open.rs",
+            "rust/src/review.rs"
+          ],
+          "library": "rust/src/lib.rs",
+          "path": "rust/tests/samples_tests.rs",
+          "testsInside": true
+        },
+        {
           "hash": "0f0f201cef1563f4b6e0b3131aa866b06f2d2f2fd177a7a4c053b39a296411a7",
           "importsFiles": [
             "rust/src/open.rs"
@@ -2840,7 +2955,7 @@
           "testsInside": true
         },
         {
-          "hash": "3a621a964bd39687e926e7209703086fef9f307dd07c6c8470a23f5fa8e21086",
+          "hash": "87e30618791f28c5d9bb8b3937fde676da1ca8ce048a6a52f19d5b89f01d73fc",
           "importsFiles": [
             "rust/src/knobs.rs",
             "rust/src/open.rs",
@@ -2880,7 +2995,7 @@
       "testRunners": [
         "cargo test"
       ],
-      "testedBy": 19,
+      "testedBy": 20,
       "unresolvedSites": 0
     },
     {
@@ -2909,32 +3024,44 @@
           "path": "site/src/content.config.ts"
         },
         {
-          "hash": "db1208660fc6c99050e46b7e1eae018cfcc9cbb13678e1785d68dca1d6bced6b",
+          "hash": "491d6d726c08593a65c142b0f1c72d5e3f842a30ef90f5f764c743dfa3c269d7",
           "path": "site/src/content/docs/handbook/beginners.md"
         },
         {
-          "hash": "615982c00246f22e3e7644b4df6ee2ce4f1e5b926dbc6c1c3af072df5fa1910a",
+          "hash": "aa8c54686ecda5d298689ac40ff65d96ef6099283d52dde0302709bbb12f9c93",
           "path": "site/src/content/docs/handbook/bundles.md"
         },
         {
-          "hash": "47d63e66620e65b3904a6e3d666efd48d772e5d64f50c2d72a5e35957279fb6f",
+          "hash": "db369872e4481d5b529f1fa85bfdd86922b16bd71d84387eb273fa566b84e691",
           "path": "site/src/content/docs/handbook/delta-analysis.md"
         },
         {
-          "hash": "966a118461cdf4cb999223fa0ae66fa00224352b22b7740c28b26dbf7c7e5f8f",
+          "hash": "92baed8f9125974a9d1e30b6e4f8c1df9d7770bf17aed70b48395276d3c79048",
+          "path": "site/src/content/docs/handbook/geometry.md"
+        },
+        {
+          "hash": "07f42066edfa7311e408a76cdd7f178d5b3440107586f2ee5f18ba6f4937cee3",
           "path": "site/src/content/docs/handbook/getting-started.md"
         },
         {
-          "hash": "ecec040e56d7b120d6ffba26957a4a2f31353eb0db67c8d4215367b02840e259",
+          "hash": "ac546306c9f24f2d024c469aaa4d7bed28eed6a6eb281b7890193ff1ac17f0a8",
+          "path": "site/src/content/docs/handbook/history.md"
+        },
+        {
+          "hash": "84b2fba4793c97117e2d6782142ff37ea383825381677d30d2e5f6d84bf52583",
           "path": "site/src/content/docs/handbook/index.md"
         },
         {
-          "hash": "c8339517302bf5d8bc915a0ec91495253035c6cfecef349361627525bb035fe0",
+          "hash": "c9abd4aea866e633eb03e1ac8fecbd59675eb5ed92235a84c770e89d1ca93556",
           "path": "site/src/content/docs/handbook/rust-review.md"
         },
         {
-          "hash": "b5050fe62ca1c7d33e2d5c9c57cd13a7e170f910fb811406f973c1ae941213b7",
+          "hash": "f2e1316dc8c8eab9b2d222c680a62db2a08708ccfabdac1d40a0bd2c2e29033d",
           "path": "site/src/content/docs/handbook/vortexkit.md"
+        },
+        {
+          "hash": "0b8a2a5499f47dbf0c426d2bd02c8a69edb31c47820153e5dcd781ef63749650",
+          "path": "site/src/content/docs/handbook/workbench.md"
         },
         {
           "hash": "391533713539035d3c92282579d43de0f137067867fdb502d7eaea3c74601d2a",
@@ -2950,7 +3077,7 @@
         },
         {
           "constantOnly": true,
-          "hash": "adb9307a720cc977b1b18f0eec557b7c0dd877bd4065c6b2841eb5863753f9f5",
+          "hash": "be1ac9245abda3e0ac8f5de2aba3d478836a26b9dd104bd4c2038dd2026f55b7",
           "path": "site/src/site-config.ts"
         },
         {
@@ -3065,7 +3192,7 @@
           "path": "src/ScalarScope/Platforms/Windows/App.xaml.cs"
         },
         {
-          "hash": "8cc1e0e0e87b3e189567a0005be716cca4e3e342bccd9ec2d567ac0a0a2b7292",
+          "hash": "c61ad4112be150288a24b53f2064b1c68a501152f99fc7d735eb9893c8515a3d",
           "path": "src/ScalarScope/Platforms/Windows/Package.appxmanifest"
         },
         {
@@ -3161,7 +3288,7 @@
           "path": "src/ScalarScope/Resources/Styles/Styles.xaml"
         },
         {
-          "hash": "115e8dd7981e57bf9bf80fa22b5be952741932efb82c5371266781ee19e77334",
+          "hash": "5dcb1e99127a7f30a0d883657005a67570786c5290b7dcf3678c6befe23da613",
           "path": "src/ScalarScope/ScalarScope.csproj"
         },
         {
@@ -3924,7 +4051,7 @@
           "path": "tests/Fixtures/Bundles/dotnet-inference-review.scbundle"
         },
         {
-          "hash": "3e48bfa460c9eb268d8f98411071d2e31a98a7b3c112ff18c33a82d8193ce7ff",
+          "hash": "d1bcc4fa572e1bf9c7974e7b4e2b6f9985d508f8cbea7296d0602afaac52e110",
           "path": "tests/Fixtures/Bundles/rust-inference-review.scbundle"
         },
         {
@@ -3980,7 +4107,7 @@
           "path": "tests/ScalarScope.FixtureTests/ComparisonLogTests.cs"
         },
         {
-          "hash": "637a87e41bf69bb16494d4be889189e750023162c7992e2bc5980d7df7922425",
+          "hash": "8bb23fdd6210b5c1653acd859376f4a4a1e4323e2986e7d9c82900fb7c37ce6e",
           "path": "tests/ScalarScope.FixtureTests/FeatureSliceTests.cs"
         },
         {
@@ -3992,7 +4119,7 @@
           "path": "tests/ScalarScope.FixtureTests/FixtureSmokeTests.cs"
         },
         {
-          "hash": "fbfde928ba57af2c2484e9ca48d8645b80e7ac6b75dfa8ea34893e85141e811d",
+          "hash": "a1da1e7926ff5b6625de57e8f777cd2666563de15b0cd1412a3d48bb8b9bddd5",
           "path": "tests/ScalarScope.FixtureTests/HealthFixTests.cs"
         },
         {
@@ -4016,11 +4143,11 @@
           "path": "tests/ScalarScope.FixtureTests/StageCShellTests.cs"
         },
         {
-          "hash": "8b0033f162280fe6e6553fced385cdb2dc36aef2388dce72dbbfbaa2843dfe7f",
+          "hash": "d85288c81df128649a6105f2639b1d0bd5c0ac03d7d7b6d9eb1e07fda85e1e0a",
           "path": "tests/ScalarScope.FixtureTests/StageCWordingTests.cs"
         },
         {
-          "hash": "a4fff96acf821834c95c986c86570da3692cc7215ec2916acaafcc3346af8511",
+          "hash": "c5e5bc13038e3e382ebcd9254201ed26630483e72e6e5f3ab7a2f728e96439f5",
           "path": "tests/ScalarScope.FixtureTests/StageDCopyTests.cs"
         },
         {
@@ -4032,7 +4159,7 @@
           "path": "tests/ScalarScope.FixtureTests/TraceReviewTests.cs"
         },
         {
-          "hash": "c2340ccf0cdcaca44ab4b695990e2c104eee3238998621a370fec2d4f40830b6",
+          "hash": "5841be8f45826f6326670611ad8fd8184b7bb8a52a2059d46e40dbf20e2ee954",
           "path": "tests/ScalarScope.FixtureTests/VersionConsistencyTests.cs"
         },
         {
@@ -4481,7 +4608,7 @@
         {
           "boundary": "rust",
           "depth": 0,
-          "files": 35
+          "files": 36
         }
       ],
       "readers": [],
@@ -4601,6 +4728,13 @@
         {
           "job": "test",
           "matched": true,
+          "path": "rust/tests/samples_tests.rs",
+          "runKind": "executes",
+          "via": "cargo test"
+        },
+        {
+          "job": "test",
+          "matched": true,
           "path": "rust/tests/sources_tests.rs",
           "runKind": "executes",
           "via": "cargo test"
@@ -4620,7 +4754,7 @@
           "via": "cargo test"
         }
       ],
-      "runsCount": 19,
+      "runsCount": 20,
       "secrets": [],
       "sends": {
         "deploysPages": false,
@@ -4637,7 +4771,7 @@
         {
           "coverage": true,
           "dir": "rust",
-          "files": 19,
+          "files": 20,
           "job": "test",
           "runner": "cargo test",
           "step": "Test"
@@ -5158,8 +5292,8 @@
   "edges": [],
   "engine": "1.24.0",
   "generatedFrom": {
-    "commit": "975415be0d0d26172bae62e253f1395706ad6367",
-    "tracked": 412
+    "commit": "d06cf13b2b5c2b6a95de1f21307c79889b35339a",
+    "tracked": 455
   },
   "landings": [
     {
@@ -5319,11 +5453,6 @@
           "confidence": "text"
         },
         {
-          "by": "README.md",
-          "call": "--project",
-          "confidence": "text"
-        },
-        {
           "by": "README.pt-BR.md",
           "call": "--project",
           "confidence": "text"
@@ -5340,16 +5469,6 @@
         },
         {
           "by": "docs/PAPER_COMPANION.md",
-          "call": "--project",
-          "confidence": "text"
-        },
-        {
-          "by": "site/src/content/docs/handbook/beginners.md",
-          "call": "--project",
-          "confidence": "text"
-        },
-        {
-          "by": "site/src/content/docs/handbook/getting-started.md",
           "call": "--project",
           "confidence": "text"
         }
@@ -5438,6 +5557,71 @@
   "overlaps": [],
   "submodules": [],
   "symlinks": [],
-  "testFiles": 70,
-  "unassigned": []
+  "testFiles": 75,
+  "unassigned": [
+    {
+      "hash": "20c54ca3354e05fbed8e4c606149cb099f04ee1062791c8c1b0f1a717131388c",
+      "path": "samples/README.md"
+    },
+    {
+      "hash": "156c2a5dc7c6e814b605a051bba9152dd85352313285b848336caa96cc8834da",
+      "path": "samples/geometry/composite-teacher.drift.geometry.json"
+    },
+    {
+      "hash": "5b17c7488d621de4bc24bf13a2cd1febccd1df3283f7da058f4d4e776223102a",
+      "path": "samples/geometry/composite-teacher.geometry.json"
+    },
+    {
+      "hash": "61e8e637750638f1c15d4262006c07a238958620961189c8b9baf70be4b97038",
+      "path": "samples/geometry/local-teacher.drift.geometry.json"
+    },
+    {
+      "hash": "03501c053c5b8be18e7f0c8cf49928918505bb4da87aec3bc1ef4194a13e35b1",
+      "path": "samples/geometry/local-teacher.geometry.json"
+    },
+    {
+      "hash": "830e760983930919c022f506d72359f4d6ef0dbaea9ee44d2155e7ba4708dd71",
+      "path": "samples/inference/baseline.runtrace.json"
+    },
+    {
+      "hash": "e727a48cfc4907e62265f5d7a85dcf1315e4cefb7dbfe947df28335902765855",
+      "path": "samples/inference/optimized.runtrace.json"
+    },
+    {
+      "hash": "977d056c409cef79cdd9077732b2b3ab1c7ff026a8b19d8e6eee39d8458d6ed6",
+      "path": "samples/workbench/batch1_seed1_runtrace.json"
+    },
+    {
+      "hash": "e8adaa5c946b945de265dc30450bbb086f1a5b86e8c7541b253aa55c251fb6a8",
+      "path": "samples/workbench/batch1_seed2_runtrace.json"
+    },
+    {
+      "hash": "b9b502a5ab2011e440435a9c6b4ada9888518012664ec5832ef3415acabeaf1a",
+      "path": "samples/workbench/batch1_seed3_runtrace.json"
+    },
+    {
+      "hash": "c269eb93d404706d7705a772ca68cebb10a961596cffcf1cb34cf7327af0c2e4",
+      "path": "samples/workbench/batch4_seed1_runtrace.json"
+    },
+    {
+      "hash": "c51e18a8a2a75b9811e583bd8921d635d7a0756f622b492e88f4e31f77a81ed2",
+      "path": "samples/workbench/batch4_seed2_runtrace.json"
+    },
+    {
+      "hash": "33ef21e6d3d91712db7d30e93fff995d2fc03b26a5efe78a340a00cb3b7c598f",
+      "path": "samples/workbench/batch4_seed3_runtrace.json"
+    },
+    {
+      "hash": "499a88b9901605c6359678cfe47583736154b7892b2f0369501e741c42147f0e",
+      "path": "samples/workbench/batch8_seed1_runtrace.json"
+    },
+    {
+      "hash": "d69f8457d353ea9a364f40dba0c747f306a53ea3d3ccdc5ba4fca37ed930744e",
+      "path": "samples/workbench/batch8_seed2_runtrace.json"
+    },
+    {
+      "hash": "ba8477a4258ef75b6102a83ef09e549c917a58d5bc4cabf32d779dd95017516d",
+      "path": "samples/workbench/batch8_seed3_runtrace.json"
+    }
+  ]
 }
