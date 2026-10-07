@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - On a geometry export whose steps are checkpoints × items, ΔĀ is compared checkpoint by checkpoint instead of over the longest stretch of consecutive steps. Each run's λ1/Σλ is averaged over a checkpoint's items, and ΔĀ fires only when one run is more concentrated by at least the floor at every checkpoint ("Path B had a more concentrated spectrum at all 3 checkpoints"). A sign that changes between checkpoints is quiet, and runs with different numbers of checkpoints are withheld. Time-ordered exports keep 2.0's rule.
+- When both runs' scores are fixed per item, ΔĀ says it compares the evaluators, not the training runs ("Evaluator setups differ: …"), and stays out of the run headline. A drift pair whose only finding is ΔĀ reads "No meaningful divergence between the runs; the evaluator setups differ (spectrum concentration)."
 - On a geometry export whose steps are checkpoints × items, ΔTd is withheld too, with the same reason as ΔTc, ΔO and ΔF: when a dominant direction emerges depends on step order, and those steps are not time.
 
 ### Added

@@ -1,6 +1,6 @@
 # scalarscope: how it works
 
-Mapped at 2026-10-07 from commit 925ce1c by Atlas 1.24.0.
+Mapped at 2026-10-07 from commit 529c1cf by Atlas 1.24.0.
 
 ## What this is
 
@@ -8,15 +8,16 @@ A review of two machine-learning runs. The app is the Rust program in rust/, pac
 
 10 parts, mostly C# (181 files), Rust (40), CSS (2), PowerShell (2), TypeScript (2), Astro (1), JavaScript (1), Python (1) and shell (1). Work enters through 7 doors; the busiest is Build and Test, which reaches 4 parts. It deploys a site to GitHub Pages. People run scalarscope.
 
-## What changed since 2026-10-07 (2639d27)
+## What changed since 2026-10-07 (925ce1c)
 
-Nothing structural changed since 2026-10-07; 14 files changed content.
+- Coverage now also runs rust/src/geometry_deltas.rs.
+- 15 files changed content, across 4 parts.
 
 ## What comes in
 
 1. **Build and Test.** On a pull request to main touching 10 paths; on a push to main touching 10 paths; or by hand. Runs packaging/pack.ps1, rust/build.rs and tests/ScalarScope.FixtureTests/ScalarScope.FixtureTests.csproj; builds src/ScalarScope/ScalarScope.csproj and src/VortexKit/VortexKit.csproj; checks rust/src/lib.rs and rust/src/main.rs.
 2. **Release.** When a tag matching `v*` is pushed; or by hand. Runs packaging/pack.ps1 and rust/build.rs; builds rust/src/main.rs; checks rust/src/lib.rs.
-3. **Coverage.** On a pull request; on a push to main. Runs rust/build.rs, rust/src/geometry.rs, rust/src/shape.rs and 18 more.
+3. **Coverage.** On a pull request; on a push to main. Runs rust/build.rs, rust/src/geometry.rs, rust/src/geometry_deltas.rs and 19 more.
 4. **Deploy site to GitHub Pages.** On a push to main touching 2 paths; or by hand. Runs site/astro.config.mjs and site/src/.
 5. **Publish to NuGet.** When a release is published; or by hand. Builds src/VortexKit/VortexKit.csproj.
 6. **live_workbench** (a command people run with `cargo run --example live_workbench`). Runs rust/examples/live_workbench.rs.
@@ -34,7 +35,7 @@ Build and Test writes nothing this map can see.
 
 **Release** runs packaging/pack.ps1 and rust/build.rs, checks rust/src/lib.rs, creates a GitHub release, and builds rust/src/main.rs into a binary for Windows and uploads them to the release.
 
-**Coverage** runs rust/build.rs, rust/src/geometry.rs, rust/src/shape.rs and 18 more, and uploads coverage to Codecov.
+**Coverage** runs rust/build.rs, rust/src/geometry.rs, rust/src/geometry_deltas.rs and 19 more, and uploads coverage to Codecov.
 
 **Deploy site to GitHub Pages** runs site/astro.config.mjs and site/src/, and deploys the site.
 
@@ -56,8 +57,8 @@ packaging and src hold only C# and PowerShell files, which this map does not rea
 
 - **rust/src/open.rs** and **rust/tests/review_tests.rs** changed together in 10 of 13 commits, inside the rust part.
 - **rust/src/ui.rs** and **rust/src/ui_tests.rs** changed together in 18 of 28 commits, inside the rust part.
-- **rust/src/review.rs** and **rust/src/ui.rs** changed together in 17 of 27 commits, inside the rust part.
-- **rust/src/review.rs** and **rust/tests/review_tests.rs** changed together in 11 of 19 commits, inside the rust part.
+- **rust/src/review.rs** and **rust/src/ui.rs** changed together in 17 of 28 commits, inside the rust part.
+- **rust/src/review.rs** and **rust/tests/review_tests.rs** changed together in 11 of 20 commits, inside the rust part.
 - **rust/src/open.rs** and **rust/tests/bundle_tests.rs** changed together in 6 of 11 commits, inside the rust part.
 
 Confidence is low: fewer than 25 source files reach 10 revisions in the window.

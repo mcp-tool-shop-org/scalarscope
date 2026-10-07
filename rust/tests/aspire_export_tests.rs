@@ -141,7 +141,8 @@ fn drift_withholds_timing_oscillation_and_failure_and_speaks_from_what_stands() 
         assert!(tile.why.contains("2.0's reading was"), "{symbol}");
     }
     assert_eq!(status(&review, "Δ\u{0100}").status, "fired");
-    assert_eq!(review.verdict, "Path B had a more concentrated spectrum at all 3 checkpoints");
+    // The scores are fixed per item, so the one delta that fires is about the evaluators.
+    assert_eq!(review.verdict, "No meaningful divergence between the runs; the evaluator setups differ (spectrum concentration).");
 }
 
 #[test]
@@ -228,7 +229,12 @@ fn concentration_is_compared_by_checkpoint_on_the_control_drift_pair() {
     let review = reviewed("real-local-teacher.drift.geometry.json", "real-composite-teacher.drift.geometry.json");
     let tile = status(&review, "Δ\u{0100}");
     assert_eq!(tile.status, "fired");
-    assert_eq!(tile.headline, "Path B had a more concentrated spectrum at all 3 checkpoints");
+    assert_eq!(tile.headline, "Evaluator setups differ: B's evaluators' scores are more concentrated at all 3 checkpoints");
+    assert!(
+        tile.why.starts_with("Evaluator setups differ: B's evaluators' scores are more concentrated at all 3 checkpoints. The scores are fixed per item, so this compares the evaluators, not the training runs."),
+        "{}",
+        tile.why
+    );
     assert!(!tile.why.contains("sustained "), "{}", tile.why);
     for checkpoint in 1..=3 {
         assert!(tile.why.contains(&format!("Checkpoint {checkpoint}: A ")), "{}", tile.why);
@@ -240,7 +246,8 @@ fn concentration_is_compared_by_checkpoint_on_the_control_drift_pair() {
 #[test]
 fn four_checkpoints_fire_at_all_four_and_unequal_counts_are_withheld() {
     let review = reviewed("sft-local-teacher.drift-from-base.geometry.json", "sft-composite-teacher.drift-from-base.geometry.json");
-    assert_eq!(review.verdict, "Path B had a more concentrated spectrum at all 4 checkpoints");
+    assert_eq!(review.verdict, "No meaningful divergence between the runs; the evaluator setups differ (spectrum concentration).");
+    assert_eq!(status(&review, "Δ\u{0100}").headline, "Evaluator setups differ: B's evaluators' scores are more concentrated at all 4 checkpoints");
     let mixed = reviewed("real-local-teacher.drift.geometry.json", "sft-local-teacher.drift-from-base.geometry.json");
     let tile = status(&mixed, "Δ\u{0100}");
     assert_eq!(tile.status, "withheld");
@@ -252,6 +259,8 @@ fn four_checkpoints_fire_at_all_four_and_unequal_counts_are_withheld() {
     let same = reviewed("real-local-teacher.drift.geometry.json", "sft-local-teacher.drift-from-sft.geometry.json");
     let tile = status(&same, "Δ\u{0100}");
     assert_eq!((tile.status.as_str(), tile.headline.as_str()), ("quiet", "Similar spectrum concentration at every checkpoint"));
+    assert!(tile.why.contains("this compares the evaluators, not the training runs"), "{}", tile.why);
+    assert_eq!(same.verdict, "No meaningful divergence observed between paths.");
 }
 
 #[test]

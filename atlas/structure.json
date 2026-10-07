@@ -212,7 +212,7 @@
           "path": "docs/index.md"
         },
         {
-          "hash": "398b6f02cbc49ae5bd6df0928ae38eadf04e664b7c5bd812d80046fcdb5e9ead",
+          "hash": "bee8bb13bcd6e3f1031d193f516aa2718de03f577832802d1316466b286b6529",
           "path": "docs/parity-and-beyond.spec.md"
         },
         {
@@ -378,7 +378,7 @@
           "path": ".gitignore"
         },
         {
-          "hash": "7fb793d94785728b66b6706f07e52ff9256f52caa080c05d193065224a4fc9f9",
+          "hash": "c361e1c0f1280b45e46524b87c57a9ed6cba93b830eaa47b4a204071dad1bae3",
           "path": "CHANGELOG.md"
         },
         {
@@ -394,35 +394,35 @@
           "path": "PRIVACY.md"
         },
         {
-          "hash": "34fe8c2c1330917967d9fcef37756c67fe7da71db19ea270c3fa24fadded0b27",
+          "hash": "f03304c1760f76183c4ff4772c0eded9dd0fd44342343adc4d6f62dbd22a4184",
           "path": "README.es.md"
         },
         {
-          "hash": "c5971c6ad862a727cdf94f641aaa777701b1cbbf96f955f63f8d064698166ef9",
+          "hash": "6f34f2b3eb0ee97d8fcf429c9872964f7dc3ccc2193f6d68820678e42ede7264",
           "path": "README.fr.md"
         },
         {
-          "hash": "d33837d07e044306edf5e6ff024c6e50ee37582530a643d5b4961288ef0d4478",
+          "hash": "61f4e930960d6286b8b0b42b2e233556a28402a8eae285b341b4856679aef917",
           "path": "README.hi.md"
         },
         {
-          "hash": "efeffac2c05fc444577c7f47c1086b50a85c55efb2cfa3abfc9ea13665ca7cef",
+          "hash": "96551505b0facfda7ddac6077a0cf500e745252f746ce032f3193076b52219e6",
           "path": "README.it.md"
         },
         {
-          "hash": "174242aca642b56b060bae4278f107ff210501e47ff4e387dcfdb5ad6bb560cd",
+          "hash": "c6363024e848cfe4ff8fcac2508ca92e59e7201b99e883b73e87383a1633e47a",
           "path": "README.ja.md"
         },
         {
-          "hash": "d9ec6b14351f10252a51b9d3ca95f6ec46df7e08f7e2dc784ab6cacd32b7a876",
+          "hash": "aad1a7243e74a5947e718ff90fdfa0185777b7159e3236e8286718accfe87039",
           "path": "README.md"
         },
         {
-          "hash": "55acb0ec97a6054e2f9725a6cc7c5104b8287c074c5d6495966c4077f575abef",
+          "hash": "53c6762519e3a27a7592e1adf6fe549a656f17d86520b51606a9f5de61e4b145",
           "path": "README.pt-BR.md"
         },
         {
-          "hash": "07a64f2c850ab4a7909864132560949dde97d69bf4891857a071a8eed2779c50",
+          "hash": "40531e2bffc7a3bb0b44d91837219dfd2ecf2e4245580c3107bc750824eabe0b",
           "path": "README.zh.md"
         },
         {
@@ -833,6 +833,7 @@
             "compute",
             "compute_with_map",
             "compute_with_summary",
+            "concentration_by_checkpoint",
             "create_alignment_map",
             "create_alignment_map_with",
             "dotnet_double",
@@ -840,11 +841,12 @@
             "robust_sigma",
             "withhold_by_layout"
           ],
-          "hash": "f6548a8efe6860dcb782fd92c9e6538e6a13ada92c57086c134777f5c690de48",
+          "hash": "37fbe1e4f9dcd54eed4461c2b7ca7099de29170560ecf96837f844808b857300",
           "importsFiles": [
             "rust/src/geometry.rs"
           ],
-          "path": "rust/src/geometry_deltas.rs"
+          "path": "rust/src/geometry_deltas.rs",
+          "testsInside": true
         },
         {
           "exports": [
@@ -2123,7 +2125,7 @@
               "line": 487
             }
           ],
-          "hash": "d19e756be884fe612f4eb54297857b9aafbfd7b3cfba91b716cc506d4d757c38",
+          "hash": "566d4ad8ecbf1285e4955edcec7a6bc5e501d5e2edd87280529684d28beb6ef6",
           "importOrder": [
             "rust/src/open.rs",
             "rust/src/readings.rs",
@@ -2745,7 +2747,7 @@
           ]
         },
         {
-          "hash": "6e10998272e5e8bb1d97df6f853587af4a3266601b966357ba65619520148fac",
+          "hash": "5368fd12c2d0ed2f40d607b66be9828d643985ab9db988587ca0d9cc63929574",
           "importOrder": [
             "rust/src/geometry_deltas.rs",
             "rust/src/open.rs",
@@ -3032,7 +3034,7 @@
       "testRunners": [
         "cargo test"
       ],
-      "testedBy": 20,
+      "testedBy": 21,
       "unresolvedSites": 0
     },
     {
@@ -3069,11 +3071,11 @@
           "path": "site/src/content/docs/handbook/bundles.md"
         },
         {
-          "hash": "e29d8a8097fe83df7c10b0920323908d1f9188ea961fa11310e029eff6d29497",
+          "hash": "42b20ae764fb29321a90f7c68ea3fac329eb726438f2f70cb22f4b04388eebea",
           "path": "site/src/content/docs/handbook/delta-analysis.md"
         },
         {
-          "hash": "a5054358202b63151cc0eacbac9c399aadd6a20898bba764b0a9b7a748bed95a",
+          "hash": "573420eaf96e9ee6507faca9eae30a2a80430f5edb0605ff5c072d793b28096a",
           "path": "site/src/content/docs/handbook/geometry.md"
         },
         {
@@ -4674,6 +4676,13 @@
         {
           "job": "test",
           "matched": true,
+          "path": "rust/src/geometry_deltas.rs",
+          "runKind": "executes",
+          "via": "cargo test"
+        },
+        {
+          "job": "test",
+          "matched": true,
           "path": "rust/src/shape.rs",
           "runKind": "executes",
           "via": "cargo test"
@@ -4805,7 +4814,7 @@
           "via": "cargo test"
         }
       ],
-      "runsCount": 21,
+      "runsCount": 22,
       "secrets": [],
       "sends": {
         "deploysPages": false,
@@ -4822,7 +4831,7 @@
         {
           "coverage": true,
           "dir": "rust",
-          "files": 21,
+          "files": 22,
           "job": "test",
           "runner": "cargo test",
           "step": "Test"
@@ -5350,7 +5359,7 @@
   "edges": [],
   "engine": "1.24.0",
   "generatedFrom": {
-    "commit": "925ce1c6873bc5af9b87929dc90735277b7cb543",
+    "commit": "529c1cf972481f44ff047b6d2b3a7b825449248b",
     "tracked": 463
   },
   "landings": [
@@ -5592,7 +5601,7 @@
   "overlaps": [],
   "submodules": [],
   "symlinks": [],
-  "testFiles": 81,
+  "testFiles": 82,
   "unassigned": [
     {
       "hash": "20c54ca3354e05fbed8e4c606149cb099f04ee1062791c8c1b0f1a717131388c",
