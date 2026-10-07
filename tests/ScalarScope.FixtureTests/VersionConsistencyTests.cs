@@ -99,4 +99,28 @@ public class VersionConsistencyTests
         cargo.Should().Contain($"version = \"{packed[..packed.LastIndexOf('.')]}\"", "the Rust crate's version is the package version without its revision");
     }
 
+    [Fact]
+    public void Rust_executable_manifest_is_dpi_aware_and_carries_the_package_version()
+    {
+        var root = FindRepoRoot();
+        XNamespace ns = "http://schemas.microsoft.com/appx/manifest/foundation/windows10";
+        var packed = XDocument.Load(Path.Combine(root, "packaging", "AppxManifest.xml")).Root!.Element(ns + "Identity")!.Attribute("Version")!.Value;
+
+        XNamespace asm = "urn:schemas-microsoft-com:asm.v1";
+        XNamespace v3 = "urn:schemas-microsoft-com:asm.v3";
+        XNamespace ws2005 = "http://schemas.microsoft.com/SMI/2005/WindowsSettings";
+        XNamespace ws2016 = "http://schemas.microsoft.com/SMI/2016/WindowsSettings";
+        var app = XDocument.Load(Path.Combine(root, "rust", "app.manifest")).Root!;
+        var identity = app.Element(asm + "assemblyIdentity")!;
+        identity.Attribute("name")!.Value.Should().Be("ScalarScope");
+        identity.Attribute("version")!.Value.Should().Be(packed, "the embedded manifest carries the Store identity version");
+        app.Descendants(v3 + "requestedExecutionLevel").Single().Attribute("level")!.Value.Should().Be("asInvoker");
+        app.Descendants(ws2005 + "dpiAware").Single().Value.Should().Be("true/pm");
+        app.Descendants(ws2016 + "dpiAwareness").Single().Value.Should().Be("PerMonitorV2");
+
+        var build = File.ReadAllText(Path.Combine(root, "rust", "build.rs"));
+        build.Should().Contain("cargo:rustc-link-arg-bin=scalarscope=/MANIFEST:EMBED");
+        build.Should().Contain("cargo:rustc-link-arg-bin=scalarscope=/MANIFESTINPUT:");
+    }
+
 }

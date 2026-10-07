@@ -1,24 +1,25 @@
 # scalarscope: how it works
 
-Mapped at 2026-10-07 from commit 5d36725 by Atlas 1.24.0.
+Mapped at 2026-10-07 from commit 05e9f42 by Atlas 1.24.0.
 
 ## What this is
 
 A review of two machine-learning runs. The app is the Rust program in rust/, packed as an MSIX for the Microsoft Store; src/ holds the earlier .NET MAUI app the Store copy still runs. (written by a person)
 
-10 parts, mostly C# (181 files), Rust (39), CSS (2), PowerShell (2), TypeScript (2), Astro (1), JavaScript (1), Python (1) and shell (1). Work enters through 7 doors; the busiest is Build and Test, which reaches 4 parts. It deploys a site to GitHub Pages. People run scalarscope.
+10 parts, mostly C# (181 files), Rust (40), CSS (2), PowerShell (2), TypeScript (2), Astro (1), JavaScript (1), Python (1) and shell (1). Work enters through 7 doors; the busiest is Build and Test, which reaches 4 parts. It deploys a site to GitHub Pages. People run scalarscope.
 
-## What changed since 2026-10-07 (d06cf13)
+## What changed since 2026-10-07 (5d36725)
 
-- rust/samples/baseline.csv is now also read by rust/tests/review_tests.rs.
-- rust/samples/optimized.csv is now also read by rust/tests/review_tests.rs.
-- 18 files changed content, across 3 parts.
+- Build and Test now also runs rust/build.rs.
+- Coverage now also runs rust/build.rs.
+- Release now also runs rust/build.rs.
+- 2 files added and 1 changed content, across 2 parts.
 
 ## What comes in
 
-1. **Build and Test.** On a pull request to main touching 10 paths; on a push to main touching 10 paths; or by hand. Runs packaging/pack.ps1 and tests/ScalarScope.FixtureTests/ScalarScope.FixtureTests.csproj; builds src/ScalarScope/ScalarScope.csproj and src/VortexKit/VortexKit.csproj; checks rust/src/lib.rs and rust/src/main.rs.
-2. **Release.** When a tag matching `v*` is pushed; or by hand. Runs packaging/pack.ps1; builds rust/src/main.rs; checks rust/src/lib.rs.
-3. **Coverage.** On a pull request; on a push to main. Runs rust/src/geometry.rs, rust/src/shape.rs, rust/src/stats.rs and 17 more.
+1. **Build and Test.** On a pull request to main touching 10 paths; on a push to main touching 10 paths; or by hand. Runs packaging/pack.ps1, rust/build.rs and tests/ScalarScope.FixtureTests/ScalarScope.FixtureTests.csproj; builds src/ScalarScope/ScalarScope.csproj and src/VortexKit/VortexKit.csproj; checks rust/src/lib.rs and rust/src/main.rs.
+2. **Release.** When a tag matching `v*` is pushed; or by hand. Runs packaging/pack.ps1 and rust/build.rs; builds rust/src/main.rs; checks rust/src/lib.rs.
+3. **Coverage.** On a pull request; on a push to main. Runs rust/build.rs, rust/src/geometry.rs, rust/src/shape.rs and 18 more.
 4. **Deploy site to GitHub Pages.** On a push to main touching 2 paths; or by hand. Runs site/astro.config.mjs and site/src/.
 5. **Publish to NuGet.** When a release is published; or by hand. Builds src/VortexKit/VortexKit.csproj.
 6. **live_workbench** (a command people run with `cargo run --example live_workbench`). Runs rust/examples/live_workbench.rs.
@@ -26,7 +27,7 @@ A review of two machine-learning runs. The app is the Rust program in rust/, pac
 
 ## What happens through Build and Test
 
-1. The workflow runs packaging/pack.ps1 in packaging and tests/ScalarScope.FixtureTests/ScalarScope.FixtureTests.csproj in tests; it builds src/ScalarScope/ScalarScope.csproj and src/VortexKit/VortexKit.csproj in src; it checks rust/src/lib.rs and rust/src/main.rs in rust.
+1. The workflow runs packaging/pack.ps1 in packaging, rust/build.rs in rust and tests/ScalarScope.FixtureTests/ScalarScope.FixtureTests.csproj in tests; it builds src/ScalarScope/ScalarScope.csproj and src/VortexKit/VortexKit.csproj in src; it checks rust/src/lib.rs and rust/src/main.rs in rust.
 
 ## Who reads the results
 
@@ -34,9 +35,9 @@ Build and Test writes nothing this map can see.
 
 ## The other doors
 
-**Release** runs packaging/pack.ps1, checks rust/src/lib.rs, creates a GitHub release, and builds rust/src/main.rs into a binary for Windows and uploads them to the release.
+**Release** runs packaging/pack.ps1 and rust/build.rs, checks rust/src/lib.rs, creates a GitHub release, and builds rust/src/main.rs into a binary for Windows and uploads them to the release.
 
-**Coverage** runs rust/src/geometry.rs, rust/src/shape.rs, rust/src/stats.rs and 17 more, and uploads coverage to Codecov.
+**Coverage** runs rust/build.rs, rust/src/geometry.rs, rust/src/shape.rs and 18 more, and uploads coverage to Codecov.
 
 **Deploy site to GitHub Pages** runs site/astro.config.mjs and site/src/, and deploys the site.
 
@@ -94,9 +95,9 @@ People write .github/, UI_Reference/, assets/, docs/, the repository root and si
 
 ## Where to start
 
-rust/src/main.rs → rust/src/lib.rs → rust/src/ui.rs
+.github/workflows/coverage.yml → rust/src/lib.rs → rust/src/bundle.rs → rust/src/review.rs → rust/src/open.rs → rust/src/shape.rs → rust/src/stats.rs → rust/src/readings.rs
 
-Read those in order to follow one run of scalarscope end to end. This path follows scalarscope (a command people run) from its entry, since Build and Test only checks code.
+Read those in order to follow one pull request end to end. This path follows Coverage, since Build and Test only checks code.
 
 ## What this map cannot see
 

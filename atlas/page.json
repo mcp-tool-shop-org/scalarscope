@@ -35,38 +35,46 @@
   ],
   "changes": {
     "fileCounts": {
-      "added": 0,
-      "changed": 18,
+      "added": 2,
+      "changed": 1,
       "moved": 0,
-      "parts": 3,
+      "parts": 2,
       "removed": 0
     },
     "items": [
       {
-        "kind": "landing",
-        "sentence": "rust/samples/baseline.csv is now also read by rust/tests/review_tests.rs.",
+        "kind": "door",
+        "sentence": "Build and Test now also runs rust/build.rs.",
         "subjects": [
-          "rust/samples/baseline.csv",
-          "rust/tests/review_tests.rs"
+          ".github/workflows/build.yml",
+          "rust/build.rs"
         ]
       },
       {
-        "kind": "landing",
-        "sentence": "rust/samples/optimized.csv is now also read by rust/tests/review_tests.rs.",
+        "kind": "door",
+        "sentence": "Coverage now also runs rust/build.rs.",
         "subjects": [
-          "rust/samples/optimized.csv",
-          "rust/tests/review_tests.rs"
+          ".github/workflows/coverage.yml",
+          "rust/build.rs"
+        ]
+      },
+      {
+        "kind": "door",
+        "sentence": "Release now also runs rust/build.rs.",
+        "subjects": [
+          ".github/workflows/release.yml",
+          "rust/build.rs"
         ]
       },
       {
         "kind": "counts",
-        "sentence": "18 files changed content, across 3 parts.",
+        "sentence": "2 files added and 1 changed content, across 2 parts.",
         "subjects": []
       }
     ],
     "since": {
-      "commit": "d06cf13b2b5c2b6a95de1f21307c79889b35339a",
-      "generatedAt": "2026-10-07T04:18:30.716Z"
+      "commit": "5d367251987fe3c1fdc23b22509d3540834d9ca4",
+      "generatedAt": "2026-10-07T05:00:40.845Z"
     },
     "unchanged": false
   },
@@ -152,9 +160,9 @@
     "Window: 180 days; a pair counts from 3 shared commits, since 8 source files reach 10 revisions; the floor rises to 10 when 25 do."
   ],
   "changesTogetherWithTests": 0,
-  "commit": "5d367251987fe3c1fdc23b22509d3540834d9ca4",
+  "commit": "05e9f42e40f6b818ae51c13931e6db64f2cf9371",
   "defaultBranch": "main",
-  "derived": "10 parts, mostly C# (181 files), Rust (39), CSS (2), PowerShell (2), TypeScript (2), Astro (1), JavaScript (1), Python (1) and shell (1). Work enters through 7 doors; the busiest is Build and Test, which reaches 4 parts. It deploys a site to GitHub Pages. People run scalarscope.",
+  "derived": "10 parts, mostly C# (181 files), Rust (40), CSS (2), PowerShell (2), TypeScript (2), Astro (1), JavaScript (1), Python (1) and shell (1). Work enters through 7 doors; the busiest is Build and Test, which reaches 4 parts. It deploys a site to GitHub Pages. People run scalarscope.",
   "doors": [
     {
       "builds": [
@@ -181,7 +189,7 @@
         {
           "boundary": "rust",
           "depth": 0,
-          "files": 25
+          "files": 26
         },
         {
           "boundary": "src",
@@ -196,9 +204,10 @@
       ],
       "runs": [
         "packaging/pack.ps1",
+        "rust/build.rs",
         "tests/ScalarScope.FixtureTests/ScalarScope.FixtureTests.csproj"
       ],
-      "runsCount": 2,
+      "runsCount": 3,
       "runsMore": 0,
       "sends": [],
       "stages": [],
@@ -231,13 +240,14 @@
         {
           "boundary": "rust",
           "depth": 0,
-          "files": 25
+          "files": 26
         }
       ],
       "runs": [
-        "packaging/pack.ps1"
+        "packaging/pack.ps1",
+        "rust/build.rs"
       ],
-      "runsCount": 1,
+      "runsCount": 2,
       "runsMore": 0,
       "sends": [
         "creates a GitHub release",
@@ -262,10 +272,11 @@
         {
           "boundary": "rust",
           "depth": 0,
-          "files": 36
+          "files": 37
         }
       ],
       "runs": [
+        "rust/build.rs",
         "rust/src/geometry.rs",
         "rust/src/shape.rs",
         "rust/src/stats.rs",
@@ -287,8 +298,8 @@
         "rust/tests/trends_tests.rs",
         "rust/tests/workbench_tests.rs"
       ],
-      "runsCount": 20,
-      "runsMore": 17,
+      "runsCount": 21,
+      "runsMore": 18,
       "sends": [
         "uploads coverage to Codecov"
       ],
@@ -419,7 +430,7 @@
   "edges": [],
   "engine": "1.24.0",
   "generated": [],
-  "generatedAt": "2026-10-07T05:00:40.845Z",
+  "generatedAt": "2026-10-07T05:21:47.462Z",
   "limits": [
     "5 writes and 4 reads use paths built at run time and are not named here.",
     "5 writes and 12 reads go to a path their caller passes, not to this repository.",
@@ -444,13 +455,18 @@
   "readers": [],
   "repo": "mcp-tool-shop-org/scalarscope",
   "sequences": [],
-  "startDoor": "rust/Cargo.toml#scalarscope",
+  "startDoor": ".github/workflows/coverage.yml",
   "startHere": [
-    "rust/src/main.rs",
+    ".github/workflows/coverage.yml",
     "rust/src/lib.rs",
-    "rust/src/ui.rs"
+    "rust/src/bundle.rs",
+    "rust/src/review.rs",
+    "rust/src/open.rs",
+    "rust/src/shape.rs",
+    "rust/src/stats.rs",
+    "rust/src/readings.rs"
   ],
-  "startReason": "This path follows scalarscope (a command people run) from its entry, since Build and Test only checks code.",
+  "startReason": "This path follows Coverage, since Build and Test only checks code.",
   "summary": "A review of two machine-learning runs. The app is the Rust program in rust/, packed as an MSIX for the Microsoft Store; src/ holds the earlier .NET MAUI app the Store copy still runs.",
   "summaryFrom": "person",
   "testFiles": 75,
