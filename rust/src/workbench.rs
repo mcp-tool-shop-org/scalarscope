@@ -122,7 +122,7 @@ impl Host for LatencyHost {
     }
 
     fn note_hint(&self) -> &str {
-        "What you looked at and what is still open, in words; name a measure by its name, such as p99, and write no other numbers."
+        "What you looked at and what is still open, in words; name a measure by its name, such as p99, and write no other numbers. When you report a hypothesis's state, use the program's words for it."
     }
 
     fn knob_label(&self, key: &str) -> String {
