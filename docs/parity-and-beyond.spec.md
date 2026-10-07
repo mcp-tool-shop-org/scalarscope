@@ -174,7 +174,7 @@ The section above says what phase 5 does, but not how the code moves. This plan 
 
 **What is shared today, and what is not.** RunForge's workbench is generic in its method but not in its types. `expr` evaluates a formula against a `Series`, and its measures (`low`, `median_between`, `slope_between`) are loss-over-epoch readings. `bench` and `session` take a `Board`, and they read `Series.recipe`, `Series.seed` and the loss samples (for `run_fingerprint`). The statistics (`exact_p`, `permutation_e`, `lambda_for`, Holm, e-BH, `Book` checkpoints), the wording fence, the phases, the caps and the Ollama loop never touch a loss value. They are what moves.
 
-**5a. The shared crate, by pull request to runforge.**
+**5a. The shared crate, by pull request to runforge** (opened as mcp-tool-shop-org/runforge#7: 149 RunForge tests before the move, 154 after, all passing).
 
 - It lives at `crates/workbench` in the runforge workspace (crate name `workbench`, `publish = false`). ScalarScope depends on it with `git = "https://github.com/mcp-tool-shop-org/runforge"`, pinned to a `rev`. A pin moves by pull request, as the Atlas pin does. It does not get a repo of its own: D2 sends the change to runforge, and one home keeps one history for the evidence code.
 - **The interface** is a concrete `Run` plus one trait the host implements:
@@ -261,6 +261,25 @@ oracle.
 | G8 | ΔF persistence | Three recorded failures, hard-coded; time from the third, kind from the first | Read `PersistenceWindow`; one failure's time and kind |
 | G9 | ΔĀ missing steps | A step without enough eigenvalues counts as alignment 0 | Leave such steps out? |
 | G10 | ΔO threshold | Adaptive per run: max(1.5 × median, 1 × robust sigma) of that run's own absolute curvature | A very straight run gets a tiny threshold and is called unstable for one small curl. Seen on the aspire-si demo pair: the steady run is flagged, the regressing one is not. A threshold shared by both runs would compare like with like |
+
+### Decision brief (2026-10-06)
+
+Each fix was applied by itself on a scratch copy and run on the two pairs ScalarScope has. The pairs are the 2.0 demo pair (correlated against orthogonal professors) and the simulated aspire-si pair (steady against regressing). Each was run in both orders and under step, convergence and first-instability alignment. Nothing was changed in the code. A bundle stores its deltas, so saved reviews keep the answers they were saved with. A fix changes only comparisons computed after it.
+
+| # | What the fix changes on this data | Tests it breaks | Recommendation |
+|---|---|---|---|
+| G1 | Nothing. The defaults equal the pinned constants, so only a non-default convergence config would differ. | None | **Fix.** It is invisible today and removes a trap for anyone who tunes the config. |
+| G2 | Nothing, in all three alignments. | None | **Fix, fully.** Take absolute curvature for the mean *and* for the comparison. The measured patch changed only the mean. |
+| G3 | Nothing. Both pairs' failure steps land on the same integer either way. On the aspire pair that depends on how floating point rounds 0.5763 × 59, so it is fragile. | None | **Fix.** It removes the one-past-the-end step. |
+| G4 | Nothing. The branch is never reached: neither demo run converges, and both aspire runs do. | `convergence_when_only_one_run_settles_is_present` (asserts +1) | **Fix, using the sign convention of the both-converged branch** (right minus left): +1 when only the left run converged, −1 when only the right did. Update the one test. |
+| G5 | Only wording: the tile name "Agreement", the explanation, "Similar evaluator alignment", the summary tail " while evaluator alignment differed" (the aspire verdict ends with it) and the Guide's help line. | Four string assertions in `geometry_delta_tests.rs` | **Rename** to "Spectrum concentration". Keep the id and the symbol, so 2.0 bundles still match. |
+| G6 | No direction flips and no status changes. On the aspire pair the reported change grows from ±0.142 to ±0.301 under step alignment. After the fix the change no longer equals right minus left of the means shown beside it. | None | **Keep 2.0.** The two disagree on neither pair, and the fix makes the tile's numbers inconsistent with each other. Revisit if a real export shows a disagreement. |
+| G7 | Unreachable at the default floor: a tie is below the 0.05 floor and is suppressed before the anchor code runs. | n/a | **Leave it, and close the question.** |
+| G8 | The failure *kind* in ΔF changes on both pairs. The time is unchanged, because the third failure was already the time source. Demo: "correctness_dip near step 6" becomes "tradeoffs_failure near step 6". Aspire: "practicality_dip" becomes "correctness_dip", which is tied at that time with two others. | Two oracle explanation tests, and the compat bundle verdict | **Fix.** Today's sentence names one failure's kind at another failure's time, which is wrong as written. The 2.0 oracles would then record 2.0's sentence and 3.0's side by side, as the golden pair already does for ΔF. |
+| G9 | Nothing. No step in these files is short of eigenvalues. | None, which means no test covers it | **Fix, and add a test with a sparse step.** |
+| G10 | A shared threshold over both runs' pooled curvature turns the demo pair's ΔO from present to "Both runs stable". On the aspire pair the steady run is **still** flagged, with a lower score (0.517 to 0.403 under step alignment), and under first-instability alignment the regressing run becomes flagged. | Two oracle tests, and the compat bundle (3 fired tiles, not 4) | **Do not adopt the pooled threshold.** It does not cure the case that raised the question. Decide G10 on the two real aspire-si exports (phase 4a's exit test), where it can be judged on runs that were actually trained. |
+
+In short: G1, G2, G3, G4 and G9 are safe fixes that are invisible on today's data. G5 and G8 change words a user sees. G6 and G7 stay as they are. G10 waits for real exports.
 
 ## Corrections
 
