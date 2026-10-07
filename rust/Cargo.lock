@@ -4258,7 +4258,7 @@ checksum = "1ebf944e87a7c253233ad6766e082e3cd714b5d03812acc24c318f549614536e"
 [[package]]
 name = "workbench"
 version = "2.0.0"
-source = "git+https://github.com/mcp-tool-shop-org/runforge?rev=39c0ce7f85f9a022185b93092a3448799c399ee0#39c0ce7f85f9a022185b93092a3448799c399ee0"
+source = "git+https://github.com/mcp-tool-shop-org/runforge?rev=019236654f633e224479163b1593dba57cac5c7c#019236654f633e224479163b1593dba57cac5c7c"
 dependencies = [
  "serde_json",
 ]

@@ -1,0 +1,153 @@
+{
+  "digest": "bdbd181c33f2ed1b31c972991882db3cf4d192569092138a7d29e973cd9debe8",
+  "learned": [
+    {
+      "formula": "p99 / p90",
+      "meaning": "How heavy the tail is, measured by the ratio of the 99th percentile to the 90th percentile.",
+      "name": "tail_heaviness"
+    }
+  ],
+  "measures_not_used": [
+    "p99_over_p50",
+    "quantile_between",
+    "mean_between"
+  ],
+  "model": "qwen3:14b",
+  "model_note": "I looked at the effect of batch size on latency and throughput. The hypothesis that increasing batch size leads to higher tail_heaviness is inconclusive, while the hypothesis that increasing batch size improves throughput_p50 is supported. Further investigation is needed to confirm the relationship between batch size and tail_heaviness.",
+  "model_note_dropped": false,
+  "program": "ScalarScope",
+  "proposed": [
+    {
+      "id": "h1",
+      "state": "inconclusive",
+      "statement": "When batch size goes up, tail_heaviness goes higher."
+    },
+    {
+      "id": "h2",
+      "state": "passes its test on these runs alone",
+      "statement": "When batch size goes up, throughput_p50 goes higher."
+    }
+  ],
+  "runs": [
+    {
+      "identity": "4ecc44d88da49452",
+      "knobs": {
+        "batch": 1,
+        "precision": "fp16"
+      },
+      "name": "batch 1 seed 1"
+    },
+    {
+      "identity": "f8a30621cd855801",
+      "knobs": {
+        "batch": 1,
+        "precision": "fp16"
+      },
+      "name": "batch 1 seed 2"
+    },
+    {
+      "identity": "8b395c5bafc1cbac",
+      "knobs": {
+        "batch": 1,
+        "precision": "fp16"
+      },
+      "name": "batch 1 seed 3"
+    },
+    {
+      "identity": "0996baf0a4274a8c",
+      "knobs": {
+        "batch": 4,
+        "precision": "fp16"
+      },
+      "name": "batch 4 seed 1"
+    },
+    {
+      "identity": "41f9c6ba7a00992f",
+      "knobs": {
+        "batch": 4,
+        "precision": "fp16"
+      },
+      "name": "batch 4 seed 2"
+    },
+    {
+      "identity": "45a80e2e90d03c5b",
+      "knobs": {
+        "batch": 4,
+        "precision": "fp16"
+      },
+      "name": "batch 4 seed 3"
+    },
+    {
+      "identity": "c7ae185ef6aab735",
+      "knobs": {
+        "batch": 8,
+        "precision": "fp16"
+      },
+      "name": "batch 8 seed 1"
+    },
+    {
+      "identity": "34d032317ad02a56",
+      "knobs": {
+        "batch": 8,
+        "precision": "fp16"
+      },
+      "name": "batch 8 seed 2"
+    },
+    {
+      "identity": "fe69dd9df35875f9",
+      "knobs": {
+        "batch": 8,
+        "precision": "fp16"
+      },
+      "name": "batch 8 seed 3"
+    }
+  ],
+  "seconds": 3,
+  "session": "knob-folder",
+  "steps": [
+    {
+      "answer": "The formula has text after its end.",
+      "args": "{\"formula\":\"p50, p90, p99, steady_mean, warmup_cost, anomaly_rate, throughput_p50, memory_peak, samples\"}",
+      "ok": false,
+      "round": 0,
+      "tool": "measure"
+    },
+    {
+      "answer": "The formula has text after its end.",
+      "args": "{\"formula\":\"p50, p90, p99, steady_mean, warmup_cost, anomaly_rate, throughput_p50, memory_peak, samples\"}",
+      "ok": false,
+      "round": 1,
+      "tool": "measure"
+    },
+    {
+      "answer": "Kept tail_heaviness as a provisional tool. It becomes a kept tool once it is used on a second folder.\nbatch 1 seed 1: 2.7079\nbatch 1 seed 2: 1.0543\nbatch 1 seed 3: 2.7373\nbatch 4 seed 1: 2.7852\nbatch 4 seed 2: 2.8335\nbatch 4 seed 3: 2.8928\nbatch 8 seed 1: 2.8086\nbatch 8 seed 2: 2.9313\nbatch 8 seed 3: 2.7979",
+      "args": "{\"formula\":\"p99 / p90\",\"meaning\":\"How heavy the tail is, measured by the ratio of the 99th percentile to the 90th percentile.\",\"name\":\"tail_heaviness\"}",
+      "ok": true,
+      "round": 2,
+      "tool": "learn_tool"
+    },
+    {
+      "answer": "Recorded h1: When batch size goes up, tail_heaviness goes higher. On these runs it is inconclusive. batch size 8 against 1: tail_heaviness 2.8086 against 2.7079, a gap of 0.1007. The gap is inside the seed spread within one setting (1.6831).\nTo settle it: 6 runs, batch size at 1 and 4, 3 seeds each, everything else as here. It is refuted if the higher batch size setting gives the lower tail_heaviness on every seed.",
+      "args": "{\"formula\":\"tail_heaviness\",\"formula_moves\":\"up\",\"knob\":\"batch\",\"knob_change\":\"raise\",\"why\":\"Increasing the batch size may lead to more variability in latency, which could result in a heavier tail as indicated by an increase in tail_heaviness.\"}",
+      "ok": true,
+      "round": 3,
+      "tool": "propose_hypothesis"
+    },
+    {
+      "answer": "Recorded h2: When batch size goes up, throughput_p50 goes higher. On these runs it is passes its test on these runs alone. batch size 8 against 1: throughput_p50 497.2172 against 181.6497, a gap of 315.5675. Every comparison of runs agrees: exact rank test p = 0.05.",
+      "args": "{\"formula\":\"throughput_p50\",\"formula_moves\":\"up\",\"knob\":\"batch\",\"knob_change\":\"raise\",\"why\":\"Increasing the batch size may improve throughput as more data is processed in each batch, leading to higher median throughput.\"}",
+      "ok": true,
+      "round": 4,
+      "tool": "propose_hypothesis"
+    },
+    {
+      "answer": "Finished. Your note is kept.",
+      "args": "{\"note\":\"I looked at the effect of batch size on latency and throughput. The hypothesis that increasing batch size leads to higher tail_heaviness is inconclusive, while the hypothesis that increasing batch size improves throughput_p50 is supported. Further investigation is needed to confirm the relationship between batch size and tail_heaviness.\"}",
+      "ok": true,
+      "round": 5,
+      "tool": "finish"
+    }
+  ],
+  "stopped": "The model finished.",
+  "your_call": "I expect a larger batch to raise p50 and to make the tail heavier."
+}
