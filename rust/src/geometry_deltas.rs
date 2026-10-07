@@ -1505,7 +1505,7 @@ pub fn withhold_by_layout(deltas: &mut [GeometryDelta], left: &crate::geometry::
     let repeated: Vec<&str> = [left.repeated_scores(), right.repeated_scores()].into_iter().flatten().collect();
     for delta in deltas.iter_mut() {
         let reason = match delta.id.as_str() {
-            delta_ids::CONVERGENCE_TIMING | delta_ids::STABILITY_OSCILLATION if not_time => Some(NOT_TIME.to_string()),
+            delta_ids::CONVERGENCE_TIMING | delta_ids::STRUCTURAL_EMERGENCE | delta_ids::STABILITY_OSCILLATION if not_time => Some(NOT_TIME.to_string()),
             delta_ids::FAILURE_PRESENCE if not_time => Some(NOT_TIME.to_string()),
             delta_ids::FAILURE_PRESENCE if !repeated.is_empty() => {
                 let how = if repeated.contains(&"replayed") { "replayed after the first epoch" } else { "fixed per item" };

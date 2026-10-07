@@ -134,7 +134,7 @@ fn the_fixtures_state_their_layout() {
 #[test]
 fn drift_withholds_timing_oscillation_and_failure_and_speaks_from_what_stands() {
     let review = reviewed("real-local-teacher.drift.geometry.json", "real-composite-teacher.drift.geometry.json");
-    for symbol in ["ΔTc", "ΔO", "ΔF"] {
+    for symbol in ["ΔTc", "ΔTd", "ΔO", "ΔF"] {
         let tile = status(&review, symbol);
         assert_eq!(tile.status, "withheld", "{symbol}");
         assert!(tile.why.contains("steps are checkpoint × item, not time"), "{symbol}: {}", tile.why);
@@ -200,21 +200,22 @@ fn the_fine_tuned_exports_open_in_full_and_state_their_layout() {
 }
 
 #[test]
-fn four_checkpoints_withhold_like_three_and_pair_with_the_control() {
+fn four_checkpoints_withhold_like_three_and_pair_with_the_control_with_emergence_withheld_too() {
     // Four checkpoints from the base student, side by side.
     let review = reviewed("sft-local-teacher.drift-from-base.geometry.json", "sft-composite-teacher.drift-from-base.geometry.json");
-    for symbol in ["ΔTc", "ΔO", "ΔF"] {
+    for symbol in ["ΔTc", "ΔTd", "ΔO", "ΔF"] {
         let tile = status(&review, symbol);
         assert_eq!(tile.status, "withheld", "{symbol}");
         assert!(tile.why.contains("steps are checkpoint × item, not time"), "{symbol}: {}", tile.why);
     }
     // ASPIRE's drift after the fine-tune against the control's ASPIRE drift: both three checkpoints.
     let review = reviewed("real-local-teacher.drift.geometry.json", "sft-local-teacher.drift-from-sft.geometry.json");
-    for symbol in ["ΔTc", "ΔO", "ΔF"] {
+    for symbol in ["ΔTc", "ΔTd", "ΔO", "ΔF"] {
         assert_eq!(status(&review, symbol).status, "withheld", "{symbol}");
     }
     assert!(!review.verdict.is_empty());
     // A four-checkpoint file against a three-checkpoint one still pairs; nothing is invented.
     let mixed = reviewed("real-local-teacher.drift.geometry.json", "sft-local-teacher.drift-from-base.geometry.json");
     assert_eq!(status(&mixed, "ΔTc").status, "withheld");
+    assert_eq!(status(&mixed, "ΔTd").status, "withheld");
 }

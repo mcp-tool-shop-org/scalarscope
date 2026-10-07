@@ -35,22 +35,22 @@
   ],
   "changes": {
     "fileCounts": {
-      "added": 6,
-      "changed": 2,
+      "added": 0,
+      "changed": 14,
       "moved": 0,
-      "parts": 2,
+      "parts": 4,
       "removed": 0
     },
     "items": [
       {
         "kind": "counts",
-        "sentence": "Nothing structural changed since 2026-10-07; 6 files added and 2 changed content.",
+        "sentence": "Nothing structural changed since 2026-10-07; 14 files changed content.",
         "subjects": []
       }
     ],
     "since": {
-      "commit": "67fa43554a51ddc6dd32e09e52f20fc10779a843",
-      "generatedAt": "2026-10-07T05:42:01.599Z"
+      "commit": "2639d27bb087591010d32fe14225c102361386c9",
+      "generatedAt": "2026-10-07T08:08:27.536Z"
     },
     "unchanged": true
   },
@@ -136,7 +136,7 @@
     "Window: 180 days; a pair counts from 3 shared commits, since 8 source files reach 10 revisions; the floor rises to 10 when 25 do."
   ],
   "changesTogetherWithTests": 0,
-  "commit": "2639d27bb087591010d32fe14225c102361386c9",
+  "commit": "925ce1c6873bc5af9b87929dc90735277b7cb543",
   "defaultBranch": "main",
   "derived": "10 parts, mostly C# (181 files), Rust (40), CSS (2), PowerShell (2), TypeScript (2), Astro (1), JavaScript (1), Python (1) and shell (1). Work enters through 7 doors; the busiest is Build and Test, which reaches 4 parts. It deploys a site to GitHub Pages. People run scalarscope.",
   "doors": [
@@ -406,7 +406,7 @@
   "edges": [],
   "engine": "1.24.0",
   "generated": [],
-  "generatedAt": "2026-10-07T08:08:27.536Z",
+  "generatedAt": "2026-10-07T08:13:54.259Z",
   "limits": [
     "5 writes and 4 reads use paths built at run time and are not named here.",
     "5 writes and 12 reads go to a path their caller passes, not to this repository.",
