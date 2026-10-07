@@ -899,7 +899,7 @@ fn capture_mode_sets_the_page_and_view_and_counts_down() {
     let mut app = blank(None);
     let out = directory().join("shot.png");
     let folder = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/workbench");
-    app.capture(out.clone(), "workbench", Some(3), Some("ΔF".to_string()), Some(&folder), Some(1.3));
+    app.capture(out.clone(), "workbench", Some(3), Some("ΔF".to_string()), Some(&folder), Some(1.3), None);
     assert_eq!(app.text_scale, 1.3);
     assert_eq!(app.page, super::Page::Workbench);
     assert_eq!(app.view, super::View::Distribution);
@@ -911,11 +911,35 @@ fn capture_mode_sets_the_page_and_view_and_counts_down() {
     assert_eq!(app.pending_png.as_deref(), Some(out.as_path()));
     for (page, expected) in [("welcome", super::Page::Welcome), ("history", super::Page::History), ("guide", super::Page::Guide), ("settings", super::Page::Settings), ("compare", super::Page::Compare)] {
         let mut other = blank(None);
-        other.capture(directory().join("x.png"), page, None, None, None, Some(9.0));
+        other.capture(directory().join("x.png"), page, None, None, None, Some(9.0), None);
         assert_eq!(other.text_scale, 1.0, "a scale out of range is ignored");
         assert_eq!(other.page, expected);
     }
     let mut missing = blank(None);
-    missing.capture(directory().join("x.png"), "workbench", Some(9), None, Some(&directory()), None);
+    missing.capture(directory().join("x.png"), "workbench", Some(9), None, Some(&directory()), None, None);
     assert!(missing.note.contains("No inference run"));
+}
+
+#[test]
+fn capture_with_ask_waits_for_the_session() {
+    let mut app = blank(None);
+    let out = directory().join("ask.png");
+    let folder = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/workbench");
+    app.capture(out, "workbench", None, None, Some(&folder), None, Some("Batch raises latency.".to_string()));
+    assert_eq!(app.bench.your_call, "Batch raises latency.");
+    assert!(app.history_dir.is_some(), "the session keeps its memory in a temporary folder");
+    // Whatever the local model does, a session is running or has answered; while it runs, no picture.
+    if app.bench.ask.is_some() {
+        let (tx, rx) = std::sync::mpsc::channel::<workbench::BenchReply>();
+        app.bench.ask = Some(rx);
+        for _ in 0..40 {
+            show(&mut app);
+        }
+        assert!(app.pending_png.is_none(), "no picture while the session runs");
+        tx.send(workbench::BenchReply::Absent("The local model is not running.".to_string())).unwrap();
+        for _ in 0..40 {
+            show(&mut app);
+        }
+    }
+    assert!(app.bench.ask.is_none());
 }

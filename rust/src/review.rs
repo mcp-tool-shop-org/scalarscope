@@ -335,7 +335,7 @@ fn explain(
         Tc::Quiet if stated => ("quiet", "Same steady-state step".to_string(), "Both files state the same steady-state step.".to_string()),
         Tc::Quiet => (
             "quiet",
-            "Settles at about the same point".to_string(),
+            "Settles at about the same step".to_string(),
             "The two steady-start ranges overlap, so a difference between them could be where a segment was cut rather than a change in warmup.".to_string(),
         ),
     };
@@ -511,10 +511,11 @@ fn notices(left: &InferenceRun, right: &InferenceRun, shapes: &(RunShape, RunSha
                 return notices_rest(left, right, shapes, lines);
             }
             lines.push(format!(
-                "In elapsed time, {} settles at {a_low:.2}–{a_high:.2} s and {} at {b_low:.2}–{b_high:.2} s; the ranges {}.",
+                "In elapsed time, {} settles at {a_low:.2}–{a_high:.2} s and {} at {b_low:.2}–{b_high:.2} s; the ranges {}. ΔTc counts steps, and in steps they {}.",
                 left.label,
                 right.label,
-                if apart { "do not overlap" } else { "overlap" }
+                if apart { "do not overlap" } else { "overlap" },
+                if steps_apart { "do not" } else { "do" }
             ));
         }
     }
