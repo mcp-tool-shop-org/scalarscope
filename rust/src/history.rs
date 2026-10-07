@@ -46,6 +46,26 @@ pub struct LogEntry {
     pub deltas_fired: Vec<String>,
     #[serde(default = "compare_kind")]
     pub kind: String,
+    /// Side B's fingerprints, when it was a RunTrace: the history groups reviews by them. New in 3.0.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub fingerprints: Option<EntryFingerprints>,
+    /// Side B's built-in measures as this review computed them, for the history view. New in 3.0.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub measures: Option<std::collections::BTreeMap<String, f64>>,
+}
+
+/// The four fingerprints a RunTrace states.
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct EntryFingerprints {
+    #[serde(default)]
+    pub dataset: String,
+    #[serde(default)]
+    pub model: String,
+    #[serde(default)]
+    pub code: String,
+    #[serde(default)]
+    pub environment: String,
 }
 
 fn compare_kind() -> String {
@@ -159,6 +179,8 @@ pub fn attach_bundle(bundle_path: &str, bundle_hash: Option<&str>, directory: &P
             alignment: String::new(),
             deltas_fired: Vec::new(),
             kind: "bundle".to_string(),
+            fingerprints: None,
+            measures: None,
         },
         directory,
     )

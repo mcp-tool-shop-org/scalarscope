@@ -66,6 +66,10 @@ pub const GUIDE: &[Section] = &[
         body: "A knob is a setting a run was made with: batch size, precision, TensorRT, threads, CUDA graphs, input shape. It is read from the first place that has it: a knobs object in the RunTrace metadata, a knobs.json beside the run, then key=value pairs in the folder name, such as batch=8_precision=fp16. The page says where each came from. A run set counts as evidence about a knob only when that knob differs and the others match.",
     },
     Section {
+        title: "History",
+        body: "The History tab follows a project across its logged reviews. A project is side B's dataset and model fingerprints, so it needs RunTrace files; reviews without fingerprints, and every review 2.0 logged, go to Unsorted. For each measure the program finds where its level shifts: PELT with a mean-shift cost on the logarithm, penalty 2 · ln n, segments of at least three reviews, and only once six reviews have the measure. Reviews where the code or environment fingerprint changed are marked, and a shift within one review of a mark says so. That is a coincidence on the page, not a cause. The log keeps the last 40 reviews.",
+    },
+    Section {
         title: "Keyboard shortcuts",
         body: "F1: Guide. Ctrl+,: Settings. Ctrl+H: Welcome. On Compare, 1 to 6 choose Series, Warmup, Distribution, Difference, Spectrum and Heat map. Esc closes the Why panel.",
     },

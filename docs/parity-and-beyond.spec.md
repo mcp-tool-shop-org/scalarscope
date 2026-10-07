@@ -197,7 +197,12 @@ The section above says what phase 5 does, but not how the code moves. This plan 
 
 - A **project** is the pair (dataset fingerprint, model fingerprint) of side B. Code and environment are left out of the key, because their changes are what the history is for. A 2.0 log entry without fingerprints goes to "Unsorted".
 - Each comparison-log entry gains an optional `measures` object: side B's built-in measures, as the review computed them. 2.0 entries lack it, and they are kept and shown without a series.
-- For each measure, the project's entries in date order go through PELT (`shape::pelt`) with a fixed penalty, which is recorded on the view. With fewer than six entries the view says "too few reviews for change points" and draws only the points.
+- For each measure, the project's entries in date order go through PELT with a fixed penalty, which is recorded on the view. With fewer than six entries the view says "too few reviews for change points" and draws only the points.
+  - *As built:* `shape::pelt`'s mean-and-variance cost is unstable on segments of a few reviews. Three near-equal values have almost no variance, and their cost runs to minus infinity. History therefore uses `trends::mean_shift_pelt` instead:
+    - the squared error around each segment's mean, on the logarithm;
+    - one noise scale for the whole series, 1.4826 × MAD of first differences / √2, so the shift itself does not inflate it;
+    - a penalty of 2 · ln n (BIC: a change adds a location and a level);
+    - segments of at least three reviews.
 - An entry whose code or environment fingerprint differs from the one before it is marked on the axis. A shift that falls within one entry of such a mark names the mark: "p99 shifted at 2026-10-09, with an environment change". The program writes that sentence, and it claims coincidence, not cause.
 
 **Exit test, restated.** (1) RunForge's workbench tests pass on the shared crate, with RunForge's suite green and its count unchanged. (2) A live session with the local tool model on the golden pair and on `rust/tests/fixtures/workbench/` ends with every hypothesis in a program-set state. The session record, with no paths, is committed under `docs/receipts/` as the receipt. (3) The history view draws a project of at least six logged reviews, with a fixture that holds one environment change and one shift.

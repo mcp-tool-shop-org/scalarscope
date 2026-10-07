@@ -143,6 +143,8 @@ fn pair(left: &str, right: &str, deltas: Vec<&str>, alignment: &str) -> LogEntry
         alignment: alignment.to_string(),
         deltas_fired: deltas.into_iter().map(str::to_string).collect(),
         kind: "compare".to_string(),
+        fingerprints: None,
+        measures: None,
     }
 }
 
