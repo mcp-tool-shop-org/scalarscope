@@ -291,6 +291,7 @@ In short: G1, G2, G3, G4 and G9 are safe fixes that are invisible on today's dat
 - G5 is renamed "Spectrum concentration", keeping its id and symbol.
 - G6 and G7 stay as 2.0 has them, and G7 is closed.
 - G10 waits for the real exports.
+- **G10, decided 2026-10-07 on the real aspire-si exports:** keep 2.0's per-run threshold, and G10 is closed. On both real pairs the runs' own thresholds are nearly equal, and a shared threshold changes no verdict or owner. The evidence is in `docs/receipts/geometry/README.md`.
 
 The fixes are applied in `rust/src/geometry_deltas.rs`, each marked `G<n> (ruled 2026-10-06)`. The oracles that change keep 2.0's wording in a comment.
 

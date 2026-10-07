@@ -391,10 +391,21 @@ impl ScalarScopeApp {
         let Some(paths) = picked.filter(|paths| !paths.is_empty()) else {
             return;
         };
+        self.load_paths(left, &paths);
+    }
+
+    /// Open a pair named on the command line (`scalarscope <path A> <path B>`), as if each had
+    /// been picked. A path that does not open leaves its side empty with the reason shown.
+    pub fn open_pair(&mut self, left: &std::path::Path, right: &std::path::Path) {
+        self.load_paths(true, &[left.to_path_buf()]);
+        self.load_paths(false, &[right.to_path_buf()]);
+    }
+
+    fn load_paths(&mut self, left: bool, paths: &[std::path::PathBuf]) {
         self.built = None;
         self.highlight = None;
         self.page = Page::Compare;
-        match open_paths(&paths) {
+        match open_paths(paths) {
             Ok(loaded) => {
                 self.opened = None;
                 let remembered = self.remember_opened_file(&loaded);

@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- `scalarscope <path A> <path B>` opens that pair on Compare at launch.
+- Fixtures from real aspire-si training runs (`rust/tests/fixtures/aspire-si/real-*`): per-step and drift exports of a local-teacher run and a composite-teacher run. Tests check that they open in full and that the evaluator-spectrum reading holds.
 - A Workbench tab, on the workbench RunForge shares with it. Open runs there, or use the runs being compared. Press Ask and a local model that can call tools (Ollama on this computer; cloud models are refused) measures the runs, builds formula tools and proposes what each knob does. ScalarScope computes every number and sets every verdict: a hypothesis is not testable, confounded, inconclusive, supported or refuted on one set of runs, and verdicts across sets come only at checkpoints, by e-BH at a 5% false discovery rate. The page puts the program's verdicts first, with how many hypotheses were tried and how many hold. It then has a box for your own call before you ask, and the model's note labelled as its words. It also lists the measures the model never looked at, and Save session record writes the model, its digest, every call and answer, and no paths.
 - Knobs. A run's settings are read from `metadata.knobs` in a RunTrace, a `knobs.json` beside the run, or `key=value` pairs in its folder name, in that order, and the page says where each came from.
 - Latency measures for the workbench's formulas: p50, p90 and p99 of the steady samples (a percentile without enough samples is refused, as on the headline), p99/p50, steady mean, warmup cost, anomaly rate under the chosen rule, throughput, memory peak, and windows over steps.
