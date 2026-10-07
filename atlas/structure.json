@@ -378,7 +378,7 @@
           "path": ".gitignore"
         },
         {
-          "hash": "182b363cc203a2818570df3a1c0f7c33b0d2531108d4cf72403ea7bee09036e6",
+          "hash": "b2ab2cee0761d1d48985b0d16a44a6a464d390442633f6822e4ac61d4eb766ee",
           "path": "CHANGELOG.md"
         },
         {
@@ -394,35 +394,35 @@
           "path": "PRIVACY.md"
         },
         {
-          "hash": "0a4af03553bec9ece1d4deae9648819436e44d4dbfa3e7744e174e1efebea52f",
+          "hash": "a12fe160b9255a1f883c166934bc0613007101d4e4d690c7b1fad8e865fdc733",
           "path": "README.es.md"
         },
         {
-          "hash": "7a2cb1fdf677b3f62a322e51cadef0fe2941eccb91cb307cec33588a639f3d3e",
+          "hash": "27cf2c00ed82a6f88a6f2b1d461f812dffe1beddc2635fda2adadaf0ebdf3486",
           "path": "README.fr.md"
         },
         {
-          "hash": "ecc1daa37dd91320fa5779c31fb2cae4fc12aee4ccd79fd362741297dd30e781",
+          "hash": "043956474fa452a38127d44d029d1cdbdb757096f54d7b05c19ca1850c8d6611",
           "path": "README.hi.md"
         },
         {
-          "hash": "ec315404dd0072a706b4bd351902ce83c60880bac4666285811e4b99c85ddc92",
+          "hash": "33e606a09597f8a4359401ab1017c796f9bd2075119978ea9dd4be8389749627",
           "path": "README.it.md"
         },
         {
-          "hash": "2d48128a24928a8b21f214a1ed9804fd53c6e46eedfcc9702d5a0098de44b270",
+          "hash": "3492ee7921d4e61ef7eaf23f906d254ff6f3f40fce24e17b4d93a00e37e88981",
           "path": "README.ja.md"
         },
         {
-          "hash": "e650c30109b63a61e7f147eee95c5c618bf72b737d2a54de8ae5df1b22c4414e",
+          "hash": "4ebce324cacf912bc86e95023f60be9f4e348191f1e43e348afd28fa53e8146a",
           "path": "README.md"
         },
         {
-          "hash": "ae3b56efe13542b6adc8e927dd805604d50e53812f0d42e06e1a99b19a77721e",
+          "hash": "731bbc35eeba693856883c2b9b5f9239c50aaba172b673f57cf1dbe5c0643d09",
           "path": "README.pt-BR.md"
         },
         {
-          "hash": "17ed0313f9b1e88cc4d3b7d47351d4f2b7ad83676bdfbb32447c3d09fa668813",
+          "hash": "d3ea77bba5446c2fd7eff0e41a97ff20a3896668693972d4e23004765076d800",
           "path": "README.zh.md"
         },
         {
@@ -850,7 +850,9 @@
           "exports": [
             "attach_bundle",
             "clear",
+            "documents_folder",
             "file_path",
+            "home_folder",
             "package_local_state",
             "read",
             "record"
@@ -867,7 +869,7 @@
               "line": 142
             }
           ],
-          "hash": "23ef6eb15f13b93bc91c6aff20008089ea5251930f323e99025c8790dd923773",
+          "hash": "1d0530f842e619658d90017a3d6a267f95eb981721c1d427389e99da8b2a4c8c",
           "importsFiles": [
             "rust/src/bundle.rs"
           ],
@@ -2052,33 +2054,35 @@
             "clear_recent",
             "read",
             "remember_file",
+            "remember_folder",
             "saved_views",
             "series_palette",
+            "start_folder",
             "write_settings"
           ],
           "failurePaths": [
             {
               "in": "read_object",
               "kind": "err",
-              "line": 96
+              "line": 100
             },
             {
               "in": "read_object",
               "kind": "err",
-              "line": 105
+              "line": 109
             },
             {
               "in": "remember_file",
               "kind": "err",
-              "line": 132
+              "line": 154
             },
             {
               "in": "remember_file",
               "kind": "err",
-              "line": 139
+              "line": 161
             }
           ],
-          "hash": "5b9d87a16da41379ff0539c2806af6257a9c2ca64ac3ff04d38a11867530c054",
+          "hash": "71d3dc7f293bad09bb2b3756822dfddf3f897106a037b062768e360cd8fbede7",
           "importsFiles": [
             "rust/src/bundle.rs"
           ],
@@ -2264,95 +2268,95 @@
             {
               "in": "page",
               "kind": "match-err",
-              "line": 325
+              "line": 326
             },
             {
               "in": "capture",
               "kind": "match-err",
-              "line": 430
+              "line": 460
             },
             {
               "in": "load_paths",
               "kind": "match-err",
-              "line": 494
+              "line": 524
             },
             {
               "in": "open_bundle",
-              "kind": "match-err",
-              "line": 517
-            },
-            {
-              "in": "save_bundle",
-              "kind": "match-err",
-              "line": 531
-            },
-            {
-              "in": "save_bundle",
               "kind": "match-err",
               "line": 548
             },
             {
               "in": "save_bundle",
               "kind": "match-err",
-              "line": 552
+              "line": 562
             },
             {
               "in": "save_bundle",
               "kind": "match-err",
-              "line": 554
+              "line": 580
+            },
+            {
+              "in": "save_bundle",
+              "kind": "match-err",
+              "line": 584
+            },
+            {
+              "in": "save_bundle",
+              "kind": "match-err",
+              "line": 586
             },
             {
               "in": "export_svg",
               "kind": "match-err",
-              "line": 739
+              "line": 773
             },
             {
               "in": "receive_screenshot",
               "kind": "match-err",
-              "line": 763
+              "line": 797
             },
             {
               "in": "settings_changed",
               "kind": "match-err",
-              "line": 802
+              "line": 836
             },
             {
               "in": "draw_settings",
               "kind": "match-err",
-              "line": 849
+              "line": 883
             },
             {
               "in": "remember",
               "kind": "match-err",
-              "line": 1243
+              "line": 1277
             },
             {
               "in": "open_saved_path",
               "kind": "match-err",
-              "line": 1371
+              "line": 1405
             },
             {
               "in": "remember_opened_file",
               "kind": "match-err",
-              "line": 1385
+              "line": 1419
             },
             {
               "in": "reopen",
               "kind": "match-err",
-              "line": 1402
+              "line": 1436
             },
             {
               "in": "reopen",
               "kind": "match-err",
-              "line": 1417
+              "line": 1451
             },
             {
               "in": "reopen",
               "kind": "match-err",
-              "line": 1417
+              "line": 1451
             }
           ],
-          "hash": "2cfdfbc42151bf8b0883ec9a52fb8153f2097357e026feaf817c8321cf8ce934",
+          "hash": "98a515f07d1eda3ecae19c0f72e09faa73900a21ffd171e7d29ecebc3ec0286b",
           "importOrder": [
             "rust/src/bundle.rs",
             "rust/src/history.rs",
@@ -2392,7 +2396,7 @@
             {
               "calls": [
                 {
-                  "line": 1030,
+                  "line": 1064,
                   "name": "nines",
                   "target": {
                     "file": "rust/src/views.rs"
@@ -2407,7 +2411,7 @@
             {
               "calls": [
                 {
-                  "line": 1051,
+                  "line": 1085,
                   "name": "spectrum",
                   "target": {
                     "file": "rust/src/views.rs"
@@ -2422,14 +2426,14 @@
             {
               "calls": [
                 {
-                  "line": 1083,
+                  "line": 1117,
                   "name": "heat_range",
                   "target": {
                     "file": "rust/src/views.rs"
                   }
                 },
                 {
-                  "line": 1100,
+                  "line": 1134,
                   "name": "heat_cells",
                   "target": {
                     "file": "rust/src/views.rs"
@@ -2444,7 +2448,7 @@
             {
               "calls": [
                 {
-                  "line": 1484,
+                  "line": 1518,
                   "name": "stored_pair",
                   "target": {
                     "file": "rust/src/bundle.rs"
@@ -2521,10 +2525,10 @@
             {
               "in": "the_workbench_page_asks_for_runs_then_weighs_a_picked_folder",
               "kind": "match-err",
-              "line": 769
+              "line": 770
             }
           ],
-          "hash": "5e8a01bd67d261cf2f6bb911ec1f534b9e9576d43faf477ec6a12830f62406d0",
+          "hash": "e5c560b37d24e26168c83c2e3cfe374a94463cafe98a33b18eb9fa120bf783bb",
           "importOrder": [
             "rust/src/bundle.rs",
             "rust/src/history.rs",
@@ -2609,20 +2613,20 @@
             {
               "in": "open_bench_runs",
               "kind": "match-err",
-              "line": 259
+              "line": 260
             },
             {
               "in": "save_session_record",
               "kind": "match-err",
-              "line": 277
+              "line": 279
             },
             {
               "in": "draw_workbench",
               "kind": "match-err",
-              "line": 340
+              "line": 342
             }
           ],
-          "hash": "afeaf00811fcf99dadb63d58f87c5f94ab311007aa728d70ee8b81aba6eeae51",
+          "hash": "7a93719a73644c9fa04f055188eec1229421d29a8a77719b503595ec6cde561d",
           "importOrder": [
             "rust/src/open.rs",
             "rust/src/workbench.rs",
@@ -2894,7 +2898,7 @@
           "testsInside": true
         },
         {
-          "hash": "164c5f1bf14254f51c764dc866994f5462a04bc0449a08135b4b44c1e793e99b",
+          "hash": "83a7b7fc1ff971e8fad376ec95eb44772368964bcd165192d70f0f13127d0154",
           "importsFiles": [
             "rust/src/prefs.rs"
           ],
@@ -5322,7 +5326,7 @@
   "edges": [],
   "engine": "1.24.0",
   "generatedFrom": {
-    "commit": "05e9f42e40f6b818ae51c13931e6db64f2cf9371",
+    "commit": "67fa43554a51ddc6dd32e09e52f20fc10779a843",
     "tracked": 457
   },
   "landings": [

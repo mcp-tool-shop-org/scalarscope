@@ -290,23 +290,58 @@ fn package_family_name() -> Option<String> {
     }
 }
 
+/// The user's Documents folder, where file dialogs start before a folder has been used.
+pub fn documents_folder() -> Option<PathBuf> {
+    #[cfg(windows)]
+    {
+        known_folder(&DOCUMENTS)
+    }
+    #[cfg(not(windows))]
+    {
+        std::env::var_os("HOME").map(|home| PathBuf::from(home).join("Documents"))
+    }
+}
+
+/// The user's profile folder, the last place a file dialog starts.
+pub fn home_folder() -> Option<PathBuf> {
+    let name = if cfg!(windows) { "USERPROFILE" } else { "HOME" };
+    std::env::var_os(name).filter(|home| !home.is_empty()).map(PathBuf::from)
+}
+
+#[cfg(windows)]
+#[repr(C)]
+struct Guid {
+    data1: u32,
+    data2: u16,
+    data3: u16,
+    data4: [u8; 8],
+}
+
+#[cfg(windows)]
+const LOCAL_APP_DATA: Guid = Guid {
+    data1: 0xF1B3_2785,
+    data2: 0x6FBA,
+    data3: 0x4FCF,
+    data4: [0x9D, 0x55, 0x7B, 0x8E, 0x7F, 0x15, 0x70, 0x91],
+};
+
+#[cfg(windows)]
+const DOCUMENTS: Guid = Guid {
+    data1: 0xFDD3_9AD0,
+    data2: 0x238F,
+    data3: 0x46AF,
+    data4: [0xAD, 0xB4, 0x6C, 0x85, 0x48, 0x03, 0x69, 0xC7],
+};
+
 #[cfg(windows)]
 fn local_app_data() -> Option<PathBuf> {
+    known_folder(&LOCAL_APP_DATA)
+}
+
+#[cfg(windows)]
+fn known_folder(id: &Guid) -> Option<PathBuf> {
     use std::ffi::c_void;
     use std::ptr;
-    #[repr(C)]
-    struct Guid {
-        data1: u32,
-        data2: u16,
-        data3: u16,
-        data4: [u8; 8],
-    }
-    const LOCAL_APP_DATA: Guid = Guid {
-        data1: 0xF1B3_2785,
-        data2: 0x6FBA,
-        data3: 0x4FCF,
-        data4: [0x9D, 0x55, 0x7B, 0x8E, 0x7F, 0x15, 0x70, 0x91],
-    };
     #[link(name = "shell32")]
     unsafe extern "system" {
         fn SHGetKnownFolderPath(id: *const Guid, flags: u32, token: *mut c_void, path: *mut *mut u16) -> i32;
@@ -317,7 +352,7 @@ fn local_app_data() -> Option<PathBuf> {
     }
     unsafe {
         let mut raw = ptr::null_mut();
-        let result = SHGetKnownFolderPath(&LOCAL_APP_DATA, 0, ptr::null_mut(), &mut raw);
+        let result = SHGetKnownFolderPath(id, 0, ptr::null_mut(), &mut raw);
         if result != 0 || raw.is_null() {
             return None;
         }

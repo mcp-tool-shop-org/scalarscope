@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ΔTc's quiet tile reads "Settles at about the same step", and the elapsed-time note adds that ΔTc counts steps and whether the step ranges overlap. Before, "the same point" sat under "in elapsed time … the ranges do not overlap" and read as a contradiction.
 - Evaluator labels on the geometry trajectory no longer overlap when two evaluators point the same way.
 - With `scalarscope <A> <B>`, a side that does not open keeps its error on the page after the other side loads.
+- File dialogs no longer open in the system folder, the Store package's working directory. Each one (Open path, Folder, Open bundle, Save bundle, Export, the Workbench's Open runs and Save session record) starts in the folder used last, kept as `LastFolder` in `preferences.json`, else in Documents. No folder goes into a bundle or `workbench.json`.
 
 ### Added
 - `scalarscope <path A> <path B>` opens that pair on Compare at launch.

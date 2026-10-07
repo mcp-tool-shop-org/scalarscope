@@ -54,6 +54,7 @@ fn blank(history: Option<PathBuf>) -> ScalarScopeApp {
         bench: Default::default(),
         history: Default::default(),
         capture: None,
+        last_folder: None,
     }
 }
 
@@ -942,4 +943,57 @@ fn capture_with_ask_waits_for_the_session() {
         }
     }
     assert!(app.bench.ask.is_none());
+}
+
+#[test]
+fn file_dialogs_start_in_the_folder_used_last_and_never_the_working_directory() {
+    let prefs_dir = directory();
+    let data = directory();
+    let csv = data.join("left.csv");
+    fs::write(&csv, latency_csv(false)).unwrap();
+    let mut app = blank(Some(prefs_dir.clone()));
+
+    // Nothing used yet: Documents, else the profile folder, and never the working directory.
+    let first = app.start_folder().expect("a starting folder");
+    assert!(first.is_absolute() && first.is_dir());
+    assert_ne!(Some(first.clone()), std::env::current_dir().ok());
+    assert_eq!(Some(first), prefs::start_folder(None, history::documents_folder(), history::home_folder()));
+
+    // A cancel remembers nothing.
+    queue_pick(None);
+    app.load(true, false);
+    assert!(app.last_folder.is_none());
+
+    // A picked file: its folder is remembered, in preferences.json too.
+    queue_pick(Some(csv));
+    app.load(true, false);
+    assert_eq!(app.last_folder.as_deref(), Some(data.as_path()));
+    assert_eq!(app.start_folder().as_deref(), Some(data.as_path()));
+    assert_eq!(prefs::read(&prefs_dir).last_folder, Some(data.display().to_string()));
+    let reopened = ScalarScopeApp { last_folder: prefs::read(&prefs_dir).last_folder.map(PathBuf::from), ..blank(Some(prefs_dir.clone())) };
+    assert_eq!(reopened.start_folder().as_deref(), Some(data.as_path()));
+
+    // A picked folder is remembered as itself.
+    let runs = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/workbench");
+    queue_pick(Some(runs.clone()));
+    app.open_bench_runs();
+    assert_eq!(app.last_folder.as_deref(), Some(runs.as_path()));
+
+    // A saved bundle remembers where it went, and the bundle carries no folder of the user's.
+    let out = directory();
+    queue_pick(Some(data.join("left.csv")));
+    app.load(true, false);
+    let right = data.join("right.csv");
+    fs::write(&right, latency_csv(true)).unwrap();
+    queue_pick(Some(right));
+    app.load(false, false);
+    queue_save(Some(out.join("review.scbundle")));
+    app.save_bundle();
+    assert_eq!(app.last_folder.as_deref(), Some(out.as_path()), "{}", app.note);
+    let bytes = fs::read(out.join("review.scbundle")).unwrap();
+    assert!(!String::from_utf8_lossy(&bytes).contains("LastFolder"));
+
+    // A remembered folder that is gone falls back.
+    fs::remove_dir_all(&out).unwrap();
+    assert_ne!(app.start_folder().as_deref(), Some(out.as_path()));
 }

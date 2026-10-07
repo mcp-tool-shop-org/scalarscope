@@ -94,36 +94,34 @@ fn queue_save(path: Option<std::path::PathBuf>) {
 }
 
 /// One or more run files. Several picked together are repeats of one side.
-fn pick_runs() -> Option<Vec<std::path::PathBuf>> {
+fn pick_runs(dialog: rfd::FileDialog) -> Option<Vec<std::path::PathBuf>> {
     if let Some(queued) = take_pick() {
         return queued.map(|path| vec![path]);
     }
-    rfd::FileDialog::new().add_filter("Run", &["json", "csv", "log", "gz"]).pick_files()
+    dialog.add_filter("Run", &["json", "csv", "log", "gz"]).pick_files()
 }
 
-fn pick_run_folder() -> Option<std::path::PathBuf> {
+fn pick_run_folder(dialog: rfd::FileDialog) -> Option<std::path::PathBuf> {
     if let Some(queued) = take_pick() {
         return queued;
     }
-    rfd::FileDialog::new().pick_folder()
+    dialog.pick_folder()
 }
 
-fn pick_bundle() -> Option<std::path::PathBuf> {
+fn pick_bundle(dialog: rfd::FileDialog) -> Option<std::path::PathBuf> {
     if let Some(queued) = take_pick() {
         return queued;
     }
-    rfd::FileDialog::new()
-        .add_filter("ScalarScope bundle", &["scbundle"])
-        .pick_file()
+    dialog.add_filter("ScalarScope bundle", &["scbundle"]).pick_file()
 }
 
 /// Where to write an exported picture, `kind` being `svg` or `png`.
-fn pick_export_path(kind: &str, name: &str) -> Option<std::path::PathBuf> {
+fn pick_export_path(dialog: rfd::FileDialog, kind: &str, name: &str) -> Option<std::path::PathBuf> {
     if let Some(queued) = take_save() {
         return queued;
     }
     let filter = if kind == "svg" { "SVG image" } else { "PNG image" };
-    rfd::FileDialog::new().add_filter(filter, &[kind]).set_file_name(format!("{name}.{kind}")).save_file()
+    dialog.add_filter(filter, &[kind]).set_file_name(format!("{name}.{kind}")).save_file()
 }
 
 /// A window screenshot as PNG bytes.
@@ -141,11 +139,11 @@ pub fn encode_png(image: &egui::ColorImage) -> Result<Vec<u8>, String> {
     Ok(bytes)
 }
 
-fn pick_save_path() -> Option<std::path::PathBuf> {
+fn pick_save_path(dialog: rfd::FileDialog) -> Option<std::path::PathBuf> {
     if let Some(queued) = take_save() {
         return queued;
     }
-    rfd::FileDialog::new()
+    dialog
         .add_filter("ScalarScope bundle", &["scbundle"])
         .set_file_name("review.scbundle")
         .save_file()
@@ -195,6 +193,8 @@ pub struct ScalarScopeApp {
     history: history_page::HistoryState,
     /// Capture mode for listing art: frames to wait, then the PNG to write, then close.
     capture: Option<(u32, std::path::PathBuf)>,
+    /// The folder a file dialog was last used in; dialogs start here.
+    last_folder: Option<std::path::PathBuf>,
 }
 
 impl Default for ScalarScopeApp {
@@ -232,6 +232,7 @@ impl Default for ScalarScopeApp {
             bench: Default::default(),
             history: Default::default(),
             capture: None,
+            last_folder: saved.last_folder.map(std::path::PathBuf::from),
         }
     }
 }
@@ -390,11 +391,40 @@ impl ScalarScopeApp {
 }
 
 impl ScalarScopeApp {
+    /// Where every file dialog starts (`prefs::start_folder`).
+    fn start_folder(&self) -> Option<std::path::PathBuf> {
+        prefs::start_folder(self.last_folder.as_deref(), history::documents_folder(), history::home_folder())
+    }
+
+    /// A file dialog that starts in `start_folder`, never in the working directory.
+    fn dialog(&self) -> rfd::FileDialog {
+        let dialog = rfd::FileDialog::new();
+        match self.start_folder() {
+            Some(folder) => dialog.set_directory(folder),
+            None => dialog,
+        }
+    }
+
+    /// Remember the folder of a path a dialog returned: the folder itself, or a file's parent.
+    /// The Store package keeps it in preferences.json; an unpackaged run keeps it for this run.
+    fn note_folder(&mut self, picked: &Path) {
+        let folder = if picked.is_dir() { Some(picked) } else { picked.parent() };
+        let Some(folder) = folder.filter(|folder| folder.is_absolute()) else {
+            return;
+        };
+        self.last_folder = Some(folder.to_path_buf());
+        if let Some(dir) = &self.history_dir {
+            // A preferences file that cannot be written only costs the starting folder next time.
+            let _ = prefs::remember_folder(dir, folder);
+        }
+    }
+
     fn load(&mut self, left: bool, folder: bool) {
-        let picked = if folder { pick_run_folder().map(|path| vec![path]) } else { pick_runs() };
+        let picked = if folder { pick_run_folder(self.dialog()).map(|path| vec![path]) } else { pick_runs(self.dialog()) };
         let Some(paths) = picked.filter(|paths| !paths.is_empty()) else {
             return;
         };
+        self.note_folder(&paths[0]);
         self.load_paths(left, &paths);
     }
 
@@ -503,9 +533,10 @@ impl ScalarScopeApp {
     }
 
     fn open_bundle(&mut self) {
-        let Some(path) = pick_bundle() else {
+        let Some(path) = pick_bundle(self.dialog()) else {
             return;
         };
+        self.note_folder(&path);
         match bundle::open_file(&path) {
             Ok(opened) => {
                 let path_text = path.display().to_string();
@@ -533,9 +564,10 @@ impl ScalarScopeApp {
                 return;
             }
         };
-        let Some(path) = pick_save_path() else {
+        let Some(path) = pick_save_path(self.dialog()) else {
             return;
         };
+        self.note_folder(&path);
         let document = bundle::document_from_pair(&built);
         match bundle::seal(&document, &bundle::utc_now()) {
             Ok(sealed) => match bundle::write_file(&path, &sealed) {
@@ -572,8 +604,9 @@ impl ScalarScopeApp {
                 self.export_svg(review);
             }
             if ui.button("Export PNG").on_hover_text("A picture of the window").clicked() {
-                self.pending_png = pick_export_path("png", "scalarscope");
-                if self.pending_png.is_some() {
+                self.pending_png = pick_export_path(self.dialog(), "png", "scalarscope");
+                if let Some(path) = self.pending_png.clone() {
+                    self.note_folder(&path);
                     ui.ctx().send_viewport_cmd(egui::ViewportCommand::Screenshot(egui::UserData::default()));
                     ui.ctx().request_repaint();
                 }
@@ -731,9 +764,10 @@ impl ScalarScopeApp {
             View::Difference => ("difference", crate::svg::difference(review, colors)),
             View::Spectrum => ("spectrum", crate::svg::spectrum(review, colors)),
         };
-        let Some(path) = pick_export_path("svg", name) else {
+        let Some(path) = pick_export_path(self.dialog(), "svg", name) else {
             return;
         };
+        self.note_folder(&path);
         self.note = match std::fs::write(&path, svg) {
             Ok(()) => format!("Saved the {name} view as SVG."),
             Err(error) => format!("Could not write the SVG. {error}"),

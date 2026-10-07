@@ -248,9 +248,10 @@ impl ScalarScopeApp {
     }
 
     pub(super) fn open_bench_runs(&mut self) {
-        let Some(paths) = pick_runs() else {
+        let Some(paths) = pick_runs(self.dialog()).filter(|paths| !paths.is_empty()) else {
             return;
         };
+        self.note_folder(&paths[0]);
         match open_runs(&paths) {
             Ok(runs) => {
                 self.bench.runs = runs;
@@ -266,12 +267,13 @@ impl ScalarScopeApp {
         };
         let path = match take_save() {
             Some(queued) => queued,
-            None => rfd::FileDialog::new().add_filter("Session record", &["json"]).set_file_name("workbench-session.json").save_file(),
+            None => self.dialog().add_filter("Session record", &["json"]).set_file_name("workbench-session.json").save_file(),
         };
         let Some(path) = path else {
             return;
         };
         let body = serde_json::to_string_pretty(&last.record).unwrap_or_default() + "\n";
+        self.note_folder(&path);
         self.bench.status = match std::fs::write(&path, body) {
             Ok(()) => "Saved the session record.".to_string(),
             Err(error) => format!("Could not save the session record. {error}"),

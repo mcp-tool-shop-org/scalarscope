@@ -113,7 +113,7 @@
       "confidence": "full",
       "highWater": null,
       "name": "rust",
-      "qualifyingSourceCommits": 39,
+      "qualifyingSourceCommits": 40,
       "rebaseline": null
     },
     {
@@ -239,28 +239,28 @@
         "path": "PRIVACY.md"
       },
       {
-        "commits": 8,
-        "lines": 1208,
+        "commits": 11,
+        "lines": 1214,
         "path": "README.es.md"
       },
       {
-        "commits": 8,
-        "lines": 1214,
+        "commits": 11,
+        "lines": 1220,
         "path": "README.fr.md"
       },
       {
-        "commits": 8,
-        "lines": 1204,
+        "commits": 11,
+        "lines": 1210,
         "path": "README.hi.md"
       },
       {
-        "commits": 8,
-        "lines": 1218,
+        "commits": 11,
+        "lines": 1224,
         "path": "README.it.md"
       },
       {
-        "commits": 8,
-        "lines": 1218,
+        "commits": 11,
+        "lines": 1224,
         "path": "README.ja.md"
       },
       {
@@ -269,13 +269,13 @@
         "path": "README.md"
       },
       {
-        "commits": 8,
-        "lines": 1206,
+        "commits": 11,
+        "lines": 1212,
         "path": "README.pt-BR.md"
       },
       {
-        "commits": 8,
-        "lines": 1214,
+        "commits": 11,
+        "lines": 1220,
         "path": "README.zh.md"
       },
       {
@@ -354,8 +354,8 @@
         "path": "assets/logo.png"
       },
       {
-        "commits": 15,
-        "lines": 468,
+        "commits": 17,
+        "lines": 526,
         "path": "atlas/README.md"
       },
       {
@@ -364,18 +364,18 @@
         "path": "atlas/boundaries.yaml"
       },
       {
-        "commits": 15,
-        "lines": 1634,
+        "commits": 17,
+        "lines": 1782,
         "path": "atlas/page.json"
       },
       {
-        "commits": 15,
-        "lines": 8034,
+        "commits": 17,
+        "lines": 8488,
         "path": "atlas/statistics.json"
       },
       {
-        "commits": 15,
-        "lines": 12560,
+        "commits": 17,
+        "lines": 12660,
         "path": "atlas/structure.json"
       },
       {
@@ -667,6 +667,16 @@
         "commits": 16,
         "lines": 42,
         "path": "rust/Cargo.toml"
+      },
+      {
+        "commits": 2,
+        "lines": 44,
+        "path": "rust/app.manifest"
+      },
+      {
+        "commits": 2,
+        "lines": 36,
+        "path": "rust/build.rs"
       },
       {
         "commits": 3,
@@ -2539,8 +2549,8 @@
         "path": "tests/ScalarScope.FixtureTests/TraceReviewTests.cs"
       },
       {
-        "commits": 6,
-        "lines": 184,
+        "commits": 8,
+        "lines": 232,
         "path": "tests/ScalarScope.FixtureTests/VersionConsistencyTests.cs"
       },
       {
@@ -2584,9 +2594,9 @@
     "level": "low",
     "reason": "fewer than 25 source files reach 10 revisions in the window"
   },
-  "generatedAt": "2026-10-07T05:21:47.462Z",
+  "generatedAt": "2026-10-07T05:42:01.599Z",
   "generatedFrom": {
-    "commit": "05e9f42e40f6b818ae51c13931e6db64f2cf9371"
+    "commit": "67fa43554a51ddc6dd32e09e52f20fc10779a843"
   },
   "pairs": [
     {
@@ -2599,190 +2609,190 @@
     {
       "a": "README.es.md",
       "b": "README.fr.md",
-      "either": 5,
-      "shared": 5,
+      "either": 6,
+      "shared": 6,
       "strength": 1
     },
     {
       "a": "README.es.md",
       "b": "README.hi.md",
-      "either": 5,
-      "shared": 5,
+      "either": 6,
+      "shared": 6,
       "strength": 1
     },
     {
       "a": "README.es.md",
       "b": "README.it.md",
-      "either": 5,
-      "shared": 5,
+      "either": 6,
+      "shared": 6,
       "strength": 1
     },
     {
       "a": "README.es.md",
       "b": "README.ja.md",
-      "either": 5,
-      "shared": 5,
+      "either": 6,
+      "shared": 6,
       "strength": 1
     },
     {
       "a": "README.es.md",
       "b": "README.pt-BR.md",
-      "either": 5,
-      "shared": 5,
+      "either": 6,
+      "shared": 6,
       "strength": 1
     },
     {
       "a": "README.es.md",
       "b": "README.zh.md",
-      "either": 5,
-      "shared": 5,
+      "either": 6,
+      "shared": 6,
       "strength": 1
     },
     {
       "a": "README.fr.md",
       "b": "README.hi.md",
-      "either": 5,
-      "shared": 5,
+      "either": 6,
+      "shared": 6,
       "strength": 1
     },
     {
       "a": "README.fr.md",
       "b": "README.it.md",
-      "either": 5,
-      "shared": 5,
+      "either": 6,
+      "shared": 6,
       "strength": 1
     },
     {
       "a": "README.fr.md",
       "b": "README.ja.md",
-      "either": 5,
-      "shared": 5,
+      "either": 6,
+      "shared": 6,
       "strength": 1
     },
     {
       "a": "README.fr.md",
       "b": "README.pt-BR.md",
-      "either": 5,
-      "shared": 5,
+      "either": 6,
+      "shared": 6,
       "strength": 1
     },
     {
       "a": "README.fr.md",
       "b": "README.zh.md",
-      "either": 5,
-      "shared": 5,
+      "either": 6,
+      "shared": 6,
       "strength": 1
     },
     {
       "a": "README.hi.md",
       "b": "README.it.md",
-      "either": 5,
-      "shared": 5,
+      "either": 6,
+      "shared": 6,
       "strength": 1
     },
     {
       "a": "README.hi.md",
       "b": "README.ja.md",
-      "either": 5,
-      "shared": 5,
+      "either": 6,
+      "shared": 6,
       "strength": 1
     },
     {
       "a": "README.hi.md",
       "b": "README.pt-BR.md",
-      "either": 5,
-      "shared": 5,
+      "either": 6,
+      "shared": 6,
       "strength": 1
     },
     {
       "a": "README.hi.md",
       "b": "README.zh.md",
-      "either": 5,
-      "shared": 5,
+      "either": 6,
+      "shared": 6,
       "strength": 1
     },
     {
       "a": "README.it.md",
       "b": "README.ja.md",
-      "either": 5,
-      "shared": 5,
+      "either": 6,
+      "shared": 6,
       "strength": 1
     },
     {
       "a": "README.it.md",
       "b": "README.pt-BR.md",
-      "either": 5,
-      "shared": 5,
+      "either": 6,
+      "shared": 6,
       "strength": 1
     },
     {
       "a": "README.it.md",
       "b": "README.zh.md",
-      "either": 5,
-      "shared": 5,
+      "either": 6,
+      "shared": 6,
       "strength": 1
     },
     {
       "a": "README.ja.md",
       "b": "README.pt-BR.md",
-      "either": 5,
-      "shared": 5,
+      "either": 6,
+      "shared": 6,
       "strength": 1
     },
     {
       "a": "README.ja.md",
       "b": "README.zh.md",
-      "either": 5,
-      "shared": 5,
+      "either": 6,
+      "shared": 6,
       "strength": 1
     },
     {
       "a": "README.pt-BR.md",
       "b": "README.zh.md",
-      "either": 5,
-      "shared": 5,
+      "either": 6,
+      "shared": 6,
       "strength": 1
     },
     {
       "a": "atlas/README.md",
       "b": "atlas/page.json",
-      "either": 8,
-      "shared": 8,
+      "either": 9,
+      "shared": 9,
       "strength": 1
     },
     {
       "a": "atlas/README.md",
       "b": "atlas/statistics.json",
-      "either": 8,
-      "shared": 8,
+      "either": 9,
+      "shared": 9,
       "strength": 1
     },
     {
       "a": "atlas/README.md",
       "b": "atlas/structure.json",
-      "either": 8,
-      "shared": 8,
+      "either": 9,
+      "shared": 9,
       "strength": 1
     },
     {
       "a": "atlas/page.json",
       "b": "atlas/statistics.json",
-      "either": 8,
-      "shared": 8,
+      "either": 9,
+      "shared": 9,
       "strength": 1
     },
     {
       "a": "atlas/page.json",
       "b": "atlas/structure.json",
-      "either": 8,
-      "shared": 8,
+      "either": 9,
+      "shared": 9,
       "strength": 1
     },
     {
       "a": "atlas/statistics.json",
       "b": "atlas/structure.json",
-      "either": 8,
-      "shared": 8,
+      "either": 9,
+      "shared": 9,
       "strength": 1
     },
     {
@@ -2866,16 +2876,16 @@
     "floor": "fallen",
     "floorHeld": false,
     "floorTrigger": "revision-depth",
-    "headDate": "2026-10-06T22:05:52-07:00",
-    "inScopeFiles": 462,
+    "headDate": "2026-10-06T22:41:41-07:00",
+    "inScopeFiles": 470,
     "pinnedStart": null,
     "priorFloor": "fallen",
-    "qualifyingCommits": 76,
+    "qualifyingCommits": 78,
     "qualifyingMinimum": 30,
     "revisions": 5,
     "shared": 10,
     "sharedFloorUsed": 3,
-    "since": "2026-04-10T05:05:52.000Z",
+    "since": "2026-04-10T05:41:41.000Z",
     "sourceExtensions": [
       ".js",
       ".mjs",
