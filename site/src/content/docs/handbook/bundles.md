@@ -32,6 +32,8 @@ What `review/review.json` keeps for redrawing depends on the review:
 
 File paths and the machine name are not stored. In an inference or training review, a run label that is a file path is cut to its last part.
 
+A bundle contains run data, and its manifest says so (`includesRawData`): an inference bundle holds both runs' series, and a geometry bundle contains both runs in full. Share a bundle only if you would share the runs.
+
 ## The hash
 
 1. Each file's SHA-256 is taken over its bytes as stored in the archive.

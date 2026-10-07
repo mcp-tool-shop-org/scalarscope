@@ -394,35 +394,35 @@
           "path": "PRIVACY.md"
         },
         {
-          "hash": "26ba4f2118bb96b7afe003a23c39eafbcf0c5ffd5ba0655418ea2cbf1da2f484",
+          "hash": "5e409d7656d473a5b43f92e0383d972c87b15bc246e28d6db82493c00553a8ac",
           "path": "README.es.md"
         },
         {
-          "hash": "ed31ff52ddb8d6033fe166ef54e988b522d77dea7745405701213f045269b346",
+          "hash": "8279194aa95232bdb36e9909fa2b4a37dbec5f93a43a29bc969c52a452a7be69",
           "path": "README.fr.md"
         },
         {
-          "hash": "df16ff3b54cc8fa14d3404a4fcb2261b5c51aa83e727665336abbb1856b93fbc",
+          "hash": "bfb9931dbce30828e64287cbe6a5009ead4d91a0d9c39855201e08c5fd54e523",
           "path": "README.hi.md"
         },
         {
-          "hash": "18bc353df008a329be5b8248d2b62af28feca206c67aa905f30a8ee1255a1349",
+          "hash": "b6d34171d1befe504a0461d7b2ef232605bacac7a5037488243d824ed483d6ac",
           "path": "README.it.md"
         },
         {
-          "hash": "2aae4fd93020fea24bf3d8fe3e5ee831182c9fb15c7fb53567599c76be372909",
+          "hash": "49672d53b60812011bd9b6799d17de2272af902bf7ad6b6131e9c2d3186e7906",
           "path": "README.ja.md"
         },
         {
-          "hash": "20dccd56dc844fe73fc0d2009663477296af5ebba0e4dbefd2e3c38904f991f7",
+          "hash": "8458c304d71890fe59d9b6d05ceb4bf377c994ea0f4e53520d6b07fd51519188",
           "path": "README.md"
         },
         {
-          "hash": "69d81127762c8d5a10df9be36f38b68186bb74054470143e8cdff5fd8715dc42",
+          "hash": "44016cc37f67066b0945206ba8af50ec9964e03b795a5347ae18ddf041ba44d4",
           "path": "README.pt-BR.md"
         },
         {
-          "hash": "53b302ce992c086d7c45cc40545170ff48f9663136229516c3709f6f75a6c698",
+          "hash": "f3a37ee9a9c8ca8e6f9c84cc9f5a8dc9cb78b1873e0616e67472fd5f7009a848",
           "path": "README.zh.md"
         },
         {
@@ -749,50 +749,50 @@
             {
               "in": "verify",
               "kind": "match-err",
-              "line": 336
+              "line": 337
             },
             {
               "in": "verify",
               "kind": "match-err",
-              "line": 346
+              "line": 347
             },
             {
               "in": "open_bytes",
               "kind": "err",
-              "line": 414
+              "line": 415
             },
             {
               "in": "pack",
               "kind": "err",
-              "line": 616
+              "line": 617
             },
             {
               "in": "pack",
               "kind": "err",
-              "line": 619
+              "line": 620
             },
             {
               "in": "findings_only",
               "kind": "err",
-              "line": 806
+              "line": 807
             },
             {
               "in": "to_json",
               "kind": "err",
-              "line": 912
+              "line": 913
             },
             {
               "in": "canon_json",
               "kind": "err",
-              "line": 921
+              "line": 922
             },
             {
               "in": "normalize",
               "kind": "err",
-              "line": 1047
+              "line": 1048
             }
           ],
-          "hash": "d0a66102d1fb1e12f060b330f65c7959d51ee184dba1d79c80ce89e7ec5e8c5e",
+          "hash": "1ecffafa641d70565d2d644589d9b3aa38f16a7a320b643d2128dd7c2bad99f6",
           "importOrder": [
             "rust/src/readings.rs",
             "rust/src/review.rs",
@@ -2768,7 +2768,7 @@
           "testsInside": true
         },
         {
-          "hash": "7da83394e3e9fed299625373884b548f3bae7711e0fd5f307a4a3be40266f987",
+          "hash": "0d6f6d0d641e60e3c319f3ed658a8575e9335d75f7cd1d5d021746d97d38df83",
           "importsFiles": [
             "rust/src/bundle.rs",
             "rust/src/open.rs",
@@ -3074,7 +3074,7 @@
           "path": "site/src/content/docs/handbook/beginners.md"
         },
         {
-          "hash": "55a9afaa253f5f24e20ec320be6235a67bcbf7b3f83ec74c8fb00a0b3ede4da3",
+          "hash": "8d52fe51e61a4c9989ccf880a74ba6e23d6fae171cb7ca18e92fedd35dbe0c38",
           "path": "site/src/content/docs/handbook/bundles.md"
         },
         {
@@ -5366,7 +5366,7 @@
   "edges": [],
   "engine": "1.24.0",
   "generatedFrom": {
-    "commit": "0180c44cf7a61a19fe50c449cf456a4b773b171b",
+    "commit": "8e56823361d426f8c98cfbe5c4397d786c586184",
     "tracked": 464
   },
   "landings": [
