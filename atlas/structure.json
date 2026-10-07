@@ -516,6 +516,15 @@
           "path": "rust/Cargo.toml"
         },
         {
+          "hash": "afd9a6f7c5458042fdc254df37be74a27017cf9c532d6c510a4667225655acba",
+          "path": "rust/app.manifest"
+        },
+        {
+          "buildScript": true,
+          "hash": "0d1eff2293044947ed367f9ee7e183e853116bccf16e56b8ce20a196ea30a337",
+          "path": "rust/build.rs"
+        },
+        {
           "entry": "main",
           "entryRule": 1,
           "hash": "23e106b01586758ba96ebc3864f3dd3c3d9e9afa68d96ef53f3d021af6bf2b69",
@@ -4159,7 +4168,7 @@
           "path": "tests/ScalarScope.FixtureTests/TraceReviewTests.cs"
         },
         {
-          "hash": "5841be8f45826f6326670611ad8fd8184b7bb8a52a2059d46e40dbf20e2ee954",
+          "hash": "02e0bf8ee56bc110295a3ee4bea9a4a2ba156b1cbfa59aea224e4f09bfc828c7",
           "path": "tests/ScalarScope.FixtureTests/VersionConsistencyTests.cs"
         },
         {
@@ -4377,7 +4386,7 @@
         {
           "boundary": "rust",
           "depth": 0,
-          "files": 25
+          "files": 26
         },
         {
           "boundary": "src",
@@ -4396,6 +4405,13 @@
           "job": "pack-review",
           "path": "packaging/pack.ps1",
           "runKind": "executes"
+        },
+        {
+          "job": "pack-review",
+          "matched": true,
+          "path": "rust/build.rs",
+          "runKind": "executes",
+          "via": "cargo build"
         },
         {
           "job": "pack-review",
@@ -4433,7 +4449,7 @@
           "via": "dotnet build"
         }
       ],
-      "runsCount": 6,
+      "runsCount": 7,
       "secrets": [],
       "sends": {
         "deploysPages": false,
@@ -4608,11 +4624,18 @@
         {
           "boundary": "rust",
           "depth": 0,
-          "files": 36
+          "files": 37
         }
       ],
       "readers": [],
       "runs": [
+        {
+          "job": "test",
+          "matched": true,
+          "path": "rust/build.rs",
+          "runKind": "executes",
+          "via": "cargo test"
+        },
         {
           "job": "test",
           "matched": true,
@@ -4754,7 +4777,7 @@
           "via": "cargo test"
         }
       ],
-      "runsCount": 20,
+      "runsCount": 21,
       "secrets": [],
       "sends": {
         "deploysPages": false,
@@ -4771,7 +4794,7 @@
         {
           "coverage": true,
           "dir": "rust",
-          "files": 20,
+          "files": 21,
           "job": "test",
           "runner": "cargo test",
           "step": "Test"
@@ -5139,7 +5162,7 @@
         {
           "boundary": "rust",
           "depth": 0,
-          "files": 25
+          "files": 26
         }
       ],
       "readers": [],
@@ -5148,6 +5171,13 @@
           "job": "build-release",
           "path": "packaging/pack.ps1",
           "runKind": "executes"
+        },
+        {
+          "job": "build-release",
+          "matched": true,
+          "path": "rust/build.rs",
+          "runKind": "executes",
+          "via": "cargo build"
         },
         {
           "job": "build-release",
@@ -5165,7 +5195,7 @@
           "via": "cargo build"
         }
       ],
-      "runsCount": 3,
+      "runsCount": 4,
       "secrets": [
         "GITHUB_TOKEN"
       ],
@@ -5292,8 +5322,8 @@
   "edges": [],
   "engine": "1.24.0",
   "generatedFrom": {
-    "commit": "5d367251987fe3c1fdc23b22509d3540834d9ca4",
-    "tracked": 455
+    "commit": "05e9f42e40f6b818ae51c13931e6db64f2cf9371",
+    "tracked": 457
   },
   "landings": [
     {
