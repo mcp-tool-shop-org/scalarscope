@@ -327,3 +327,62 @@ if ($info.bundleHash -ne $computed) {
 }
 Write-Output $computed
 "#;
+
+// Review mode shows a geometry bundle as it was saved: the stored verdict and tiles, which the
+// hash vouches for. Today's rules can read the stored runs differently; that reading is shown
+// below, labelled, and never as the stored one.
+
+fn fixture(name: &str) -> std::path::PathBuf {
+    std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures").join(name)
+}
+
+fn stored_geometry(opened: &scalarscope::bundle::OpenedBundle) -> scalarscope::review::GeometryReview {
+    let Some(Pair::Geometry(review)) = scalarscope::bundle::stored_pair(&opened.review) else { panic!("geometry") };
+    review
+}
+
+#[test]
+fn a_bundle_saved_under_older_rules_keeps_its_verdict_and_tiles() {
+    // Saved by v3.1.0.0 from the control drift pair, before ΔTd and ΔĀ changed for these exports.
+    let opened = scalarscope::bundle::open_file(&fixture("bundles/drift-saved-by-3.1.0.scbundle")).unwrap();
+    assert!(opened.verified);
+    let review = stored_geometry(&opened);
+    assert_eq!(review.verdict, "Path B had a more concentrated spectrum (sustained 31 steps)");
+    assert_eq!(review.verdict, opened.review.verdict);
+    assert_eq!(
+        review.current_verdict.as_deref(),
+        Some("No meaningful divergence between the runs; the evaluator setups differ (spectrum concentration).")
+    );
+    // The tiles are the stored ones: 3.1.0 read ΔTd on these files, today's rules withhold it.
+    assert_eq!(review.explanations, opened.review.explanations);
+    assert!(!review.tiles_are_current);
+    let emergence = review.explanations.iter().find(|tile| tile.symbol == "ΔTd").unwrap();
+    assert_ne!(emergence.status, "withheld");
+}
+
+#[test]
+fn a_bundle_saved_under_todays_rules_shows_no_extra_reading() {
+    let left = scalarscope::open::open_path(&fixture("aspire-si/real-local-teacher.drift.geometry.json")).unwrap().side;
+    let right = scalarscope::open::open_path(&fixture("aspire-si/real-composite-teacher.drift.geometry.json")).unwrap().side;
+    let built = pair(&left, &right).unwrap();
+    let Pair::Geometry(live) = &built else { panic!("geometry") };
+    let sealed = seal(&document_from_pair(&built), STAMP).unwrap();
+    let opened = open_bytes(&sealed.bytes).unwrap();
+    let review = stored_geometry(&opened);
+    assert_eq!(review.verdict, live.verdict);
+    assert!(review.current_verdict.is_none());
+    assert!(!review.tiles_are_current);
+    assert_eq!(review.explanations, live.explanations);
+
+    // A geometry bundle that stored only its verdict: the stored verdict heads the page, and the
+    // tiles are marked as today's reading.
+    let mut document = document_from_pair(&built);
+    document.review.explanations.clear();
+    document.review.verdict = "PLANTED stored verdict".to_string();
+    let opened = open_bytes(&seal(&document, STAMP).unwrap().bytes).unwrap();
+    let review = stored_geometry(&opened);
+    assert_eq!(review.verdict, "PLANTED stored verdict");
+    assert_eq!(review.current_verdict.as_deref(), Some(live.verdict.as_str()));
+    assert!(review.tiles_are_current);
+    assert_eq!(review.explanations, live.explanations);
+}

@@ -571,15 +571,26 @@ pub fn stored_pair(review: &StoredReview) -> Option<Pair> {
         }
         "geometry" => {
             let stored = review.geometry.as_ref()?;
-            // The runs are stored in full; the deltas are recomputed from them by the same ported
-            // rules, so they match what was saved.
-            Some(Pair::Geometry(crate::review::geometry_with_deltas(
+            // The runs are stored in full, so the views redraw from them. The verdict and the tiles
+            // are the stored ones, which the hash vouches for. The deltas are recomputed by today's
+            // rules, which can read differently from the rules the bundle was saved under; when
+            // they do, the page shows today's verdict below the stored one, labelled.
+            let mut current = crate::review::geometry_with_deltas(
                 review.left_text.clone(),
                 review.right_text.clone(),
                 stored.left.clone(),
                 stored.right.clone(),
                 review.notices.clone(),
-            )))
+            );
+            if current.verdict != review.verdict {
+                current.current_verdict = Some(std::mem::replace(&mut current.verdict, review.verdict.clone()));
+            }
+            if review.explanations.is_empty() {
+                current.tiles_are_current = true;
+            } else {
+                current.explanations = review.explanations.clone();
+            }
+            Some(Pair::Geometry(current))
         }
         "training" => {
             let training = review.training.as_ref()?;

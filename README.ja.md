@@ -113,7 +113,7 @@ cargo run --release --manifest-path rust/Cargo.toml
 ## テスト
 
 ```bash
-# The review: 224 tests. Line coverage must stay above 90%.
+# The review: 227 tests. Line coverage must stay above 90%.
 cd rust
 cargo test
 cargo llvm-cov --locked --all-targets --fail-under-lines 90
