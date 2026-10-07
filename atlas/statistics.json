@@ -129,7 +129,7 @@
       "confidence": "low",
       "highWater": null,
       "name": "site",
-      "qualifyingSourceCommits": 4,
+      "qualifyingSourceCommits": 5,
       "rebaseline": null
     },
     {
@@ -194,8 +194,8 @@
         "path": ".github/workflows/build.yml"
       },
       {
-        "commits": 2,
-        "lines": 86,
+        "commits": 3,
+        "lines": 102,
         "path": ".github/workflows/coverage.yml"
       },
       {
@@ -349,28 +349,28 @@
         "path": "assets/logo.png"
       },
       {
-        "commits": 1,
-        "lines": 103,
+        "commits": 3,
+        "lines": 216,
         "path": "atlas/README.md"
       },
       {
-        "commits": 1,
-        "lines": 42,
+        "commits": 2,
+        "lines": 84,
         "path": "atlas/boundaries.yaml"
       },
       {
-        "commits": 1,
-        "lines": 401,
+        "commits": 3,
+        "lines": 848,
         "path": "atlas/page.json"
       },
       {
-        "commits": 1,
-        "lines": 2303,
+        "commits": 3,
+        "lines": 4678,
         "path": "atlas/statistics.json"
       },
       {
-        "commits": 1,
-        "lines": 3801,
+        "commits": 3,
+        "lines": 7606,
         "path": "atlas/structure.json"
       },
       {
@@ -729,18 +729,18 @@
         "path": "rust/tests/sources_tests.rs"
       },
       {
-        "commits": 1,
-        "lines": 30,
+        "commits": 2,
+        "lines": 32,
         "path": "site/astro.config.mjs"
       },
       {
-        "commits": 1,
-        "lines": 7539,
+        "commits": 2,
+        "lines": 13695,
         "path": "site/package-lock.json"
       },
       {
-        "commits": 1,
-        "lines": 18,
+        "commits": 2,
+        "lines": 26,
         "path": "site/package.json"
       },
       {
@@ -2139,9 +2139,9 @@
     "level": "low",
     "reason": "fewer than 25 source files reach 10 revisions in the window"
   },
-  "generatedAt": "2026-10-07T01:23:03.739Z",
+  "generatedAt": "2026-10-07T01:31:59.876Z",
   "generatedFrom": {
-    "commit": "fd6dcdac68952b42899d6474f8bb64534b63d484"
+    "commit": "3d471dc241a2d0012b248b22e032f9b354cf47bd"
   },
   "pairs": [
     {
@@ -2295,16 +2295,16 @@
     "floor": "fallen",
     "floorHeld": false,
     "floorTrigger": "revision-depth",
-    "headDate": "2026-10-06T21:22:44-04:00",
+    "headDate": "2026-10-06T21:31:54-04:00",
     "inScopeFiles": 393,
     "pinnedStart": null,
     "priorFloor": "fallen",
-    "qualifyingCommits": 50,
+    "qualifyingCommits": 52,
     "qualifyingMinimum": 30,
     "revisions": 5,
     "shared": 10,
     "sharedFloorUsed": 3,
-    "since": "2026-04-10T01:22:44.000Z",
+    "since": "2026-04-10T01:31:54.000Z",
     "sourceExtensions": [
       ".js",
       ".mjs",
