@@ -1,0 +1,3801 @@
+{
+  "boundaries": [
+    {
+      "dynamicReads": 0,
+      "dynamicSpawns": 0,
+      "dynamicSpawnsInTests": 0,
+      "dynamicWrites": 0,
+      "entryPoints": [],
+      "externals": 0,
+      "files": [
+        {
+          "hash": "007ecff77cea0c64f1fddd25966d15c3016e7030d8d2e49d9771cfc7cf002174",
+          "path": ".github/ISSUE_TEMPLATE/bug_report.md"
+        },
+        {
+          "hash": "9434a4c58c46e0f66368ffebb2b41d4b7895be490cc057fadb0f4967e97dc5b8",
+          "path": ".github/ISSUE_TEMPLATE/feature_request.md"
+        },
+        {
+          "hash": "e9ae0db17806f91610cf7740d775e44270d009a8fb581429250339a7bf2ad42f",
+          "path": ".github/ISSUE_TEMPLATE/question.md"
+        },
+        {
+          "hash": "41c3801ca4f1b36051a413bbc785fc777bee156f360c753bd55fd4bdae84f94e",
+          "path": ".github/PULL_REQUEST_TEMPLATE.md"
+        },
+        {
+          "hash": "1a5fc76851f2ba48dc0953f6566a6f6caf1a902fcc35a1caa91922ad452982bd",
+          "path": ".github/workflows/build.yml"
+        },
+        {
+          "hash": "f920e5a5c8b57ba87ffe6710a61543208d0d27a03a3900532a9399603f1f049e",
+          "path": ".github/workflows/coverage.yml"
+        },
+        {
+          "hash": "cc39b471a612a05477f6d27cd8435333ae823a40a38761e678ed769113f2f103",
+          "path": ".github/workflows/pages.yml"
+        },
+        {
+          "hash": "801b8678e73158719674b68c689c1017feeea6f0b3d904579ced487106126f72",
+          "path": ".github/workflows/publish.yml"
+        },
+        {
+          "hash": "92bd908c4dd8917a2dbe3ae2027ffdc57edcd3962eaeae800bba1b86ffc4f277",
+          "path": ".github/workflows/release.yml"
+        }
+      ],
+      "globs": [
+        ".github/**"
+      ],
+      "importConfidence": "full",
+      "name": ".github",
+      "origin": "authored",
+      "role": "config",
+      "testedBy": 0,
+      "unresolvedSites": 0
+    },
+    {
+      "dynamicReads": 0,
+      "dynamicSpawns": 0,
+      "dynamicSpawnsInTests": 0,
+      "dynamicWrites": 0,
+      "entryPoints": [],
+      "externals": 0,
+      "files": [
+        {
+          "hash": "9e236d3effbe8addcb2de7f1bed761e469f0098ed3cca2500a4d46f9a702a41c",
+          "path": "UI_Reference/01_home_workspace.png"
+        },
+        {
+          "hash": "c42317673f53580328df9332f0e8e3c14f9f9ec400d6a60ba865b4bc8c89bec2",
+          "path": "UI_Reference/02_navigation_modes.png"
+        },
+        {
+          "hash": "b1659af4040071ffba806d54de7d51e3d48ee1558cd26cbc01e3b10ccbbdefa8",
+          "path": "UI_Reference/03_compare_context_header.png"
+        },
+        {
+          "hash": "1888ab8a1b9aa0740bf2977155d3e10064db92458185d2234eab3bfa3f1866d6",
+          "path": "UI_Reference/04_delta_zone_hierarchy.png"
+        },
+        {
+          "hash": "c9a0761d9ebf38ea8eadad5236cef7b2d68685ad220f5f0def2f9828820d76fb",
+          "path": "UI_Reference/05_guide_lens.png"
+        },
+        {
+          "hash": "6cec499b590249f8e224b913c74ce24259fa61906c2f32ed0711ba3478944506",
+          "path": "UI_Reference/README.txt"
+        }
+      ],
+      "globs": [
+        "UI_Reference/**"
+      ],
+      "importConfidence": "full",
+      "name": "UI_Reference",
+      "origin": "authored",
+      "role": "data",
+      "testedBy": 0,
+      "unresolvedSites": 0
+    },
+    {
+      "dynamicReads": 0,
+      "dynamicSpawns": 0,
+      "dynamicSpawnsInTests": 0,
+      "dynamicWrites": 0,
+      "entryPoints": [],
+      "externals": 0,
+      "files": [
+        {
+          "hash": "ed2498cb76ba7f884fb0aebc19c76889c46637d452a67ea32f1c462b9a63462d",
+          "path": "assets/logo.png"
+        }
+      ],
+      "globs": [
+        "assets/**"
+      ],
+      "importConfidence": "full",
+      "name": "assets",
+      "origin": "authored",
+      "role": "data",
+      "testedBy": 0,
+      "unresolvedSites": 0
+    },
+    {
+      "dynamicReads": 0,
+      "dynamicSpawns": 0,
+      "dynamicSpawnsInTests": 0,
+      "dynamicWrites": 0,
+      "entryPoints": [
+        "docs/index.md"
+      ],
+      "externals": 0,
+      "files": [
+        {
+          "hash": "29cce2ee93bc4ff66f809a8188c00d41ea23d709c149f5d1827e1483c093f454",
+          "path": "docs/BETA_GUIDE.md"
+        },
+        {
+          "hash": "fe025bdfc58a7adb93a961fef22f48caeaacb0ad4fc3a60f8cdf6491ea368313",
+          "path": "docs/BUTTON_COVERAGE_MATRIX.md"
+        },
+        {
+          "hash": "5775628c9041ae993d28df1d93a6fa24b0ec8eb97e87c32c78a5cc2ee2a5cf77",
+          "path": "docs/DATA_PERSISTENCE.md"
+        },
+        {
+          "hash": "e8e634b4f87288e30d2518bc302617b7d73d90e0ca15a431bb2c34a5e120de6b",
+          "path": "docs/DEMO_SCRIPT.md"
+        },
+        {
+          "hash": "253cc086567e6af93cf19f36aa02e0273c09954e36e4f5006bb70fbb1ee8851e",
+          "path": "docs/DETERMINISM.md"
+        },
+        {
+          "hash": "9f57c3b7104589086579b727bee424fd5a419dc7daaadbe723753a580698d441",
+          "path": "docs/INSTALL_RUNBOOK.md"
+        },
+        {
+          "hash": "e5f3a9318a3ab11640a7221ce37437c91f8709459cdd8d8bc00e6ded4ab50636",
+          "path": "docs/LITERATURE_REVIEW.md"
+        },
+        {
+          "hash": "ba71027ca998d166be59c57b625d436198d602ccc611eb71674147049e0ede84",
+          "path": "docs/PAPER_COMPANION.md"
+        },
+        {
+          "hash": "b25890483a80528ba1e9d98df32a73bbc3cb60b0a5cfc34dd4cd0a1c259ba7ec",
+          "path": "docs/PHASE12_AUDIT.md"
+        },
+        {
+          "hash": "cd29fd714d1739af9b89907c5533a839a42fca71cff5ac1648c098f267d21cc9",
+          "path": "docs/QUICK_REFERENCE.md"
+        },
+        {
+          "hash": "466d61e924c8ad8b63629f92e586d1cc645c025b6c37dddc22b4a545cf4a0182",
+          "path": "docs/RELEASE_PROCESS.md"
+        },
+        {
+          "hash": "a29ebdb068101ac86127c2a26f3eb3163991da4cd3a07e2772ec4e2a33ff4e69",
+          "path": "docs/RELEASE_QA_CHECKLIST.md"
+        },
+        {
+          "hash": "a9d4df6831e76c855fd1147dca979f74ae1924671de13f0909c1900ac86d36f8",
+          "path": "docs/RESULTS_AND_LIMITATIONS.md"
+        },
+        {
+          "hash": "d5b80e32a4955191b7f2565574b4cfae1ab266eb229328e3b829318e6a75d54d",
+          "path": "docs/ROADMAP_V2.md"
+        },
+        {
+          "hash": "17843bb2f27ddb1bbba8de0919d809f5cdd19e0191a366ee9b6475ec6d316881",
+          "path": "docs/SOAK_TESTING.md"
+        },
+        {
+          "hash": "8850f50a592f13946d6251ec090852e0f8a09981fe86c20580fff23db4980704",
+          "path": "docs/THEME_AUDIT.md"
+        },
+        {
+          "hash": "a782e550f0e35b1bd56e7723bfe6d4d3b615fc52b72d71dae6a1362c436cfa76",
+          "path": "docs/THESIS.md"
+        },
+        {
+          "hash": "dca03fc75989366c5fdec3ce9491c02b8d74e98eab347c10c9a4e2b73522ef92",
+          "path": "docs/VERIFY_RELEASE.md"
+        },
+        {
+          "hash": "f9adad053760123ba63f4cdc110967b11834e300ab9fe7dad8e0d917e89da245",
+          "path": "docs/_config.yml"
+        },
+        {
+          "hash": "0dcc0239fbee82fa54f47ff7cbced3c15aa5e5f83673ee8d0fa64c90418f519d",
+          "path": "docs/index.md"
+        },
+        {
+          "hash": "78ed3cca5e5e3c3448176ae0f7b8c672b58f45b01142a35606bc2c36a81d7d43",
+          "path": "docs/parity-and-beyond.spec.md"
+        }
+      ],
+      "globs": [
+        "docs/**"
+      ],
+      "importConfidence": "full",
+      "name": "docs",
+      "origin": "authored",
+      "role": "docs",
+      "testedBy": 0,
+      "unresolvedSites": 0
+    },
+    {
+      "dynamicReads": 0,
+      "dynamicSpawns": 0,
+      "dynamicSpawnsInTests": 0,
+      "dynamicWrites": 0,
+      "entryPoints": [],
+      "externals": 0,
+      "files": [
+        {
+          "hash": "bca2f6947590e78ae6530f364bcabf12679a6f0b57cbbf80575f769920c87f52",
+          "path": "packaging/AppxManifest.xml"
+        },
+        {
+          "hash": "65da1ef710062143860d5ab9fe6aa91f6b0c960da73e62089921075344d3d0e6",
+          "path": "packaging/assets/appiconLargeTile.png"
+        },
+        {
+          "hash": "243c9dc1082008f32877117d9a0b3ce494544ce72fead2b49a8a5fd4277fcabd",
+          "path": "packaging/assets/appiconLogo.png"
+        },
+        {
+          "hash": "b69602eb17da0d1da6e211e21079f0655c716f9e177db3ad58cd920f66814ff5",
+          "path": "packaging/assets/appiconMediumTile.png"
+        },
+        {
+          "hash": "7d4fa72bcfcd9282b0133ef72ebb1a8333eafd382fb2e91e2731adc26ae549a3",
+          "path": "packaging/assets/appiconSmallTile.png"
+        },
+        {
+          "hash": "ab2fe2283212c8831e107a0c91d190107b1e97eb54697cba62f9595bd6725530",
+          "path": "packaging/assets/appiconStoreLogo.png"
+        },
+        {
+          "hash": "7457ae171b31a2192be5ad94f4a3faec733d453b474b6b8c6e52c70098ac7366",
+          "path": "packaging/assets/appiconWideTile.png"
+        },
+        {
+          "hash": "05a9e049afa853736f4d27889b13012cfef8f63f64684a725e59c1292fa1637e",
+          "path": "packaging/assets/splashSplashScreen.png"
+        },
+        {
+          "hash": "6c859228839f2c2b73bdcb00c0c86e38a8822f518bdfec6b81afeae33c0f76cc",
+          "path": "packaging/pack.ps1"
+        }
+      ],
+      "globs": [
+        "packaging/**"
+      ],
+      "importConfidence": "full",
+      "name": "packaging",
+      "origin": "authored",
+      "role": "code",
+      "testedBy": 0,
+      "unresolvedSites": 0
+    },
+    {
+      "dynamicReads": 0,
+      "dynamicSpawns": 0,
+      "dynamicSpawnsInTests": 0,
+      "dynamicWrites": 0,
+      "entryPoints": [],
+      "externals": 0,
+      "files": [
+        {
+          "hash": "ef37cc5bd20b76347044b5e9ff8b67169269c90170aa64537a019915a4d94c76",
+          "path": ".gitignore"
+        },
+        {
+          "hash": "97a55ba5d646dd3a53234c924586d9c3723d9e06df0ff4356b20152f564baca0",
+          "path": "CHANGELOG.md"
+        },
+        {
+          "hash": "4121345c49a4e8f691803607baa84f22e341a56bfc0dc950412b631c08a56430",
+          "path": "FINAL_SHIP_VERIFICATION.md"
+        },
+        {
+          "hash": "5c6a1b6c473584d53b27291fd2f3d196a8f3ad8cde90de0b625e9f9de21e8b75",
+          "path": "LICENSE"
+        },
+        {
+          "hash": "d77ab81b373014308860b4028c4c59707c068c913518e185e18398d4eac40b61",
+          "path": "PRIVACY.md"
+        },
+        {
+          "hash": "9776d1173b3130d6586b0df174fd3cc64cfb6d882cbe0fa2497ea30373c8bb2c",
+          "path": "README.es.md"
+        },
+        {
+          "hash": "5646145504675c742b9791e4161d91e100a4b276122b1d6391819ab0b0029fcd",
+          "path": "README.fr.md"
+        },
+        {
+          "hash": "d59373c649f2215c51aa91f7d88564b301edc0e4decef83dfb63da8d51d9c04c",
+          "path": "README.hi.md"
+        },
+        {
+          "hash": "46fd2732431ea18453097f0a54cb668931442edc07843aee044ea9602761e162",
+          "path": "README.it.md"
+        },
+        {
+          "hash": "0caf6f991521b14311f46bdd90f6f851c2426ebaaa42c22fb36e9bc84969aa70",
+          "path": "README.ja.md"
+        },
+        {
+          "hash": "e83421658cce318ee4bedd29cde091dc042b75e6b35b68b193569b870841d5cc",
+          "path": "README.md"
+        },
+        {
+          "hash": "9cab6f5ab8295502282dd191b7b70d77dc5568fb825a302d468a23b7c057e902",
+          "path": "README.pt-BR.md"
+        },
+        {
+          "hash": "6550cd90b119e02b5b53a6f3c62ea1f3836433d21933e02aec08aff9ef0a1444",
+          "path": "README.zh.md"
+        },
+        {
+          "hash": "eb442d2ae6e487b301252eb8f36c52e9ac7b22fbf508e36d34c1f6546b478127",
+          "path": "ROADMAP.md"
+        },
+        {
+          "hash": "054be8687ac5cb85cd3b3cf2895c2da958c08146f377ff1ea10cb950e0109981",
+          "path": "SCORECARD.md"
+        },
+        {
+          "hash": "8334db1b8594a81e3bb64a3080f601e19d1cb1c178e50aa9434cb1e84bab3c4a",
+          "path": "SECURITY.md"
+        },
+        {
+          "hash": "2e7b69c58d86840deb095c35d8abfd12311dcaebedad79cdd5458819a1b2170a",
+          "path": "SHIP_GATE.md"
+        },
+        {
+          "hash": "d199249c5650e64a0a3020556c73e69bb89048354c59264dec34d54d7ec39977",
+          "path": "STORE_LISTING.md"
+        },
+        {
+          "hash": "64ae0bb19b649112eb3c7a89de5408276ad2d672155e4631b3de6c0f55fc658c",
+          "path": "ScalarScope.sln"
+        },
+        {
+          "hash": "3456e61161af3014be74550b230456b10abe5ab61a51ee291117c63ecd7d3f39",
+          "path": "ScalarScope_UI_Reference_Pack_v2.zip"
+        },
+        {
+          "hash": "3d1de8e075917ce065dafdeef9925d28c03944e36c08d4b6c9a3b39cdd27a4bc",
+          "path": "codecov.yml"
+        },
+        {
+          "hash": "70e24aeb922ef5d91ff8a06ab9c5a69ca0afee00df88c21c040dad600165da82",
+          "path": "global.json"
+        },
+        {
+          "hash": "ed2498cb76ba7f884fb0aebc19c76889c46637d452a67ea32f1c462b9a63462d",
+          "path": "logo.png"
+        },
+        {
+          "hash": "33f5c0dcfae8883f9c9401dbe0cc995181400adb69b83463bc55de2d6dd394ec",
+          "path": "passport.json"
+        },
+        {
+          "hash": "25f0e6d3b9c0e80745a861f30610dbb289ca9110422250fb8b5910f81111c9a0",
+          "path": "phase32_validation_report.md"
+        },
+        {
+          "hash": "241d66b3d574992f878cab87923e9622051f8ae150792607b3afed656122ba24",
+          "path": "verify.ps1"
+        },
+        {
+          "hash": "c6cf157e379dcefee1514db5327f2b766c677ca38e5f9553117dcc465c958edd",
+          "path": "verify.sh"
+        }
+      ],
+      "globs": [
+        "*"
+      ],
+      "importConfidence": "full",
+      "name": "root",
+      "origin": "authored",
+      "role": "docs",
+      "testedBy": 0,
+      "unresolvedSites": 0
+    },
+    {
+      "dynamicReads": 3,
+      "dynamicSpawns": 0,
+      "dynamicSpawnsInTests": 0,
+      "dynamicWrites": 3,
+      "entryPoints": [
+        "rust/src/lib.rs",
+        "rust/src/main.rs"
+      ],
+      "externals": 0,
+      "files": [
+        {
+          "hash": "4f627beb1373d53fe523514ff3108b7eca206bd75b1b560cd9a4cdbd295f9c1b",
+          "path": "rust/Cargo.lock"
+        },
+        {
+          "hash": "82745ba9254df7f0fb079358bccb4d1d8292abc1c28a58341f93a8a16eb3beab",
+          "path": "rust/Cargo.toml"
+        },
+        {
+          "hash": "ddb2e2af72081a81e599d6bcedbe421fdb71bba0dd0827c3d1f106c894d5f9d5",
+          "path": "rust/samples/baseline.csv"
+        },
+        {
+          "hash": "68b3e5f5dbad2493571a66c573fe552f2f833bd90c34a10ce6dc368b0c190618",
+          "path": "rust/samples/optimized.csv"
+        },
+        {
+          "exports": [
+            "bundle_hash",
+            "document_from_pair",
+            "open_bytes",
+            "open_file",
+            "pack",
+            "seal",
+            "sha256_hex",
+            "stored_pair",
+            "unpack",
+            "utc_now",
+            "utc_stamp",
+            "verify",
+            "write_file"
+          ],
+          "failurePaths": [
+            {
+              "in": "seal",
+              "kind": "err",
+              "line": 214
+            },
+            {
+              "in": "verify",
+              "kind": "match-err",
+              "line": 335
+            },
+            {
+              "in": "verify",
+              "kind": "match-err",
+              "line": 345
+            },
+            {
+              "in": "open_bytes",
+              "kind": "err",
+              "line": 413
+            },
+            {
+              "in": "pack",
+              "kind": "err",
+              "line": 604
+            },
+            {
+              "in": "pack",
+              "kind": "err",
+              "line": 607
+            },
+            {
+              "in": "findings_only",
+              "kind": "err",
+              "line": 794
+            },
+            {
+              "in": "to_json",
+              "kind": "err",
+              "line": 900
+            },
+            {
+              "in": "canon_json",
+              "kind": "err",
+              "line": 909
+            },
+            {
+              "in": "normalize",
+              "kind": "err",
+              "line": 1035
+            }
+          ],
+          "hash": "1d5cca9cc0e24a48a9f731f7384e585cdb486b64eb0643f568b2a0262db1ef0c",
+          "importOrder": [
+            "rust/src/readings.rs",
+            "rust/src/review.rs",
+            "rust/src/geometry.rs",
+            "rust/src/views.rs",
+            "rust/src/geometry_deltas.rs",
+            "rust/src/open.rs"
+          ],
+          "importsFiles": [
+            "rust/src/geometry.rs",
+            "rust/src/geometry_deltas.rs",
+            "rust/src/open.rs",
+            "rust/src/readings.rs",
+            "rust/src/review.rs",
+            "rust/src/views.rs"
+          ],
+          "path": "rust/src/bundle.rs"
+        },
+        {
+          "exports": [
+            "looks_like_geometry",
+            "read"
+          ],
+          "failurePaths": [
+            {
+              "in": "read",
+              "kind": "err",
+              "line": 235
+            }
+          ],
+          "hash": "d16e9b9f6da2b97d4895db4bc662220d24f4c580f449c5f26bd716b786d6da97",
+          "path": "rust/src/geometry.rs",
+          "testsInside": true
+        },
+        {
+          "exports": [
+            "auto_summary",
+            "compute",
+            "compute_with_map",
+            "compute_with_summary",
+            "create_alignment_map",
+            "dotnet_double",
+            "fixed",
+            "robust_sigma"
+          ],
+          "hash": "e39b1b955464dd6560ff3b2bb689a5eddde4825c93034105c77ea68d76b2c089",
+          "importsFiles": [
+            "rust/src/geometry.rs"
+          ],
+          "path": "rust/src/geometry_deltas.rs"
+        },
+        {
+          "exports": [
+            "attach_bundle",
+            "clear",
+            "file_path",
+            "package_local_state",
+            "read",
+            "record"
+          ],
+          "failurePaths": [
+            {
+              "in": "record",
+              "kind": "err",
+              "line": 91
+            },
+            {
+              "in": "attach_bundle",
+              "kind": "err",
+              "line": 122
+            }
+          ],
+          "hash": "188542507907294709cd3621b5407236f7b19c012a0147c115659bbe4763f2d0",
+          "importsFiles": [
+            "rust/src/bundle.rs"
+          ],
+          "path": "rust/src/history.rs"
+        },
+        {
+          "hash": "fa6b0e8ed656e45bc341548c9c26499bce5fde3e220f2698837ce89391b02970",
+          "importsFiles": [
+            "rust/src/bundle.rs",
+            "rust/src/geometry.rs",
+            "rust/src/geometry_deltas.rs",
+            "rust/src/history.rs",
+            "rust/src/milestones.rs",
+            "rust/src/open.rs",
+            "rust/src/prefs.rs",
+            "rust/src/readings.rs",
+            "rust/src/review.rs",
+            "rust/src/runtrace.rs",
+            "rust/src/shape.rs",
+            "rust/src/stats.rs",
+            "rust/src/svg.rs",
+            "rust/src/ui.rs",
+            "rust/src/views.rs"
+          ],
+          "path": "rust/src/lib.rs"
+        },
+        {
+          "entry": "main",
+          "entryRule": 1,
+          "hash": "8d83cc7b60ab946b322b5a5aa7c48a49ff49f5d31e172fa1864a119d84db3b86",
+          "importsFiles": [
+            "rust/src/ui.rs"
+          ],
+          "library": "rust/src/lib.rs",
+          "path": "rust/src/main.rs",
+          "sequences": [
+            {
+              "calls": [
+                {
+                  "line": 14,
+                  "name": "install_style",
+                  "target": {
+                    "file": "rust/src/ui.rs"
+                  }
+                },
+                {
+                  "line": 15,
+                  "name": "default",
+                  "receiver": "ScalarScopeApp",
+                  "target": {
+                    "file": "rust/src/ui.rs"
+                  }
+                }
+              ],
+              "exported": false,
+              "invokedAtTopLevel": true,
+              "isDefaultExport": false,
+              "name": "main"
+            }
+          ]
+        },
+        {
+          "exports": [
+            "detect_steady_start",
+            "detect_warmup_end"
+          ],
+          "hash": "6ecc18c6c3446ae448581b5b5afbac6688ebb8efbdd0e9f0c26dd772d691e897",
+          "path": "rust/src/milestones.rs"
+        },
+        {
+          "exports": [
+            "is_runtime_log",
+            "open_folder",
+            "open_log",
+            "open_path",
+            "open_paths",
+            "open_text"
+          ],
+          "failurePaths": [
+            {
+              "in": "open_paths",
+              "kind": "err",
+              "line": 108
+            },
+            {
+              "in": "open_paths",
+              "kind": "err",
+              "line": 113
+            },
+            {
+              "in": "open_log",
+              "kind": "err",
+              "line": 358
+            },
+            {
+              "in": "open_json",
+              "kind": "err",
+              "line": 395
+            },
+            {
+              "in": "open_json",
+              "kind": "err",
+              "line": 398
+            },
+            {
+              "in": "open_trace",
+              "kind": "err",
+              "line": 422
+            },
+            {
+              "in": "open_benchmark",
+              "kind": "err",
+              "line": 516
+            },
+            {
+              "in": "open_csv",
+              "kind": "err",
+              "line": 550
+            },
+            {
+              "in": "open_csv",
+              "kind": "err",
+              "line": 553
+            },
+            {
+              "in": "open_csv",
+              "kind": "err",
+              "line": 574
+            },
+            {
+              "in": "open_training",
+              "kind": "err",
+              "line": 608
+            },
+            {
+              "in": "open_runtrace",
+              "kind": "err",
+              "line": 734
+            }
+          ],
+          "hash": "78575cd698db5c2985e206c510ed88cfaa3d3558c9c3fbc4b768362dddc174f6",
+          "importOrder": [
+            "rust/src/milestones.rs",
+            "rust/src/runtrace.rs",
+            "rust/src/geometry.rs",
+            "rust/src/shape.rs"
+          ],
+          "importsFiles": [
+            "rust/src/geometry.rs",
+            "rust/src/milestones.rs",
+            "rust/src/runtrace.rs",
+            "rust/src/shape.rs"
+          ],
+          "path": "rust/src/open.rs"
+        },
+        {
+          "exports": [
+            "clear_recent",
+            "read",
+            "remember_file",
+            "saved_views",
+            "series_palette",
+            "write_settings"
+          ],
+          "failurePaths": [
+            {
+              "in": "read_object",
+              "kind": "err",
+              "line": 96
+            },
+            {
+              "in": "read_object",
+              "kind": "err",
+              "line": 105
+            },
+            {
+              "in": "remember_file",
+              "kind": "err",
+              "line": 132
+            },
+            {
+              "in": "remember_file",
+              "kind": "err",
+              "line": 139
+            }
+          ],
+          "hash": "5b9d87a16da41379ff0539c2806af6257a9c2ca64ac3ff04d38a11867530c054",
+          "importsFiles": [
+            "rust/src/bundle.rs"
+          ],
+          "path": "rust/src/prefs.rs"
+        },
+        {
+          "exports": [
+            "deviation_band",
+            "empirical_cdf",
+            "finite_sorted",
+            "percentile",
+            "steady_index",
+            "three_sigma_indices"
+          ],
+          "hash": "7a6eb07f17917f27ba8f877c9d0aace586ef0790a2257bb8f1899bacf78b9389",
+          "path": "rust/src/readings.rs"
+        },
+        {
+          "exports": [
+            "geometry_with_deltas",
+            "pair",
+            "pair_with"
+          ],
+          "failurePaths": [
+            {
+              "in": "pair_with",
+              "kind": "err",
+              "line": 173
+            },
+            {
+              "in": "blocked",
+              "kind": "err",
+              "line": 480
+            },
+            {
+              "in": "blocked",
+              "kind": "err",
+              "line": 487
+            }
+          ],
+          "hash": "9b15a193bc777a796763f9443d845e0fdbb58f57770653bd45205d658a490e65",
+          "importOrder": [
+            "rust/src/open.rs",
+            "rust/src/readings.rs",
+            "rust/src/runtrace.rs",
+            "rust/src/shape.rs",
+            "rust/src/stats.rs",
+            "rust/src/views.rs",
+            "rust/src/geometry.rs",
+            "rust/src/geometry_deltas.rs",
+            "rust/src/milestones.rs"
+          ],
+          "importsFiles": [
+            "rust/src/geometry.rs",
+            "rust/src/geometry_deltas.rs",
+            "rust/src/milestones.rs",
+            "rust/src/open.rs",
+            "rust/src/readings.rs",
+            "rust/src/runtrace.rs",
+            "rust/src/shape.rs",
+            "rust/src/stats.rs",
+            "rust/src/views.rs"
+          ],
+          "path": "rust/src/review.rs"
+        },
+        {
+          "exports": [
+            "blocked_message",
+            "blocked_side_message",
+            "compare_fingerprints",
+            "guardrails",
+            "is_absent",
+            "looks_like_runtrace",
+            "milestone",
+            "parse",
+            "series",
+            "validate"
+          ],
+          "failurePaths": [
+            {
+              "in": "parse",
+              "kind": "err",
+              "line": 134
+            },
+            {
+              "in": "parse",
+              "kind": "err",
+              "line": 146
+            },
+            {
+              "in": "parse",
+              "kind": "err",
+              "line": 161
+            },
+            {
+              "in": "parse",
+              "kind": "err",
+              "line": 163
+            }
+          ],
+          "hash": "710f9a9eb3db5b61fc3d0d95680db872289aaf26ca43c5ed844055e58e35640d",
+          "path": "rust/src/runtrace.rs"
+        },
+        {
+          "exports": [
+            "pelt",
+            "run_shape"
+          ],
+          "hash": "cd9406f0c10287a518203c95c1160d68bd80befb40ab3b94b062f1d5017e5ad8",
+          "importsFiles": [
+            "rust/src/stats.rs"
+          ],
+          "path": "rust/src/shape.rs",
+          "testsInside": true
+        },
+        {
+          "exports": [
+            "anomalies",
+            "binomial_upper_tail",
+            "block_length",
+            "block_resample",
+            "difference_interval",
+            "mad_indices",
+            "more_anomalies",
+            "quantile_band",
+            "quantile_support",
+            "quantile_unsorted",
+            "ratio_interval",
+            "relative_spread",
+            "robust_center",
+            "runs_interval",
+            "spread_ratio_interval"
+          ],
+          "hash": "7e72a7d9fbe6d4aea093f5e1fe96f1509df4f5abec5e1595340952f56794d464",
+          "importsFiles": [
+            "rust/src/readings.rs"
+          ],
+          "path": "rust/src/stats.rs",
+          "testsInside": true
+        },
+        {
+          "exports": [
+            "difference",
+            "distribution",
+            "escape",
+            "series",
+            "spectrum",
+            "ticks",
+            "warmup",
+            "wrap"
+          ],
+          "hash": "cc577a0ca2cccb0f6a5ec5031ab22ed6acc7320adacacbfc9b9cf79963af7f7e",
+          "importsFiles": [
+            "rust/src/review.rs",
+            "rust/src/views.rs"
+          ],
+          "path": "rust/src/svg.rs",
+          "testsInside": true
+        },
+        {
+          "exports": [
+            "encode_png",
+            "install_style"
+          ],
+          "failurePaths": [
+            {
+              "in": "page",
+              "kind": "match-err",
+              "line": 309
+            },
+            {
+              "in": "load",
+              "kind": "match-err",
+              "line": 398
+            },
+            {
+              "in": "open_bundle",
+              "kind": "match-err",
+              "line": 421
+            },
+            {
+              "in": "save_bundle",
+              "kind": "match-err",
+              "line": 435
+            },
+            {
+              "in": "save_bundle",
+              "kind": "match-err",
+              "line": 452
+            },
+            {
+              "in": "save_bundle",
+              "kind": "match-err",
+              "line": 456
+            },
+            {
+              "in": "save_bundle",
+              "kind": "match-err",
+              "line": 458
+            },
+            {
+              "in": "export_svg",
+              "kind": "match-err",
+              "line": 643
+            },
+            {
+              "in": "receive_screenshot",
+              "kind": "match-err",
+              "line": 667
+            },
+            {
+              "in": "settings_changed",
+              "kind": "match-err",
+              "line": 706
+            },
+            {
+              "in": "draw_settings",
+              "kind": "match-err",
+              "line": 753
+            },
+            {
+              "in": "remember",
+              "kind": "match-err",
+              "line": 1140
+            },
+            {
+              "in": "open_saved_path",
+              "kind": "match-err",
+              "line": 1266
+            },
+            {
+              "in": "remember_opened_file",
+              "kind": "match-err",
+              "line": 1280
+            },
+            {
+              "in": "reopen",
+              "kind": "match-err",
+              "line": 1297
+            },
+            {
+              "in": "reopen",
+              "kind": "match-err",
+              "line": 1312
+            },
+            {
+              "in": "reopen",
+              "kind": "match-err",
+              "line": 1312
+            }
+          ],
+          "hash": "7c934725d52f66564ec5068999cd45ec056e5bca23ef8d23a9cc9cdde688b375",
+          "importOrder": [
+            "rust/src/bundle.rs",
+            "rust/src/history.rs",
+            "rust/src/open.rs",
+            "rust/src/prefs.rs",
+            "rust/src/readings.rs",
+            "rust/src/review.rs",
+            "rust/src/views.rs",
+            "rust/src/svg.rs",
+            "rust/src/stats.rs",
+            "rust/src/ui_pages.rs",
+            "rust/src/ui_geometry.rs",
+            "rust/src/ui_tests.rs"
+          ],
+          "importsFiles": [
+            "rust/src/bundle.rs",
+            "rust/src/history.rs",
+            "rust/src/open.rs",
+            "rust/src/prefs.rs",
+            "rust/src/readings.rs",
+            "rust/src/review.rs",
+            "rust/src/stats.rs",
+            "rust/src/svg.rs",
+            "rust/src/ui_geometry.rs",
+            "rust/src/ui_pages.rs",
+            "rust/src/ui_tests.rs",
+            "rust/src/views.rs"
+          ],
+          "path": "rust/src/ui.rs",
+          "sequences": [
+            {
+              "calls": [
+                {
+                  "line": 934,
+                  "name": "nines",
+                  "target": {
+                    "file": "rust/src/views.rs"
+                  }
+                }
+              ],
+              "exported": false,
+              "invokedAtTopLevel": false,
+              "isDefaultExport": false,
+              "name": "draw_difference"
+            },
+            {
+              "calls": [
+                {
+                  "line": 955,
+                  "name": "spectrum",
+                  "target": {
+                    "file": "rust/src/views.rs"
+                  }
+                }
+              ],
+              "exported": false,
+              "invokedAtTopLevel": false,
+              "isDefaultExport": false,
+              "name": "draw_spectrum"
+            },
+            {
+              "calls": [
+                {
+                  "line": 987,
+                  "name": "heat_range",
+                  "target": {
+                    "file": "rust/src/views.rs"
+                  }
+                },
+                {
+                  "line": 1004,
+                  "name": "heat_cells",
+                  "target": {
+                    "file": "rust/src/views.rs"
+                  }
+                }
+              ],
+              "exported": false,
+              "invokedAtTopLevel": false,
+              "isDefaultExport": false,
+              "name": "draw_heat_maps"
+            },
+            {
+              "calls": [
+                {
+                  "line": 1379,
+                  "name": "stored_pair",
+                  "target": {
+                    "file": "rust/src/bundle.rs"
+                  }
+                }
+              ],
+              "exported": false,
+              "invokedAtTopLevel": false,
+              "isDefaultExport": false,
+              "name": "stored_names"
+            }
+          ]
+        },
+        {
+          "exports": [
+            "position_at",
+            "professor_tips",
+            "reach",
+            "time_range"
+          ],
+          "hash": "23fb0d2f9351526de7dbaa1f86d2706c65f8e78a81332acbd487112db29569bb",
+          "importOrder": [
+            "rust/src/ui.rs",
+            "rust/src/geometry.rs",
+            "rust/src/review.rs"
+          ],
+          "importsFiles": [
+            "rust/src/geometry.rs",
+            "rust/src/review.rs",
+            "rust/src/ui.rs"
+          ],
+          "path": "rust/src/ui_geometry.rs",
+          "testsInside": true
+        },
+        {
+          "exports": [
+            "search",
+            "view_for_key"
+          ],
+          "failurePaths": [
+            {
+              "in": "load_sample",
+              "kind": "match-err",
+              "line": 133
+            },
+            {
+              "in": "load_sample",
+              "kind": "match-err",
+              "line": 133
+            }
+          ],
+          "hash": "229198a87ff3c69aa01347dec8a99e7badd9710f2ce54d447ab38db217ac9cd9",
+          "importOrder": [
+            "rust/src/ui.rs",
+            "rust/src/open.rs"
+          ],
+          "importsFiles": [
+            "rust/src/open.rs",
+            "rust/src/ui.rs"
+          ],
+          "path": "rust/src/ui_pages.rs"
+        },
+        {
+          "hash": "aba0c498134f6f225507ff3e89a92c0060e7e437e1a47f064f10f05e38ce5edd",
+          "importOrder": [
+            "rust/src/bundle.rs",
+            "rust/src/history.rs",
+            "rust/src/open.rs",
+            "rust/src/prefs.rs",
+            "rust/src/readings.rs",
+            "rust/src/review.rs",
+            "rust/src/ui.rs",
+            "rust/src/stats.rs",
+            "rust/src/ui_pages.rs",
+            "rust/src/svg.rs"
+          ],
+          "importsFiles": [
+            "rust/src/bundle.rs",
+            "rust/src/history.rs",
+            "rust/src/open.rs",
+            "rust/src/prefs.rs",
+            "rust/src/readings.rs",
+            "rust/src/review.rs",
+            "rust/src/stats.rs",
+            "rust/src/svg.rs",
+            "rust/src/ui.rs",
+            "rust/src/ui_pages.rs"
+          ],
+          "path": "rust/src/ui_tests.rs",
+          "testsInside": true
+        },
+        {
+          "exports": [
+            "difference",
+            "exceedance",
+            "heat_cells",
+            "heat_range",
+            "nines",
+            "quantile_strip",
+            "spectrum",
+            "window_segments"
+          ],
+          "hash": "dab6211dbb29eda1f796e2cfe47bcaa79bf52f29d477f70a3b2fdb7d946190ce",
+          "importsFiles": [
+            "rust/src/stats.rs"
+          ],
+          "path": "rust/src/views.rs",
+          "testsInside": true
+        },
+        {
+          "hash": "5db842cddeda984eb002f5459520112826749dbdd9e516fe83c0e40a0861a3c1",
+          "importsFiles": [
+            "rust/src/geometry_deltas.rs",
+            "rust/src/open.rs",
+            "rust/src/review.rs"
+          ],
+          "library": "rust/src/lib.rs",
+          "path": "rust/tests/aspire_export_tests.rs",
+          "testsInside": true
+        },
+        {
+          "hash": "bd19342e65d33f290ba47967ab0f2d81dbed3dfecb36fe50964b82b1b1558380",
+          "importsFiles": [
+            "rust/src/bundle.rs",
+            "rust/src/open.rs",
+            "rust/src/review.rs"
+          ],
+          "library": "rust/src/lib.rs",
+          "path": "rust/tests/bundle_tests.rs",
+          "testsInside": true
+        },
+        {
+          "hash": "26b9bb294314f8898cf561b6b18e008c143bc2b68dd58283740cf956a6702f63",
+          "importsFiles": [
+            "rust/src/bundle.rs",
+            "rust/src/open.rs",
+            "rust/src/review.rs"
+          ],
+          "library": "rust/src/lib.rs",
+          "path": "rust/tests/compat_tests.rs",
+          "testsInside": true
+        },
+        {
+          "hash": "cec1d0cce4f232dd3cd3bf0be7fb2d62f10b841f43efd93965d08bd4f171072a",
+          "importsFiles": [
+            "rust/src/bundle.rs",
+            "rust/src/history.rs",
+            "rust/src/milestones.rs",
+            "rust/src/open.rs",
+            "rust/src/prefs.rs",
+            "rust/src/readings.rs",
+            "rust/src/review.rs"
+          ],
+          "library": "rust/src/lib.rs",
+          "path": "rust/tests/edge_tests.rs",
+          "testsInside": true
+        },
+        {
+          "hash": "e7e17e1d87e54f1c47e1fb67f8f557ec7064a476da4666cf61637ec74fc176ef",
+          "path": "rust/tests/fixtures/aspire-si/regressing.json"
+        },
+        {
+          "hash": "fc53c3e8d26207b8a299f0a7ddaec6534947537c9d1295fcaaa2b600bb0ebb6f",
+          "path": "rust/tests/fixtures/aspire-si/steady.json"
+        },
+        {
+          "hash": "f605ce1108276fb0fbecc34470eacb61f4cc6b3b31935a4afea81dcf137394ff",
+          "importsFiles": [
+            "rust/src/geometry.rs",
+            "rust/src/geometry_deltas.rs"
+          ],
+          "library": "rust/src/lib.rs",
+          "path": "rust/tests/geometry_delta_tests.rs",
+          "testsInside": true
+        },
+        {
+          "hash": "351c7d51b567fe5dfcf253323da2d399fac73fcc20201408beb734ce93e28e3d",
+          "importsFiles": [
+            "rust/src/history.rs"
+          ],
+          "library": "rust/src/lib.rs",
+          "path": "rust/tests/history_tests.rs",
+          "testsInside": true
+        },
+        {
+          "hash": "164c5f1bf14254f51c764dc866994f5462a04bc0449a08135b4b44c1e793e99b",
+          "importsFiles": [
+            "rust/src/prefs.rs"
+          ],
+          "library": "rust/src/lib.rs",
+          "path": "rust/tests/prefs_tests.rs",
+          "testsInside": true
+        },
+        {
+          "hash": "a68c428d07b87e789d145eb08887022eae61c0a18aaf9e4f970639382d3abdc4",
+          "importsFiles": [
+            "rust/src/milestones.rs",
+            "rust/src/open.rs",
+            "rust/src/readings.rs",
+            "rust/src/review.rs",
+            "rust/src/stats.rs"
+          ],
+          "library": "rust/src/lib.rs",
+          "path": "rust/tests/review_tests.rs",
+          "testsInside": true
+        },
+        {
+          "hash": "3899a200ae2847be9a0ab862855aabb98df03a9e1e5e94a54c4f6496b95bc435",
+          "importsFiles": [
+            "rust/src/open.rs",
+            "rust/src/review.rs",
+            "rust/src/runtrace.rs"
+          ],
+          "library": "rust/src/lib.rs",
+          "path": "rust/tests/runtrace_tests.rs",
+          "testsInside": true
+        },
+        {
+          "hash": "0f0f201cef1563f4b6e0b3131aa866b06f2d2f2fd177a7a4c053b39a296411a7",
+          "importsFiles": [
+            "rust/src/open.rs"
+          ],
+          "library": "rust/src/lib.rs",
+          "path": "rust/tests/sources_tests.rs",
+          "testsInside": true
+        }
+      ],
+      "globs": [
+        "rust/**"
+      ],
+      "importConfidence": "full",
+      "name": "rust",
+      "origin": "authored",
+      "outsidePlaces": [
+        {
+          "reads": 11,
+          "where": [
+            "caller"
+          ],
+          "writes": 4
+        },
+        {
+          "reads": 0,
+          "where": [
+            "temp"
+          ],
+          "writes": 1
+        }
+      ],
+      "outsideReads": 11,
+      "outsideWrites": 5,
+      "role": "code",
+      "testRunners": [
+        "cargo test"
+      ],
+      "testedBy": 17,
+      "unresolvedSites": 0
+    },
+    {
+      "dynamicReads": 0,
+      "dynamicSpawns": 0,
+      "dynamicSpawnsInTests": 0,
+      "dynamicWrites": 0,
+      "entryPoints": [],
+      "externals": 0,
+      "files": [
+        {
+          "hash": "f28162a1043cc69da1b528c0a13a9aa7efd9be6a7bee69cb6c8f06bd5fb4d454",
+          "path": "site/astro.config.mjs"
+        },
+        {
+          "hash": "baeef27103706a82b6cb18b044164d949248b2d90f40e133f94172c14d4f65ca",
+          "path": "site/package-lock.json"
+        },
+        {
+          "hash": "e3948f3adea612a50f80b0084dc874569b512d5150b14de8d1323a5fff09cd6d",
+          "path": "site/package.json"
+        },
+        {
+          "constantOnly": true,
+          "hash": "ee756dfba4122d2acc94a39b2555d9f200fff56a87a8c0b10f9cd01df26a8b62",
+          "path": "site/src/content.config.ts"
+        },
+        {
+          "hash": "db1208660fc6c99050e46b7e1eae018cfcc9cbb13678e1785d68dca1d6bced6b",
+          "path": "site/src/content/docs/handbook/beginners.md"
+        },
+        {
+          "hash": "615982c00246f22e3e7644b4df6ee2ce4f1e5b926dbc6c1c3af072df5fa1910a",
+          "path": "site/src/content/docs/handbook/bundles.md"
+        },
+        {
+          "hash": "47d63e66620e65b3904a6e3d666efd48d772e5d64f50c2d72a5e35957279fb6f",
+          "path": "site/src/content/docs/handbook/delta-analysis.md"
+        },
+        {
+          "hash": "966a118461cdf4cb999223fa0ae66fa00224352b22b7740c28b26dbf7c7e5f8f",
+          "path": "site/src/content/docs/handbook/getting-started.md"
+        },
+        {
+          "hash": "ecec040e56d7b120d6ffba26957a4a2f31353eb0db67c8d4215367b02840e259",
+          "path": "site/src/content/docs/handbook/index.md"
+        },
+        {
+          "hash": "c8339517302bf5d8bc915a0ec91495253035c6cfecef349361627525bb035fe0",
+          "path": "site/src/content/docs/handbook/rust-review.md"
+        },
+        {
+          "hash": "b5050fe62ca1c7d33e2d5c9c57cd13a7e170f910fb811406f973c1ae941213b7",
+          "path": "site/src/content/docs/handbook/vortexkit.md"
+        },
+        {
+          "hash": "391533713539035d3c92282579d43de0f137067867fdb502d7eaea3c74601d2a",
+          "importOrder": [
+            "site/src/styles/global.css",
+            "site/src/site-config.ts"
+          ],
+          "importsFiles": [
+            "site/src/site-config.ts",
+            "site/src/styles/global.css"
+          ],
+          "path": "site/src/pages/index.astro"
+        },
+        {
+          "constantOnly": true,
+          "hash": "adb9307a720cc977b1b18f0eec557b7c0dd877bd4065c6b2841eb5863753f9f5",
+          "path": "site/src/site-config.ts"
+        },
+        {
+          "hash": "29ee8df91833e694bdba973126b34a6177de4cf01dab6d9ef7d3126e8e2b67fb",
+          "path": "site/src/styles/global.css"
+        },
+        {
+          "hash": "0d11beabe574a2269bdaa467f06d03254f61512b287b43d6205d8d46d28f9270",
+          "path": "site/src/styles/starlight-custom.css"
+        },
+        {
+          "hash": "b5b0a5b04a14cddd7713c5e1c82e86c79c17c2f86b170e26e9b170b3d5e01cd9",
+          "path": "site/tsconfig.json"
+        }
+      ],
+      "globs": [
+        "site/**"
+      ],
+      "importConfidence": "full",
+      "name": "site",
+      "origin": "authored",
+      "role": "site",
+      "testedBy": 0,
+      "unresolvedSites": 0
+    },
+    {
+      "dynamicReads": 0,
+      "dynamicSpawns": 0,
+      "dynamicSpawnsInTests": 0,
+      "dynamicWrites": 0,
+      "entryPoints": [],
+      "externals": 0,
+      "files": [
+        {
+          "hash": "cca5b0bf890a1925472a880cce38d36fb00b8b75f4bae90ad1cbfa6ee4244f49",
+          "path": "src/ScalarScope/App.xaml"
+        },
+        {
+          "hash": "5d3a9ddf6b778e8213b0b8603760bc8295aeba5964551b8737495ec68352975a",
+          "path": "src/ScalarScope/App.xaml.cs"
+        },
+        {
+          "hash": "01cb68d2da5eb8ec7db2e2fa9f51d07369eea1ebb0d5f014e8fbc497860adb46",
+          "path": "src/ScalarScope/AppShell.xaml"
+        },
+        {
+          "hash": "5bc73ee7d9d12f408c8cb82a616dc7b4757b9390b0fff875b4fce5f0addc1b5f",
+          "path": "src/ScalarScope/AppShell.xaml.cs"
+        },
+        {
+          "hash": "64d414c8a02e40300a41eb9385fbf3b86522b3630501b7dd3c98da1eee0c3180",
+          "path": "src/ScalarScope/Converters/BoolConverters.cs"
+        },
+        {
+          "hash": "431db9089f5c1d0a901527026d5e4fde80e936549554c59cae0df855f04d154f",
+          "path": "src/ScalarScope/MainPage.xaml"
+        },
+        {
+          "hash": "6c660404116460cf9026228649a80312889101d6465095de5b89df7bbae0dde7",
+          "path": "src/ScalarScope/MainPage.xaml.cs"
+        },
+        {
+          "hash": "3818cdb4eb507cb5fa791b0b908d7e4f7cb01a8f3f0b255a5f20634771f48a82",
+          "path": "src/ScalarScope/MauiProgram.cs"
+        },
+        {
+          "hash": "f0c1e26ac0573e93ede4070f9b579f5ea14e0786a5829272972921c4c2f5517b",
+          "path": "src/ScalarScope/Models/GeometryRun.cs"
+        },
+        {
+          "hash": "35b45808eae6361e1a4b63d0b338ef1318f91b15f8b0697b304131e0e637fb38",
+          "path": "src/ScalarScope/Models/InsightEvent.cs"
+        },
+        {
+          "hash": "ecac074e169810efc9f1ea0d7667e8a7683d76da2999a63a50c514fcd564db27",
+          "path": "src/ScalarScope/Platforms/Android/AndroidManifest.xml"
+        },
+        {
+          "hash": "9a8273db77f71f881f0b964525256f2d514c5d666555e8a81831f5648f6b1451",
+          "path": "src/ScalarScope/Platforms/Android/MainActivity.cs"
+        },
+        {
+          "hash": "15af3d11109b2493166c57a6c76d6a831b21c1de1912f260284c31ad0add6f73",
+          "path": "src/ScalarScope/Platforms/Android/MainApplication.cs"
+        },
+        {
+          "hash": "785f8cc2287b9036ec769b23b490b22a3e074aed9a812ff06b8fdb615e30e8f7",
+          "path": "src/ScalarScope/Platforms/Android/Resources/values/colors.xml"
+        },
+        {
+          "hash": "e30defff71ecf19db9718fe7aa6ffe01a0d9fab5f97cc7f21b5ddc78bf1a0d6c",
+          "path": "src/ScalarScope/Platforms/MacCatalyst/AppDelegate.cs"
+        },
+        {
+          "hash": "b1362bf3f8d84b43a0f229e3644b8e911cec21689155fc91e184ac3a56145ca6",
+          "path": "src/ScalarScope/Platforms/MacCatalyst/Entitlements.plist"
+        },
+        {
+          "hash": "1083735a3b94518437ac8280b0145907aa9084211cd2607d2e6d94596ec60626",
+          "path": "src/ScalarScope/Platforms/MacCatalyst/Info.plist"
+        },
+        {
+          "hash": "3bd94e2e839a298c8877e1e5563d29b9dd67b9a822cead77d16003d9b050c6c0",
+          "path": "src/ScalarScope/Platforms/MacCatalyst/Program.cs"
+        },
+        {
+          "hash": "16c017f832165abf5f5dca686c6f601bbb5755ef714430c8c36484212560c42f",
+          "path": "src/ScalarScope/Platforms/Windows/App.xaml"
+        },
+        {
+          "hash": "e0de3797e1533bfa89c252049309548c374e0c5e417fd2f6ba72d793914944ff",
+          "path": "src/ScalarScope/Platforms/Windows/App.xaml.cs"
+        },
+        {
+          "hash": "8cc1e0e0e87b3e189567a0005be716cca4e3e342bccd9ec2d567ac0a0a2b7292",
+          "path": "src/ScalarScope/Platforms/Windows/Package.appxmanifest"
+        },
+        {
+          "hash": "96c9f0ee6fea8201ec6db294a7a81365ec90ec6806e9dc030b80a34680a40201",
+          "path": "src/ScalarScope/Platforms/Windows/app.manifest"
+        },
+        {
+          "hash": "e30defff71ecf19db9718fe7aa6ffe01a0d9fab5f97cc7f21b5ddc78bf1a0d6c",
+          "path": "src/ScalarScope/Platforms/iOS/AppDelegate.cs"
+        },
+        {
+          "hash": "da57689ff54e53a03a5fc646b4a3be0559c1e2c5fdf3668fd248d3744e546a5b",
+          "path": "src/ScalarScope/Platforms/iOS/Info.plist"
+        },
+        {
+          "hash": "3bd94e2e839a298c8877e1e5563d29b9dd67b9a822cead77d16003d9b050c6c0",
+          "path": "src/ScalarScope/Platforms/iOS/Program.cs"
+        },
+        {
+          "hash": "c2cfc0316bb579011018f04b90c8cc83e21cc8e7ca88262c3213db239e6afaa9",
+          "path": "src/ScalarScope/Platforms/iOS/Resources/PrivacyInfo.xcprivacy"
+        },
+        {
+          "hash": "12e54b598f0759f17ff38b030206359c7244319edda6b5dfaf4991d6b2ce57dd",
+          "path": "src/ScalarScope/Properties/launchSettings.json"
+        },
+        {
+          "hash": "06f12213ecfe619e0199520c02878bf607de47654b2835baca1aabab55d6b124",
+          "path": "src/ScalarScope/Resources/AppIcon/StoreLogo_150x150.png"
+        },
+        {
+          "hash": "905834ddb75054c3a8abc7f72733110aafa9dca95abbfd6f5af539df9aafaf85",
+          "path": "src/ScalarScope/Resources/AppIcon/StoreLogo_300x300.png"
+        },
+        {
+          "hash": "96cbf6ece1a832674b96d2d6584d7eb13485c2d1e50fe47b45dac60e2289cd04",
+          "path": "src/ScalarScope/Resources/AppIcon/StoreLogo_512x512.png"
+        },
+        {
+          "hash": "7fc94a0cc19311f6c30afa1133fce7c526f5496133680e6c7a60b8c8c9abf77b",
+          "path": "src/ScalarScope/Resources/AppIcon/StoreLogo_71x71.png"
+        },
+        {
+          "hash": "dc70e9b9d8d9e9e1c243e09e32c771d6a03d675e1f5ca466cfebd8063f80fb05",
+          "path": "src/ScalarScope/Resources/AppIcon/appicon.svg"
+        },
+        {
+          "hash": "44f5c5beff897b14186014f6d3e35cc8b0e7f81fdeff86318812b29e6a1b052d",
+          "path": "src/ScalarScope/Resources/AppIcon/appiconfg.svg"
+        },
+        {
+          "hash": "c966ea81f1a16e8aead66a65520028e35e5e74692d24a27e957bff8bc995b791",
+          "path": "src/ScalarScope/Resources/AppIcon/scalarscope_icon.svg"
+        },
+        {
+          "hash": "68537966c2ed6954f240ec73cb31a20f63891b54b6d3aa71f2edcd2406689ddb",
+          "path": "src/ScalarScope/Resources/Fonts/OpenSans-Regular.ttf"
+        },
+        {
+          "hash": "059c322533f302e897749c38d8f286fce3a9ca0bfef0447ad1a777f342fc771b",
+          "path": "src/ScalarScope/Resources/Fonts/OpenSans-Semibold.ttf"
+        },
+        {
+          "hash": "93b5cdf74a8d22a5956eca9703f62e1b26d618cec20914255ee7f5e595b98ae7",
+          "path": "src/ScalarScope/Resources/Images/dotnet_bot.png"
+        },
+        {
+          "hash": "502854e97277d11c50ceef5082fd4bca622ef921e7c3bc6e013b32de88df311a",
+          "path": "src/ScalarScope/Resources/Raw/AboutAssets.txt"
+        },
+        {
+          "hash": "e27280afec4b6be4b29e6402d5eb180e2f0d7ee4f5ff43cebe1bd90e3c4a4fa4",
+          "path": "src/ScalarScope/Resources/Raw/Samples/correlated_professors.json"
+        },
+        {
+          "hash": "3c72eb2b258ff8d16c007658b088f9b46739cfb3cd06674eda7ff960338aedc5",
+          "path": "src/ScalarScope/Resources/Raw/Samples/orthogonal_professors.json"
+        },
+        {
+          "hash": "b16c1a74ac278ebf1af93af295e6bd2b8c534331bdd4bc4603c3d6e04a1815d9",
+          "path": "src/ScalarScope/Resources/Splash/splash.svg"
+        },
+        {
+          "hash": "ff7495cda3c01b413b6b568c50f59ea95da5d8735600557e64514e0ca6e3f8e4",
+          "path": "src/ScalarScope/Resources/Styles/Colors.xaml"
+        },
+        {
+          "hash": "1b55b8e836fd69bcc420e9dc24d474a4504d617f1f6c33eb8aaf0c5873353757",
+          "path": "src/ScalarScope/Resources/Styles/DesignSystem.xaml"
+        },
+        {
+          "hash": "404d58659960715a06d98b84448bc05adc382511b5df0a306d731a8e8bb0e00e",
+          "path": "src/ScalarScope/Resources/Styles/Styles.xaml"
+        },
+        {
+          "hash": "115e8dd7981e57bf9bf80fa22b5be952741932efb82c5371266781ee19e77334",
+          "path": "src/ScalarScope/ScalarScope.csproj"
+        },
+        {
+          "hash": "fcb2a3ae11939b180bcee7f5b3b8063aea385751c8091963089ff4b0b6d9b229",
+          "path": "src/ScalarScope/Services/AccessibilityService.cs"
+        },
+        {
+          "hash": "32b57949d1d352df871e6608822cd0e263faa3ca73cbcb8249280829a7b729b3",
+          "path": "src/ScalarScope/Services/AlignmentCaption.cs"
+        },
+        {
+          "hash": "142043dfa9cad324398fda8b5bfa4dedd737c93358ab4eceb2fb26908eda5ac3",
+          "path": "src/ScalarScope/Services/AlignmentMapper.cs"
+        },
+        {
+          "hash": "1f0c6313034fae87e9911fb7700aea3be3df5a459bd3157f88415bb21bbfd896",
+          "path": "src/ScalarScope/Services/AnalysisService.cs"
+        },
+        {
+          "hash": "0f23a0977fcc318d094bdc71243814d9485f16a9b18a75b18626a5390153b198",
+          "path": "src/ScalarScope/Services/AutoSaveService.cs"
+        },
+        {
+          "hash": "7341585a5f94b3837e8eee2dd0b3e711b63520d4de4bee6deb44763bd6a5e788",
+          "path": "src/ScalarScope/Services/BundleImportService.cs"
+        },
+        {
+          "hash": "f8a2f39153ad342873f0223a1e38c3d1279b13721f49b28dee351f453608e475",
+          "path": "src/ScalarScope/Services/BundleIntegrityService.cs"
+        },
+        {
+          "hash": "a0ba772c1409797d6c5261d90cbfc03039d8b2d681ba13151afe521c6f1ded8f",
+          "path": "src/ScalarScope/Services/BundlePaths.cs"
+        },
+        {
+          "hash": "43c1f0d313fcf3713dd2262b495d673fe35cdda57c34d5c796cbbcf4113ce909",
+          "path": "src/ScalarScope/Services/BundleSchemaValidator.cs"
+        },
+        {
+          "hash": "37ad7e1d0c2e959878dce82d41e52594fc5f136539516b410227a5b14f92783a",
+          "path": "src/ScalarScope/Services/Bundles/BundleBuilder.cs"
+        },
+        {
+          "hash": "fad91095b684ef67446b7ac95d1a458841678029b8387801f729d0675378d38f",
+          "path": "src/ScalarScope/Services/Bundles/BundleExporter.cs"
+        },
+        {
+          "hash": "07a7b1b48f20e82b66af16d51f97437e894a61d147082d283d2d6dfd3c2bb5fb",
+          "path": "src/ScalarScope/Services/Bundles/BundleHashAlgorithm.cs"
+        },
+        {
+          "hash": "7d21463b46ca13e5f0f740d50f115a0a438b0fde7c45933c98a177dc2689317d",
+          "path": "src/ScalarScope/Services/Bundles/BundleImporter.cs"
+        },
+        {
+          "hash": "86e2d7fe20dd5306ec3c8f91c0490e3d0b553e88609222d17cc2f2702ee6de6a",
+          "path": "src/ScalarScope/Services/Bundles/BundleIntegrityService.cs"
+        },
+        {
+          "hash": "3705334aaf8ef76e41f8a8f2affc2b53ba73619f5dc7cb2d8b6a9674b20d804e",
+          "path": "src/ScalarScope/Services/Bundles/BundleModels.cs"
+        },
+        {
+          "hash": "0db971c74944ef5ceb8d8fa1cd4a138668eb53e3c20770f1df826da14564836d",
+          "path": "src/ScalarScope/Services/Bundles/deltas-1.0.0.schema.json"
+        },
+        {
+          "hash": "e5e355732b251682037d2c1f3b33a0df8447c059827b6062191f8988956e33e2",
+          "path": "src/ScalarScope/Services/Bundles/manifest-1.0.0.schema.json"
+        },
+        {
+          "hash": "77f6ba9851cd82b9c4347eebf824f37f0138833a26cc0aa2923362683b374c5e",
+          "path": "src/ScalarScope/Services/Bundles/repro-1.0.0.schema.json"
+        },
+        {
+          "hash": "8fa4ad9068da8ede815972ec71af21dc1a95b219e4ff2028fd67256e7d0cedc6",
+          "path": "src/ScalarScope/Services/Bundles/why-1.0.0.schema.json"
+        },
+        {
+          "hash": "42dbd80512d14707acc71488dab4d8438c371958e546f06f1793d4258e6cf55e",
+          "path": "src/ScalarScope/Services/CanonicalDeltaService.cs"
+        },
+        {
+          "hash": "2d5a327d162c4f59b25d02326e3faf10b51e5ede06fbab33c9ef444da6cea87b",
+          "path": "src/ScalarScope/Services/CheckpointService.cs"
+        },
+        {
+          "hash": "b54bb9df2c597a7b05c57da5238d7aedc3a38b1e04204192870bac9b5b85e92e",
+          "path": "src/ScalarScope/Services/ComparativeAnalysisService.cs"
+        },
+        {
+          "hash": "74df514fbe1b3f12c180b7184f216505c0724b74783b99393a870a2e5512e7d2",
+          "path": "src/ScalarScope/Services/ComparisonBundleService.cs"
+        },
+        {
+          "hash": "288827b9de548afe7b1b4d3a5699820f255f03abc99a8f82ac69874e117f75ce",
+          "path": "src/ScalarScope/Services/ComparisonLog.cs"
+        },
+        {
+          "hash": "24b4ab78a8f1217c5c0637b9fe11110b76cf19ef323c676f3c0b8ade32184fa8",
+          "path": "src/ScalarScope/Services/ComparisonReplayService.cs"
+        },
+        {
+          "hash": "0441bcd2eb47a55a335d9cafcceb4dd2490558e4ac6e2501ef2f803cd695197e",
+          "path": "src/ScalarScope/Services/ConfidenceTokens.cs"
+        },
+        {
+          "hash": "799c02a77c25d7d005d67303c6de7045296c8ef160e836b5b40799c4e42b614c",
+          "path": "src/ScalarScope/Services/Connectors/CONNECTOR_CONTRACT_SPEC.md"
+        },
+        {
+          "hash": "e3c083cb390d08ac24ec5a0e19cada907cd7b35c45e6bc2ce37d43fd822b10b6",
+          "path": "src/ScalarScope/Services/Connectors/ConnectorModels.cs"
+        },
+        {
+          "hash": "f148fb661d0531039a47a0f1a3cb20deee5533a586935ac13797d2da9bdfcc5c",
+          "path": "src/ScalarScope/Services/Connectors/ConnectorPreset.cs"
+        },
+        {
+          "hash": "20b485003fecdd0af766742baab7333e7a162c92825fa43bcf79703b00ae0b1b",
+          "path": "src/ScalarScope/Services/Connectors/ConnectorValidationService.cs"
+        },
+        {
+          "hash": "394c175d485eab041c826a5328055072b23c2467e25911b1a96640106c2e341d",
+          "path": "src/ScalarScope/Services/Connectors/IRunConnector.cs"
+        },
+        {
+          "hash": "032aa0e763640935df3df418143b6b34eb3476383e67af4835eaf151189e7e1b",
+          "path": "src/ScalarScope/Services/Connectors/RunTraceComparer.cs"
+        },
+        {
+          "hash": "ab3d9f2807b99decfacf7599c888103dcb325dd70c4f2ac40863ea42d3ea9a97",
+          "path": "src/ScalarScope/Services/Connectors/RunTraceValidator.cs"
+        },
+        {
+          "hash": "a7249d0b960a1d075b534c490a84d398eb3ef9b0ce8a2c309e80a56e7531033f",
+          "path": "src/ScalarScope/Services/Connectors/RuntimeRunTraceModels.cs"
+        },
+        {
+          "hash": "f935ff7c77d7bfc46d51d1087b9a8f0943e9fd0d038505c22e46b670c228328c",
+          "path": "src/ScalarScope/Services/Connectors/TensorFlowRTOfflineConnector.cs"
+        },
+        {
+          "hash": "941e9ca8cfce7fa1c07e751fe674b7055066dbf978407a48d12e2282b0de65da",
+          "path": "src/ScalarScope/Services/Connectors/TfrtRuntimePreset.cs"
+        },
+        {
+          "hash": "38100cf565453f7b7cfa5afafc941429df487817aedb1e96bc713f0ed70206b0",
+          "path": "src/ScalarScope/Services/Connectors/TraceReview.cs"
+        },
+        {
+          "hash": "640599309191fc90e24301279851207d1cf6d31929f5a054e7055f2e7f2be461",
+          "path": "src/ScalarScope/Services/Connectors/run-trace-1.0.0.schema.json"
+        },
+        {
+          "hash": "7ce412f12b8245d12c208c3d1433ac0b1cd0b8133f0fa22b2429edc4b6e15aaf",
+          "path": "src/ScalarScope/Services/Connectors/runtrace-1.0.0.schema.json"
+        },
+        {
+          "hash": "6388a22206a96063a2800f6ffc342fe56e73f81ea668a7d40163624194c58848",
+          "path": "src/ScalarScope/Services/ConsistencyCheckService.cs"
+        },
+        {
+          "hash": "b954eef10b4b1291dcb8d3cb09178f57a7752fa9e27897c026671a00b936ac09",
+          "path": "src/ScalarScope/Services/ContextualExplanationService.cs"
+        },
+        {
+          "hash": "6c6af6faf25bb7af30bc8f3091f8908696e83b640353db4e1208ced8ba2731f1",
+          "path": "src/ScalarScope/Services/CrashReportingService.cs"
+        },
+        {
+          "hash": "2d0b50e0f43218d9f821c50cecd29330736d9e0a22a1a22111af474e2385db08",
+          "path": "src/ScalarScope/Services/DeltaCopyService.cs"
+        },
+        {
+          "hash": "2641e1509e3b9ad5945178f45ff524ea8b5b2a20a4fcc5bc1c5ac306ceb80a45",
+          "path": "src/ScalarScope/Services/DeltaIds.cs"
+        },
+        {
+          "hash": "0a15160250f5d50ae9fe368b9e4f74cfd6eadb2818bcdfe5be6c90a00f0bacdd",
+          "path": "src/ScalarScope/Services/DeltaTypes.cs"
+        },
+        {
+          "hash": "88b60bb8298c42555b7082c259894fb1d95154d08420d7996efb3e63462fdf1c",
+          "path": "src/ScalarScope/Services/DemoAnnotationService.cs"
+        },
+        {
+          "hash": "95d83097cbd20c9ca33c1850e0460e5412b982a3df2897f69e3d102c72cea9bd",
+          "path": "src/ScalarScope/Services/DemoService.cs"
+        },
+        {
+          "hash": "6a1ca82dcc3dbe313911946d07f44b41cb9fe2110f00aa25292fc77c805f589b",
+          "path": "src/ScalarScope/Services/DemoStateService.cs"
+        },
+        {
+          "hash": "6b9e190a1cde8ca7681e2b615c29d71ecfa17f80543272529eae7861e5b84d8d",
+          "path": "src/ScalarScope/Services/DeterminismService.cs"
+        },
+        {
+          "hash": "191a3f858f2b9c1c57cdad3fc2bbcfa0e6f6766ab1aaddc1f1485f2f5639c029",
+          "path": "src/ScalarScope/Services/DeterminismTestSuite.cs"
+        },
+        {
+          "hash": "e89f86d63f49ab101a81c6b00b8f953d2441a0dea0457043977103c68119c29e",
+          "path": "src/ScalarScope/Services/DiagnosticsService.cs"
+        },
+        {
+          "hash": "8898cea80765ccb7c653743dc57413e3b5d81893f4308d68937db81d4e22df7d",
+          "path": "src/ScalarScope/Services/ErrorBoundary.cs"
+        },
+        {
+          "hash": "2c2830e4c8341980034010b93ee99cd1f0b393bb5c2f3ea33a8d60ee65dd5213",
+          "path": "src/ScalarScope/Services/ErrorExplanationService.cs"
+        },
+        {
+          "hash": "cdbf95578bc56163930455416e2c3533fa3932e8461fc6d905319c68ed73ff34",
+          "path": "src/ScalarScope/Services/ErrorLoggingService.cs"
+        },
+        {
+          "hash": "7267363ebcd56fc07b057c73956db923a22256c99d44270e262bc89bb8fcb4db",
+          "path": "src/ScalarScope/Services/ErrorStateMapping.cs"
+        },
+        {
+          "hash": "fc59db69eb76b3586f4ee29f9e0219f16b4a4f3e14c3369d2c43d913a13b0a27",
+          "path": "src/ScalarScope/Services/Evidence/ComparisonEvidenceReport.cs"
+        },
+        {
+          "hash": "3150c01f8e397c47e0a50e4cc3c0038f49d6f0522055600a6164efafac6eec66",
+          "path": "src/ScalarScope/Services/Evidence/ComparisonSetDefinition.cs"
+        },
+        {
+          "hash": "d6f20b0aa04a8763e90d23fe0e47205e39308d69c941ca387507b7140b0d526a",
+          "path": "src/ScalarScope/Services/Evidence/DetectorDiagnostics.cs"
+        },
+        {
+          "hash": "cf6cbee81f88dd0e8bd27f4453f160162c61d00336e11024233d1b84c5842beb",
+          "path": "src/ScalarScope/Services/Evidence/EvidenceExportService.cs"
+        },
+        {
+          "hash": "c18ddaa25b5307164b64125b286bea5b3d46c5ee24b172dd0b97babe75f59a5c",
+          "path": "src/ScalarScope/Services/Evidence/EvidenceModels.cs"
+        },
+        {
+          "hash": "905bf0844fc0ac818beee064c3a7699959856a326b92fceec6bc2b638e3f7583",
+          "path": "src/ScalarScope/Services/ExportPreferences.cs"
+        },
+        {
+          "hash": "99a58475b8bf4f021d0f701429423d85e2b12379900a6b193f158eb7aea64aa1",
+          "path": "src/ScalarScope/Services/ExportService.cs"
+        },
+        {
+          "hash": "3d2248c40bb1e16c709bed7c584af34a5d273cbbeb5b0386da9070cc9df9c3f5",
+          "path": "src/ScalarScope/Services/FileValidationService.cs"
+        },
+        {
+          "hash": "43d50bce8422c071f5c803fc5d296a6015365439c40655e440d13b865bf3791e",
+          "path": "src/ScalarScope/Services/FlowFieldService.cs"
+        },
+        {
+          "hash": "6ef7957bb2904c11c459db9ba5c908404a26ff070fa7f73a6c168dfc13a0b8e0",
+          "path": "src/ScalarScope/Services/GoldenRunService.cs"
+        },
+        {
+          "hash": "03c28894a625a73f0a29125981a9c446eff57a010903b422a189566716fedbff",
+          "path": "src/ScalarScope/Services/GuideSearch.cs"
+        },
+        {
+          "hash": "7811d1b3b0c43b211960dbd15383e481f053b935051bcf034dab3df50d16dfb0",
+          "path": "src/ScalarScope/Services/ImportPresetService.cs"
+        },
+        {
+          "hash": "16295da58d5885f21aa64217c9e4dc7c515fc19d4909b9ca879497f854f63af3",
+          "path": "src/ScalarScope/Services/ImportSchemaService.cs"
+        },
+        {
+          "hash": "fff2701eb2d3f7814d267e9ff8b9870a083e4483a6980c4903730971656d5a19",
+          "path": "src/ScalarScope/Services/InertialPhysicsController.cs"
+        },
+        {
+          "hash": "6f90ddf45090e99cb0d72e2347cd15f12cd6d58c43fae845ba9c5b3aa89cbbc7",
+          "path": "src/ScalarScope/Services/InputNormalizer.cs"
+        },
+        {
+          "hash": "08275b3d045ac9ffab683ed8bbcab0ed24fe6b2a4ac93a6c0e14671d186715bb",
+          "path": "src/ScalarScope/Services/InsightFeedService.cs"
+        },
+        {
+          "hash": "cfdaf4cc1bdc91a6f72735f2c34cd75f63e871bca14367829e850255380941da",
+          "path": "src/ScalarScope/Services/Integrations/IntegrationService.cs"
+        },
+        {
+          "hash": "c9f2e23fef8b4fc1dfc577313eeea39eb0caacb54749be2145b857829068d100",
+          "path": "src/ScalarScope/Services/InteractiveProbingService.cs"
+        },
+        {
+          "hash": "1e465a2e7b644292843c41a7891a03a4660856351d3378430087e4da6635f799",
+          "path": "src/ScalarScope/Services/InvariantGuard.cs"
+        },
+        {
+          "hash": "b9d3503edb247fcaf36ae56d27b787c09fa3ea9c4f27d7970f41a832821e042f",
+          "path": "src/ScalarScope/Services/KeyboardService.cs"
+        },
+        {
+          "hash": "1ac6ebf1ece851b7aba5871c5641725216a5527c69887c2cf95e7ee5e5c6946b",
+          "path": "src/ScalarScope/Services/LayoutDebouncer.cs"
+        },
+        {
+          "hash": "a5cadbcda34571ebaab88d7ae15b1ab00b625126bda4f49f8047f32169df883a",
+          "path": "src/ScalarScope/Services/MotionTokens.cs"
+        },
+        {
+          "hash": "ac5462e0778f810e6c05f7ab9ee0896e67bc4011590a26a2c13d828d744d8a5b",
+          "path": "src/ScalarScope/Services/PerformanceProfiler.cs"
+        },
+        {
+          "hash": "ccf0a1aea01167fcb8d5864ffbe225560d083df716c4476e1f1e044d82ccdd06",
+          "path": "src/ScalarScope/Services/PlaybackController.cs"
+        },
+        {
+          "hash": "7a04fc7128b3bbcead9d14967aedc1bbc18958535f5cfccd64d900f74e19f6b9",
+          "path": "src/ScalarScope/Services/PlaybackEffects.cs"
+        },
+        {
+          "hash": "7acbc1b47959761954e7229947b786d94d7242edf2878a9b5fb35ad632e33feb",
+          "path": "src/ScalarScope/Services/Plugins/PluginManager.cs"
+        },
+        {
+          "hash": "7cce66692c61aed525ffc0279201b56970313fed27edd4cb15f76966d37a76c2",
+          "path": "src/ScalarScope/Services/RecoveryResume.cs"
+        },
+        {
+          "hash": "f033f3686a4ce3fe9d0f4757272a2ba044a307293f32bf352d61df07bbb37648",
+          "path": "src/ScalarScope/Services/ReproAuditExportService.cs"
+        },
+        {
+          "hash": "caa01ab0b2105f78105b20ad91a33e31b0c21696db6d0d9bd97364eba5fbb76a",
+          "path": "src/ScalarScope/Services/ReproducibilityBadgeService.cs"
+        },
+        {
+          "hash": "b188e203dfc0db2f8288ae3ada1c654771a0a0464d4c338341115452defcd88e",
+          "path": "src/ScalarScope/Services/ResumableOperationService.cs"
+        },
+        {
+          "hash": "311e76b6e36bfb6e69d35be6846fdf23d62283913c0e6172346fe68712d92861",
+          "path": "src/ScalarScope/Services/RetryPolicyService.cs"
+        },
+        {
+          "hash": "39aa80caae684d5d891cd59c9c830a6d929193ab9c49c1510a461345de3ef109",
+          "path": "src/ScalarScope/Services/ShareService.cs"
+        },
+        {
+          "hash": "68fd7fd7a3f2b521b003e83f214fdb2361a78245a6636cff59a001d15aa4e296",
+          "path": "src/ScalarScope/Services/ShellStartup.cs"
+        },
+        {
+          "hash": "285157821986c943174c0fa58093b9c362cb6caae47b7a4555903fe6c5526c02",
+          "path": "src/ScalarScope/Services/SocialCardService.cs"
+        },
+        {
+          "hash": "9d43dea38674d2a15934b9389cf927052946561c219b00eec75bd958fd3e74a1",
+          "path": "src/ScalarScope/Services/TemporalAlignmentService.cs"
+        },
+        {
+          "hash": "d765db02e32d4481760fba0ad3158b1c15f12aa4e39fcc28da13f7fbde69778e",
+          "path": "src/ScalarScope/Services/TransitionService.cs"
+        },
+        {
+          "hash": "c20698787dceed504e935a60f1d4124e7b22a4ed0e249c2944b75bc85db2ff70",
+          "path": "src/ScalarScope/Services/UserPreferencesService.cs"
+        },
+        {
+          "hash": "d358e9c644b14701d3c2d15bce71c96ad29b187c0e34c475a88da289f7b1ee39",
+          "path": "src/ScalarScope/Services/VersionInfo.cs"
+        },
+        {
+          "hash": "06b50121e81b124f4906d516b84fed66ea25d8e63a1640077ad199cbeb9ea5bf",
+          "path": "src/ScalarScope/ViewModels/ComparisonViewModel.cs"
+        },
+        {
+          "hash": "c322a6b296a3533240cec78d0d8d974750e989f7dea43398eb743af6dc2ca669",
+          "path": "src/ScalarScope/ViewModels/ExportViewModel.cs"
+        },
+        {
+          "hash": "e2543145abd1a2915c2ccc2e1efaff9517c89dcb1ad419989f388d03ec65d92a",
+          "path": "src/ScalarScope/ViewModels/ProductLinks.cs"
+        },
+        {
+          "hash": "be2139a75a67c85aaf20df4b403e30ffaadf8d92d6ebd4f1edf261a08e9aacfa",
+          "path": "src/ScalarScope/ViewModels/SettingsViewModel.cs"
+        },
+        {
+          "hash": "4ae62eca35d837bb86e986f34cc6e6e6be1c3c0e6d5541a3415920763988710f",
+          "path": "src/ScalarScope/ViewModels/TrajectoryPlayerViewModel.cs"
+        },
+        {
+          "hash": "92a7eb1de6874d4288be24aa67354f9c41d156072ff19434f8e08aa922f3381d",
+          "path": "src/ScalarScope/ViewModels/VortexSessionViewModel.cs"
+        },
+        {
+          "hash": "d31cdc24c704e556267b528de5de344f50955b6ce1f0033e89f13a1db41a05d4",
+          "path": "src/ScalarScope/ViewModels/WelcomeViewModel.cs"
+        },
+        {
+          "hash": "cb125eb8facd52bb50fc3cd9da46bf9df242160aa268969e779d7f075645ab24",
+          "path": "src/ScalarScope/Views/AccessibleShell.cs"
+        },
+        {
+          "hash": "9190eb1047d2d3423d7d765ac0fea1eb62e41356d29a630010e3c6fd6e81a974",
+          "path": "src/ScalarScope/Views/ComparisonPage.xaml"
+        },
+        {
+          "hash": "9dee0f57ca09d5c91b3a1a5e086d57f54058c48b9fa8082d4d50be2e1b6ab2ae",
+          "path": "src/ScalarScope/Views/ComparisonPage.xaml.cs"
+        },
+        {
+          "hash": "17c3fb95464d6c35d84d940ad2f4398e602b742ca5630e0082196fbcd15efa25",
+          "path": "src/ScalarScope/Views/Controls/AccessibleCanvasHook.cs"
+        },
+        {
+          "hash": "1c3c22dc6445cdddf0d3fd59eb21a7a65bae7f42a162d1deaba32fd47d3a68f3",
+          "path": "src/ScalarScope/Views/Controls/AdvancedSection.xaml"
+        },
+        {
+          "hash": "0630d82136a1a9950b275c808c4552f1f7dea52598d2c36410da04ba6a60806d",
+          "path": "src/ScalarScope/Views/Controls/AdvancedSection.xaml.cs"
+        },
+        {
+          "hash": "fa287afb4eadf8fce9f082ca643f402005545eb264c414beb7c42b257e51e564",
+          "path": "src/ScalarScope/Views/Controls/AlignmentControl.xaml"
+        },
+        {
+          "hash": "ebf96a215acc00660e68dad500b20afb46638f8f7747d48942ab7f042a04dd7f",
+          "path": "src/ScalarScope/Views/Controls/AlignmentControl.xaml.cs"
+        },
+        {
+          "hash": "34b6d198a9aecff707ba8be92f9fcaf7c6871367d85b720c67c85d20ed14a98e",
+          "path": "src/ScalarScope/Views/Controls/AnalysisOverlayPanel.cs"
+        },
+        {
+          "hash": "98f0e35aa75187daad965cc093ff1bef99fc78b6e5b5992a88fa401da48a3558",
+          "path": "src/ScalarScope/Views/Controls/AnnotationOverlay.cs"
+        },
+        {
+          "hash": "3b9c859751c035a2106a10c21ff37c63e97479147aae98409df76a4744810ffc",
+          "path": "src/ScalarScope/Views/Controls/AnnotationPanel.xaml"
+        },
+        {
+          "hash": "c1b96bee13af2a2811069ce59b6e3667bccd2ba3efa777d6c69f1323445dd5ce",
+          "path": "src/ScalarScope/Views/Controls/AnnotationPanel.xaml.cs"
+        },
+        {
+          "hash": "5abb6c5f5edd1dcb56876d0ad40a49686c0b2c2da2d125dc230591731ab054b7",
+          "path": "src/ScalarScope/Views/Controls/BundleExportPanel.xaml"
+        },
+        {
+          "hash": "39ddc6c9293a3686252b4f5855a00a06fcf1aa6ec75767b74ed943557b081afb",
+          "path": "src/ScalarScope/Views/Controls/BundleExportPanel.xaml.cs"
+        },
+        {
+          "hash": "d8a58b70339b8048be9dd2d5b5483fc46b64a935c9ba6a952ca0be2506ff96e5",
+          "path": "src/ScalarScope/Views/Controls/BundleIntegrityPanel.xaml"
+        },
+        {
+          "hash": "ba4de999d5dd67328135b3c73e27dff785b63d952030152c7dd4cf7da5e64704",
+          "path": "src/ScalarScope/Views/Controls/BundleIntegrityPanel.xaml.cs"
+        },
+        {
+          "hash": "4c2b0ea19e5455d1b5110bafc1c970a4840b5468e69bbfe2fd8a7d1bfff09d85",
+          "path": "src/ScalarScope/Views/Controls/ComparisonAnalyticsPanel.cs"
+        },
+        {
+          "hash": "6e5cf1566828dfdf024fc1be5fbe121382a01d355ca1538a712521275195a8c1",
+          "path": "src/ScalarScope/Views/Controls/ComparisonTrajectoryCanvas.cs"
+        },
+        {
+          "hash": "06801cdec6278f9ecc6fff2fb51750b61f8bf8f7d37cdb787060fc239456f688",
+          "path": "src/ScalarScope/Views/Controls/ContextualTooltip.xaml"
+        },
+        {
+          "hash": "c4e963e3ebac30b0e8b3d421b7b50207d8c6b150f0708699be55c72fe9c5d216",
+          "path": "src/ScalarScope/Views/Controls/ContextualTooltip.xaml.cs"
+        },
+        {
+          "hash": "4b929024cea0f097fd1730a827265694fe0897024f1930cad0b94b434c53c545",
+          "path": "src/ScalarScope/Views/Controls/DeltaHints.xaml"
+        },
+        {
+          "hash": "431c90b19b6fa98376a5dff96ad92d72a254cba0f5c4d7ee5c8b5f30cf8a9727",
+          "path": "src/ScalarScope/Views/Controls/DeltaHints.xaml.cs"
+        },
+        {
+          "hash": "462d4f3f005c838957792444f5807e3a5cfda51bd1182c945f1a8cb10ab582d0",
+          "path": "src/ScalarScope/Views/Controls/DeltaWhyPanel.xaml"
+        },
+        {
+          "hash": "afee0393223eca176a7b607946fe4f20fd5a36d264e4120d0483d343f5d98f55",
+          "path": "src/ScalarScope/Views/Controls/DeltaWhyPanel.xaml.cs"
+        },
+        {
+          "hash": "ef6b8d48b2781b7cebfbf1236437cbedd3eca8d5fdb1f5346156dfb4d5518d8e",
+          "path": "src/ScalarScope/Views/Controls/DeltaZone.xaml"
+        },
+        {
+          "hash": "3dc8d99738b2b468b2032c6a58b5122393e2bd17362a48b74b2df3586085a309",
+          "path": "src/ScalarScope/Views/Controls/DeltaZone.xaml.cs"
+        },
+        {
+          "hash": "6dd3792aad90862f82abcda30c50de077b534b24c021fb1976ccb7417531df2f",
+          "path": "src/ScalarScope/Views/Controls/DemoAnnotationBanner.cs"
+        },
+        {
+          "hash": "1faf577839d694241d28cd0edf44570b0cd0e92e5083ba7a0bb1b953bded7c6a",
+          "path": "src/ScalarScope/Views/Controls/EigenSpectrumView.cs"
+        },
+        {
+          "hash": "8a83cfc7c4643a86583b0a375e21db804acd503a1f74b77c2cdcb5acf1fb3ddf",
+          "path": "src/ScalarScope/Views/Controls/ErrorBanner.xaml"
+        },
+        {
+          "hash": "ba73cae8025d6355941e9aaa6497d8e9d25fc4af9894fcb2aa26efd1fd548b7b",
+          "path": "src/ScalarScope/Views/Controls/ErrorBanner.xaml.cs"
+        },
+        {
+          "hash": "118300035f061e41edbe19b9117af5bd94f1c7a5755e987b8956edf197e0932b",
+          "path": "src/ScalarScope/Views/Controls/ErrorDetailPanel.xaml"
+        },
+        {
+          "hash": "3c50804c4d4240aa460d9d680c0a6ebe69bc2dfbb8df1eea4b0690b899e5ec46",
+          "path": "src/ScalarScope/Views/Controls/ErrorDetailPanel.xaml.cs"
+        },
+        {
+          "hash": "203a208b6b3d758e046d0472e0bfd05904f602adeec9d177681781e6e7a3f992",
+          "path": "src/ScalarScope/Views/Controls/ExportPanel.xaml"
+        },
+        {
+          "hash": "b57221b69188d2b90af4c773fb93bba1e0ba748fa602a61d0622da81a8fdb64f",
+          "path": "src/ScalarScope/Views/Controls/ExportPanel.xaml.cs"
+        },
+        {
+          "hash": "2c23cdc9c884bfe3c8f31b663f62949f48dec300faf92b0ba656fc40db571753",
+          "path": "src/ScalarScope/Views/Controls/FailuresTimeline.cs"
+        },
+        {
+          "hash": "e546ce6c35fe2bbcc620564be1fbfb2e9f068887e4e8c12ace8d24f0d6d9a970",
+          "path": "src/ScalarScope/Views/Controls/InlineHint.cs"
+        },
+        {
+          "hash": "7132de241bac890685fd3e0c5837960f7120b3a27733e7ea9eef2080e7b66808",
+          "path": "src/ScalarScope/Views/Controls/InsightsTray.xaml"
+        },
+        {
+          "hash": "9db5add89292f59281d940018673ba585addd282991a595cdae0547981ac05d9",
+          "path": "src/ScalarScope/Views/Controls/InsightsTray.xaml.cs"
+        },
+        {
+          "hash": "670cd98137f311a8cc3b386e4c5f23ced6328a7f002352ebfe4e837971c5aab4",
+          "path": "src/ScalarScope/Views/Controls/IntentToggle.xaml"
+        },
+        {
+          "hash": "c598e3a32d3471bb9b9661e5a19541c3f85cea3f48c3e912b8b3898bec443407",
+          "path": "src/ScalarScope/Views/Controls/IntentToggle.xaml.cs"
+        },
+        {
+          "hash": "daf765db2e2b433a286c21cf09eaf24c9818df187e4663ddb4044228382475ef",
+          "path": "src/ScalarScope/Views/Controls/LoadingOverlay.cs"
+        },
+        {
+          "hash": "125958554f42a3ae85ca79df71094be92dc6e3f356cffe80e61b5e159ddd7a9b",
+          "path": "src/ScalarScope/Views/Controls/OverlayComparisonCanvas.cs"
+        },
+        {
+          "hash": "48a340084a563cfd27df357dfdd780e6fef23def571eefb24507e461c9c1606b",
+          "path": "src/ScalarScope/Views/Controls/PlaybackControl.xaml"
+        },
+        {
+          "hash": "695f8de8ab62f44c1e29a5604b42016e80fa174e5131896033d076d6cd0c1472",
+          "path": "src/ScalarScope/Views/Controls/PlaybackControl.xaml.cs"
+        },
+        {
+          "hash": "2fbe3a5c149892c8b74c902016f10a8751b5e3aa25261308636bbf67d7bdcda9",
+          "path": "src/ScalarScope/Views/Controls/ProbingInspectorPanel.cs"
+        },
+        {
+          "hash": "04918a251fd6ecbc68a96c8af85c489b2d1c290d02467ffa1d7b5142306b9f59",
+          "path": "src/ScalarScope/Views/Controls/RecoveryDialog.xaml"
+        },
+        {
+          "hash": "953b5451c7368d79af8aa991619ac0f05a2771decf8c1b6fca0371b546a2d7ec",
+          "path": "src/ScalarScope/Views/Controls/RecoveryDialog.xaml.cs"
+        },
+        {
+          "hash": "bdac8901003a4dbd9c169a66c8c89f8c868e9f4295f4796bc6f088c17a1d2f80",
+          "path": "src/ScalarScope/Views/Controls/ReviewModeBanner.xaml"
+        },
+        {
+          "hash": "e1e9b941d13ac71946b89ecd6a009957004c5607b7f4f65e0f240717abd94342",
+          "path": "src/ScalarScope/Views/Controls/ReviewModeBanner.xaml.cs"
+        },
+        {
+          "hash": "0ada24259ed19f2b3927ea6b762cd54aac7ad5d47cd672f1e134fffc3f7127c8",
+          "path": "src/ScalarScope/Views/Controls/ScalarRingStack.cs"
+        },
+        {
+          "hash": "4dfe4419715804608619ad77d37e1408aac34961429fd86139f9c3b4efeb08a6",
+          "path": "src/ScalarScope/Views/Controls/ToastNotification.xaml"
+        },
+        {
+          "hash": "b4c8897ddb5719d32b7449a628c6606667ec0299a6f1814a7d1d95b5252da331",
+          "path": "src/ScalarScope/Views/Controls/ToastNotification.xaml.cs"
+        },
+        {
+          "hash": "f247ac31c858610493a9b3f3bae4ac56752ca904b1a5a4305bf0a0e9de22eead",
+          "path": "src/ScalarScope/Views/Controls/TraceReviewCanvas.cs"
+        },
+        {
+          "hash": "2ee59698380617c63493f34e4748d66d79ce3fc1f1501b9a30ee9e185590ebcb",
+          "path": "src/ScalarScope/Views/Controls/TrajectoryCanvas.cs"
+        },
+        {
+          "hash": "a5e06aaf28c3512ac9712d6205b0937eec2c08f7fc898c3559859eb721f6b620",
+          "path": "src/ScalarScope/Views/Controls/TrajectoryMinimap.cs"
+        },
+        {
+          "hash": "0864d309ddb24d2024c08877083cd06ac341ca4c45a6470a8eb3be7076e3d5f9",
+          "path": "src/ScalarScope/Views/FailuresPage.xaml"
+        },
+        {
+          "hash": "0d165f30dff1a5c46c85e0e2d488fb6e1b6bf0bcf9e78ae373457de46f6cfc8b",
+          "path": "src/ScalarScope/Views/FailuresPage.xaml.cs"
+        },
+        {
+          "hash": "b74056fee4f6ab7b2e084b2836fb6152bfb61339a91e4e2156480b08780023b7",
+          "path": "src/ScalarScope/Views/GeometryPage.xaml"
+        },
+        {
+          "hash": "d116471d1d1ad98a3bf3d4a96fec1ff868757dea40212e35c4954230222348f3",
+          "path": "src/ScalarScope/Views/GeometryPage.xaml.cs"
+        },
+        {
+          "hash": "e1bd178698ae9234fbc30f19f96437290efe8124aeaf94da562a351a7c8a81bc",
+          "path": "src/ScalarScope/Views/HelpPage.xaml"
+        },
+        {
+          "hash": "17ff19befd513214924af315be1005ae7f9031799c0203e217d153934852ec43",
+          "path": "src/ScalarScope/Views/HelpPage.xaml.cs"
+        },
+        {
+          "hash": "f3cc13a8c572bd074b974118eea834386ccd5bdab2b834f946b30d6aafa4584b",
+          "path": "src/ScalarScope/Views/OverviewPage.xaml"
+        },
+        {
+          "hash": "ac755285cdebfdf8f4227805ad5d87af60b7841b71eaf6991492eb75edf68201",
+          "path": "src/ScalarScope/Views/OverviewPage.xaml.cs"
+        },
+        {
+          "hash": "eebd9f975e31cf03756c4a09e704f97e22430f6a4f7d5c089579dfbf29280d4f",
+          "path": "src/ScalarScope/Views/RecoveryPage.xaml"
+        },
+        {
+          "hash": "2baf2e36c8c28a6180e82ec4ce6cd0b6f6f7b46862f070b9a01c85c146b4530d",
+          "path": "src/ScalarScope/Views/RecoveryPage.xaml.cs"
+        },
+        {
+          "hash": "9c779f1932c8debf4797c916484d27e09f72a6fad8bde2365e86e81e04259514",
+          "path": "src/ScalarScope/Views/ScalarsPage.xaml"
+        },
+        {
+          "hash": "fe6b5ca6e9d15316a20c768311cc435322c8c2efaafcd4cab47680804be668ac",
+          "path": "src/ScalarScope/Views/ScalarsPage.xaml.cs"
+        },
+        {
+          "hash": "dfe57b8b916caae210f2502a23991cb8519e9b125125d8f3ef98c3e56694216c",
+          "path": "src/ScalarScope/Views/SettingsPage.xaml"
+        },
+        {
+          "hash": "1e1c2896be6c1e3aa058db1b8c8c85f87cc92914288c8fed7d42da8d311e98ed",
+          "path": "src/ScalarScope/Views/SettingsPage.xaml.cs"
+        },
+        {
+          "hash": "8ee1b5018cc7a218135773bce898908667a0c86ff1b6eb93210f5602f7ede2ee",
+          "path": "src/ScalarScope/Views/ShellDestinations.cs"
+        },
+        {
+          "hash": "0af5ce7382358228572cbef0a69930d789fe602a74e1d57444eb451bda7c4936",
+          "path": "src/ScalarScope/Views/TrajectoryPage.xaml"
+        },
+        {
+          "hash": "5369c3a777dbd5cab9edf5cd5791ad59c3193fd78d43637a5192cfe82b7c9fc3",
+          "path": "src/ScalarScope/Views/TrajectoryPage.xaml.cs"
+        },
+        {
+          "hash": "af4f705b8e50472753535b5ccf59ff3693be92556aa1948bc6072210e32e0d36",
+          "path": "src/ScalarScope/Views/WelcomePage.xaml"
+        },
+        {
+          "hash": "cd427ce886206fb09d76ae475c6b5b9593cb7916dc8b3f1df5083fb07f209185",
+          "path": "src/ScalarScope/Views/WelcomePage.xaml.cs"
+        },
+        {
+          "hash": "48118ded1f52a741de6a4dd54512f08aea78a87b30f49f1703c080f6291d48e6",
+          "path": "src/VortexKit/Annotations/IAnnotation.cs"
+        },
+        {
+          "hash": "27e75353501e215f21cc7b44758e891e7e7333a693a98f1542c408c89b7f2b0b",
+          "path": "src/VortexKit/Core/AnimatedCanvas.cs"
+        },
+        {
+          "hash": "14bfe8537020160b24bcca6499cb1f594c56c8efba202ff0cb90bcdb179aae23",
+          "path": "src/VortexKit/Core/ExportService.cs"
+        },
+        {
+          "hash": "9c89c45fc33a5187eb2dd66dddfce6128677d9446153f4330cc872feb7271605",
+          "path": "src/VortexKit/Core/ITimeSeries.cs"
+        },
+        {
+          "hash": "de3a6726e44852eb1dea293a4b917f25f5e22b966379b55d0fe594ff252a62ff",
+          "path": "src/VortexKit/Core/PlaybackController.cs"
+        },
+        {
+          "hash": "326b4579d362d5d2072fb90107a361013e95b420fa6b3f51b387fa3d961eb80f",
+          "path": "src/VortexKit/Core/SvgExportService.cs"
+        },
+        {
+          "hash": "d1ee1f53c5d61d25201d40558e505b6246f0d429d0403acd388091d33ec4541a",
+          "path": "src/VortexKit/README.md"
+        },
+        {
+          "hash": "f9e11ce9b82f8bd18de366796a64c919f2fce263d0afbf458af2d7d40052b990",
+          "path": "src/VortexKit/Theme/VortexColors.cs"
+        },
+        {
+          "hash": "fc16edeb777c6ff77c3ecb8f3546a1cecd4aaf0b3d36166737162593f18f4ba8",
+          "path": "src/VortexKit/VortexKit.csproj"
+        }
+      ],
+      "globs": [
+        "src/**"
+      ],
+      "importConfidence": "full",
+      "name": "src",
+      "origin": "authored",
+      "role": "code",
+      "testedBy": 0,
+      "unresolvedSites": 0
+    },
+    {
+      "dynamicReads": 0,
+      "dynamicSpawns": 0,
+      "dynamicSpawnsInTests": 0,
+      "dynamicWrites": 0,
+      "entryPoints": [],
+      "externals": 0,
+      "files": [
+        {
+          "hash": "3f12c99dee58dd8a0bba2496e07096a11091b0c3b29245a784b791be647d47c2",
+          "path": "tests/Fixtures/Bundles/dotnet-geometry-compare.scbundle"
+        },
+        {
+          "hash": "62a2fed985471e55ccec92372fa51579b396eabfa4706aedd66c74d02749fc43",
+          "path": "tests/Fixtures/Bundles/dotnet-inference-review.scbundle"
+        },
+        {
+          "hash": "3e48bfa460c9eb268d8f98411071d2e31a98a7b3c112ff18c33a82d8193ce7ff",
+          "path": "tests/Fixtures/Bundles/rust-inference-review.scbundle"
+        },
+        {
+          "hash": "830e760983930919c022f506d72359f4d6ef0dbaea9ee44d2155e7ba4708dd71",
+          "path": "tests/Fixtures/InferenceOptimization/baseline_tfrt_runtrace.json"
+        },
+        {
+          "hash": "fdd90c76a413a146d7bd7c55724afdc7332dde91177aa901ea49af93a4591622",
+          "path": "tests/Fixtures/InferenceOptimization/broken_baseline_tfrt_runtrace.json"
+        },
+        {
+          "hash": "4ac6e5ac799ba097d245aca334cf6d67fef6cc32aac4ccae65f831ab673e2377",
+          "path": "tests/Fixtures/InferenceOptimization/expected_assertions.json"
+        },
+        {
+          "hash": "55aa3f19e7481039a7a71c2ab6aa1556056c0f0b7c32759aa40efb9128148f04",
+          "path": "tests/Fixtures/InferenceOptimization/expected_assertions_broken.json"
+        },
+        {
+          "hash": "592daad27962a97632976fc1efe837f4b8be692a101da57a1ef0a5cb84029798",
+          "path": "tests/Fixtures/InferenceOptimization/expected_assertions_nearly_identical.json"
+        },
+        {
+          "hash": "b1ea5a79c92ef0e200029829333849c81b8ca5935701b3603a3158809996b19f",
+          "path": "tests/Fixtures/InferenceOptimization/nearly_identical_baseline_tfrt_runtrace.json"
+        },
+        {
+          "hash": "7a40a818193b1e1d2a9916d8ce52052aa7118e694593eac3468cd3ac3ccd3da9",
+          "path": "tests/Fixtures/InferenceOptimization/nearly_identical_optimized_tfrt_runtrace.json"
+        },
+        {
+          "hash": "e727a48cfc4907e62265f5d7a85dcf1315e4cefb7dbfe947df28335902765855",
+          "path": "tests/Fixtures/InferenceOptimization/optimized_tfrt_runtrace.json"
+        },
+        {
+          "hash": "e72e792954eeb1ba49341114b667a743cee978c33b9a88769c938d08311ff1d0",
+          "path": "tests/ScalarScope.DeterminismTests/DeterminismSuiteTests.cs"
+        },
+        {
+          "hash": "16b775bacff7629f4ef733f61fc518d8fb706825e1712176695813a7f626b38f",
+          "path": "tests/ScalarScope.DeterminismTests/ScalarScope.DeterminismTests.csproj"
+        },
+        {
+          "hash": "bad88e365ccbfc193a54602a8ee1b1bd1fe0a093bffee73a49f622f1fe110565",
+          "path": "tests/ScalarScope.FixtureTests/BundleFixtureWriter.cs"
+        },
+        {
+          "hash": "bc9506aeb70b258229b464ce342e90b6e1d682ff939611d63677ee0e43f7a586",
+          "path": "tests/ScalarScope.FixtureTests/BundleHashTests.cs"
+        },
+        {
+          "hash": "3907acf8f1eddff4285bfdfed1ee4077a2dd3ed218cf180b45a7706b4eb19d00",
+          "path": "tests/ScalarScope.FixtureTests/ComparisonLogTests.cs"
+        },
+        {
+          "hash": "637a87e41bf69bb16494d4be889189e750023162c7992e2bc5980d7df7922425",
+          "path": "tests/ScalarScope.FixtureTests/FeatureSliceTests.cs"
+        },
+        {
+          "hash": "d3df6edaa22141bf30388efa8b826a3e0f97dd58521e2f0d7c01c8fdb41655a2",
+          "path": "tests/ScalarScope.FixtureTests/FixtureLoader.cs"
+        },
+        {
+          "hash": "b98441b2d16ac88193a7283a7b5949e761227d60d000aafd8f53a22ea49345e5",
+          "path": "tests/ScalarScope.FixtureTests/FixtureSmokeTests.cs"
+        },
+        {
+          "hash": "fbfde928ba57af2c2484e9ca48d8645b80e7ac6b75dfa8ea34893e85141e811d",
+          "path": "tests/ScalarScope.FixtureTests/HealthFixTests.cs"
+        },
+        {
+          "hash": "66034c77dfbf49ce1eb6e5373522d0ffc52c465abcca44540fcdc3c30152a4f1",
+          "path": "tests/ScalarScope.FixtureTests/HighSliceTests.cs"
+        },
+        {
+          "hash": "c9f1e268ac6e6a04e11646f944c759d75317bfaea113a461888746c39247931a",
+          "path": "tests/ScalarScope.FixtureTests/InferenceOptimizationFixtureTests.cs"
+        },
+        {
+          "hash": "9e6903e6992ca07fd23cf13daa3a4fd27cbe5699ecf7cecc2521a43bb7c966f8",
+          "path": "tests/ScalarScope.FixtureTests/ScalarScope.FixtureTests.csproj"
+        },
+        {
+          "hash": "673b93770cd03484a2c4d0b93b3052b307a35e8b1874eccd657d8edaddf5c2d8",
+          "path": "tests/ScalarScope.FixtureTests/StageCServiceTests.cs"
+        },
+        {
+          "hash": "231a881d3f9f5ee32cda2b7f1b3e79cfa0847076b027f7f193b57c8374e86894",
+          "path": "tests/ScalarScope.FixtureTests/StageCShellTests.cs"
+        },
+        {
+          "hash": "8b0033f162280fe6e6553fced385cdb2dc36aef2388dce72dbbfbaa2843dfe7f",
+          "path": "tests/ScalarScope.FixtureTests/StageCWordingTests.cs"
+        },
+        {
+          "hash": "a4fff96acf821834c95c986c86570da3692cc7215ec2916acaafcc3346af8511",
+          "path": "tests/ScalarScope.FixtureTests/StageDCopyTests.cs"
+        },
+        {
+          "hash": "220dc21cfcaf68ff5dab97bf73b511936283075a68910c8095960640907e9e15",
+          "path": "tests/ScalarScope.FixtureTests/StageDHeldTests.cs"
+        },
+        {
+          "hash": "38fe4e87fd0ab40ac26fac5d806ce99f3c76c58615b90bbf6f18e1b15e993810",
+          "path": "tests/ScalarScope.FixtureTests/TraceReviewTests.cs"
+        },
+        {
+          "hash": "c2340ccf0cdcaca44ab4b695990e2c104eee3238998621a370fec2d4f40830b6",
+          "path": "tests/ScalarScope.FixtureTests/VersionConsistencyTests.cs"
+        },
+        {
+          "hash": "0d5d052dc242bf10051dc6688308acb2b5a56ee52d64cdbb609dfd8fcf41777b",
+          "path": "tests/ScalarScope.SoakTests/Phase32ValidationRunner.cs"
+        },
+        {
+          "hash": "1fc5678458066d3faf7fa7d06c13e1e8d586d103a33fa02f0fb090351a43b4b6",
+          "path": "tests/ScalarScope.SoakTests/Program.cs"
+        },
+        {
+          "hash": "a1b20f007b6fd0312925e9c6610adc1bd2435cc9089fdecf6256e3b22d33ada9",
+          "path": "tests/ScalarScope.SoakTests/ScalarScope.SoakTests.csproj"
+        },
+        {
+          "hash": "ce846e2a9e0006aff388fb9a5f61651c97376a025db99a56f2927212130875e8",
+          "path": "tests/ScalarScope.SoakTests/SoakCommand.cs"
+        },
+        {
+          "hash": "793bed6831fcc29e0e9998fe3e2cd034942c68f1a4c294512533f01c54371680",
+          "path": "tests/ScalarScope.SoakTests/SoakTestRunner.cs"
+        }
+      ],
+      "globs": [
+        "tests/**"
+      ],
+      "importConfidence": "full",
+      "name": "tests",
+      "origin": "authored",
+      "role": "test",
+      "testRunners": [
+        "dotnet test"
+      ],
+      "testedBy": 0,
+      "unresolvedSites": 0
+    }
+  ],
+  "doors": [
+    {
+      "checksCount": 2,
+      "commands": [
+        {
+          "dir": "",
+          "job": "build",
+          "programs": [
+            "dotnet"
+          ],
+          "step": "Install MAUI workload"
+        },
+        {
+          "dir": "",
+          "job": "build",
+          "programs": [
+            "dotnet"
+          ],
+          "step": "Restore VortexKit"
+        },
+        {
+          "dir": "",
+          "job": "build",
+          "programs": [
+            "dotnet"
+          ],
+          "step": "Restore ScalarScope"
+        },
+        {
+          "dir": "",
+          "job": "build",
+          "programs": [
+            "dotnet"
+          ],
+          "step": "Build VortexKit (Release)"
+        },
+        {
+          "dir": "",
+          "job": "build",
+          "programs": [
+            "dotnet"
+          ],
+          "step": "Build ScalarScope (Release)"
+        },
+        {
+          "dir": "",
+          "job": "build",
+          "programs": [
+            "dotnet"
+          ],
+          "step": "Restore FixtureTests"
+        },
+        {
+          "dir": "",
+          "job": "build",
+          "programs": [
+            "dotnet"
+          ],
+          "step": "Build FixtureTests (Release)"
+        },
+        {
+          "dir": "",
+          "job": "build",
+          "programs": [
+            "dotnet"
+          ],
+          "step": "Run tests"
+        },
+        {
+          "dir": "",
+          "job": "build",
+          "programs": [
+            "dotnet"
+          ],
+          "step": "Check code formatting"
+        },
+        {
+          "dir": "",
+          "job": "build",
+          "programs": [
+            "dotnet"
+          ],
+          "step": "Pack VortexKit"
+        },
+        {
+          "dir": "",
+          "job": "build",
+          "programs": [
+            ".Node.InnerText",
+            "Select",
+            "Select-Xml",
+            "echo"
+          ],
+          "step": "Get version info"
+        },
+        {
+          "dir": "",
+          "job": "build",
+          "programs": [
+            "echo"
+          ],
+          "step": "Build Summary"
+        },
+        {
+          "dir": "",
+          "job": "pack-review",
+          "programs": [
+            "cargo"
+          ],
+          "step": "Build the review the tag will pack"
+        },
+        {
+          "dir": "",
+          "job": "pack-review",
+          "programs": [
+            "-not",
+            "./packaging/pack.ps1",
+            "Test-Path",
+            "foreach",
+            "release/checksums.txt",
+            "throw"
+          ],
+          "step": "Pack the unsigned MSIX"
+        }
+      ],
+      "elsewhere": [],
+      "file": ".github/workflows/build.yml",
+      "jobs": [
+        {
+          "basis": "declared",
+          "name": "build",
+          "runsOn": [
+            {
+              "labels": [
+                "windows-latest"
+              ],
+              "platform": {
+                "cpu": "x64",
+                "os": "win32"
+              }
+            }
+          ]
+        },
+        {
+          "basis": "declared",
+          "name": "pack-review",
+          "runsOn": [
+            {
+              "labels": [
+                "windows-latest"
+              ],
+              "platform": {
+                "cpu": "x64",
+                "os": "win32"
+              }
+            }
+          ]
+        }
+      ],
+      "landings": [],
+      "mentions": [
+        {
+          "job": "pack-review",
+          "path": "rust/Cargo.toml"
+        }
+      ],
+      "name": "Build and Test",
+      "permissions": [
+        "contents:read"
+      ],
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "packaging",
+          "depth": 0,
+          "files": 1
+        },
+        {
+          "boundary": "rust",
+          "depth": 0,
+          "files": 20
+        },
+        {
+          "boundary": "src",
+          "depth": 0,
+          "files": 2
+        },
+        {
+          "boundary": "tests",
+          "depth": 0,
+          "files": 1
+        }
+      ],
+      "readers": [],
+      "runs": [
+        {
+          "job": "pack-review",
+          "path": "packaging/pack.ps1",
+          "runKind": "executes"
+        },
+        {
+          "job": "pack-review",
+          "matched": true,
+          "path": "rust/src/lib.rs",
+          "runKind": "checks",
+          "via": "cargo build"
+        },
+        {
+          "job": "pack-review",
+          "matched": true,
+          "path": "rust/src/main.rs",
+          "runKind": "checks",
+          "via": "cargo build"
+        },
+        {
+          "built": true,
+          "job": "build",
+          "path": "src/ScalarScope/ScalarScope.csproj",
+          "runKind": "executes"
+        },
+        {
+          "built": true,
+          "job": "build",
+          "matched": true,
+          "path": "src/VortexKit/VortexKit.csproj",
+          "runKind": "executes",
+          "via": "dotnet build"
+        },
+        {
+          "job": "build",
+          "matched": true,
+          "path": "tests/ScalarScope.FixtureTests/ScalarScope.FixtureTests.csproj",
+          "runKind": "executes",
+          "via": "dotnet build"
+        }
+      ],
+      "runsCount": 6,
+      "secrets": [],
+      "sends": {
+        "deploysPages": false,
+        "dispatchesTo": [],
+        "opensIssues": false,
+        "opensIssuesOnFailure": false,
+        "opensPullRequests": false,
+        "publishes": false,
+        "publishesTo": [],
+        "releases": false
+      },
+      "stages": [],
+      "tests": [
+        {
+          "files": 1,
+          "job": "build",
+          "runner": "dotnet test",
+          "step": "Run tests"
+        }
+      ],
+      "triggers": [
+        {
+          "branches": [
+            "main"
+          ],
+          "event": "pull_request",
+          "paths": [
+            "**/*.cs",
+            "**/*.csproj",
+            "**/*.sln",
+            "**/*.xaml",
+            "**/Package.appxmanifest",
+            "**/app.manifest",
+            ".github/workflows/**",
+            "global.json",
+            "packaging/**",
+            "rust/**"
+          ]
+        },
+        {
+          "branches": [
+            "main"
+          ],
+          "event": "push",
+          "paths": [
+            "**/*.cs",
+            "**/*.csproj",
+            "**/*.sln",
+            "**/*.xaml",
+            "**/Package.appxmanifest",
+            "**/app.manifest",
+            ".github/workflows/**",
+            "global.json",
+            "packaging/**",
+            "rust/**"
+          ]
+        },
+        {
+          "event": "workflow_dispatch"
+        }
+      ],
+      "uses": [
+        "actions/checkout",
+        "actions/setup-dotnet",
+        "actions/upload-artifact",
+        "dtolnay/rust-toolchain"
+      ],
+      "usesWorkflowToken": false
+    },
+    {
+      "checksCount": 0,
+      "commands": [
+        {
+          "dir": "rust",
+          "job": "test",
+          "programs": [
+            "cargo"
+          ],
+          "step": "Test"
+        },
+        {
+          "dir": "rust",
+          "job": "test",
+          "programs": [
+            "-replace",
+            "ForEach-Object"
+          ],
+          "step": "Point the report at the Rust crate"
+        },
+        {
+          "dir": "",
+          "job": "atlas",
+          "programs": [
+            "npx"
+          ],
+          "step": "Atlas check"
+        }
+      ],
+      "elsewhere": [],
+      "file": ".github/workflows/coverage.yml",
+      "jobs": [
+        {
+          "basis": "declared",
+          "name": "test",
+          "runsOn": [
+            {
+              "labels": [
+                "windows-latest"
+              ],
+              "platform": {
+                "cpu": "x64",
+                "os": "win32"
+              }
+            }
+          ]
+        },
+        {
+          "basis": "declared",
+          "name": "atlas",
+          "runsOn": [
+            {
+              "labels": [
+                "ubuntu-latest"
+              ],
+              "platform": {
+                "cpu": "x64",
+                "libc": "glibc",
+                "os": "linux"
+              }
+            }
+          ],
+          "setup": [
+            {
+              "ranges": [
+                {
+                  "from": "22",
+                  "range": ">=22.0.0 <23.0.0-0"
+                }
+              ],
+              "step": "1",
+              "uses": "actions/setup-node",
+              "version": "22"
+            }
+          ]
+        },
+        {
+          "basis": "declared",
+          "name": "codecov",
+          "runsOn": [
+            {
+              "labels": [
+                "ubuntu-latest"
+              ],
+              "platform": {
+                "cpu": "x64",
+                "libc": "glibc",
+                "os": "linux"
+              }
+            }
+          ]
+        }
+      ],
+      "landings": [],
+      "mentions": [],
+      "name": "Coverage",
+      "permissions": [
+        "contents:read",
+        "id-token:write"
+      ],
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "rust",
+          "depth": 0,
+          "files": 28
+        }
+      ],
+      "readers": [],
+      "runs": [
+        {
+          "job": "test",
+          "matched": true,
+          "path": "rust/src/geometry.rs",
+          "runKind": "executes",
+          "via": "cargo test"
+        },
+        {
+          "job": "test",
+          "matched": true,
+          "path": "rust/src/shape.rs",
+          "runKind": "executes",
+          "via": "cargo test"
+        },
+        {
+          "job": "test",
+          "matched": true,
+          "path": "rust/src/stats.rs",
+          "runKind": "executes",
+          "via": "cargo test"
+        },
+        {
+          "job": "test",
+          "matched": true,
+          "path": "rust/src/svg.rs",
+          "runKind": "executes",
+          "via": "cargo test"
+        },
+        {
+          "job": "test",
+          "matched": true,
+          "path": "rust/src/ui_geometry.rs",
+          "runKind": "executes",
+          "via": "cargo test"
+        },
+        {
+          "job": "test",
+          "matched": true,
+          "path": "rust/src/ui_tests.rs",
+          "runKind": "executes",
+          "via": "cargo test"
+        },
+        {
+          "job": "test",
+          "matched": true,
+          "path": "rust/src/views.rs",
+          "runKind": "executes",
+          "via": "cargo test"
+        },
+        {
+          "directory": true,
+          "job": "test",
+          "matched": true,
+          "path": "rust/tests/",
+          "runKind": "executes",
+          "via": "cargo test"
+        }
+      ],
+      "runsCount": 8,
+      "secrets": [],
+      "sends": {
+        "deploysPages": false,
+        "dispatchesTo": [],
+        "opensIssues": false,
+        "opensIssuesOnFailure": false,
+        "opensPullRequests": false,
+        "publishes": false,
+        "publishesTo": [],
+        "releases": false
+      },
+      "stages": [],
+      "tests": [
+        {
+          "coverage": true,
+          "dir": "rust",
+          "files": 17,
+          "job": "test",
+          "runner": "cargo test",
+          "step": "Test"
+        }
+      ],
+      "triggers": [
+        {
+          "event": "pull_request"
+        },
+        {
+          "branches": [
+            "main"
+          ],
+          "event": "push"
+        }
+      ],
+      "uses": [
+        "actions/checkout",
+        "actions/download-artifact",
+        "actions/setup-node",
+        "actions/upload-artifact",
+        "codecov/codecov-action",
+        "dtolnay/rust-toolchain",
+        "taiki-e/install-action"
+      ],
+      "usesWorkflowToken": false
+    },
+    {
+      "checksCount": 0,
+      "commands": [
+        {
+          "dir": "site",
+          "job": "build",
+          "programs": [
+            "npm"
+          ],
+          "step": "Install site dependencies"
+        },
+        {
+          "dir": "site",
+          "job": "build",
+          "programs": [
+            "npm"
+          ],
+          "step": "Build site"
+        }
+      ],
+      "elsewhere": [],
+      "file": ".github/workflows/pages.yml",
+      "jobs": [
+        {
+          "basis": "declared",
+          "name": "build",
+          "runsOn": [
+            {
+              "labels": [
+                "ubuntu-latest"
+              ],
+              "platform": {
+                "cpu": "x64",
+                "libc": "glibc",
+                "os": "linux"
+              }
+            }
+          ],
+          "setup": [
+            {
+              "ranges": [
+                {
+                  "from": "22",
+                  "range": ">=22.0.0 <23.0.0-0"
+                }
+              ],
+              "step": "1",
+              "uses": "actions/setup-node",
+              "version": "22"
+            }
+          ]
+        },
+        {
+          "basis": "declared",
+          "environment": {
+            "name": "github-pages"
+          },
+          "name": "deploy",
+          "runsOn": [
+            {
+              "labels": [
+                "ubuntu-latest"
+              ],
+              "platform": {
+                "cpu": "x64",
+                "libc": "glibc",
+                "os": "linux"
+              }
+            }
+          ]
+        }
+      ],
+      "landings": [],
+      "mentions": [],
+      "name": "Deploy site to GitHub Pages",
+      "permissions": [
+        "contents:read",
+        "id-token:write",
+        "pages:write"
+      ],
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "site",
+          "depth": 0,
+          "files": 5
+        }
+      ],
+      "readers": [],
+      "runs": [
+        {
+          "job": "build",
+          "matched": true,
+          "path": "site/astro.config.mjs",
+          "runKind": "executes",
+          "via": "astro build"
+        },
+        {
+          "directory": true,
+          "job": "build",
+          "matched": true,
+          "path": "site/src/",
+          "runKind": "executes",
+          "via": "astro build"
+        }
+      ],
+      "runsCount": 2,
+      "secrets": [],
+      "sends": {
+        "deploysPages": true,
+        "dispatchesTo": [],
+        "opensIssues": false,
+        "opensIssuesOnFailure": false,
+        "opensPullRequests": false,
+        "publishes": false,
+        "publishesTo": [],
+        "releases": false
+      },
+      "stages": [],
+      "triggers": [
+        {
+          "branches": [
+            "main"
+          ],
+          "event": "push",
+          "paths": [
+            ".github/workflows/pages.yml",
+            "site/**"
+          ]
+        },
+        {
+          "event": "workflow_dispatch"
+        }
+      ],
+      "uses": [
+        "actions/checkout",
+        "actions/deploy-pages",
+        "actions/setup-node",
+        "actions/upload-pages-artifact"
+      ],
+      "usesWorkflowToken": false
+    },
+    {
+      "checksCount": 0,
+      "commands": [
+        {
+          "dir": "",
+          "job": "publish",
+          "programs": [
+            "dotnet"
+          ],
+          "step": "Install MAUI workload"
+        },
+        {
+          "dir": "",
+          "job": "publish",
+          "programs": [
+            "dotnet"
+          ],
+          "step": "Restore VortexKit"
+        },
+        {
+          "dir": "",
+          "job": "publish",
+          "programs": [
+            "dotnet"
+          ],
+          "step": "Build VortexKit"
+        },
+        {
+          "dir": "",
+          "job": "publish",
+          "programs": [
+            "dotnet"
+          ],
+          "step": "Pack VortexKit"
+        }
+      ],
+      "elsewhere": [],
+      "file": ".github/workflows/publish.yml",
+      "jobs": [
+        {
+          "basis": "declared",
+          "environment": {
+            "name": "nuget"
+          },
+          "name": "publish",
+          "runsOn": [
+            {
+              "labels": [
+                "windows-latest"
+              ],
+              "platform": {
+                "cpu": "x64",
+                "os": "win32"
+              }
+            }
+          ]
+        }
+      ],
+      "landings": [],
+      "mentions": [],
+      "name": "Publish to NuGet",
+      "permissions": [
+        "id-token:write"
+      ],
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "src",
+          "depth": 0,
+          "files": 1
+        }
+      ],
+      "readers": [],
+      "runs": [
+        {
+          "built": true,
+          "job": "publish",
+          "matched": true,
+          "path": "src/VortexKit/VortexKit.csproj",
+          "runKind": "executes",
+          "via": "dotnet build"
+        }
+      ],
+      "runsCount": 1,
+      "secrets": [],
+      "sends": {
+        "deploysPages": false,
+        "dispatchesTo": [],
+        "opensIssues": false,
+        "opensIssuesOnFailure": false,
+        "opensPullRequests": false,
+        "publishes": false,
+        "publishesTo": [],
+        "releases": false
+      },
+      "stages": [],
+      "triggers": [
+        {
+          "event": "release",
+          "types": [
+            "published"
+          ]
+        },
+        {
+          "event": "workflow_dispatch"
+        }
+      ],
+      "uses": [
+        "actions/checkout",
+        "actions/setup-dotnet",
+        "nuget/login"
+      ],
+      "usesWorkflowToken": false
+    },
+    {
+      "checksCount": 1,
+      "commands": [
+        {
+          "dir": "",
+          "job": "build-release",
+          "programs": [
+            "throw"
+          ],
+          "step": "Reject a tag that is not the Store identity"
+        },
+        {
+          "dir": "",
+          "job": "build-release",
+          "programs": [
+            "cargo"
+          ],
+          "step": "Build the review"
+        },
+        {
+          "dir": "",
+          "job": "build-release",
+          "programs": [
+            "./packaging/pack.ps1"
+          ],
+          "step": "Pack the unsigned MSIX"
+        }
+      ],
+      "elsewhere": [],
+      "file": ".github/workflows/release.yml",
+      "jobs": [
+        {
+          "basis": "declared",
+          "name": "build-release",
+          "runsOn": [
+            {
+              "labels": [
+                "windows-latest"
+              ],
+              "platform": {
+                "cpu": "x64",
+                "os": "win32"
+              }
+            }
+          ]
+        },
+        {
+          "basis": "declared",
+          "name": "publish",
+          "runsOn": [
+            {
+              "labels": [
+                "windows-latest"
+              ],
+              "platform": {
+                "cpu": "x64",
+                "os": "win32"
+              }
+            }
+          ]
+        }
+      ],
+      "landings": [],
+      "mentions": [
+        {
+          "job": "build-release",
+          "path": "rust/Cargo.toml"
+        }
+      ],
+      "name": "Release",
+      "permissions": [
+        "contents:read",
+        "contents:write"
+      ],
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "packaging",
+          "depth": 0,
+          "files": 1
+        },
+        {
+          "boundary": "rust",
+          "depth": 0,
+          "files": 20
+        }
+      ],
+      "readers": [],
+      "runs": [
+        {
+          "job": "build-release",
+          "path": "packaging/pack.ps1",
+          "runKind": "executes"
+        },
+        {
+          "job": "build-release",
+          "matched": true,
+          "path": "rust/src/lib.rs",
+          "runKind": "checks",
+          "via": "cargo build"
+        },
+        {
+          "built": true,
+          "job": "build-release",
+          "matched": true,
+          "path": "rust/src/main.rs",
+          "runKind": "executes",
+          "via": "cargo build"
+        }
+      ],
+      "runsCount": 3,
+      "secrets": [
+        "GITHUB_TOKEN"
+      ],
+      "sends": {
+        "assets": [
+          "binary:Windows"
+        ],
+        "deploysPages": false,
+        "dispatchesTo": [],
+        "opensIssues": false,
+        "opensIssuesOnFailure": false,
+        "opensPullRequests": false,
+        "publishes": false,
+        "publishesTo": [],
+        "releases": true
+      },
+      "stages": [],
+      "triggers": [
+        {
+          "event": "push",
+          "tags": [
+            "v*"
+          ]
+        },
+        {
+          "event": "workflow_dispatch"
+        }
+      ],
+      "uses": [
+        "actions/checkout",
+        "actions/download-artifact",
+        "actions/upload-artifact",
+        "dtolnay/rust-toolchain",
+        "softprops/action-gh-release"
+      ],
+      "usesWorkflowToken": true
+    },
+    {
+      "checksCount": 0,
+      "commands": [],
+      "elsewhere": [],
+      "file": "rust/Cargo.toml",
+      "kind": "command",
+      "landings": [],
+      "mentions": [],
+      "name": "scalarscope",
+      "permissions": [],
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "rust",
+          "depth": 0,
+          "files": 19
+        }
+      ],
+      "readers": [],
+      "runs": [
+        {
+          "path": "rust/src/main.rs",
+          "runKind": "executes"
+        }
+      ],
+      "runsCount": 1,
+      "secrets": [],
+      "sends": {
+        "deploysPages": false,
+        "dispatchesTo": [],
+        "opensIssues": false,
+        "opensIssuesOnFailure": false,
+        "opensPullRequests": false,
+        "publishes": false,
+        "publishesTo": [],
+        "releases": false
+      },
+      "stages": [],
+      "triggers": [],
+      "uses": [],
+      "usesWorkflowToken": false
+    }
+  ],
+  "edges": [],
+  "engine": "1.24.0",
+  "generatedFrom": {
+    "commit": "fd6dcdac68952b42899d6474f8bb64534b63d484",
+    "tracked": 388
+  },
+  "landings": [
+    {
+      "readers": [
+        {
+          "by": "packaging/pack.ps1",
+          "call": "Copy-Item",
+          "confidence": "text"
+        }
+      ],
+      "target": "packaging/AppxManifest.xml",
+      "writers": []
+    },
+    {
+      "readers": [
+        {
+          "by": ".github/workflows/build.yml",
+          "confidence": "config"
+        },
+        {
+          "by": ".github/workflows/release.yml",
+          "confidence": "config"
+        },
+        {
+          "by": "README.es.md",
+          "call": "--manifest-path",
+          "confidence": "text"
+        },
+        {
+          "by": "README.fr.md",
+          "call": "--manifest-path",
+          "confidence": "text"
+        },
+        {
+          "by": "README.hi.md",
+          "call": "--manifest-path",
+          "confidence": "text"
+        },
+        {
+          "by": "README.it.md",
+          "call": "--manifest-path",
+          "confidence": "text"
+        },
+        {
+          "by": "README.ja.md",
+          "call": "--manifest-path",
+          "confidence": "text"
+        },
+        {
+          "by": "README.md",
+          "call": "--manifest-path",
+          "confidence": "text"
+        },
+        {
+          "by": "README.pt-BR.md",
+          "call": "--manifest-path",
+          "confidence": "text"
+        },
+        {
+          "by": "README.zh.md",
+          "call": "--manifest-path",
+          "confidence": "text"
+        },
+        {
+          "by": "docs/VERIFY_RELEASE.md",
+          "call": "--manifest-path",
+          "confidence": "text"
+        },
+        {
+          "by": "site/src/content/docs/handbook/beginners.md",
+          "call": "--manifest-path",
+          "confidence": "text"
+        },
+        {
+          "by": "site/src/content/docs/handbook/getting-started.md",
+          "call": "--manifest-path",
+          "confidence": "text"
+        },
+        {
+          "by": "site/src/content/docs/handbook/rust-review.md",
+          "call": "--manifest-path",
+          "confidence": "text"
+        }
+      ],
+      "target": "rust/Cargo.toml",
+      "writers": []
+    },
+    {
+      "readers": [
+        {
+          "by": "rust/src/ui_pages.rs",
+          "call": "include_str",
+          "confidence": "ast"
+        }
+      ],
+      "target": "rust/samples/baseline.csv",
+      "writers": []
+    },
+    {
+      "readers": [
+        {
+          "by": "rust/src/ui_pages.rs",
+          "call": "include_str",
+          "confidence": "ast"
+        }
+      ],
+      "target": "rust/samples/optimized.csv",
+      "writers": []
+    },
+    {
+      "readers": [
+        {
+          "by": "site/astro.config.mjs",
+          "call": "content-collection",
+          "confidence": "ast"
+        }
+      ],
+      "target": "site/src/content/docs",
+      "writers": []
+    },
+    {
+      "readers": [
+        {
+          "by": "site/astro.config.mjs",
+          "call": "autogenerate",
+          "confidence": "ast"
+        }
+      ],
+      "target": "site/src/content/docs/handbook",
+      "writers": []
+    },
+    {
+      "readers": [
+        {
+          "by": "README.es.md",
+          "call": "--project",
+          "confidence": "text"
+        },
+        {
+          "by": "README.fr.md",
+          "call": "--project",
+          "confidence": "text"
+        },
+        {
+          "by": "README.hi.md",
+          "call": "--project",
+          "confidence": "text"
+        },
+        {
+          "by": "README.it.md",
+          "call": "--project",
+          "confidence": "text"
+        },
+        {
+          "by": "README.ja.md",
+          "call": "--project",
+          "confidence": "text"
+        },
+        {
+          "by": "README.md",
+          "call": "--project",
+          "confidence": "text"
+        },
+        {
+          "by": "README.pt-BR.md",
+          "call": "--project",
+          "confidence": "text"
+        },
+        {
+          "by": "README.zh.md",
+          "call": "--project",
+          "confidence": "text"
+        },
+        {
+          "by": "codecov.yml",
+          "call": "literal",
+          "confidence": "text"
+        },
+        {
+          "by": "docs/PAPER_COMPANION.md",
+          "call": "--project",
+          "confidence": "text"
+        },
+        {
+          "by": "site/src/content/docs/handbook/beginners.md",
+          "call": "--project",
+          "confidence": "text"
+        },
+        {
+          "by": "site/src/content/docs/handbook/getting-started.md",
+          "call": "--project",
+          "confidence": "text"
+        }
+      ],
+      "target": "src/ScalarScope",
+      "writers": []
+    },
+    {
+      "readers": [
+        {
+          "by": "docs/INSTALL_RUNBOOK.md",
+          "call": "--project",
+          "confidence": "text"
+        }
+      ],
+      "target": "src/ScalarScope/ScalarScope.csproj",
+      "writers": []
+    },
+    {
+      "readers": [
+        {
+          "by": "codecov.yml",
+          "call": "literal",
+          "confidence": "text"
+        }
+      ],
+      "target": "src/VortexKit",
+      "writers": []
+    },
+    {
+      "readers": [
+        {
+          "by": "codecov.yml",
+          "call": "literal",
+          "confidence": "text"
+        }
+      ],
+      "target": "tests/Fixtures",
+      "writers": []
+    },
+    {
+      "readers": [
+        {
+          "by": "codecov.yml",
+          "call": "literal",
+          "confidence": "text"
+        }
+      ],
+      "target": "tests/ScalarScope.DeterminismTests",
+      "writers": []
+    },
+    {
+      "readers": [
+        {
+          "by": "codecov.yml",
+          "call": "literal",
+          "confidence": "text"
+        }
+      ],
+      "target": "tests/ScalarScope.FixtureTests",
+      "writers": []
+    },
+    {
+      "readers": [
+        {
+          "by": "codecov.yml",
+          "call": "literal",
+          "confidence": "text"
+        }
+      ],
+      "target": "tests/ScalarScope.SoakTests",
+      "writers": []
+    },
+    {
+      "readers": [
+        {
+          "by": "verify.sh",
+          "call": "literal",
+          "confidence": "text"
+        }
+      ],
+      "target": "verify.ps1",
+      "writers": []
+    }
+  ],
+  "overlaps": [],
+  "submodules": [],
+  "symlinks": [],
+  "testFiles": 55,
+  "unassigned": []
+}

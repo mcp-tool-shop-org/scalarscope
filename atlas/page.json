@@ -1,0 +1,419 @@
+{
+  "authored": [
+    ".github/",
+    "UI_Reference/",
+    "assets/",
+    "docs/",
+    "root",
+    "site/"
+  ],
+  "breaks": [
+    {
+      "doors": 4,
+      "importedBy": [],
+      "importedByTests": [],
+      "kind": "part",
+      "name": "rust",
+      "partLabel": "rust"
+    },
+    {
+      "doors": 2,
+      "importedBy": [],
+      "importedByTests": [],
+      "kind": "part",
+      "name": "packaging",
+      "partLabel": "packaging"
+    },
+    {
+      "doors": 2,
+      "importedBy": [],
+      "importedByTests": [],
+      "kind": "part",
+      "name": "src",
+      "partLabel": "src"
+    }
+  ],
+  "changes": {
+    "fileCounts": {
+      "added": 0,
+      "changed": 1,
+      "moved": 0,
+      "parts": 1,
+      "removed": 0
+    },
+    "items": [
+      {
+        "kind": "counts",
+        "sentence": "Nothing structural changed since 2026-10-07; 1 file changed content.",
+        "subjects": []
+      }
+    ],
+    "since": {
+      "commit": "4584e94b9ec5a70fabe0433ea741a234f9f8eaf0",
+      "generatedAt": "2026-10-07T01:12:36.950Z"
+    },
+    "unchanged": true
+  },
+  "changesTogether": [
+    {
+      "a": "rust/src/open.rs",
+      "b": "rust/tests/review_tests.rs",
+      "either": 11,
+      "partLabels": [
+        "rust",
+        "rust"
+      ],
+      "parts": [
+        "rust",
+        "rust"
+      ],
+      "relation": "inside",
+      "shared": 9
+    },
+    {
+      "a": "rust/src/review.rs",
+      "b": "rust/src/ui.rs",
+      "either": 19,
+      "partLabels": [
+        "rust",
+        "rust"
+      ],
+      "parts": [
+        "rust",
+        "rust"
+      ],
+      "relation": "inside",
+      "shared": 15
+    },
+    {
+      "a": "rust/src/ui.rs",
+      "b": "rust/src/ui_tests.rs",
+      "either": 19,
+      "partLabels": [
+        "rust",
+        "rust"
+      ],
+      "parts": [
+        "rust",
+        "rust"
+      ],
+      "relation": "inside",
+      "shared": 12
+    },
+    {
+      "a": "rust/src/review.rs",
+      "b": "rust/tests/review_tests.rs",
+      "either": 16,
+      "partLabels": [
+        "rust",
+        "rust"
+      ],
+      "parts": [
+        "rust",
+        "rust"
+      ],
+      "relation": "inside",
+      "shared": 10
+    },
+    {
+      "a": "rust/src/ui_tests.rs",
+      "b": "rust/tests/edge_tests.rs",
+      "either": 13,
+      "partLabels": [
+        "rust",
+        "rust"
+      ],
+      "parts": [
+        "rust",
+        "rust"
+      ],
+      "relation": "inside",
+      "shared": 8
+    }
+  ],
+  "changesTogetherNote": [
+    "Confidence is low: fewer than 25 source files reach 10 revisions in the window.",
+    "Window: 180 days; a pair counts from 3 shared commits, since 6 source files reach 10 revisions; the floor rises to 10 when 25 do."
+  ],
+  "changesTogetherWithTests": 0,
+  "commit": "fd6dcdac68952b42899d6474f8bb64534b63d484",
+  "defaultBranch": "main",
+  "derived": "10 parts, mostly C# (181 files), Rust (30), CSS (2), PowerShell (2), TypeScript (2), Astro (1), JavaScript (1) and shell (1). Work enters through 6 doors; the busiest is Build and Test, which reaches 4 parts. It deploys a site to GitHub Pages. People run scalarscope.",
+  "doors": [
+    {
+      "builds": [
+        "src/ScalarScope/ScalarScope.csproj",
+        "src/VortexKit/VortexKit.csproj"
+      ],
+      "checks": [
+        "rust/src/lib.rs",
+        "rust/src/main.rs"
+      ],
+      "checksCount": 2,
+      "checksMore": 0,
+      "file": ".github/workflows/build.yml",
+      "id": ".github/workflows/build.yml",
+      "landings": [],
+      "name": "Build and Test",
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "packaging",
+          "depth": 0,
+          "files": 1
+        },
+        {
+          "boundary": "rust",
+          "depth": 0,
+          "files": 20
+        },
+        {
+          "boundary": "src",
+          "depth": 0,
+          "files": 2
+        },
+        {
+          "boundary": "tests",
+          "depth": 0,
+          "files": 1
+        }
+      ],
+      "runs": [
+        "packaging/pack.ps1",
+        "tests/ScalarScope.FixtureTests/ScalarScope.FixtureTests.csproj"
+      ],
+      "runsCount": 2,
+      "runsMore": 0,
+      "sends": [],
+      "stages": [],
+      "triggers": [
+        "on a pull request to main touching 10 paths",
+        "on a push to main touching 10 paths",
+        "or by hand"
+      ]
+    },
+    {
+      "builds": [
+        "rust/src/main.rs"
+      ],
+      "checks": [
+        "rust/src/lib.rs"
+      ],
+      "checksCount": 1,
+      "checksMore": 0,
+      "file": ".github/workflows/release.yml",
+      "id": ".github/workflows/release.yml",
+      "landings": [],
+      "name": "Release",
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "packaging",
+          "depth": 0,
+          "files": 1
+        },
+        {
+          "boundary": "rust",
+          "depth": 0,
+          "files": 20
+        }
+      ],
+      "runs": [
+        "packaging/pack.ps1"
+      ],
+      "runsCount": 1,
+      "runsMore": 0,
+      "sends": [
+        "creates a GitHub release",
+        "builds rust/src/main.rs into a binary for Windows and uploads them to the release"
+      ],
+      "stages": [],
+      "triggers": [
+        "when a tag matching `v*` is pushed",
+        "or by hand"
+      ]
+    },
+    {
+      "checks": [],
+      "checksCount": 0,
+      "checksMore": 0,
+      "file": ".github/workflows/coverage.yml",
+      "id": ".github/workflows/coverage.yml",
+      "landings": [],
+      "name": "Coverage",
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "rust",
+          "depth": 0,
+          "files": 28
+        }
+      ],
+      "runs": [
+        "rust/src/geometry.rs",
+        "rust/src/shape.rs",
+        "rust/src/stats.rs",
+        "rust/src/svg.rs",
+        "rust/src/ui_geometry.rs",
+        "rust/src/ui_tests.rs",
+        "rust/src/views.rs",
+        "rust/tests/"
+      ],
+      "runsCount": 8,
+      "runsMore": 14,
+      "sends": [
+        "uploads coverage to Codecov"
+      ],
+      "stages": [],
+      "triggers": [
+        "on a pull request",
+        "on a push to main"
+      ]
+    },
+    {
+      "checks": [],
+      "checksCount": 0,
+      "checksMore": 0,
+      "file": ".github/workflows/pages.yml",
+      "id": ".github/workflows/pages.yml",
+      "landings": [],
+      "name": "Deploy site to GitHub Pages",
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "site",
+          "depth": 0,
+          "files": 5
+        }
+      ],
+      "runs": [
+        "site/astro.config.mjs",
+        "site/src/"
+      ],
+      "runsCount": 2,
+      "runsMore": 0,
+      "sends": [
+        "deploys the site"
+      ],
+      "stages": [],
+      "triggers": [
+        "on a push to main touching 2 paths",
+        "or by hand"
+      ]
+    },
+    {
+      "builds": [
+        "src/VortexKit/VortexKit.csproj"
+      ],
+      "checks": [],
+      "checksCount": 0,
+      "checksMore": 0,
+      "file": ".github/workflows/publish.yml",
+      "id": ".github/workflows/publish.yml",
+      "landings": [],
+      "name": "Publish to NuGet",
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "src",
+          "depth": 0,
+          "files": 1
+        }
+      ],
+      "runs": [],
+      "runsCount": 0,
+      "runsMore": 0,
+      "sends": [],
+      "stages": [],
+      "triggers": [
+        "when a release is published",
+        "or by hand"
+      ]
+    },
+    {
+      "checks": [],
+      "checksCount": 0,
+      "checksMore": 0,
+      "file": "rust/Cargo.toml",
+      "id": "rust/Cargo.toml#scalarscope",
+      "kind": "command",
+      "landings": [],
+      "name": "scalarscope",
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "rust",
+          "depth": 0,
+          "files": 19
+        }
+      ],
+      "runs": [
+        "rust/src/main.rs"
+      ],
+      "runsCount": 1,
+      "runsMore": 0,
+      "sends": [],
+      "stages": [],
+      "triggers": []
+    }
+  ],
+  "duplicates": [],
+  "duplicatesLead": null,
+  "duplicatesNote": [],
+  "edges": [],
+  "engine": "1.24.0",
+  "generated": [],
+  "generatedAt": "2026-10-07T01:23:03.739Z",
+  "limits": [
+    "3 writes and 3 reads use paths built at run time and are not named here.",
+    "4 writes and 11 reads go to a path their caller passes, not to this repository.",
+    "1 write goes to a temporary directory, not to this repository.",
+    "Statistics confidence is low: fewer than 25 source files reach 10 revisions in the window."
+  ],
+  "mainDoor": ".github/workflows/build.yml",
+  "partLabels": {
+    ".github": ".github",
+    "UI_Reference": "UI_Reference",
+    "assets": "assets",
+    "docs": "docs",
+    "packaging": "packaging",
+    "root": "the repository root",
+    "rust": "rust",
+    "site": "the site",
+    "src": "src",
+    "tests": "tests"
+  },
+  "parts": 10,
+  "readers": [],
+  "repo": "mcp-tool-shop-org/scalarscope",
+  "sequences": [],
+  "startDoor": "rust/Cargo.toml#scalarscope",
+  "startHere": [
+    "rust/src/main.rs",
+    "rust/src/lib.rs",
+    "rust/src/ui.rs"
+  ],
+  "startReason": "This path follows scalarscope (a command people run) from its entry, since Build and Test only checks code.",
+  "summary": "A review of two machine-learning runs. The app is the Rust program in rust/, packed as an MSIX for the Microsoft Store; src/ holds the earlier .NET MAUI app the Store copy still runs.",
+  "summaryFrom": "person",
+  "testFiles": 55,
+  "testedBy": {
+    "rust": 17
+  },
+  "unnamedWrites": 3,
+  "unread": [],
+  "unreadCode": [
+    "packaging",
+    "src"
+  ],
+  "unreadCodeUses": "packaging and src hold only C# and PowerShell files, which this map does not read, so what uses them cannot be seen.",
+  "unreadFiles": 0,
+  "unreadNote": [],
+  "untested": [],
+  "untestedNote": [
+    "packaging and src hold only C# and PowerShell files, which this map does not read, so whether a test touches them cannot be seen.",
+    "verify.ps1 runs in no workflow.",
+    "verify.sh runs in no workflow."
+  ],
+  "written": 0
+}

@@ -1,0 +1,2328 @@
+{
+  "authorship": {
+    "parts": [],
+    "places": []
+  },
+  "boundaries": [
+    {
+      "breakage": {
+        "coChangesOnly": [],
+        "collapsed": false,
+        "confidence": "low",
+        "importsAndCoChanges": [],
+        "importsOnly": []
+      },
+      "cohesion": null,
+      "cohesionDropped": false,
+      "confidence": "low",
+      "highWater": null,
+      "name": ".github",
+      "qualifyingSourceCommits": 0,
+      "rebaseline": null
+    },
+    {
+      "breakage": {
+        "coChangesOnly": [],
+        "collapsed": false,
+        "confidence": "low",
+        "importsAndCoChanges": [],
+        "importsOnly": []
+      },
+      "cohesion": null,
+      "cohesionDropped": false,
+      "confidence": "low",
+      "highWater": null,
+      "name": "UI_Reference",
+      "qualifyingSourceCommits": 0,
+      "rebaseline": null
+    },
+    {
+      "breakage": {
+        "coChangesOnly": [],
+        "collapsed": false,
+        "confidence": "low",
+        "importsAndCoChanges": [],
+        "importsOnly": []
+      },
+      "cohesion": null,
+      "cohesionDropped": false,
+      "confidence": "low",
+      "highWater": null,
+      "name": "assets",
+      "qualifyingSourceCommits": 0,
+      "rebaseline": null
+    },
+    {
+      "breakage": {
+        "coChangesOnly": [],
+        "collapsed": false,
+        "confidence": "low",
+        "importsAndCoChanges": [],
+        "importsOnly": []
+      },
+      "cohesion": null,
+      "cohesionDropped": false,
+      "confidence": "low",
+      "highWater": null,
+      "name": "docs",
+      "qualifyingSourceCommits": 0,
+      "rebaseline": null
+    },
+    {
+      "breakage": {
+        "coChangesOnly": [],
+        "collapsed": false,
+        "confidence": "low",
+        "importsAndCoChanges": [],
+        "importsOnly": []
+      },
+      "cohesion": null,
+      "cohesionDropped": false,
+      "confidence": "low",
+      "highWater": null,
+      "name": "packaging",
+      "qualifyingSourceCommits": 0,
+      "rebaseline": null
+    },
+    {
+      "breakage": {
+        "coChangesOnly": [],
+        "collapsed": false,
+        "confidence": "low",
+        "importsAndCoChanges": [],
+        "importsOnly": []
+      },
+      "cohesion": null,
+      "cohesionDropped": false,
+      "confidence": "low",
+      "highWater": null,
+      "name": "root",
+      "qualifyingSourceCommits": 0,
+      "rebaseline": null
+    },
+    {
+      "breakage": {
+        "coChangesOnly": [],
+        "collapsed": false,
+        "confidence": "low",
+        "importsAndCoChanges": [],
+        "importsOnly": []
+      },
+      "cohesion": 1,
+      "cohesionDropped": false,
+      "confidence": "low",
+      "highWater": null,
+      "name": "rust",
+      "qualifyingSourceCommits": 23,
+      "rebaseline": null
+    },
+    {
+      "breakage": {
+        "coChangesOnly": [],
+        "collapsed": false,
+        "confidence": "low",
+        "importsAndCoChanges": [],
+        "importsOnly": []
+      },
+      "cohesion": null,
+      "cohesionDropped": false,
+      "confidence": "low",
+      "highWater": null,
+      "name": "site",
+      "qualifyingSourceCommits": 4,
+      "rebaseline": null
+    },
+    {
+      "breakage": {
+        "coChangesOnly": [],
+        "collapsed": false,
+        "confidence": "low",
+        "importsAndCoChanges": [],
+        "importsOnly": []
+      },
+      "cohesion": null,
+      "cohesionDropped": false,
+      "confidence": "low",
+      "highWater": null,
+      "name": "src",
+      "qualifyingSourceCommits": 0,
+      "rebaseline": null
+    },
+    {
+      "breakage": {
+        "coChangesOnly": [],
+        "collapsed": false,
+        "confidence": "low",
+        "importsAndCoChanges": [],
+        "importsOnly": []
+      },
+      "cohesion": null,
+      "cohesionDropped": false,
+      "confidence": "low",
+      "highWater": null,
+      "name": "tests",
+      "qualifyingSourceCommits": 0,
+      "rebaseline": null
+    }
+  ],
+  "churn": {
+    "definition": "commits is how many commits in the window touch the file, including merges and commits dropped from coupling. lines is added plus deleted in those commits.",
+    "files": [
+      {
+        "commits": 1,
+        "lines": 41,
+        "path": ".github/ISSUE_TEMPLATE/bug_report.md"
+      },
+      {
+        "commits": 1,
+        "lines": 35,
+        "path": ".github/ISSUE_TEMPLATE/feature_request.md"
+      },
+      {
+        "commits": 1,
+        "lines": 27,
+        "path": ".github/ISSUE_TEMPLATE/question.md"
+      },
+      {
+        "commits": 1,
+        "lines": 47,
+        "path": ".github/PULL_REQUEST_TEMPLATE.md"
+      },
+      {
+        "commits": 4,
+        "lines": 161,
+        "path": ".github/workflows/build.yml"
+      },
+      {
+        "commits": 2,
+        "lines": 86,
+        "path": ".github/workflows/coverage.yml"
+      },
+      {
+        "commits": 3,
+        "lines": 60,
+        "path": ".github/workflows/pages.yml"
+      },
+      {
+        "commits": 3,
+        "lines": 62,
+        "path": ".github/workflows/publish.yml"
+      },
+      {
+        "commits": 7,
+        "lines": 280,
+        "path": ".github/workflows/release.yml"
+      },
+      {
+        "commits": 5,
+        "lines": 36,
+        "path": ".gitignore"
+      },
+      {
+        "commits": 37,
+        "lines": 438,
+        "path": "CHANGELOG.md"
+      },
+      {
+        "commits": 4,
+        "lines": 158,
+        "path": "FINAL_SHIP_VERIFICATION.md"
+      },
+      {
+        "commits": 1,
+        "lines": 21,
+        "path": "LICENSE"
+      },
+      {
+        "commits": 4,
+        "lines": 79,
+        "path": "PRIVACY.md"
+      },
+      {
+        "commits": 6,
+        "lines": 534,
+        "path": "README.es.md"
+      },
+      {
+        "commits": 6,
+        "lines": 540,
+        "path": "README.fr.md"
+      },
+      {
+        "commits": 6,
+        "lines": 534,
+        "path": "README.hi.md"
+      },
+      {
+        "commits": 6,
+        "lines": 524,
+        "path": "README.it.md"
+      },
+      {
+        "commits": 6,
+        "lines": 528,
+        "path": "README.ja.md"
+      },
+      {
+        "commits": 15,
+        "lines": 391,
+        "path": "README.md"
+      },
+      {
+        "commits": 6,
+        "lines": 532,
+        "path": "README.pt-BR.md"
+      },
+      {
+        "commits": 6,
+        "lines": 536,
+        "path": "README.zh.md"
+      },
+      {
+        "commits": 1,
+        "lines": 193,
+        "path": "ROADMAP.md"
+      },
+      {
+        "commits": 2,
+        "lines": 61,
+        "path": "SCORECARD.md"
+      },
+      {
+        "commits": 3,
+        "lines": 70,
+        "path": "SECURITY.md"
+      },
+      {
+        "commits": 2,
+        "lines": 78,
+        "path": "SHIP_GATE.md"
+      },
+      {
+        "commits": 5,
+        "lines": 231,
+        "path": "STORE_LISTING.md"
+      },
+      {
+        "commits": 1,
+        "lines": 71,
+        "path": "ScalarScope.sln"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "ScalarScope_UI_Reference_Pack_v2.zip"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "UI_Reference/01_home_workspace.png"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "UI_Reference/02_navigation_modes.png"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "UI_Reference/03_compare_context_header.png"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "UI_Reference/04_delta_zone_hierarchy.png"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "UI_Reference/05_guide_lens.png"
+      },
+      {
+        "commits": 1,
+        "lines": 42,
+        "path": "UI_Reference/README.txt"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "assets/logo.png"
+      },
+      {
+        "commits": 1,
+        "lines": 103,
+        "path": "atlas/README.md"
+      },
+      {
+        "commits": 1,
+        "lines": 42,
+        "path": "atlas/boundaries.yaml"
+      },
+      {
+        "commits": 1,
+        "lines": 401,
+        "path": "atlas/page.json"
+      },
+      {
+        "commits": 1,
+        "lines": 2303,
+        "path": "atlas/statistics.json"
+      },
+      {
+        "commits": 1,
+        "lines": 3801,
+        "path": "atlas/structure.json"
+      },
+      {
+        "commits": 1,
+        "lines": 29,
+        "path": "codecov.yml"
+      },
+      {
+        "commits": 5,
+        "lines": 178,
+        "path": "docs/BETA_GUIDE.md"
+      },
+      {
+        "commits": 1,
+        "lines": 137,
+        "path": "docs/BUTTON_COVERAGE_MATRIX.md"
+      },
+      {
+        "commits": 2,
+        "lines": 264,
+        "path": "docs/DATA_PERSISTENCE.md"
+      },
+      {
+        "commits": 2,
+        "lines": 552,
+        "path": "docs/DEMO_SCRIPT.md"
+      },
+      {
+        "commits": 2,
+        "lines": 168,
+        "path": "docs/DETERMINISM.md"
+      },
+      {
+        "commits": 4,
+        "lines": 268,
+        "path": "docs/INSTALL_RUNBOOK.md"
+      },
+      {
+        "commits": 1,
+        "lines": 499,
+        "path": "docs/LITERATURE_REVIEW.md"
+      },
+      {
+        "commits": 4,
+        "lines": 194,
+        "path": "docs/PAPER_COMPANION.md"
+      },
+      {
+        "commits": 1,
+        "lines": 466,
+        "path": "docs/PHASE12_AUDIT.md"
+      },
+      {
+        "commits": 4,
+        "lines": 125,
+        "path": "docs/QUICK_REFERENCE.md"
+      },
+      {
+        "commits": 5,
+        "lines": 176,
+        "path": "docs/RELEASE_PROCESS.md"
+      },
+      {
+        "commits": 2,
+        "lines": 252,
+        "path": "docs/RELEASE_QA_CHECKLIST.md"
+      },
+      {
+        "commits": 1,
+        "lines": 369,
+        "path": "docs/RESULTS_AND_LIMITATIONS.md"
+      },
+      {
+        "commits": 1,
+        "lines": 183,
+        "path": "docs/ROADMAP_V2.md"
+      },
+      {
+        "commits": 1,
+        "lines": 164,
+        "path": "docs/SOAK_TESTING.md"
+      },
+      {
+        "commits": 2,
+        "lines": 292,
+        "path": "docs/THEME_AUDIT.md"
+      },
+      {
+        "commits": 2,
+        "lines": 443,
+        "path": "docs/THESIS.md"
+      },
+      {
+        "commits": 5,
+        "lines": 247,
+        "path": "docs/VERIFY_RELEASE.md"
+      },
+      {
+        "commits": 1,
+        "lines": 3,
+        "path": "docs/_config.yml"
+      },
+      {
+        "commits": 2,
+        "lines": 23,
+        "path": "docs/index.md"
+      },
+      {
+        "commits": 15,
+        "lines": 877,
+        "path": "docs/parity-and-beyond.spec.md"
+      },
+      {
+        "commits": 1,
+        "lines": 6,
+        "path": "global.json"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "logo.png"
+      },
+      {
+        "commits": 3,
+        "lines": 61,
+        "path": "packaging/AppxManifest.xml"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "packaging/assets/appiconLargeTile.png"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "packaging/assets/appiconLogo.png"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "packaging/assets/appiconMediumTile.png"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "packaging/assets/appiconSmallTile.png"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "packaging/assets/appiconStoreLogo.png"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "packaging/assets/appiconWideTile.png"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "packaging/assets/splashSplashScreen.png"
+      },
+      {
+        "commits": 3,
+        "lines": 89,
+        "path": "packaging/pack.ps1"
+      },
+      {
+        "commits": 2,
+        "lines": 99,
+        "path": "passport.json"
+      },
+      {
+        "commits": 1,
+        "lines": 48,
+        "path": "phase32_validation_report.md"
+      },
+      {
+        "commits": 6,
+        "lines": 4655,
+        "path": "rust/Cargo.lock"
+      },
+      {
+        "commits": 6,
+        "lines": 24,
+        "path": "rust/Cargo.toml"
+      },
+      {
+        "commits": 2,
+        "lines": 602,
+        "path": "rust/samples/baseline.csv"
+      },
+      {
+        "commits": 2,
+        "lines": 602,
+        "path": "rust/samples/optimized.csv"
+      },
+      {
+        "commits": 19,
+        "lines": 1579,
+        "path": "rust/src/bundle.rs"
+      },
+      {
+        "commits": 3,
+        "lines": 885,
+        "path": "rust/src/geometry.rs"
+      },
+      {
+        "commits": 4,
+        "lines": 5912,
+        "path": "rust/src/geometry_deltas.rs"
+      },
+      {
+        "commits": 1,
+        "lines": 310,
+        "path": "rust/src/history.rs"
+      },
+      {
+        "commits": 18,
+        "lines": 31,
+        "path": "rust/src/lib.rs"
+      },
+      {
+        "commits": 1,
+        "lines": 18,
+        "path": "rust/src/main.rs"
+      },
+      {
+        "commits": 1,
+        "lines": 58,
+        "path": "rust/src/milestones.rs"
+      },
+      {
+        "commits": 16,
+        "lines": 1557,
+        "path": "rust/src/open.rs"
+      },
+      {
+        "commits": 3,
+        "lines": 339,
+        "path": "rust/src/prefs.rs"
+      },
+      {
+        "commits": 1,
+        "lines": 121,
+        "path": "rust/src/readings.rs"
+      },
+      {
+        "commits": 26,
+        "lines": 2356,
+        "path": "rust/src/review.rs"
+      },
+      {
+        "commits": 5,
+        "lines": 1237,
+        "path": "rust/src/runtrace.rs"
+      },
+      {
+        "commits": 2,
+        "lines": 668,
+        "path": "rust/src/shape.rs"
+      },
+      {
+        "commits": 8,
+        "lines": 1176,
+        "path": "rust/src/stats.rs"
+      },
+      {
+        "commits": 2,
+        "lines": 696,
+        "path": "rust/src/svg.rs"
+      },
+      {
+        "commits": 32,
+        "lines": 2951,
+        "path": "rust/src/ui.rs"
+      },
+      {
+        "commits": 4,
+        "lines": 732,
+        "path": "rust/src/ui_geometry.rs"
+      },
+      {
+        "commits": 2,
+        "lines": 398,
+        "path": "rust/src/ui_pages.rs"
+      },
+      {
+        "commits": 24,
+        "lines": 1046,
+        "path": "rust/src/ui_tests.rs"
+      },
+      {
+        "commits": 4,
+        "lines": 572,
+        "path": "rust/src/views.rs"
+      },
+      {
+        "commits": 3,
+        "lines": 156,
+        "path": "rust/tests/aspire_export_tests.rs"
+      },
+      {
+        "commits": 11,
+        "lines": 366,
+        "path": "rust/tests/bundle_tests.rs"
+      },
+      {
+        "commits": 5,
+        "lines": 180,
+        "path": "rust/tests/compat_tests.rs"
+      },
+      {
+        "commits": 18,
+        "lines": 746,
+        "path": "rust/tests/edge_tests.rs"
+      },
+      {
+        "commits": 3,
+        "lines": 8511,
+        "path": "rust/tests/fixtures/aspire-si/regressing.json"
+      },
+      {
+        "commits": 3,
+        "lines": 8367,
+        "path": "rust/tests/fixtures/aspire-si/steady.json"
+      },
+      {
+        "commits": 4,
+        "lines": 1472,
+        "path": "rust/tests/geometry_delta_tests.rs"
+      },
+      {
+        "commits": 1,
+        "lines": 157,
+        "path": "rust/tests/history_tests.rs"
+      },
+      {
+        "commits": 3,
+        "lines": 217,
+        "path": "rust/tests/prefs_tests.rs"
+      },
+      {
+        "commits": 19,
+        "lines": 649,
+        "path": "rust/tests/review_tests.rs"
+      },
+      {
+        "commits": 10,
+        "lines": 556,
+        "path": "rust/tests/runtrace_tests.rs"
+      },
+      {
+        "commits": 10,
+        "lines": 416,
+        "path": "rust/tests/sources_tests.rs"
+      },
+      {
+        "commits": 1,
+        "lines": 30,
+        "path": "site/astro.config.mjs"
+      },
+      {
+        "commits": 1,
+        "lines": 7539,
+        "path": "site/package-lock.json"
+      },
+      {
+        "commits": 1,
+        "lines": 18,
+        "path": "site/package.json"
+      },
+      {
+        "commits": 1,
+        "lines": 7,
+        "path": "site/src/content.config.ts"
+      },
+      {
+        "commits": 6,
+        "lines": 190,
+        "path": "site/src/content/docs/handbook/beginners.md"
+      },
+      {
+        "commits": 4,
+        "lines": 90,
+        "path": "site/src/content/docs/handbook/bundles.md"
+      },
+      {
+        "commits": 1,
+        "lines": 82,
+        "path": "site/src/content/docs/handbook/delta-analysis.md"
+      },
+      {
+        "commits": 5,
+        "lines": 174,
+        "path": "site/src/content/docs/handbook/getting-started.md"
+      },
+      {
+        "commits": 4,
+        "lines": 39,
+        "path": "site/src/content/docs/handbook/index.md"
+      },
+      {
+        "commits": 1,
+        "lines": 34,
+        "path": "site/src/content/docs/handbook/rust-review.md"
+      },
+      {
+        "commits": 1,
+        "lines": 99,
+        "path": "site/src/content/docs/handbook/vortexkit.md"
+      },
+      {
+        "commits": 1,
+        "lines": 33,
+        "path": "site/src/pages/index.astro"
+      },
+      {
+        "commits": 6,
+        "lines": 175,
+        "path": "site/src/site-config.ts"
+      },
+      {
+        "commits": 1,
+        "lines": 3,
+        "path": "site/src/styles/global.css"
+      },
+      {
+        "commits": 1,
+        "lines": 18,
+        "path": "site/src/styles/starlight-custom.css"
+      },
+      {
+        "commits": 1,
+        "lines": 5,
+        "path": "site/tsconfig.json"
+      },
+      {
+        "commits": 2,
+        "lines": 21,
+        "path": "src/ScalarScope/App.xaml"
+      },
+      {
+        "commits": 3,
+        "lines": 107,
+        "path": "src/ScalarScope/App.xaml.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 42,
+        "path": "src/ScalarScope/AppShell.xaml"
+      },
+      {
+        "commits": 3,
+        "lines": 59,
+        "path": "src/ScalarScope/AppShell.xaml.cs"
+      },
+      {
+        "commits": 2,
+        "lines": 74,
+        "path": "src/ScalarScope/Converters/BoolConverters.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 36,
+        "path": "src/ScalarScope/MainPage.xaml"
+      },
+      {
+        "commits": 1,
+        "lines": 23,
+        "path": "src/ScalarScope/MainPage.xaml.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 28,
+        "path": "src/ScalarScope/MauiProgram.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 204,
+        "path": "src/ScalarScope/Models/GeometryRun.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 99,
+        "path": "src/ScalarScope/Models/InsightEvent.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 6,
+        "path": "src/ScalarScope/Platforms/Android/AndroidManifest.xml"
+      },
+      {
+        "commits": 1,
+        "lines": 10,
+        "path": "src/ScalarScope/Platforms/Android/MainActivity.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 15,
+        "path": "src/ScalarScope/Platforms/Android/MainApplication.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 6,
+        "path": "src/ScalarScope/Platforms/Android/Resources/values/colors.xml"
+      },
+      {
+        "commits": 1,
+        "lines": 9,
+        "path": "src/ScalarScope/Platforms/MacCatalyst/AppDelegate.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 14,
+        "path": "src/ScalarScope/Platforms/MacCatalyst/Entitlements.plist"
+      },
+      {
+        "commits": 1,
+        "lines": 40,
+        "path": "src/ScalarScope/Platforms/MacCatalyst/Info.plist"
+      },
+      {
+        "commits": 1,
+        "lines": 15,
+        "path": "src/ScalarScope/Platforms/MacCatalyst/Program.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 8,
+        "path": "src/ScalarScope/Platforms/Windows/App.xaml"
+      },
+      {
+        "commits": 2,
+        "lines": 151,
+        "path": "src/ScalarScope/Platforms/Windows/App.xaml.cs"
+      },
+      {
+        "commits": 2,
+        "lines": 50,
+        "path": "src/ScalarScope/Platforms/Windows/Package.appxmanifest"
+      },
+      {
+        "commits": 1,
+        "lines": 17,
+        "path": "src/ScalarScope/Platforms/Windows/app.manifest"
+      },
+      {
+        "commits": 1,
+        "lines": 9,
+        "path": "src/ScalarScope/Platforms/iOS/AppDelegate.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 32,
+        "path": "src/ScalarScope/Platforms/iOS/Info.plist"
+      },
+      {
+        "commits": 1,
+        "lines": 15,
+        "path": "src/ScalarScope/Platforms/iOS/Program.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 51,
+        "path": "src/ScalarScope/Platforms/iOS/Resources/PrivacyInfo.xcprivacy"
+      },
+      {
+        "commits": 1,
+        "lines": 8,
+        "path": "src/ScalarScope/Properties/launchSettings.json"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "src/ScalarScope/Resources/AppIcon/StoreLogo_150x150.png"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "src/ScalarScope/Resources/AppIcon/StoreLogo_300x300.png"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "src/ScalarScope/Resources/AppIcon/StoreLogo_512x512.png"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "src/ScalarScope/Resources/AppIcon/StoreLogo_71x71.png"
+      },
+      {
+        "commits": 1,
+        "lines": 5,
+        "path": "src/ScalarScope/Resources/AppIcon/appicon.svg"
+      },
+      {
+        "commits": 1,
+        "lines": 26,
+        "path": "src/ScalarScope/Resources/AppIcon/appiconfg.svg"
+      },
+      {
+        "commits": 1,
+        "lines": 53,
+        "path": "src/ScalarScope/Resources/AppIcon/scalarscope_icon.svg"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "src/ScalarScope/Resources/Fonts/OpenSans-Regular.ttf"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "src/ScalarScope/Resources/Fonts/OpenSans-Semibold.ttf"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "src/ScalarScope/Resources/Images/dotnet_bot.png"
+      },
+      {
+        "commits": 1,
+        "lines": 15,
+        "path": "src/ScalarScope/Resources/Raw/AboutAssets.txt"
+      },
+      {
+        "commits": 1,
+        "lines": 80,
+        "path": "src/ScalarScope/Resources/Raw/Samples/correlated_professors.json"
+      },
+      {
+        "commits": 1,
+        "lines": 82,
+        "path": "src/ScalarScope/Resources/Raw/Samples/orthogonal_professors.json"
+      },
+      {
+        "commits": 1,
+        "lines": 8,
+        "path": "src/ScalarScope/Resources/Splash/splash.svg"
+      },
+      {
+        "commits": 1,
+        "lines": 44,
+        "path": "src/ScalarScope/Resources/Styles/Colors.xaml"
+      },
+      {
+        "commits": 1,
+        "lines": 282,
+        "path": "src/ScalarScope/Resources/Styles/DesignSystem.xaml"
+      },
+      {
+        "commits": 1,
+        "lines": 434,
+        "path": "src/ScalarScope/Resources/Styles/Styles.xaml"
+      },
+      {
+        "commits": 3,
+        "lines": 99,
+        "path": "src/ScalarScope/ScalarScope.csproj"
+      },
+      {
+        "commits": 1,
+        "lines": 434,
+        "path": "src/ScalarScope/Services/AccessibilityService.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 16,
+        "path": "src/ScalarScope/Services/AlignmentCaption.cs"
+      },
+      {
+        "commits": 3,
+        "lines": 364,
+        "path": "src/ScalarScope/Services/AlignmentMapper.cs"
+      },
+      {
+        "commits": 3,
+        "lines": 580,
+        "path": "src/ScalarScope/Services/AnalysisService.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 495,
+        "path": "src/ScalarScope/Services/AutoSaveService.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 307,
+        "path": "src/ScalarScope/Services/BundleImportService.cs"
+      },
+      {
+        "commits": 4,
+        "lines": 436,
+        "path": "src/ScalarScope/Services/BundleIntegrityService.cs"
+      },
+      {
+        "commits": 2,
+        "lines": 102,
+        "path": "src/ScalarScope/Services/BundlePaths.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 379,
+        "path": "src/ScalarScope/Services/BundleSchemaValidator.cs"
+      },
+      {
+        "commits": 3,
+        "lines": 704,
+        "path": "src/ScalarScope/Services/Bundles/BundleBuilder.cs"
+      },
+      {
+        "commits": 4,
+        "lines": 320,
+        "path": "src/ScalarScope/Services/Bundles/BundleExporter.cs"
+      },
+      {
+        "commits": 3,
+        "lines": 313,
+        "path": "src/ScalarScope/Services/Bundles/BundleHashAlgorithm.cs"
+      },
+      {
+        "commits": 4,
+        "lines": 653,
+        "path": "src/ScalarScope/Services/Bundles/BundleImporter.cs"
+      },
+      {
+        "commits": 3,
+        "lines": 875,
+        "path": "src/ScalarScope/Services/Bundles/BundleIntegrityService.cs"
+      },
+      {
+        "commits": 3,
+        "lines": 713,
+        "path": "src/ScalarScope/Services/Bundles/BundleModels.cs"
+      },
+      {
+        "commits": 3,
+        "lines": 103,
+        "path": "src/ScalarScope/Services/Bundles/deltas-1.0.0.schema.json"
+      },
+      {
+        "commits": 1,
+        "lines": 188,
+        "path": "src/ScalarScope/Services/Bundles/manifest-1.0.0.schema.json"
+      },
+      {
+        "commits": 1,
+        "lines": 117,
+        "path": "src/ScalarScope/Services/Bundles/repro-1.0.0.schema.json"
+      },
+      {
+        "commits": 1,
+        "lines": 94,
+        "path": "src/ScalarScope/Services/Bundles/why-1.0.0.schema.json"
+      },
+      {
+        "commits": 3,
+        "lines": 1786,
+        "path": "src/ScalarScope/Services/CanonicalDeltaService.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 537,
+        "path": "src/ScalarScope/Services/CheckpointService.cs"
+      },
+      {
+        "commits": 2,
+        "lines": 643,
+        "path": "src/ScalarScope/Services/ComparativeAnalysisService.cs"
+      },
+      {
+        "commits": 5,
+        "lines": 745,
+        "path": "src/ScalarScope/Services/ComparisonBundleService.cs"
+      },
+      {
+        "commits": 4,
+        "lines": 303,
+        "path": "src/ScalarScope/Services/ComparisonLog.cs"
+      },
+      {
+        "commits": 3,
+        "lines": 546,
+        "path": "src/ScalarScope/Services/ComparisonReplayService.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 153,
+        "path": "src/ScalarScope/Services/ConfidenceTokens.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 212,
+        "path": "src/ScalarScope/Services/Connectors/CONNECTOR_CONTRACT_SPEC.md"
+      },
+      {
+        "commits": 1,
+        "lines": 529,
+        "path": "src/ScalarScope/Services/Connectors/ConnectorModels.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 450,
+        "path": "src/ScalarScope/Services/Connectors/ConnectorPreset.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 545,
+        "path": "src/ScalarScope/Services/Connectors/ConnectorValidationService.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 337,
+        "path": "src/ScalarScope/Services/Connectors/IRunConnector.cs"
+      },
+      {
+        "commits": 6,
+        "lines": 1820,
+        "path": "src/ScalarScope/Services/Connectors/RunTraceComparer.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 697,
+        "path": "src/ScalarScope/Services/Connectors/RunTraceValidator.cs"
+      },
+      {
+        "commits": 3,
+        "lines": 560,
+        "path": "src/ScalarScope/Services/Connectors/RuntimeRunTraceModels.cs"
+      },
+      {
+        "commits": 5,
+        "lines": 2236,
+        "path": "src/ScalarScope/Services/Connectors/TensorFlowRTOfflineConnector.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 317,
+        "path": "src/ScalarScope/Services/Connectors/TfrtRuntimePreset.cs"
+      },
+      {
+        "commits": 2,
+        "lines": 347,
+        "path": "src/ScalarScope/Services/Connectors/TraceReview.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 242,
+        "path": "src/ScalarScope/Services/Connectors/run-trace-1.0.0.schema.json"
+      },
+      {
+        "commits": 1,
+        "lines": 246,
+        "path": "src/ScalarScope/Services/Connectors/runtrace-1.0.0.schema.json"
+      },
+      {
+        "commits": 1,
+        "lines": 334,
+        "path": "src/ScalarScope/Services/ConsistencyCheckService.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 226,
+        "path": "src/ScalarScope/Services/ContextualExplanationService.cs"
+      },
+      {
+        "commits": 3,
+        "lines": 333,
+        "path": "src/ScalarScope/Services/CrashReportingService.cs"
+      },
+      {
+        "commits": 4,
+        "lines": 416,
+        "path": "src/ScalarScope/Services/DeltaCopyService.cs"
+      },
+      {
+        "commits": 3,
+        "lines": 103,
+        "path": "src/ScalarScope/Services/DeltaIds.cs"
+      },
+      {
+        "commits": 3,
+        "lines": 409,
+        "path": "src/ScalarScope/Services/DeltaTypes.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 186,
+        "path": "src/ScalarScope/Services/DemoAnnotationService.cs"
+      },
+      {
+        "commits": 2,
+        "lines": 225,
+        "path": "src/ScalarScope/Services/DemoService.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 433,
+        "path": "src/ScalarScope/Services/DemoStateService.cs"
+      },
+      {
+        "commits": 3,
+        "lines": 390,
+        "path": "src/ScalarScope/Services/DeterminismService.cs"
+      },
+      {
+        "commits": 4,
+        "lines": 775,
+        "path": "src/ScalarScope/Services/DeterminismTestSuite.cs"
+      },
+      {
+        "commits": 2,
+        "lines": 304,
+        "path": "src/ScalarScope/Services/DiagnosticsService.cs"
+      },
+      {
+        "commits": 2,
+        "lines": 412,
+        "path": "src/ScalarScope/Services/ErrorBoundary.cs"
+      },
+      {
+        "commits": 2,
+        "lines": 476,
+        "path": "src/ScalarScope/Services/ErrorExplanationService.cs"
+      },
+      {
+        "commits": 2,
+        "lines": 431,
+        "path": "src/ScalarScope/Services/ErrorLoggingService.cs"
+      },
+      {
+        "commits": 3,
+        "lines": 312,
+        "path": "src/ScalarScope/Services/ErrorStateMapping.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 307,
+        "path": "src/ScalarScope/Services/Evidence/ComparisonEvidenceReport.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 122,
+        "path": "src/ScalarScope/Services/Evidence/ComparisonSetDefinition.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 546,
+        "path": "src/ScalarScope/Services/Evidence/DetectorDiagnostics.cs"
+      },
+      {
+        "commits": 3,
+        "lines": 1027,
+        "path": "src/ScalarScope/Services/Evidence/EvidenceExportService.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 370,
+        "path": "src/ScalarScope/Services/Evidence/EvidenceModels.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 21,
+        "path": "src/ScalarScope/Services/ExportPreferences.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 1918,
+        "path": "src/ScalarScope/Services/ExportService.cs"
+      },
+      {
+        "commits": 3,
+        "lines": 333,
+        "path": "src/ScalarScope/Services/FileValidationService.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 572,
+        "path": "src/ScalarScope/Services/FlowFieldService.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 328,
+        "path": "src/ScalarScope/Services/GoldenRunService.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 25,
+        "path": "src/ScalarScope/Services/GuideSearch.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 577,
+        "path": "src/ScalarScope/Services/ImportPresetService.cs"
+      },
+      {
+        "commits": 3,
+        "lines": 639,
+        "path": "src/ScalarScope/Services/ImportSchemaService.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 504,
+        "path": "src/ScalarScope/Services/InertialPhysicsController.cs"
+      },
+      {
+        "commits": 3,
+        "lines": 171,
+        "path": "src/ScalarScope/Services/InputNormalizer.cs"
+      },
+      {
+        "commits": 3,
+        "lines": 503,
+        "path": "src/ScalarScope/Services/InsightFeedService.cs"
+      },
+      {
+        "commits": 2,
+        "lines": 530,
+        "path": "src/ScalarScope/Services/Integrations/IntegrationService.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 372,
+        "path": "src/ScalarScope/Services/InteractiveProbingService.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 387,
+        "path": "src/ScalarScope/Services/InvariantGuard.cs"
+      },
+      {
+        "commits": 3,
+        "lines": 243,
+        "path": "src/ScalarScope/Services/KeyboardService.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 171,
+        "path": "src/ScalarScope/Services/LayoutDebouncer.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 334,
+        "path": "src/ScalarScope/Services/MotionTokens.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 234,
+        "path": "src/ScalarScope/Services/PerformanceProfiler.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 309,
+        "path": "src/ScalarScope/Services/PlaybackController.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 465,
+        "path": "src/ScalarScope/Services/PlaybackEffects.cs"
+      },
+      {
+        "commits": 3,
+        "lines": 508,
+        "path": "src/ScalarScope/Services/Plugins/PluginManager.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 18,
+        "path": "src/ScalarScope/Services/RecoveryResume.cs"
+      },
+      {
+        "commits": 3,
+        "lines": 536,
+        "path": "src/ScalarScope/Services/ReproAuditExportService.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 372,
+        "path": "src/ScalarScope/Services/ReproducibilityBadgeService.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 443,
+        "path": "src/ScalarScope/Services/ResumableOperationService.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 500,
+        "path": "src/ScalarScope/Services/RetryPolicyService.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 337,
+        "path": "src/ScalarScope/Services/ShareService.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 30,
+        "path": "src/ScalarScope/Services/ShellStartup.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 260,
+        "path": "src/ScalarScope/Services/SocialCardService.cs"
+      },
+      {
+        "commits": 3,
+        "lines": 455,
+        "path": "src/ScalarScope/Services/TemporalAlignmentService.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 188,
+        "path": "src/ScalarScope/Services/TransitionService.cs"
+      },
+      {
+        "commits": 3,
+        "lines": 607,
+        "path": "src/ScalarScope/Services/UserPreferencesService.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 151,
+        "path": "src/ScalarScope/Services/VersionInfo.cs"
+      },
+      {
+        "commits": 9,
+        "lines": 1429,
+        "path": "src/ScalarScope/ViewModels/ComparisonViewModel.cs"
+      },
+      {
+        "commits": 2,
+        "lines": 608,
+        "path": "src/ScalarScope/ViewModels/ExportViewModel.cs"
+      },
+      {
+        "commits": 2,
+        "lines": 78,
+        "path": "src/ScalarScope/ViewModels/ProductLinks.cs"
+      },
+      {
+        "commits": 4,
+        "lines": 457,
+        "path": "src/ScalarScope/ViewModels/SettingsViewModel.cs"
+      },
+      {
+        "commits": 4,
+        "lines": 376,
+        "path": "src/ScalarScope/ViewModels/TrajectoryPlayerViewModel.cs"
+      },
+      {
+        "commits": 3,
+        "lines": 430,
+        "path": "src/ScalarScope/ViewModels/VortexSessionViewModel.cs"
+      },
+      {
+        "commits": 6,
+        "lines": 603,
+        "path": "src/ScalarScope/ViewModels/WelcomeViewModel.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 57,
+        "path": "src/ScalarScope/Views/AccessibleShell.cs"
+      },
+      {
+        "commits": 7,
+        "lines": 491,
+        "path": "src/ScalarScope/Views/ComparisonPage.xaml"
+      },
+      {
+        "commits": 8,
+        "lines": 825,
+        "path": "src/ScalarScope/Views/ComparisonPage.xaml.cs"
+      },
+      {
+        "commits": 2,
+        "lines": 79,
+        "path": "src/ScalarScope/Views/Controls/AccessibleCanvasHook.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 43,
+        "path": "src/ScalarScope/Views/Controls/AdvancedSection.xaml"
+      },
+      {
+        "commits": 1,
+        "lines": 116,
+        "path": "src/ScalarScope/Views/Controls/AdvancedSection.xaml.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 76,
+        "path": "src/ScalarScope/Views/Controls/AlignmentControl.xaml"
+      },
+      {
+        "commits": 2,
+        "lines": 129,
+        "path": "src/ScalarScope/Views/Controls/AlignmentControl.xaml.cs"
+      },
+      {
+        "commits": 2,
+        "lines": 685,
+        "path": "src/ScalarScope/Views/Controls/AnalysisOverlayPanel.cs"
+      },
+      {
+        "commits": 2,
+        "lines": 508,
+        "path": "src/ScalarScope/Views/Controls/AnnotationOverlay.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 136,
+        "path": "src/ScalarScope/Views/Controls/AnnotationPanel.xaml"
+      },
+      {
+        "commits": 1,
+        "lines": 49,
+        "path": "src/ScalarScope/Views/Controls/AnnotationPanel.xaml.cs"
+      },
+      {
+        "commits": 2,
+        "lines": 180,
+        "path": "src/ScalarScope/Views/Controls/BundleExportPanel.xaml"
+      },
+      {
+        "commits": 4,
+        "lines": 407,
+        "path": "src/ScalarScope/Views/Controls/BundleExportPanel.xaml.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 103,
+        "path": "src/ScalarScope/Views/Controls/BundleIntegrityPanel.xaml"
+      },
+      {
+        "commits": 1,
+        "lines": 245,
+        "path": "src/ScalarScope/Views/Controls/BundleIntegrityPanel.xaml.cs"
+      },
+      {
+        "commits": 4,
+        "lines": 574,
+        "path": "src/ScalarScope/Views/Controls/ComparisonAnalyticsPanel.cs"
+      },
+      {
+        "commits": 5,
+        "lines": 797,
+        "path": "src/ScalarScope/Views/Controls/ComparisonTrajectoryCanvas.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 66,
+        "path": "src/ScalarScope/Views/Controls/ContextualTooltip.xaml"
+      },
+      {
+        "commits": 1,
+        "lines": 72,
+        "path": "src/ScalarScope/Views/Controls/ContextualTooltip.xaml.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 49,
+        "path": "src/ScalarScope/Views/Controls/DeltaHints.xaml"
+      },
+      {
+        "commits": 1,
+        "lines": 64,
+        "path": "src/ScalarScope/Views/Controls/DeltaHints.xaml.cs"
+      },
+      {
+        "commits": 2,
+        "lines": 111,
+        "path": "src/ScalarScope/Views/Controls/DeltaWhyPanel.xaml"
+      },
+      {
+        "commits": 2,
+        "lines": 413,
+        "path": "src/ScalarScope/Views/Controls/DeltaWhyPanel.xaml.cs"
+      },
+      {
+        "commits": 3,
+        "lines": 112,
+        "path": "src/ScalarScope/Views/Controls/DeltaZone.xaml"
+      },
+      {
+        "commits": 4,
+        "lines": 715,
+        "path": "src/ScalarScope/Views/Controls/DeltaZone.xaml.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 133,
+        "path": "src/ScalarScope/Views/Controls/DemoAnnotationBanner.cs"
+      },
+      {
+        "commits": 2,
+        "lines": 300,
+        "path": "src/ScalarScope/Views/Controls/EigenSpectrumView.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 76,
+        "path": "src/ScalarScope/Views/Controls/ErrorBanner.xaml"
+      },
+      {
+        "commits": 1,
+        "lines": 161,
+        "path": "src/ScalarScope/Views/Controls/ErrorBanner.xaml.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 155,
+        "path": "src/ScalarScope/Views/Controls/ErrorDetailPanel.xaml"
+      },
+      {
+        "commits": 1,
+        "lines": 170,
+        "path": "src/ScalarScope/Views/Controls/ErrorDetailPanel.xaml.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 84,
+        "path": "src/ScalarScope/Views/Controls/ExportPanel.xaml"
+      },
+      {
+        "commits": 1,
+        "lines": 9,
+        "path": "src/ScalarScope/Views/Controls/ExportPanel.xaml.cs"
+      },
+      {
+        "commits": 2,
+        "lines": 346,
+        "path": "src/ScalarScope/Views/Controls/FailuresTimeline.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 143,
+        "path": "src/ScalarScope/Views/Controls/InlineHint.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 105,
+        "path": "src/ScalarScope/Views/Controls/InsightsTray.xaml"
+      },
+      {
+        "commits": 3,
+        "lines": 327,
+        "path": "src/ScalarScope/Views/Controls/InsightsTray.xaml.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 35,
+        "path": "src/ScalarScope/Views/Controls/IntentToggle.xaml"
+      },
+      {
+        "commits": 1,
+        "lines": 99,
+        "path": "src/ScalarScope/Views/Controls/IntentToggle.xaml.cs"
+      },
+      {
+        "commits": 2,
+        "lines": 358,
+        "path": "src/ScalarScope/Views/Controls/LoadingOverlay.cs"
+      },
+      {
+        "commits": 5,
+        "lines": 675,
+        "path": "src/ScalarScope/Views/Controls/OverlayComparisonCanvas.cs"
+      },
+      {
+        "commits": 2,
+        "lines": 177,
+        "path": "src/ScalarScope/Views/Controls/PlaybackControl.xaml"
+      },
+      {
+        "commits": 1,
+        "lines": 9,
+        "path": "src/ScalarScope/Views/Controls/PlaybackControl.xaml.cs"
+      },
+      {
+        "commits": 2,
+        "lines": 375,
+        "path": "src/ScalarScope/Views/Controls/ProbingInspectorPanel.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 114,
+        "path": "src/ScalarScope/Views/Controls/RecoveryDialog.xaml"
+      },
+      {
+        "commits": 1,
+        "lines": 261,
+        "path": "src/ScalarScope/Views/Controls/RecoveryDialog.xaml.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 86,
+        "path": "src/ScalarScope/Views/Controls/ReviewModeBanner.xaml"
+      },
+      {
+        "commits": 1,
+        "lines": 98,
+        "path": "src/ScalarScope/Views/Controls/ReviewModeBanner.xaml.cs"
+      },
+      {
+        "commits": 2,
+        "lines": 390,
+        "path": "src/ScalarScope/Views/Controls/ScalarRingStack.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 31,
+        "path": "src/ScalarScope/Views/Controls/ToastNotification.xaml"
+      },
+      {
+        "commits": 1,
+        "lines": 38,
+        "path": "src/ScalarScope/Views/Controls/ToastNotification.xaml.cs"
+      },
+      {
+        "commits": 3,
+        "lines": 411,
+        "path": "src/ScalarScope/Views/Controls/TraceReviewCanvas.cs"
+      },
+      {
+        "commits": 2,
+        "lines": 1275,
+        "path": "src/ScalarScope/Views/Controls/TrajectoryCanvas.cs"
+      },
+      {
+        "commits": 2,
+        "lines": 380,
+        "path": "src/ScalarScope/Views/Controls/TrajectoryMinimap.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 135,
+        "path": "src/ScalarScope/Views/FailuresPage.xaml"
+      },
+      {
+        "commits": 1,
+        "lines": 10,
+        "path": "src/ScalarScope/Views/FailuresPage.xaml.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 20,
+        "path": "src/ScalarScope/Views/GeometryPage.xaml"
+      },
+      {
+        "commits": 1,
+        "lines": 10,
+        "path": "src/ScalarScope/Views/GeometryPage.xaml.cs"
+      },
+      {
+        "commits": 5,
+        "lines": 642,
+        "path": "src/ScalarScope/Views/HelpPage.xaml"
+      },
+      {
+        "commits": 6,
+        "lines": 266,
+        "path": "src/ScalarScope/Views/HelpPage.xaml.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 475,
+        "path": "src/ScalarScope/Views/OverviewPage.xaml"
+      },
+      {
+        "commits": 2,
+        "lines": 423,
+        "path": "src/ScalarScope/Views/OverviewPage.xaml.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 106,
+        "path": "src/ScalarScope/Views/RecoveryPage.xaml"
+      },
+      {
+        "commits": 5,
+        "lines": 312,
+        "path": "src/ScalarScope/Views/RecoveryPage.xaml.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 20,
+        "path": "src/ScalarScope/Views/ScalarsPage.xaml"
+      },
+      {
+        "commits": 1,
+        "lines": 10,
+        "path": "src/ScalarScope/Views/ScalarsPage.xaml.cs"
+      },
+      {
+        "commits": 4,
+        "lines": 599,
+        "path": "src/ScalarScope/Views/SettingsPage.xaml"
+      },
+      {
+        "commits": 1,
+        "lines": 12,
+        "path": "src/ScalarScope/Views/SettingsPage.xaml.cs"
+      },
+      {
+        "commits": 2,
+        "lines": 104,
+        "path": "src/ScalarScope/Views/ShellDestinations.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 218,
+        "path": "src/ScalarScope/Views/TrajectoryPage.xaml"
+      },
+      {
+        "commits": 1,
+        "lines": 15,
+        "path": "src/ScalarScope/Views/TrajectoryPage.xaml.cs"
+      },
+      {
+        "commits": 8,
+        "lines": 281,
+        "path": "src/ScalarScope/Views/WelcomePage.xaml"
+      },
+      {
+        "commits": 3,
+        "lines": 31,
+        "path": "src/ScalarScope/Views/WelcomePage.xaml.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 115,
+        "path": "src/VortexKit/Annotations/IAnnotation.cs"
+      },
+      {
+        "commits": 5,
+        "lines": 560,
+        "path": "src/VortexKit/Core/AnimatedCanvas.cs"
+      },
+      {
+        "commits": 4,
+        "lines": 381,
+        "path": "src/VortexKit/Core/ExportService.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 121,
+        "path": "src/VortexKit/Core/ITimeSeries.cs"
+      },
+      {
+        "commits": 5,
+        "lines": 622,
+        "path": "src/VortexKit/Core/PlaybackController.cs"
+      },
+      {
+        "commits": 5,
+        "lines": 1285,
+        "path": "src/VortexKit/Core/SvgExportService.cs"
+      },
+      {
+        "commits": 4,
+        "lines": 864,
+        "path": "src/VortexKit/README.md"
+      },
+      {
+        "commits": 2,
+        "lines": 184,
+        "path": "src/VortexKit/Theme/VortexColors.cs"
+      },
+      {
+        "commits": 3,
+        "lines": 52,
+        "path": "src/VortexKit/VortexKit.csproj"
+      },
+      {
+        "commits": 2,
+        "lines": 0,
+        "path": "tests/Fixtures/Bundles/dotnet-geometry-compare.scbundle"
+      },
+      {
+        "commits": 2,
+        "lines": 0,
+        "path": "tests/Fixtures/Bundles/dotnet-inference-review.scbundle"
+      },
+      {
+        "commits": 2,
+        "lines": 0,
+        "path": "tests/Fixtures/Bundles/rust-inference-review.scbundle"
+      },
+      {
+        "commits": 1,
+        "lines": 90,
+        "path": "tests/Fixtures/InferenceOptimization/baseline_tfrt_runtrace.json"
+      },
+      {
+        "commits": 1,
+        "lines": 62,
+        "path": "tests/Fixtures/InferenceOptimization/broken_baseline_tfrt_runtrace.json"
+      },
+      {
+        "commits": 4,
+        "lines": 146,
+        "path": "tests/Fixtures/InferenceOptimization/expected_assertions.json"
+      },
+      {
+        "commits": 3,
+        "lines": 141,
+        "path": "tests/Fixtures/InferenceOptimization/expected_assertions_broken.json"
+      },
+      {
+        "commits": 3,
+        "lines": 96,
+        "path": "tests/Fixtures/InferenceOptimization/expected_assertions_nearly_identical.json"
+      },
+      {
+        "commits": 1,
+        "lines": 65,
+        "path": "tests/Fixtures/InferenceOptimization/nearly_identical_baseline_tfrt_runtrace.json"
+      },
+      {
+        "commits": 1,
+        "lines": 65,
+        "path": "tests/Fixtures/InferenceOptimization/nearly_identical_optimized_tfrt_runtrace.json"
+      },
+      {
+        "commits": 1,
+        "lines": 91,
+        "path": "tests/Fixtures/InferenceOptimization/optimized_tfrt_runtrace.json"
+      },
+      {
+        "commits": 4,
+        "lines": 80,
+        "path": "tests/ScalarScope.DeterminismTests/DeterminismSuiteTests.cs"
+      },
+      {
+        "commits": 3,
+        "lines": 32,
+        "path": "tests/ScalarScope.DeterminismTests/ScalarScope.DeterminismTests.csproj"
+      },
+      {
+        "commits": 2,
+        "lines": 134,
+        "path": "tests/ScalarScope.FixtureTests/BundleFixtureWriter.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 388,
+        "path": "tests/ScalarScope.FixtureTests/BundleHashTests.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 137,
+        "path": "tests/ScalarScope.FixtureTests/ComparisonLogTests.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 99,
+        "path": "tests/ScalarScope.FixtureTests/FeatureSliceTests.cs"
+      },
+      {
+        "commits": 4,
+        "lines": 650,
+        "path": "tests/ScalarScope.FixtureTests/FixtureLoader.cs"
+      },
+      {
+        "commits": 4,
+        "lines": 344,
+        "path": "tests/ScalarScope.FixtureTests/FixtureSmokeTests.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 243,
+        "path": "tests/ScalarScope.FixtureTests/HealthFixTests.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 208,
+        "path": "tests/ScalarScope.FixtureTests/HighSliceTests.cs"
+      },
+      {
+        "commits": 4,
+        "lines": 1410,
+        "path": "tests/ScalarScope.FixtureTests/InferenceOptimizationFixtureTests.cs"
+      },
+      {
+        "commits": 4,
+        "lines": 50,
+        "path": "tests/ScalarScope.FixtureTests/ScalarScope.FixtureTests.csproj"
+      },
+      {
+        "commits": 2,
+        "lines": 264,
+        "path": "tests/ScalarScope.FixtureTests/StageCServiceTests.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 402,
+        "path": "tests/ScalarScope.FixtureTests/StageCShellTests.cs"
+      },
+      {
+        "commits": 2,
+        "lines": 214,
+        "path": "tests/ScalarScope.FixtureTests/StageCWordingTests.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 174,
+        "path": "tests/ScalarScope.FixtureTests/StageDCopyTests.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 156,
+        "path": "tests/ScalarScope.FixtureTests/StageDHeldTests.cs"
+      },
+      {
+        "commits": 3,
+        "lines": 188,
+        "path": "tests/ScalarScope.FixtureTests/TraceReviewTests.cs"
+      },
+      {
+        "commits": 4,
+        "lines": 128,
+        "path": "tests/ScalarScope.FixtureTests/VersionConsistencyTests.cs"
+      },
+      {
+        "commits": 5,
+        "lines": 1411,
+        "path": "tests/ScalarScope.SoakTests/Phase32ValidationRunner.cs"
+      },
+      {
+        "commits": 4,
+        "lines": 222,
+        "path": "tests/ScalarScope.SoakTests/Program.cs"
+      },
+      {
+        "commits": 4,
+        "lines": 27,
+        "path": "tests/ScalarScope.SoakTests/ScalarScope.SoakTests.csproj"
+      },
+      {
+        "commits": 1,
+        "lines": 86,
+        "path": "tests/ScalarScope.SoakTests/SoakCommand.cs"
+      },
+      {
+        "commits": 4,
+        "lines": 1027,
+        "path": "tests/ScalarScope.SoakTests/SoakTestRunner.cs"
+      },
+      {
+        "commits": 1,
+        "lines": 8,
+        "path": "verify.ps1"
+      },
+      {
+        "commits": 1,
+        "lines": 12,
+        "path": "verify.sh"
+      }
+    ]
+  },
+  "confidence": {
+    "level": "low",
+    "reason": "fewer than 25 source files reach 10 revisions in the window"
+  },
+  "generatedAt": "2026-10-07T01:23:03.739Z",
+  "generatedFrom": {
+    "commit": "fd6dcdac68952b42899d6474f8bb64534b63d484"
+  },
+  "pairs": [
+    {
+      "a": "CHANGELOG.md",
+      "b": "rust/src/ui.rs",
+      "either": 27,
+      "shared": 15,
+      "strength": 0.555556
+    },
+    {
+      "a": "rust/src/bundle.rs",
+      "b": "rust/src/review.rs",
+      "either": 16,
+      "shared": 9,
+      "strength": 0.5625
+    },
+    {
+      "a": "rust/src/bundle.rs",
+      "b": "rust/src/ui.rs",
+      "either": 19,
+      "shared": 10,
+      "strength": 0.526316
+    },
+    {
+      "a": "rust/src/bundle.rs",
+      "b": "rust/src/ui_tests.rs",
+      "either": 14,
+      "shared": 8,
+      "strength": 0.571429
+    },
+    {
+      "a": "rust/src/bundle.rs",
+      "b": "rust/tests/edge_tests.rs",
+      "either": 12,
+      "shared": 7,
+      "strength": 0.583333
+    },
+    {
+      "a": "rust/src/bundle.rs",
+      "b": "rust/tests/runtrace_tests.rs",
+      "either": 10,
+      "shared": 5,
+      "strength": 0.5
+    },
+    {
+      "a": "rust/src/open.rs",
+      "b": "rust/src/review.rs",
+      "either": 16,
+      "shared": 8,
+      "strength": 0.5
+    },
+    {
+      "a": "rust/src/open.rs",
+      "b": "rust/tests/bundle_tests.rs",
+      "either": 10,
+      "shared": 5,
+      "strength": 0.5
+    },
+    {
+      "a": "rust/src/open.rs",
+      "b": "rust/tests/edge_tests.rs",
+      "either": 12,
+      "shared": 6,
+      "strength": 0.5
+    },
+    {
+      "a": "rust/src/open.rs",
+      "b": "rust/tests/review_tests.rs",
+      "either": 11,
+      "shared": 9,
+      "strength": 0.818182
+    },
+    {
+      "a": "rust/src/review.rs",
+      "b": "rust/src/ui.rs",
+      "either": 19,
+      "shared": 15,
+      "strength": 0.789474
+    },
+    {
+      "a": "rust/src/review.rs",
+      "b": "rust/src/ui_tests.rs",
+      "either": 18,
+      "shared": 9,
+      "strength": 0.5
+    },
+    {
+      "a": "rust/src/review.rs",
+      "b": "rust/tests/edge_tests.rs",
+      "either": 16,
+      "shared": 8,
+      "strength": 0.5
+    },
+    {
+      "a": "rust/src/review.rs",
+      "b": "rust/tests/review_tests.rs",
+      "either": 16,
+      "shared": 10,
+      "strength": 0.625
+    },
+    {
+      "a": "rust/src/ui.rs",
+      "b": "rust/src/ui_tests.rs",
+      "either": 19,
+      "shared": 12,
+      "strength": 0.631579
+    },
+    {
+      "a": "rust/src/ui.rs",
+      "b": "rust/tests/review_tests.rs",
+      "either": 20,
+      "shared": 10,
+      "strength": 0.5
+    },
+    {
+      "a": "rust/src/ui_tests.rs",
+      "b": "rust/tests/edge_tests.rs",
+      "either": 13,
+      "shared": 8,
+      "strength": 0.615385
+    },
+    {
+      "a": "rust/tests/bundle_tests.rs",
+      "b": "rust/tests/edge_tests.rs",
+      "either": 10,
+      "shared": 5,
+      "strength": 0.5
+    },
+    {
+      "a": "rust/tests/edge_tests.rs",
+      "b": "rust/tests/runtrace_tests.rs",
+      "either": 9,
+      "shared": 5,
+      "strength": 0.555556
+    },
+    {
+      "a": "src/ScalarScope/ViewModels/ComparisonViewModel.cs",
+      "b": "src/ScalarScope/Views/ComparisonPage.xaml",
+      "either": 7,
+      "shared": 4,
+      "strength": 0.571429
+    }
+  ],
+  "parameters": {
+    "appliedChangesetLimit": 50,
+    "changeset": 50,
+    "changesetFraction": 0.25,
+    "cohesionDrop": 0.2,
+    "couplingPopulation": "source",
+    "fallenShared": 3,
+    "floor": "fallen",
+    "floorHeld": false,
+    "floorTrigger": "revision-depth",
+    "headDate": "2026-10-06T21:22:44-04:00",
+    "inScopeFiles": 393,
+    "pinnedStart": null,
+    "priorFloor": "fallen",
+    "qualifyingCommits": 50,
+    "qualifyingMinimum": 30,
+    "revisions": 5,
+    "shared": 10,
+    "sharedFloorUsed": 3,
+    "since": "2026-04-10T01:22:44.000Z",
+    "sourceExtensions": [
+      ".js",
+      ".mjs",
+      ".cjs",
+      ".jsx",
+      ".ts",
+      ".tsx",
+      ".mts",
+      ".cts",
+      ".py",
+      ".rs",
+      ".gd"
+    ],
+    "sourceFileReach": 20,
+    "sourceFileRise": 25,
+    "sourceFilesReachingStrongFloor": 6,
+    "strength": 0.5,
+    "windowDays": 180
+  },
+  "strengthDefinition": "strength is the shared qualifying commits divided by either. either is the number of qualifying commits that touch either file."
+}

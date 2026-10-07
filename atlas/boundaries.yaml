@@ -1,0 +1,42 @@
+summary: "A review of two machine-learning runs. The app is the Rust program in rust/, packed as an MSIX for the Microsoft Store; src/ holds the earlier .NET MAUI app the Store copy still runs."
+boundaries:
+  - name: .github
+    globs:
+      - .github/**
+    role: config
+  - name: UI_Reference
+    globs:
+      - UI_Reference/**
+    role: data
+  - name: assets
+    globs:
+      - assets/**
+    role: data
+  - name: docs
+    globs:
+      - docs/**
+    role: docs
+  - name: packaging
+    globs:
+      - packaging/**
+    role: code
+  - name: root
+    globs:
+      - "*"
+    role: docs
+  - name: rust
+    globs:
+      - rust/**
+    role: code
+  - name: site
+    globs:
+      - site/**
+    role: site
+  - name: src
+    globs:
+      - src/**
+    role: code
+  - name: tests
+    globs:
+      - tests/**
+    role: test
