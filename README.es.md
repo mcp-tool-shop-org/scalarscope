@@ -25,7 +25,7 @@ La versión **3.1.0** es una reescritura en Rust. Es la aplicación de Windows e
 - **Lo que lee.** Los archivos que abre. El paquete de la tienda también lee y escribe `comparison-log.json`, `preferences.json` y `workbench.json` en su propia carpeta LocalState, la carpeta que usaba la versión 2.0. Una versión no empaquetada no escribe ninguno de ellos.
 - **Lo que escribe.** Un conjunto de datos, una imagen o un registro de sesión, solo en una ruta que elija.
 - **Red.** No hay ninguna cuenta, ni telemetría ni análisis. La única conexión que la aplicación puede establecer es desde la pestaña Workbench, y solo cuando presiona **Preguntar**: a un Ollama local en `127.0.0.1` en este equipo. Los modelos en la nube de Ollama se rechazan. Nada sale de la máquina.
-- **Conjuntos de datos.** Un SHA-256 coincidente es una verificación de contenido, no una firma. Indica que los bytes están intactos. No indica quién escribió el archivo.
+- **Paquetes (bundles).** Una coincidencia de SHA-256 es una verificación de contenido, no una firma. Indica que los bytes están intactos. No indica quién escribió el archivo.
 - **Complementos.** Los complementos que quedaron en la carpeta de la versión 2.0 no se cargan.
 
 ---

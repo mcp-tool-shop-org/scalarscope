@@ -25,7 +25,7 @@ La versione **3.1.0** è una riscrittura in Rust. È l'app per Windows disponibi
 - **Cosa legge.** I file che si aprono. Il pacchetto di Store legge e scrive anche `comparison-log.json`, `preferences.json` e `workbench.json` nella propria cartella LocalState, la cartella utilizzata dalla versione 2.0. Una versione non impacchettata non scrive nessuno di questi file.
 - **Cosa scrive.** Un insieme di dati, un'immagine o una registrazione di sessione, solo in un percorso scelto dall'utente.
 - **Rete.** Non sono presenti account, telemetria o analisi. L'unica connessione che l'app può stabilire è dalla scheda Workbench, e solo quando si preme **Chiedi**: a un'istanza locale di Ollama all'indirizzo `127.0.0.1` su questo computer. I modelli cloud di Ollama non sono supportati. Nessun dato lascia la macchina.
-- **Insiemi di dati.** Un hash SHA-256 corrispondente è un controllo del contenuto, non una firma. Indica che i byte sono intatti. Non indica chi ha scritto il file.
+- **Pacchetti (bundle).** Un SHA-256 corrispondente è un controllo del contenuto, non una firma. Indica che i byte sono intatti. Non indica chi ha scritto il file.
 - **Plugin.** I plugin lasciati nella cartella 2.0 non vengono caricati.
 
 ---

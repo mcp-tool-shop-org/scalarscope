@@ -25,7 +25,7 @@ A versão **3.1.0** é uma reescrita em Rust. É o aplicativo para Windows na Mi
 - **O que ele lê.** Os arquivos que você abre. O pacote da Store também lê e grava `comparison-log.json`, `preferences.json` e `workbench.json` em sua própria pasta LocalState, a pasta que a versão 2.0 usava. Uma versão não empacotada não grava nenhum deles.
 - **O que ele grava.** Um conjunto de dados, uma imagem ou um registro de sessão, apenas em um caminho que você escolher.
 - **Rede.** Não há conta, telemetria ou análise. A única conexão que o aplicativo pode fazer é a partir da guia Workbench, e apenas quando você pressiona **Perguntar**: para um Ollama local em `127.0.0.1` neste computador. Os modelos em nuvem do Ollama são recusados. Nada sai da máquina.
-- **Conjuntos de dados.** Uma correspondência SHA-256 é uma verificação de conteúdo, não uma assinatura. Indica que os bytes estão intactos. Não indica quem escreveu o arquivo.
+- **Pacotes (bundles).** Um SHA-256 correspondente é uma verificação de conteúdo, não uma assinatura. Indica que os bytes estão intactos. Não indica quem escreveu o arquivo.
 - **Plugins.** Os plugins deixados na pasta da versão 2.0 não são carregados.
 
 ---
