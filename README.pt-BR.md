@@ -113,7 +113,7 @@ O guia “Primeiros Passos” em [handbook](https://mcp-tool-shop-org.github.io/
 ## Testes
 
 ```bash
-# The review: 219 tests. Line coverage must stay above 90%.
+# The review: 224 tests. Line coverage must stay above 90%.
 cd rust
 cargo test
 cargo llvm-cov --locked --all-targets --fail-under-lines 90

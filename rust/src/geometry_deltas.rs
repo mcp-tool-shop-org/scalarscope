@@ -255,6 +255,9 @@ pub struct GeometryDelta {
     // Failure.
     pub failed_a: Option<bool>,
     pub failed_b: Option<bool>,
+    /// True when this delta compares the evaluators' fixed scores rather than the runs (ΔĀ on
+    /// scores fixed per item, ruled 2026-10-07). It is kept out of the run headline.
+    pub about_evaluators: bool,
     pub t_fail_a: Option<i64>,
     pub t_fail_b: Option<i64>,
     pub failure_kind_a: Option<String>,
@@ -304,6 +307,7 @@ impl GeometryDelta {
             dominance_ratio_k: None,
             failed_a: None,
             failed_b: None,
+            about_evaluators: false,
             t_fail_a: None,
             t_fail_b: None,
             failure_kind_a: None,
@@ -341,7 +345,11 @@ pub fn compute_with_map(left: &GeometryRun, right: &GeometryRun, current_time: f
         detect_failure_presence(left, right, &config.failure, left_steps, right_steps),
         detect_convergence_timing(left, right, &config.convergence, left_steps, right_steps),
         detect_structural_emergence(left, right, &config.emergence),
-        detect_evaluator_alignment(left, right, &config.alignment, current_time, map),
+        if left.metadata.steps_are_time() && right.metadata.steps_are_time() {
+            detect_evaluator_alignment(left, right, &config.alignment, current_time, map)
+        } else {
+            concentration_by_checkpoint(left, right, &config.alignment)
+        },
         detect_stability_oscillation(left, right, &config.stability, current_time, map),
     ]
 }
@@ -1395,10 +1403,25 @@ fn find_dominance_onset(run: &GeometryRun, config: &EmergenceConfig) -> (i64, f6
 /// list left them out). At most 25 words; past that it falls back to the first delta alone.
 pub fn auto_summary(deltas: &[GeometryDelta]) -> String {
     // A withheld delta (`Indeterminate`, which 2.0 never produced) does not speak either.
-    let deltas: Vec<&GeometryDelta> = deltas.iter().filter(|delta| delta.status == DeltaStatus::Present).collect();
+    let evaluators = deltas.iter().any(|delta| delta.status == DeltaStatus::Present && delta.about_evaluators);
+    let deltas: Vec<&GeometryDelta> = deltas.iter().filter(|delta| delta.status == DeltaStatus::Present && !delta.about_evaluators).collect();
     if deltas.is_empty() {
-        return "No meaningful divergence observed between paths.".to_string();
+        return if evaluators {
+            "No meaningful divergence between the runs; the evaluator setups differ (spectrum concentration).".to_string()
+        } else {
+            "No meaningful divergence observed between paths.".to_string()
+        };
     }
+    if evaluators {
+        let runs = run_summary(&deltas);
+        let stop = if runs.ends_with('.') { "" } else { "." };
+        return format!("{runs}{stop} The evaluator setups differ (spectrum concentration).");
+    }
+    run_summary(&deltas)
+}
+
+/// The headline from the deltas about the runs: 2.0's wording.
+fn run_summary(deltas: &[&GeometryDelta]) -> String {
     let primary = deltas[0];
     let alone = || primary.summary_sentence.clone().unwrap_or_else(|| format!("{}.", primary.explanation));
     if deltas.len() == 1 {
@@ -1495,6 +1518,125 @@ pub fn dotnet_double(value: f64) -> String {
 
 /// Why steps that are not time cannot carry a timing or oscillation reading.
 pub const NOT_TIME: &str = "steps are checkpoint × item, not time";
+/// ΔĀ on exports whose steps are checkpoints × items (ruled 2026-10-07). 2.0's rule keeps the
+/// longest stretch of consecutive steps, which depends on step order, and these steps are not
+/// time. Here each run's λ1/Σλ is averaged over each checkpoint block's items, which does not
+/// depend on their order, and the rule asks for consistency across blocks instead of a
+/// sustained stretch: it fires only when B − A clears the floor with the same sign at every
+/// checkpoint. The whole file is read; the time marker does not cut a block.
+pub fn concentration_by_checkpoint(left: &GeometryRun, right: &GeometryRun, config: &AlignmentDetectionConfig) -> GeometryDelta {
+    let mut delta = GeometryDelta::new(delta_ids::EVALUATOR_ALIGNMENT, SYMBOL_ALIGNMENT, "Spectrum concentration");
+    let blocks = |run: &GeometryRun| -> Option<Vec<Option<f64>>> {
+        if run.metadata.steps_are_time() {
+            return None;
+        }
+        let count = usize::try_from(run.metadata.checkpoints?).ok().filter(|count| *count > 0)?;
+        let steps = run.geometry.eigenvalues.len();
+        if steps == 0 || steps % count != 0 {
+            return None;
+        }
+        let size = steps / count;
+        Some(
+            run.geometry
+                .eigenvalues
+                .chunks(size)
+                .map(|block| {
+                    let shares: Vec<f64> = block
+                        .iter()
+                        .filter_map(|step| {
+                            let total = sum(&step.values);
+                            (step.values.len() as i64 >= config.min_evaluators && total > 0.001).then(|| step.values[0] / total)
+                        })
+                        .collect();
+                    (!shares.is_empty()).then(|| average(&shares))
+                })
+                .collect(),
+        )
+    };
+    let (Some(left_blocks), Some(right_blocks)) = (blocks(left), blocks(right)) else {
+        delta.status = DeltaStatus::Indeterminate;
+        delta.explanation = format!("Withheld: {NOT_TIME}, and the two runs' checkpoint blocks cannot be paired");
+        delta.notes = vec!["Both runs must state checkpoint_by_item with a checkpoint count that divides their steps.".to_string()];
+        return delta;
+    };
+    if left_blocks.len() != right_blocks.len() {
+        delta.status = DeltaStatus::Indeterminate;
+        delta.explanation = format!("Withheld: the runs have {} and {} checkpoints, so their blocks do not pair", left_blocks.len(), right_blocks.len());
+        return delta;
+    }
+    let pairs: Vec<(f64, f64)> = left_blocks.iter().zip(&right_blocks).filter_map(|(a, b)| Some(((*a)?, (*b)?))).collect();
+    if pairs.len() != left_blocks.len() {
+        delta.status = DeltaStatus::Indeterminate;
+        delta.explanation = "Withheld: a checkpoint has no step with enough eigenvalues".to_string();
+        return delta;
+    }
+    let count = pairs.len();
+    let left_mean = average(&pairs.iter().map(|pair| pair.0).collect::<Vec<_>>());
+    let right_mean = average(&pairs.iter().map(|pair| pair.1).collect::<Vec<_>>());
+    let differences: Vec<f64> = pairs.iter().map(|(a, b)| b - a).collect();
+    delta.left_value = left_mean;
+    delta.right_value = right_mean;
+    delta.delta = right_mean - left_mean;
+    delta.magnitude = differences.iter().fold(f64::INFINITY, |least, difference| least.min(difference.abs()));
+    delta.mean_align_a = Some(left_mean);
+    delta.mean_align_b = Some(right_mean);
+    delta.notes = pairs
+        .iter()
+        .enumerate()
+        .map(|(index, (a, b))| format!("Checkpoint {}: A {a:.3}, B {b:.3}, B − A {:+.3}.", index + 1, b - a))
+        .collect();
+    delta
+        .notes
+        .push(format!("Fires when B − A is at least {} in size with the same sign at every checkpoint; each block's mean is over its items, so their order does not matter.", config.delta_floor));
+
+    let higher = differences.iter().all(|difference| *difference >= config.delta_floor);
+    let lower = differences.iter().all(|difference| *difference <= -config.delta_floor);
+    if higher || lower {
+        let path = if higher { "Path B" } else { "Path A" };
+        let at = if count == 1 { "at its one checkpoint".to_string() } else { format!("at all {count} checkpoints") };
+        delta.status = DeltaStatus::Present;
+        delta.explanation = format!("{path} kept a more concentrated spectrum {at}");
+        delta.summary_sentence = Some(format!("{path} had a more concentrated spectrum {at}"));
+        delta.delta_type = DeltaType::Structure;
+        return delta;
+    }
+    delta.status = DeltaStatus::Suppressed;
+    let positive = differences.iter().any(|difference| *difference > 0.0);
+    let negative = differences.iter().any(|difference| *difference < 0.0);
+    delta.explanation = if positive && negative {
+        "Spectrum concentration differs by checkpoint".to_string()
+    } else {
+        let short: Vec<String> = differences.iter().enumerate().filter(|(_, difference)| difference.abs() < config.delta_floor).map(|(index, _)| (index + 1).to_string()).collect();
+        if short.len() == count { "Similar spectrum concentration at every checkpoint".to_string() } else { format!("Similar spectrum concentration at checkpoint {}", short.join(", ")) }
+    };
+    delta
+}
+
+/// What ΔĀ compares when both runs' scores are fixed per item.
+pub const EVALUATORS_NOT_RUNS: &str = "The scores are fixed per item, so this compares the evaluators, not the training runs.";
+
+/// ΔĀ on scores fixed per item on both sides (ruled 2026-10-07): the eigenvalues come from the
+/// evaluators' fixed scores, so the comparison is true but about the evaluator setups. The tile
+/// and the Why say so, and the delta is kept out of the run headline.
+fn label_evaluator_setups(deltas: &mut [GeometryDelta]) {
+    for delta in deltas.iter_mut().filter(|delta| delta.id == delta_ids::EVALUATOR_ALIGNMENT) {
+        match delta.status {
+            DeltaStatus::Present => {
+                let (who, at) = match delta.explanation.split_once(" kept a more concentrated spectrum ") {
+                    Some((path, at)) => (if path == "Path B" { "B" } else { "A" }, at.to_string()),
+                    None => (if delta.delta > 0.0 { "B" } else { "A" }, String::new()),
+                };
+                let headline = format!("Evaluator setups differ: {who}'s evaluators' scores are more concentrated {at}").trim_end().to_string();
+                delta.explanation = format!("{headline}. {EVALUATORS_NOT_RUNS}");
+                delta.summary_sentence = Some(headline);
+                delta.about_evaluators = true;
+            }
+            DeltaStatus::Suppressed => delta.notes.push(EVALUATORS_NOT_RUNS.to_string()),
+            DeltaStatus::Indeterminate => {}
+        }
+    }
+}
+
 /// Why repeating scores cannot carry a failure reading.
 pub const SCORES_REPEAT: &str = "its failures are score dips, and the scores repeat";
 
@@ -1503,6 +1645,9 @@ pub const SCORES_REPEAT: &str = "its failures are score dips, and the scores rep
 pub fn withhold_by_layout(deltas: &mut [GeometryDelta], left: &crate::geometry::RunMetadata, right: &crate::geometry::RunMetadata) {
     let not_time = !left.steps_are_time() || !right.steps_are_time();
     let repeated: Vec<&str> = [left.repeated_scores(), right.repeated_scores()].into_iter().flatten().collect();
+    if left.scalar_source.as_deref() == Some("fixed_per_item") && right.scalar_source.as_deref() == Some("fixed_per_item") {
+        label_evaluator_setups(deltas);
+    }
     for delta in deltas.iter_mut() {
         let reason = match delta.id.as_str() {
             delta_ids::CONVERGENCE_TIMING | delta_ids::STRUCTURAL_EMERGENCE | delta_ids::STABILITY_OSCILLATION if not_time => Some(NOT_TIME.to_string()),
@@ -1520,5 +1665,34 @@ pub fn withhold_by_layout(deltas: &mut [GeometryDelta], left: &crate::geometry::
             delta.summary_sentence = None;
             delta.visual_anchor_time = None;
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn fired(id: &str, symbol: &str, sentence: &str) -> GeometryDelta {
+        let mut delta = GeometryDelta::new(id, symbol, "test");
+        delta.summary_sentence = Some(sentence.to_string());
+        delta
+    }
+
+    #[test]
+    fn an_evaluator_finding_stays_out_of_the_run_headline() {
+        let run = fired(delta_ids::STRUCTURAL_EMERGENCE, "ΔTd", "Path A achieved structural dominance 4 steps before the other");
+        let mut evaluators = fired(delta_ids::EVALUATOR_ALIGNMENT, SYMBOL_ALIGNMENT, "Path B had a more concentrated spectrum at all 3 checkpoints");
+        evaluators.explanation = "Path B kept a more concentrated spectrum at all 3 checkpoints".to_string();
+        evaluators.delta = 0.2;
+        let mut deltas = vec![run, evaluators];
+        label_evaluator_setups(&mut deltas);
+        assert!(deltas[1].about_evaluators);
+        assert_eq!(
+            auto_summary(&deltas),
+            "Path A achieved structural dominance 4 steps before the other. The evaluator setups differ (spectrum concentration)."
+        );
+        // Without the label the same pair reads as 2.0 read it.
+        deltas[1].about_evaluators = false;
+        assert!(auto_summary(&deltas).ends_with(" while spectrum concentration differed."));
     }
 }

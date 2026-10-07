@@ -141,7 +141,8 @@ fn drift_withholds_timing_oscillation_and_failure_and_speaks_from_what_stands() 
         assert!(tile.why.contains("2.0's reading was"), "{symbol}");
     }
     assert_eq!(status(&review, "Δ\u{0100}").status, "fired");
-    assert_eq!(review.verdict, "Path B had a more concentrated spectrum (sustained 31 steps)");
+    // The scores are fixed per item, so the one delta that fires is about the evaluators.
+    assert_eq!(review.verdict, "No meaningful divergence between the runs; the evaluator setups differ (spectrum concentration).");
 }
 
 #[test]
@@ -218,4 +219,88 @@ fn four_checkpoints_withhold_like_three_and_pair_with_the_control_with_emergence
     let mixed = reviewed("real-local-teacher.drift.geometry.json", "sft-local-teacher.drift-from-base.geometry.json");
     assert_eq!(status(&mixed, "ΔTc").status, "withheld");
     assert_eq!(status(&mixed, "ΔTd").status, "withheld");
+}
+
+// ΔĀ on checkpoint × item exports (ruled 2026-10-07): compared checkpoint by checkpoint, and
+// fired only when B − A clears the floor with the same sign at every checkpoint.
+
+#[test]
+fn concentration_is_compared_by_checkpoint_on_the_control_drift_pair() {
+    let review = reviewed("real-local-teacher.drift.geometry.json", "real-composite-teacher.drift.geometry.json");
+    let tile = status(&review, "Δ\u{0100}");
+    assert_eq!(tile.status, "fired");
+    assert_eq!(tile.headline, "Evaluator setups differ: B's evaluators' scores are more concentrated at all 3 checkpoints");
+    assert!(
+        tile.why.starts_with("Evaluator setups differ: B's evaluators' scores are more concentrated at all 3 checkpoints. The scores are fixed per item, so this compares the evaluators, not the training runs."),
+        "{}",
+        tile.why
+    );
+    assert!(!tile.why.contains("sustained "), "{}", tile.why);
+    for checkpoint in 1..=3 {
+        assert!(tile.why.contains(&format!("Checkpoint {checkpoint}: A ")), "{}", tile.why);
+    }
+    assert!(tile.why.contains("3.1's rule, compared checkpoint by checkpoint"), "{}", tile.why);
+    assert!(tile.anchor.is_none());
+}
+
+#[test]
+fn four_checkpoints_fire_at_all_four_and_unequal_counts_are_withheld() {
+    let review = reviewed("sft-local-teacher.drift-from-base.geometry.json", "sft-composite-teacher.drift-from-base.geometry.json");
+    assert_eq!(review.verdict, "No meaningful divergence between the runs; the evaluator setups differ (spectrum concentration).");
+    assert_eq!(status(&review, "Δ\u{0100}").headline, "Evaluator setups differ: B's evaluators' scores are more concentrated at all 4 checkpoints");
+    let mixed = reviewed("real-local-teacher.drift.geometry.json", "sft-local-teacher.drift-from-base.geometry.json");
+    let tile = status(&mixed, "Δ\u{0100}");
+    assert_eq!(tile.status, "withheld");
+    assert!(tile.why.contains("the runs have 3 and 4 checkpoints"), "{}", tile.why);
+    // A checkpoint export against a time-ordered one has no blocks to pair.
+    let layouts = reviewed("real-local-teacher.drift.geometry.json", "real-composite-teacher.geometry.json");
+    assert_eq!(status(&layouts, "Δ\u{0100}").status, "withheld");
+    // The same teacher with and without the fine-tune: the evaluators' spectrum is the same.
+    let same = reviewed("real-local-teacher.drift.geometry.json", "sft-local-teacher.drift-from-sft.geometry.json");
+    let tile = status(&same, "Δ\u{0100}");
+    assert_eq!((tile.status.as_str(), tile.headline.as_str()), ("quiet", "Similar spectrum concentration at every checkpoint"));
+    assert!(tile.why.contains("this compares the evaluators, not the training runs"), "{}", tile.why);
+    assert_eq!(same.verdict, "No meaningful divergence observed between paths.");
+}
+
+#[test]
+fn a_sign_that_flips_between_checkpoints_is_quiet() {
+    use scalarscope::geometry_deltas::{concentration_by_checkpoint, AlignmentDetectionConfig};
+    let left = geometry("real-local-teacher.drift.geometry.json").run;
+    let size = left.geometry.eigenvalues.len() / 3;
+    let scaled = |factor: &dyn Fn(usize) -> f64| {
+        let mut right = left.clone();
+        for (index, step) in right.geometry.eigenvalues.iter_mut().enumerate() {
+            step.values[0] *= factor(index / size);
+        }
+        right
+    };
+    let config = AlignmentDetectionConfig::default();
+
+    // B is more concentrated at checkpoint 1, less at checkpoint 2, and the same at checkpoint 3.
+    let flips = scaled(&|block| [3.0, 0.3, 1.0][block]);
+    let delta = concentration_by_checkpoint(&left, &flips, &config);
+    assert_eq!(delta.status, DeltaStatus::Suppressed);
+    assert_eq!(delta.explanation, "Spectrum concentration differs by checkpoint");
+    assert!(delta.summary_sentence.is_none());
+
+    // The same sign everywhere, but too small at one checkpoint: quiet, naming it.
+    let short = scaled(&|block| if block == 2 { 1.01 } else { 3.0 });
+    let delta = concentration_by_checkpoint(&left, &short, &config);
+    assert_eq!(delta.status, DeltaStatus::Suppressed);
+    assert_eq!(delta.explanation, "Similar spectrum concentration at checkpoint 3");
+
+    // Lower everywhere: Path A is the more concentrated.
+    let lower = scaled(&|_| 0.3);
+    let delta = concentration_by_checkpoint(&left, &lower, &config);
+    assert_eq!(delta.status, DeltaStatus::Present);
+    assert_eq!(delta.summary_sentence.as_deref(), Some("Path A had a more concentrated spectrum at all 3 checkpoints"));
+}
+
+#[test]
+fn time_ordered_exports_keep_the_sustained_stretch_rule() {
+    let review = reviewed("real-local-teacher.geometry.json", "real-composite-teacher.geometry.json");
+    let tile = status(&review, "Δ\u{0100}");
+    assert!(tile.why.contains("2.0's geometry rule"), "{}", tile.why);
+    assert!(!tile.headline.contains("checkpoint"), "{}", tile.headline);
 }

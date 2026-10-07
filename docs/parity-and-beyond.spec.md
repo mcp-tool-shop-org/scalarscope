@@ -325,7 +325,16 @@ On the real aspire-si exports, three of the five deltas fired on how the data wa
 - **Either run's `scalar_source` is `replayed` or `fixed_per_item`:**
   - ΔF is withheld: its recorded failures are score dips, and the scores repeat.
   - The score panels say the scores are replayed or fixed per item.
-- **ΔĀ is never withheld for these reasons.**
+- **ΔĀ on checkpoint × item** (ruled 2026-10-07). 2.0's rule keeps the longest stretch of consecutive steps, which depends on step order.
+  - On these exports, each run's λ1/Σλ is averaged over each checkpoint block's items, which is order-free within a block.
+  - Consistency across blocks replaces the sustained-stretch filter: ΔĀ fires only if B − A clears the delta floor (0.05) with the same sign in every block. The wording is "Path B had a more concentrated spectrum at all N checkpoints", with no "sustained N steps".
+  - Otherwise it is quiet, with the reason: "differs by checkpoint", or the checkpoints where the difference is below the floor.
+  - It is withheld when the blocks cannot pair: a different number of checkpoints, or one run whose steps are time.
+  - Time-ordered exports keep 2.0's rule unchanged.
+- **ΔĀ when both runs' `scalar_source` is `fixed_per_item`** (ruled 2026-10-07). The eigenvalues come from the evaluators' fixed scores, so they are the same for any two runs under the same teachers, and the comparison is about the evaluator setups.
+  - It is not withheld, because the comparison is true.
+  - The tile and the Why say what it compares: "Evaluator setups differ: B's evaluators' scores are more concentrated at all 3 checkpoints. The scores are fixed per item, so this compares the evaluators, not the training runs." A quiet tile adds the second sentence to its Why.
+  - It is kept out of the run headline. When it is the only delta that fires, the headline reads "No meaningful divergence between the runs; the evaluator setups differ (spectrum concentration)." When run deltas fire too, their headline is followed by "The evaluator setups differ (spectrum concentration)."
 - **The headline** is built only from deltas that stand: neither quiet nor withheld.
 
 **Also fixed with this:** evaluator labels that overlap when two evaluators point the same way.

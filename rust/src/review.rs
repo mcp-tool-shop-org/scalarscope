@@ -811,7 +811,12 @@ pub fn geometry_with_deltas(
                 why: std::iter::once(delta.explanation.clone())
                     .chain(delta.notes.iter().cloned())
                     .chain(std::iter::once(
-                        "This is 2.0's geometry rule, ported exactly and checked against 2.0's own results; read at the end of the runs.".to_string(),
+                        if delta.id == deltas::delta_ids::EVALUATOR_ALIGNMENT && !(left.metadata.steps_are_time() && right.metadata.steps_are_time()) {
+                            "On checkpoint × item exports this is 3.1's rule, compared checkpoint by checkpoint (ruled 2026-10-07); 2.0's sustained-stretch rule reads step order."
+                                .to_string()
+                        } else {
+                            "This is 2.0's geometry rule, ported exactly and checked against 2.0's own results; read at the end of the runs.".to_string()
+                        },
                     ))
                     .collect::<Vec<_>>()
                     .join(" "),
