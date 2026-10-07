@@ -1,0 +1,204 @@
+[
+ {
+  "id": "b1",
+  "finishedAt": "2026-10-20T09:00:00Z",
+  "leftName": "review",
+  "rightName": "",
+  "bundlePath": "review.scbundle",
+  "bundleHash": "0000000000000000000000000000000000000000000000000000000000000000",
+  "alignment": "",
+  "deltasFired": [],
+  "kind": "bundle"
+ },
+ {
+  "id": "dotnet-1",
+  "finishedAt": "2026-09-01T09:00:00Z",
+  "leftName": "before",
+  "rightName": "after",
+  "alignment": "latency",
+  "deltasFired": [
+   "ΔTc"
+  ],
+  "kind": "compare"
+ },
+ {
+  "id": "h8",
+  "finishedAt": "2026-10-18T09:00:00Z",
+  "leftName": "baseline",
+  "rightName": "nightly 9",
+  "alignment": "latency",
+  "deltasFired": [],
+  "kind": "compare",
+  "fingerprints": {
+   "dataset": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "model": "5555555555555555555555555555555555555555555555555555555555555555",
+   "code": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+   "environment": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+  },
+  "measures": {
+   "p50": 10.0,
+   "p99": 15.0,
+   "p99_over_p50": 1.5
+  }
+ },
+ {
+  "id": "h7",
+  "finishedAt": "2026-10-17T09:00:00Z",
+  "leftName": "baseline",
+  "rightName": "nightly 8",
+  "alignment": "latency",
+  "deltasFired": [],
+  "kind": "compare",
+  "fingerprints": {
+   "dataset": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "model": "5555555555555555555555555555555555555555555555555555555555555555",
+   "code": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+   "environment": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+  },
+  "measures": {
+   "p50": 10.1,
+   "p99": 15.2,
+   "p99_over_p50": 1.50495
+  }
+ },
+ {
+  "id": "h6",
+  "finishedAt": "2026-10-16T09:00:00Z",
+  "leftName": "baseline",
+  "rightName": "nightly 7",
+  "alignment": "latency",
+  "deltasFired": [],
+  "kind": "compare",
+  "fingerprints": {
+   "dataset": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "model": "5555555555555555555555555555555555555555555555555555555555555555",
+   "code": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+   "environment": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+  },
+  "measures": {
+   "p50": 9.9,
+   "p99": 14.9,
+   "p99_over_p50": 1.505051
+  }
+ },
+ {
+  "id": "h5",
+  "finishedAt": "2026-10-15T09:00:00Z",
+  "leftName": "baseline",
+  "rightName": "nightly 6",
+  "alignment": "latency",
+  "deltasFired": [],
+  "kind": "compare",
+  "fingerprints": {
+   "dataset": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "model": "5555555555555555555555555555555555555555555555555555555555555555",
+   "code": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+   "environment": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+  },
+  "measures": {
+   "p50": 10.0,
+   "p99": 15.1,
+   "p99_over_p50": 1.51
+  }
+ },
+ {
+  "id": "h4",
+  "finishedAt": "2026-10-14T09:00:00Z",
+  "leftName": "baseline",
+  "rightName": "nightly 5",
+  "alignment": "latency",
+  "deltasFired": [],
+  "kind": "compare",
+  "fingerprints": {
+   "dataset": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "model": "5555555555555555555555555555555555555555555555555555555555555555",
+   "code": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+   "environment": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+  },
+  "measures": {
+   "p50": 10.1,
+   "p99": 11.8,
+   "p99_over_p50": 1.168317
+  }
+ },
+ {
+  "id": "h3",
+  "finishedAt": "2026-10-13T09:00:00Z",
+  "leftName": "baseline",
+  "rightName": "nightly 4",
+  "alignment": "latency",
+  "deltasFired": [],
+  "kind": "compare",
+  "fingerprints": {
+   "dataset": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "model": "5555555555555555555555555555555555555555555555555555555555555555",
+   "code": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+   "environment": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+  },
+  "measures": {
+   "p50": 10.0,
+   "p99": 12.0,
+   "p99_over_p50": 1.2
+  }
+ },
+ {
+  "id": "h2",
+  "finishedAt": "2026-10-12T09:00:00Z",
+  "leftName": "baseline",
+  "rightName": "nightly 3",
+  "alignment": "latency",
+  "deltasFired": [],
+  "kind": "compare",
+  "fingerprints": {
+   "dataset": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "model": "5555555555555555555555555555555555555555555555555555555555555555",
+   "code": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+   "environment": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+  },
+  "measures": {
+   "p50": 9.9,
+   "p99": 12.2,
+   "p99_over_p50": 1.232323
+  }
+ },
+ {
+  "id": "h1",
+  "finishedAt": "2026-10-11T09:00:00Z",
+  "leftName": "baseline",
+  "rightName": "nightly 2",
+  "alignment": "latency",
+  "deltasFired": [],
+  "kind": "compare",
+  "fingerprints": {
+   "dataset": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "model": "5555555555555555555555555555555555555555555555555555555555555555",
+   "code": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+   "environment": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+  },
+  "measures": {
+   "p50": 10.1,
+   "p99": 11.9,
+   "p99_over_p50": 1.178218
+  }
+ },
+ {
+  "id": "h0",
+  "finishedAt": "2026-10-10T09:00:00Z",
+  "leftName": "baseline",
+  "rightName": "nightly 1",
+  "alignment": "latency",
+  "deltasFired": [],
+  "kind": "compare",
+  "fingerprints": {
+   "dataset": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "model": "5555555555555555555555555555555555555555555555555555555555555555",
+   "code": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+   "environment": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+  },
+  "measures": {
+   "p50": 10.0,
+   "p99": 12.1,
+   "p99_over_p50": 1.21
+  }
+ }
+]

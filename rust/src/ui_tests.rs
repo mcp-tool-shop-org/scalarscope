@@ -52,6 +52,7 @@ fn blank(history: Option<PathBuf>) -> ScalarScopeApp {
         text_scale: 1.0,
         sitting_key: String::new(),
         bench: Default::default(),
+        history: Default::default(),
     }
 }
 
@@ -103,6 +104,8 @@ fn entry(kind: &str, bundle: Option<&str>) -> LogEntry {
         alignment: String::new(),
         deltas_fired: vec!["ΔO".to_string()],
         kind: kind.to_string(),
+        fingerprints: None,
+        measures: None,
     }
 }
 
@@ -841,4 +844,37 @@ fn an_unpackaged_window_keeps_a_session_only_while_it_is_open() {
     assert!(app.bench.status.contains("nothing is kept"));
     app.page = super::Page::Workbench;
     show(&mut app);
+}
+
+#[test]
+fn the_history_page_draws_a_project_its_shift_and_the_empty_cases() {
+    let dir = directory();
+    fs::copy(
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/history/comparison-log.json"),
+        history::file_path(&dir),
+    )
+    .unwrap();
+    let mut app = blank(Some(dir));
+    app.page = super::Page::History;
+    show(&mut app);
+    // Every measure, including ones no review recorded, draws without a panic.
+    for measure in 0..crate::trends::MEASURES.len() {
+        app.history.measure = measure;
+        show(&mut app);
+    }
+    // The 2.0 entries' project: one review, too few to segment.
+    app.history.project = 1;
+    app.history.measure = 2;
+    show(&mut app);
+    // A selection past the end is clamped.
+    app.history.project = 99;
+    show(&mut app);
+    assert_eq!(app.history.project, 1);
+
+    let mut empty = blank(Some(directory()));
+    empty.page = super::Page::History;
+    show(&mut empty);
+    let mut unpackaged = blank(None);
+    unpackaged.page = super::Page::History;
+    show(&mut unpackaged);
 }

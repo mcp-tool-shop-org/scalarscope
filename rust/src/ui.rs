@@ -20,6 +20,7 @@ pub enum Page {
     Compare,
     Guide,
     Workbench,
+    History,
     Settings,
 }
 
@@ -190,6 +191,8 @@ pub struct ScalarScopeApp {
     sitting_key: String,
     /// The Workbench page.
     bench: bench_page::BenchState,
+    /// The History page.
+    history: history_page::HistoryState,
 }
 
 impl Default for ScalarScopeApp {
@@ -225,6 +228,7 @@ impl Default for ScalarScopeApp {
             text_scale: saved.text_scale,
             sitting_key: String::new(),
             bench: Default::default(),
+            history: Default::default(),
         }
     }
 }
@@ -254,6 +258,7 @@ impl ScalarScopeApp {
             ui.selectable_value(&mut self.page, Page::Welcome, "Welcome");
             ui.selectable_value(&mut self.page, Page::Compare, "Compare");
             ui.selectable_value(&mut self.page, Page::Workbench, "Workbench");
+            ui.selectable_value(&mut self.page, Page::History, "History");
             ui.selectable_value(&mut self.page, Page::Guide, "Guide");
             ui.selectable_value(&mut self.page, Page::Settings, "Settings");
         });
@@ -263,6 +268,7 @@ impl ScalarScopeApp {
             Page::Welcome => return self.draw_welcome(ui),
             Page::Guide => return self.draw_guide(ui),
             Page::Workbench => return self.draw_workbench(ui),
+            Page::History => return self.draw_history(ui),
             Page::Compare => {}
         }
         let reviewing = self.opened.is_some();
@@ -1120,6 +1126,11 @@ impl ScalarScopeApp {
             ),
         };
         let key = format!("{left_path}|{right_path}|{alignment}|{}", deltas.join(","));
+        // Side B's fingerprints and measures, for the history view.
+        let (fingerprints, measures) = match (pair, self.right.as_ref().map(|loaded| &loaded.side)) {
+            (Pair::Inference(_), Some(crate::open::Side::Inference(run))) => crate::trends::entry_facts(run, crate::stats::AnomalyRule::from_code(self.settings.anomaly_rule)),
+            _ => (None, None),
+        };
         if key == self.sitting_key {
             return;
         }
@@ -1137,6 +1148,8 @@ impl ScalarScopeApp {
             alignment,
             deltas_fired: deltas,
             kind: "compare".to_string(),
+            fingerprints,
+            measures,
         };
         match history::record(entry, &dir) {
             Ok(_) => {
@@ -1170,6 +1183,8 @@ impl ScalarScopeApp {
             alignment: String::new(),
             deltas_fired: Vec::new(),
             kind: "bundle".to_string(),
+            fingerprints: None,
+            measures: None,
         };
         if history::record(entry, &dir).is_ok() {
             self.refresh_recent();
@@ -1411,6 +1426,9 @@ mod geometry_views;
 
 #[path = "ui_workbench.rs"]
 mod bench_page;
+
+#[path = "ui_history.rs"]
+mod history_page;
 
 #[cfg(test)]
 #[path = "ui_tests.rs"]

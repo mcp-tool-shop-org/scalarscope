@@ -651,5 +651,7 @@ fn named(left: &str, right: &str) -> LogEntry {
         alignment: "latency".to_string(),
         deltas_fired: Vec::new(),
         kind: "compare".to_string(),
+        fingerprints: None,
+        measures: None,
     }
 }
