@@ -134,7 +134,7 @@ fn the_fixtures_state_their_layout() {
 #[test]
 fn drift_withholds_timing_oscillation_and_failure_and_speaks_from_what_stands() {
     let review = reviewed("real-local-teacher.drift.geometry.json", "real-composite-teacher.drift.geometry.json");
-    for symbol in ["ΔTc", "ΔO", "ΔF"] {
+    for symbol in ["ΔTc", "ΔTd", "ΔO", "ΔF"] {
         let tile = status(&review, symbol);
         assert_eq!(tile.status, "withheld", "{symbol}");
         assert!(tile.why.contains("steps are checkpoint × item, not time"), "{symbol}: {}", tile.why);
@@ -168,4 +168,54 @@ fn an_unknown_layout_value_warns_and_reads_as_before() {
     // A file that states nothing keeps every 2.0 reading: the simulated pair is unchanged.
     let review = reviewed("steady.json", "regressing.json");
     assert!(review.explanations.iter().all(|tile| tile.status != "withheld"));
+}
+
+// The fine-tune-then-ASPIRE run (aspire-si docs/runs/2026-10-07-sft-then-aspire.md): the same
+// student, teachers and 32 exchanges as the real-* fixtures, fine-tuned on teacher answers first.
+
+#[test]
+fn the_fine_tuned_exports_open_in_full_and_state_their_layout() {
+    for teacher in ["local", "composite"] {
+        let professors = if teacher == "local" { 1 } else { 2 };
+        for (kind, steps, axis, checkpoints, source) in [
+            ("", 96, "training_step", None, "replayed"),
+            (".drift-from-base", 128, "checkpoint_by_item", Some(4), "fixed_per_item"),
+            (".drift-from-sft", 96, "checkpoint_by_item", Some(3), "fixed_per_item"),
+        ] {
+            let name = format!("sft-{teacher}-teacher{kind}.geometry.json");
+            let side = geometry(&name);
+            assert!(side.warnings.is_empty(), "{name}: {:?}", side.warnings);
+            let run = &side.run;
+            assert_eq!(run.metadata.run_id, format!("sft-{teacher}-teacher{kind}"), "{name}");
+            assert_eq!(run.trajectory.timesteps.len(), steps, "{name}");
+            assert_eq!(run.geometry.eigenvalues.len(), steps, "{name}");
+            assert_eq!(run.evaluators.professors.len(), professors, "{name}");
+            let meta = &run.metadata;
+            assert_eq!((meta.step_axis.as_deref(), meta.checkpoints, meta.scalar_source.as_deref()), (Some(axis), checkpoints, Some(source)), "{name}");
+            for step in &run.trajectory.timesteps {
+                assert!(step.curvature.is_finite() && step.state_2d.iter().all(|value| value.is_finite()), "{name}");
+            }
+        }
+    }
+}
+
+#[test]
+fn four_checkpoints_withhold_like_three_and_pair_with_the_control_with_emergence_withheld_too() {
+    // Four checkpoints from the base student, side by side.
+    let review = reviewed("sft-local-teacher.drift-from-base.geometry.json", "sft-composite-teacher.drift-from-base.geometry.json");
+    for symbol in ["ΔTc", "ΔTd", "ΔO", "ΔF"] {
+        let tile = status(&review, symbol);
+        assert_eq!(tile.status, "withheld", "{symbol}");
+        assert!(tile.why.contains("steps are checkpoint × item, not time"), "{symbol}: {}", tile.why);
+    }
+    // ASPIRE's drift after the fine-tune against the control's ASPIRE drift: both three checkpoints.
+    let review = reviewed("real-local-teacher.drift.geometry.json", "sft-local-teacher.drift-from-sft.geometry.json");
+    for symbol in ["ΔTc", "ΔTd", "ΔO", "ΔF"] {
+        assert_eq!(status(&review, symbol).status, "withheld", "{symbol}");
+    }
+    assert!(!review.verdict.is_empty());
+    // A four-checkpoint file against a three-checkpoint one still pairs; nothing is invented.
+    let mixed = reviewed("real-local-teacher.drift.geometry.json", "sft-local-teacher.drift-from-base.geometry.json");
+    assert_eq!(status(&mixed, "ΔTc").status, "withheld");
+    assert_eq!(status(&mixed, "ΔTd").status, "withheld");
 }

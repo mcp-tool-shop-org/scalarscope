@@ -319,12 +319,13 @@ On the real aspire-si exports, three of the five deltas fired on how the data wa
 **What ScalarScope withholds.** A withheld delta has the status 2.0 declared and never produced, `Indeterminate`, shown as "withheld". Its explanation states the reason.
 - **Either run has `checkpoint_by_item`:**
   - ΔTc and ΔO are withheld: "steps are checkpoint × item, not time".
+  - ΔTd is withheld with the same reason (ruled 2026-10-07): when a dominant direction emerges depends on step order, as ΔTc's settle point does. The principle is that any reading that depends on step order is withheld when steps are not time.
   - ΔF is withheld too, because its divergence and collapse checks read across steps.
   - The trajectory is drawn as unordered points per checkpoint block, not as one joined line, and is labelled so.
 - **Either run's `scalar_source` is `replayed` or `fixed_per_item`:**
   - ΔF is withheld: its recorded failures are score dips, and the scores repeat.
   - The score panels say the scores are replayed or fixed per item.
-- **ΔTd and ΔĀ are never withheld for these reasons.**
+- **ΔĀ is never withheld for these reasons.**
 - **The headline** is built only from deltas that stand: neither quiet nor withheld.
 
 **Also fixed with this:** evaluator labels that overlap when two evaluators point the same way.

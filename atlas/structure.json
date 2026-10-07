@@ -212,7 +212,7 @@
           "path": "docs/index.md"
         },
         {
-          "hash": "073fa6bb9f5b85d133cb99cfd877fee6e343e9d7ee3bcab6e03e47caec1679a5",
+          "hash": "398b6f02cbc49ae5bd6df0928ae38eadf04e664b7c5bd812d80046fcdb5e9ead",
           "path": "docs/parity-and-beyond.spec.md"
         },
         {
@@ -378,7 +378,7 @@
           "path": ".gitignore"
         },
         {
-          "hash": "b2ab2cee0761d1d48985b0d16a44a6a464d390442633f6822e4ac61d4eb766ee",
+          "hash": "7fb793d94785728b66b6706f07e52ff9256f52caa080c05d193065224a4fc9f9",
           "path": "CHANGELOG.md"
         },
         {
@@ -394,35 +394,35 @@
           "path": "PRIVACY.md"
         },
         {
-          "hash": "a12fe160b9255a1f883c166934bc0613007101d4e4d690c7b1fad8e865fdc733",
+          "hash": "34fe8c2c1330917967d9fcef37756c67fe7da71db19ea270c3fa24fadded0b27",
           "path": "README.es.md"
         },
         {
-          "hash": "27cf2c00ed82a6f88a6f2b1d461f812dffe1beddc2635fda2adadaf0ebdf3486",
+          "hash": "c5971c6ad862a727cdf94f641aaa777701b1cbbf96f955f63f8d064698166ef9",
           "path": "README.fr.md"
         },
         {
-          "hash": "043956474fa452a38127d44d029d1cdbdb757096f54d7b05c19ca1850c8d6611",
+          "hash": "d33837d07e044306edf5e6ff024c6e50ee37582530a643d5b4961288ef0d4478",
           "path": "README.hi.md"
         },
         {
-          "hash": "33e606a09597f8a4359401ab1017c796f9bd2075119978ea9dd4be8389749627",
+          "hash": "efeffac2c05fc444577c7f47c1086b50a85c55efb2cfa3abfc9ea13665ca7cef",
           "path": "README.it.md"
         },
         {
-          "hash": "3492ee7921d4e61ef7eaf23f906d254ff6f3f40fce24e17b4d93a00e37e88981",
+          "hash": "174242aca642b56b060bae4278f107ff210501e47ff4e387dcfdb5ad6bb560cd",
           "path": "README.ja.md"
         },
         {
-          "hash": "4ebce324cacf912bc86e95023f60be9f4e348191f1e43e348afd28fa53e8146a",
+          "hash": "d9ec6b14351f10252a51b9d3ca95f6ec46df7e08f7e2dc784ab6cacd32b7a876",
           "path": "README.md"
         },
         {
-          "hash": "731bbc35eeba693856883c2b9b5f9239c50aaba172b673f57cf1dbe5c0643d09",
+          "hash": "55acb0ec97a6054e2f9725a6cc7c5104b8287c074c5d6495966c4077f575abef",
           "path": "README.pt-BR.md"
         },
         {
-          "hash": "d3ea77bba5446c2fd7eff0e41a97ff20a3896668693972d4e23004765076d800",
+          "hash": "07a64f2c850ab4a7909864132560949dde97d69bf4891857a071a8eed2779c50",
           "path": "README.zh.md"
         },
         {
@@ -840,7 +840,7 @@
             "robust_sigma",
             "withhold_by_layout"
           ],
-          "hash": "cb3a7b5683ec4634b9c5572988b39576b4540383c0b39d1730250e03b91dd293",
+          "hash": "f6548a8efe6860dcb782fd92c9e6538e6a13ada92c57086c134777f5c690de48",
           "importsFiles": [
             "rust/src/geometry.rs"
           ],
@@ -2745,7 +2745,7 @@
           ]
         },
         {
-          "hash": "5ffea9ac3ee64c24a70f3910676b4943dfb335fedd90bc3c2191468050776d1a",
+          "hash": "6e10998272e5e8bb1d97df6f853587af4a3266601b966357ba65619520148fac",
           "importOrder": [
             "rust/src/geometry_deltas.rs",
             "rust/src/open.rs",
@@ -2818,6 +2818,30 @@
         {
           "hash": "e7e17e1d87e54f1c47e1fb67f8f557ec7064a476da4666cf61637ec74fc176ef",
           "path": "rust/tests/fixtures/aspire-si/regressing.json"
+        },
+        {
+          "hash": "2e678fa4bed8cb4af6bf28764b83a475b74002cc99379c70673a3d4871aa1fc5",
+          "path": "rust/tests/fixtures/aspire-si/sft-composite-teacher.drift-from-base.geometry.json"
+        },
+        {
+          "hash": "f4c225e850dac95f1562edb57e10d185603730c6dee595fe99815b27aab7420f",
+          "path": "rust/tests/fixtures/aspire-si/sft-composite-teacher.drift-from-sft.geometry.json"
+        },
+        {
+          "hash": "1e0b621413832d3ba2a055479038896e5b57286e4760ad1ab3c79e111c40d710",
+          "path": "rust/tests/fixtures/aspire-si/sft-composite-teacher.geometry.json"
+        },
+        {
+          "hash": "7a423c2d117352a8eb0b3dc27fd6418ace63713fb55c43a2671b6223b3ea2280",
+          "path": "rust/tests/fixtures/aspire-si/sft-local-teacher.drift-from-base.geometry.json"
+        },
+        {
+          "hash": "86943ee7fa776eeed1c06b1ec0ae068e81d4f83f7fa8e7d4ddd743cd1bcc72d3",
+          "path": "rust/tests/fixtures/aspire-si/sft-local-teacher.drift-from-sft.geometry.json"
+        },
+        {
+          "hash": "70a20e2edb8f14f7e4d85da8d9e152134e8916a23899fb6ee35e1b0afe7762d0",
+          "path": "rust/tests/fixtures/aspire-si/sft-local-teacher.geometry.json"
         },
         {
           "hash": "fc53c3e8d26207b8a299f0a7ddaec6534947537c9d1295fcaaa2b600bb0ebb6f",
@@ -3045,11 +3069,11 @@
           "path": "site/src/content/docs/handbook/bundles.md"
         },
         {
-          "hash": "db369872e4481d5b529f1fa85bfdd86922b16bd71d84387eb273fa566b84e691",
+          "hash": "e29d8a8097fe83df7c10b0920323908d1f9188ea961fa11310e029eff6d29497",
           "path": "site/src/content/docs/handbook/delta-analysis.md"
         },
         {
-          "hash": "92baed8f9125974a9d1e30b6e4f8c1df9d7770bf17aed70b48395276d3c79048",
+          "hash": "a5054358202b63151cc0eacbac9c399aadd6a20898bba764b0a9b7a748bed95a",
           "path": "site/src/content/docs/handbook/geometry.md"
         },
         {
@@ -5326,8 +5350,8 @@
   "edges": [],
   "engine": "1.24.0",
   "generatedFrom": {
-    "commit": "67fa43554a51ddc6dd32e09e52f20fc10779a843",
-    "tracked": 457
+    "commit": "925ce1c6873bc5af9b87929dc90735277b7cb543",
+    "tracked": 463
   },
   "landings": [
     {
@@ -5568,7 +5592,7 @@
   "overlaps": [],
   "submodules": [],
   "symlinks": [],
-  "testFiles": 75,
+  "testFiles": 81,
   "unassigned": [
     {
       "hash": "20c54ca3354e05fbed8e4c606149cb099f04ee1062791c8c1b0f1a717131388c",

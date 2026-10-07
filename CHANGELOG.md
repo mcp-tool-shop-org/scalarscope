@@ -5,6 +5,14 @@ All notable changes to ScalarScope will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- On a geometry export whose steps are checkpoints × items, ΔTd is withheld too, with the same reason as ΔTc, ΔO and ΔF: when a dominant direction emerges depends on step order, and those steps are not time.
+
+### Added
+- Fixtures from aspire-si's fine-tune-then-ASPIRE run (`rust/tests/fixtures/aspire-si/sft-*`): per-step exports, drift from the base student over four checkpoints, and drift from the fine-tuned student over three, for both teachers.
+
 ## [3.1.0] - 2026-10-07
 
 ### Fixed

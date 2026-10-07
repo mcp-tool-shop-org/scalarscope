@@ -40,7 +40,7 @@ A geometry export can state two things about its own layout in `run_metadata`:
 - **`scalar_source`:** `live`, `replayed` (epochs after the first replay cached scores), or `fixed_per_item`.
 
 When a run's steps are not time:
-- ΔTc, ΔO and ΔF are **withheld**, with the reason "steps are checkpoint × item, not time".
+- ΔTc, ΔTd, ΔO and ΔF are **withheld**, with the reason "steps are checkpoint × item, not time".
 - The trajectory is drawn as unordered points, one shade per checkpoint.
 
 When a run's scores repeat:

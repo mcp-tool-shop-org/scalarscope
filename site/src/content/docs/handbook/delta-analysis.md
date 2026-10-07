@@ -45,6 +45,6 @@ For two ASPIRE training runs. These are 2.0's rules with 2.0's defaults, ported 
 
 A delta is **withheld** when the data cannot carry it. The tile then says why.
 - **On a geometry export that states its layout** (the [export contract](/scalarscope/handbook/geometry/)):
-  - ΔTc, ΔO and ΔF are withheld when the steps are checkpoints × items, not time.
+  - ΔTc, ΔTd, ΔO and ΔF are withheld when the steps are checkpoints × items, not time.
   - ΔF is withheld when the scores were replayed or are fixed per item.
 - **The headline speaks only from the deltas that stand.**
