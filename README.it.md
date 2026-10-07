@@ -16,191 +16,113 @@
   <a href="https://apps.microsoft.com/detail/9P3HT1PHBKQK"><img src="https://img.shields.io/badge/Microsoft%20Store-9P3HT1PHBKQK-0078D4?style=flat-square&logo=microsoft" alt="Microsoft Store"></a>
 </p>
 
-**Una recensione di due esecuzioni di machine learning.** L'app che si crea da questo repository è il programma Rust in `rust/`. Il processo di rilascio impacchetta quel programma come MSIX 3.0.0.0 non firmato. Il nome del pacchetto e l'editore rimangono gli stessi. Quel file non viene caricato. La copia sullo Store è ancora il precedente pacchetto .NET fino a quel caricamento.
+**Confronta due esecuzioni di machine learning e verifica l'affidabilità del confronto.** ScalarScope apre due tracce di inferenza, due cronologie di addestramento o due esportazioni di geometria ASPIRE. Indica in cosa l'esecuzione B differisce dall'esecuzione A, assegna a ciascuna differenza un intervallo o una motivazione e omette ciò che i dati non possono supportare.
 
-Versione del pacchetto **3.0.0.0**. Gli aggiornamenti sullo Store di [9P3HT1PHBKQK](https://apps.microsoft.com/detail/9P3HT1PHBKQK) mantengono il nome `mcp-tool-shop.ScalarScope` e l'editore `CN=5305D976-6952-4F00-9C21-3A5DB090359F`.
+La versione **3.1.0** è una riscrittura in Rust. È l'app per Windows disponibile su Microsoft Store come [9P3HT1PHBKQK](https://apps.microsoft.com/detail/9P3HT1PHBKQK), con il numero di pacchetto 3.1.0.0, un aggiornamento della stessa versione. Il nome del pacchetto `mcp-tool-shop.ScalarScope` e l'editore `CN=5305D976-6952-4F00-9C21-3A5DB090359F` rimangono invariati, quindi i file, le recensioni salvate e le impostazioni della versione 2.0 vengono mantenuti.
 
 ## Modello di affidabilità
 
-La recensione legge i due file che si aprono. Un'esecuzione impacchettata legge e scrive anche `comparison-log.json` e `preferences.json` nella cartella LocalState di quel pacchetto. Un pacchetto viene scritto solo nel percorso che si seleziona.
-
-Non invia questi file da nessuna parte. Non ci sono account, telemetria o analisi. I plugin in quella cartella rimangono al loro posto e non vengono caricati. L'hash di un pacchetto verifica i byte archiviati. Si tratta di un controllo del contenuto, non di una firma, e non indica chi ha scritto il file.
-
-Il programma necessita del permesso di leggere i file che si selezionano e di scrivere il pacchetto che si salva.
-
----
-
-## Perché ScalarScope?
-
-La maggior parte dei team di ML esamina i log. ScalarScope sostituisce questo con un confronto strutturato e riproducibile.
-
-I punti seguenti descrivono il pacchetto .NET pubblicato. La recensione Rust elabora una serie di inferenze o una curva di perdita di addestramento retropropagante. Su una coppia di inferenze, segnala ΔF e ΔO e ΔTc solo quando entrambi i lati hanno una pietra miliare di stato stazionario. Quando entrambe le pietre miliari esistono, la serie disegna una linea verticale lì. Scrive un `.scbundle` nel layout di Fase 7.2. Riaprendo quel file, si visualizza la recensione salvata. L'hash è SHA-256 dei byte del file archiviato e `integrity.json` è il sigillo. Un hash corrispondente è un controllo del contenuto, non una firma. Un'esecuzione impacchettata mantiene `comparison-log.json` e `preferences.json` nella cartella LocalState di quel pacchetto, gli stessi file su cui ha scritto l'app .NET. I colori delle serie seguono una modalità di visione dei colori salvata. I file recenti e le viste salvate da quella cartella si riaprono qui. I plugin in quella cartella rimangono al loro posto e non vengono caricati. Un'esecuzione non impacchettata non scrive quella cartella.
-
-- **Confronto diretto** — Carica due tracce di inferenza affiancate e osserva esattamente cosa è cambiato
-- **Analisi delta canonica** — Cinque tipi di delta (ΔTc, ΔO, ΔF, ΔĀ, ΔTd) si attivano solo quando le differenze sono statisticamente significative
-- **Preset di runtime** — Il preset TFRT sopprime automaticamente le metriche irrilevanti in modo che tu possa concentrarti su ciò che conta per i carichi di lavoro TensorFlow-TRT
-- **Pacchetti riproducibili** — Esporta archivi `.scbundle` con integrità SHA-256, delta congelati e metadati completi di provenienza
-- **Modalità di recensione** — Apri un pacchetto senza ricalcolare. Un SHA-256 corrispondente è un controllo del contenuto, non una firma.
-- **Privacy al primo posto** — Nessuna telemetria, nessuna analisi, tutti i dati rimangono locali a meno che tu non li esporti esplicitamente
-
----
-
-## VortexKit
-
-VortexKit è la libreria di visualizzazione in `src/VortexKit`. Fa parte di questo repository. Non è pubblicato su NuGet.
-
-Copre la riproduzione sincronizzata nel tempo, le animazioni di canvas SkiaSharp, le viste di confronto, le sovrapposizioni di annotazione, l'esportazione SVG e PNG e un sistema di colori semantico.
-
----
-
-## Avvio rapido
-
-### Recensione Rust
-
-Da questo repository:
-
-```
-cargo run --manifest-path rust/Cargo.toml
-```
-
-Apri due file di inferenza o due file `run_history.json` di retropropagazione. Un file di inferenza è un CSV di latenza, un JSON di benchmark o una traccia di Chrome. Un `ProfilerStep` completo in quella traccia è una singola inferenza e le operazioni al suo interno non sono campioni aggiuntivi. Una traccia senza passaggi utilizza comunque eventi i cui nomi contengono TensorRT o inferenza. Un file di addestramento viene disegnato come perdita di addestramento. La perdita trattenuta, la perplessità e le metriche delle attività sono visualizzate insieme a quella curva. `final_loss` viene visualizzato come un numero a sé stante. Una coppia di inferenze segnala ΔF e ΔO dalla serie di latenza. ΔTc viene segnalato solo quando entrambi i file hanno una pietra miliare di stato stazionario. Senza quella pietra miliare, l'ultimo passaggio non viene definito come tempo di stabilizzazione e la serie non disegna una linea di stato stazionario. ΔTd e ΔĀ non vengono visualizzati nella pagina di inferenza. I delta di inferenza non vengono calcolati su una cronologia di addestramento. Il salvataggio del pacchetto scrive la recensione sulla pagina. L'apertura del pacchetto mostra nuovamente quella recensione salvata. L'hash corrisponde al controllo .NET di Fase 7.2. Una corrispondenza significa che i byte sono intatti. Non è una firma.
-
-`packaging/pack.ps1` crea il `ScalarScope_3.0.0.0_x64.msix` non firmato dal binario di rilascio. Il nome del pacchetto è `mcp-tool-shop.ScalarScope`, l'editore è `CN=5305D976-6952-4F00-9C21-3A5DB090359F` e l'architettura è x64. Non viene caricato. La copia sullo Store è ancora il precedente pacchetto .NET.
-
-### Dal Microsoft Store
-
-1. Installa **ScalarScope** dal [Microsoft Store](https://apps.microsoft.com/detail/9P3HT1PHBKQK) (ID dello Store: `9P3HT1PHBKQK`)
-2. Fai clic su **Confronta due esecuzioni**
-3. Carica una traccia di riferimento: un CSV di latenza, un JSON di benchmark o un profiler `trace.json`
-4. Carica la traccia ottimizzata nello stesso tipo di file
-5. Esamina i delta nella scheda **Confronta**
-6. Esporta un `.scbundle` per una condivisione riproducibile
-
-### Utilizzo di VortexKit
-
-```csharp
-using VortexKit.Core;
-
-// 1. Create a shared playback controller (0.0 -> 1.0 timeline)
-var player = new PlaybackController { Duration = 10.0, Loop = true };
-
-// 2. Bind multiple animated canvases to the same controller
-player.TimeChanged += () =>
-{
-    trajectoryCanvas.CurrentTime = player.Time;
-    eigenCanvas.CurrentTime      = player.Time;
-    scalarsCanvas.CurrentTime    = player.Time;
-};
-
-// 3. Subclass AnimatedCanvas for custom rendering
-public class MyTrajectoryCanvas : AnimatedCanvas
-{
-    protected override void OnRender(SKCanvas canvas, SKImageInfo info, double time)
-    {
-        // Your SkiaSharp rendering at the current time position
-    }
-}
-
-// 4. Export a side-by-side comparison as PNG
-var exporter = new ExportService();
-await exporter.ExportComparisonAsync(
-    leftRender, rightRender, time: 0.5,
-    outputPath: "comparison.png",
-    new ComparisonExportOptions
-    {
-        Width = 1920, Height = 1080,
-        LeftLabel = "Baseline", RightLabel = "Optimized",
-        ShowLabels = true
-    });
-
-// 5. Export as layered SVG (Inkscape-compatible)
-var svgExporter = new SvgExportService();
-await svgExporter.ExportSvgAsync(svgData, "trajectory.svg",
-    new SvgExportOptions
-    {
-        Palette = SvgColorPalette.Publication,
-        UseCatmullRomSplines = true,
-        EnableGlow = false
-    });
-```
+- **Cosa legge.** I file che si aprono. Il pacchetto di Store legge e scrive anche `comparison-log.json`, `preferences.json` e `workbench.json` nella propria cartella LocalState, la cartella utilizzata dalla versione 2.0. Una versione non impacchettata non scrive nessuno di questi file.
+- **Cosa scrive.** Un insieme di dati, un'immagine o una registrazione di sessione, solo in un percorso scelto dall'utente.
+- **Rete.** Non sono presenti account, telemetria o analisi. L'unica connessione che l'app può stabilire è dalla scheda Workbench, e solo quando si preme **Chiedi**: a un'istanza locale di Ollama all'indirizzo `127.0.0.1` su questo computer. I modelli cloud di Ollama non sono supportati. Nessun dato lascia la macchina.
+- **Insiemi di dati.** Un hash SHA-256 corrispondente è un controllo del contenuto, non una firma. Indica che i byte sono intatti. Non indica chi ha scritto il file.
+- **Plugin.** I plugin lasciati nella cartella 2.0 non vengono caricati.
 
 ---
 
 ## Funzionalità
 
-### Analisi delta: cinque tipi di delta canonici
+**Inferenza: due esecuzioni di latenza per passaggio.**
+- **Il titolo** è B/A a p50, p90 e p99. Ogni rapporto include un intervallo bootstrap mobile del 95%.
+- **È possibile aprire diverse esecuzioni per ciascun lato.** L'intervallo quindi ricampiona anche le intere esecuzioni e, quando vengono aperte meno di tre esecuzioni per lato, viene indicato come indicativo.
+- **Un percentile con un numero di campioni insufficiente** non viene visualizzato; p99 richiede 368 campioni.
+- **Tre delta,** ciascuno con una casella che indica se è stato attivato, se è rimasto inattivo o se è stato omesso, e perché:
+- **ΔF (nuove anomalie)** conta i campioni stabili oltre 5 deviazioni robuste. Si attiva solo quando l'eccesso di B supera il valore casuale.
+- **ΔO (variabilità)** si attiva quando l'intervallo sulla variazione relativa di B rispetto ad A esclude 1.
+- **ΔTc (stabilizzazione)** assegna a ciascuna esecuzione una forma. Si attiva solo quando entrambe le esecuzioni si stabilizzano e i loro intervalli di stabilizzazione non si sovrappongono.
+- **Sei viste:** Serie, Riscaldamento, Distribuzione con una soglia modificabile, Differenza per percentile, Spettro e Mappa di calore. Nessuna di esse è animata.
 
-Ogni confronto produce un insieme di delta canonici. Ogni delta si attiva solo quando la differenza è statisticamente significativa; i delta irrilevanti vengono soppressi automaticamente.
+**Addestramento.** Un backpropagate `run_history.json` viene visualizzato come perdita di addestramento, con la perdita omessa, la perplexità e le metriche delle attività visualizzate accanto. I delta di inferenza non vengono calcolati su di esso.
 
-| Delta | Nome completo | Cosa misura | Si attiva quando |
-|-------|-----------|------------------|------------|
-| **ΔTc** | Tempo di convergenza | Passaggi per raggiungere una latenza stabile | Lo stato stazionario viene raggiunto in passaggi diversi (separazione di 3+ passaggi) |
-| **ΔO** | Variabilità dell'output | Oscillazione / instabilità in fase di esecuzione | Il punteggio dell'area sopra la soglia differisce oltre la soglia di rumore |
-| **ΔF** | Tasso di errore | Frequenza delle anomalie | La frequenza o il tipo di errore differiscono tra le esecuzioni |
-| **ΔĀ** | Latenza media | Valore medio della metrica | La differenza media è significativa (soppressa nella configurazione predefinita TFRT) |
-| **ΔTd** | Durata totale | Tempo di esecuzione / emergenza strutturale | La durata o l'inizio della dominanza differiscono (soppresso nella configurazione predefinita TFRT) |
+**Geometria: due esecuzioni di addestramento ASPIRE.**
+- **Cosa legge:** l'esportazione di geometria che [aspire-si](https://github.com/mcp-tool-shop-org/aspire-si) scrive, con la sua traiettoria, i punteggi dell'evaluator, lo spettro degli autovalori e i fallimenti.
+- **Cinque delta:** ΔF, ΔTc, ΔTd, ΔĀ (concentrazione dello spettro) e ΔO. Sono stati portati dalla versione 2.0 e confrontati con i risultati della versione 2.0, con le correzioni registrate in [questa specifica](docs/parity-and-beyond.spec.md).
+- **Contratto di esportazione (schema 1.1).** Un'esportazione può indicare che i suoi passaggi sono checkpoint × elementi anziché tempo, oppure che i suoi punteggi sono stati riprodotti. In tal caso, i delta che leggono il tempo o i cali di punteggio vengono omessi con tale motivazione e il titolo si basa solo sui delta che rimangono. Le esportazioni più vecchie vengono lette come prima.
 
-### Configurazioni predefinite per l'esecuzione — TFRT
+**Workbench.**
+- **Apri molte esecuzioni** che differiscono in un'impostazione, come la dimensione del batch o la precisione.
+- **Chiedi:** un modello locale in grado di chiamare strumenti misura le esecuzioni con formule e propone cosa fa ciascuna impostazione.
+- **Il programma imposta ogni numero e verdetto.** Un'ipotesi viene testata con un test di rango esatto su ciascun insieme di esecuzioni. I verdetti tra gli insiemi vengono forniti solo ai checkpoint, con un metodo e-BH con un tasso di falsi positivi del 5%.
+- **Prima, la tua decisione.** Puoi scrivere la tua richiesta prima di chiedere. La nota del modello viene visualizzata sotto i verdetti, contrassegnata come "parole del modello".
 
-La configurazione predefinita integrata **TensorFlow-TRT** (`tensorflowrt-runtime-v1`) mappa i segnali specifici per l'inferenza (latenza, velocità di trasmissione, memoria, carico della CPU/GPU) e sopprime le differenze valide solo per l'addestramento (ΔĀ, ΔTd) che non hanno significato per il confronto dell'inferenza. I meccanismi di sicurezza avvisano quando il periodo di riscaldamento supera il 50% dell'esecuzione o quando sono disponibili solo statistiche aggregate.
+**Cronologia.** Nel pacchetto di Store, i confronti che si completano vengono raggruppati in base al set di dati e al modello del lato B. Ogni misura viene visualizzata su queste recensioni, con i punti in cui il suo livello è cambiato. Un cambiamento di codice o ambiente accanto a un cambiamento viene indicato e definito come coincidenza, non come causa. Il registro conserva le ultime 40 recensioni.
 
-### Pacchetti riproducibili
-
-Esporta i risultati come archivi `.scbundle` (ComparisonBundle v1.0.0):
-
-- **`manifest.json`** — metadati del pacchetto, versione dell'app, etichette di confronto, modalità di allineamento
-- **`repro/repro.json`** — impronte digitali degli input, hash della configurazione predefinita, seme di determinismo, informazioni sull'ambiente
-- **`findings/deltas.json`** — differenze canoniche con punteggi di confidenza, punti di riferimento e tipi di trigger
-- **`findings/why.json`** — spiegazioni leggibili dall'utente, meccanismi di sicurezza, elementi di parametro
-- **`findings/summary.md`** — riepilogo Markdown generato automaticamente
-- **Integrità** — ogni file ha un hash SHA-256. L'hash del pacchetto è un controllo del contenuto, non una firma.
-
-### Modalità di revisione
-
-Apri qualsiasi `.scbundle` senza ricalcolare. Un hash SHA-256 corrispondente è un controllo del contenuto, non una firma. Le differenze memorizzate vengono visualizzate come memorizzate.
-
-### Framework di visualizzazione VortexKit
-
-VortexKit è la libreria di visualizzazione in `src/VortexKit`. Viene fornita con questo repository. Non è un pacchetto NuGet.
-
-| Componente | Cosa fa |
-|-----------|-------------|
-| `PlaybackController` | Timeline condivisa 0→1 con riproduzione/pausa/passo/ciclo, configurazioni predefinite per la velocità (0,25x—4x), aggiornamento a ~60 fps |
-| `AnimatedCanvas` | Base astratta `SKCanvasView` con invalidazione sincronizzata con il tempo, disegno della griglia, eventi di tocco/trascinamento, helper per le coordinate |
-| `ITimeSeries<T>` / `TimeSeries<T>` | Serie temporale generica con mappatura indice↔tempo ed enumerazione del percorso |
-| `ExportService` | PNG a fotogramma singolo, sequenze di fotogrammi (con suggerimenti ffmpeg) ed esportazione di confronto affiancato |
-| `SvgExportService` | Esportazione SVG completamente vettoriale con livelli Inkscape, spline Catmull-Rom, mappe di calore, campi vettoriali e quattro tavolozze di colori (Predefinita, Chiara, Contrasto elevato, Pubblicazione) |
-| `IAnnotation` | Annotazioni tipizzate (Fase, Avviso, Approfondimento, Errore, Personalizzata) con base teorica e priorità |
-| `VortexColors` | Tavolozza di colori semantica: livelli di sfondo, semantica di accento, codifica della gravità, tavolozza degli autovalori, helper per lerp/gradiente |
+**Insiemi di dati e stato salvato.**
+- **Salva l'insieme di dati** scrive la recensione come un file `.scbundle`. **Apri l'insieme di dati** lo visualizza esattamente come è stato salvato, in modalità di recensione.
+- **Gli insiemi di dati della versione 2.0** si aprono: insiemi di dati di confronto con i loro delta salvati e recensioni di inferenza contrassegnate come non verificate.
+- **Le impostazioni della versione 2.0** vengono mantenute: tema, palette di colori, contrasto elevato, scala del testo, limite dei file recenti e regola delle anomalie.
+- **Esporta** la vista corrente come SVG o la finestra come PNG.
 
 ---
 
-## Installazione
+## Avvio rapido
 
-### Microsoft Store (consigliato)
+### Da Microsoft Store
 
-**ID Store:** `9P3HT1PHBKQK`
+1. Installa **ScalarScope** da [Microsoft Store](https://apps.microsoft.com/detail/9P3HT1PHBKQK). Richiede Windows 10 versione 1809 (build 17763) o successiva, x64.
+2. Nella schermata **Benvenuto**, fai clic su **Prova il confronto di esempio**. Oppure, fai clic su **Confronta due esecuzioni** e apri il percorso A e il percorso B.
+3. Leggi il titolo, quindi fai clic su una casella per visualizzare **Perché** e **Mostrami**.
 
-[Scaricalo dal Microsoft Store](https://apps.microsoft.com/detail/9P3HT1PHBKQK)
+I file di esempio da provare, una coppia di inferenza, una coppia di geometria e una cartella di esecuzioni per Workbench, sono disponibili in [`samples/`](samples/). [TESTING.md](TESTING.md) indica quali file aprire e dove.
 
-Richiede Windows 10 (versione 17763) o successiva.
-
-### Da sorgente
+### Dal codice sorgente
 
 ```bash
-# Prerequisites:
-#   .NET 9.0 SDK (global.json pins 9.0.100)
-#   Visual Studio 2022 with MAUI workload, or:
-#     dotnet workload install maui-windows
-
 git clone https://github.com/mcp-tool-shop-org/scalarscope.git
 cd scalarscope
-dotnet restore
-dotnet build
-
-# Run the desktop app
-dotnet run --project src/ScalarScope
+cargo run --release --manifest-path rust/Cargo.toml
 ```
+
+`scalarscope <path A> <path B>` apre una coppia all'avvio.
+
+### Cosa puoi aprire
+
+| Tipo | File |
+|---|---|
+| Inferenza | Un file CSV di latenza, un file JSON di benchmark, una traccia di Chrome o PyTorch (`.json` o `.json.gz`), un registro di runtime, un file JSON di ScalarScope RunTrace o una cartella di esecuzioni |
+| Addestramento | Un file `run_history.json` di backpropagate |
+| Geometria | Un'esportazione di geometria ASPIRE (aspire-si, schema 1.x) |
+| Revisione | Un `.scbundle` dalla versione 3.x o 2.0 |
+
+La sezione "Inizia" nel [manuale](https://mcp-tool-shop-org.github.io/scalarscope/handbook/getting-started/) contiene un breve esempio per ciascun file.
+
+---
+
+## Scorciatoie da tastiera
+
+| Scorciatoia | Azione |
+|---|---|
+| `F1` | Guida |
+| `Ctrl+,` | Impostazioni |
+| `Ctrl+H` | Benvenuto |
+| `1`–`6` | Nella sezione "Confronta": Serie, Riscaldamento, Distribuzione, Differenza, Spettro, Mappa di calore |
+| `Esc` | Chiudi il pannello "Perché" |
+
+---
+
+## Test
+
+```bash
+# The review: 215 tests. Line coverage must stay above 90%.
+cd rust
+cargo test
+cargo llvm-cov --locked --all-targets --fail-under-lines 90
+
+# The .NET fixture tests: the 2.0 oracles, bundle compatibility and the version surfaces (134 tests)
+dotnet test tests/ScalarScope.FixtureTests
+```
+
+Il progetto .NET in `src/ScalarScope` è l'applicazione 2.0. Rimane nel repository come riferimento rispetto al quale viene verificata la versione 3.x. Il pacchetto Store viene creato da `rust/` tramite `packaging/pack.ps1` e il progetto MAUI si rifiuta di essere pubblicato in questa versione.
 
 ---
 
@@ -208,115 +130,34 @@ dotnet run --project src/ScalarScope
 
 ```
 scalarscope/
-├── src/
-│   ├── ScalarScope/                    # .NET MAUI desktop app
-│   │   ├── Models/                     # GeometryRun, InsightEvent
-│   │   ├── ViewModels/                 # Welcome, Comparison, Export, Settings, TrajectoryPlayer, VortexSession
-│   │   ├── Views/                      # XAML pages + 19 custom controls
-│   │   │   ├── WelcomePage.xaml        # First-60-seconds onboarding (Home tab)
-│   │   │   ├── ComparisonPage.xaml     # Side-by-side delta comparison (Compare tab)
-│   │   │   ├── HelpPage.xaml           # Interpretation guide (Guide tab)
-│   │   │   ├── SettingsPage.xaml       # Preferences and about (Settings tab)
-│   │   │   └── Controls/              # DeltaZone, BundleExportPanel, PlaybackControl, etc.
-│   │   ├── Services/
-│   │   │   ├── Connectors/            # RunTraceComparer, TfrtRuntimePreset, validation
-│   │   │   ├── Bundles/               # BundleBuilder, BundleExporter, integrity, schemas
-│   │   │   ├── Evidence/              # Comparison evidence reports, detector diagnostics
-│   │   │   ├── Plugins/               # PluginManager
-│   │   │   ├── CanonicalDeltaService.cs
-│   │   │   ├── DeltaTypes.cs          # 5 canonical deltas + detector configs
-│   │   │   ├── DeterminismService.cs  # Reproducible seed management
-│   │   │   ├── FlowFieldService.cs    # Vector field computation
-│   │   │   └── ...                    # 70+ service files
-│   │   └── Resources/
-│   │       ├── Styles/DesignSystem.xaml # Unified visual grammar
-│   │       └── Raw/Samples/            # Built-in example traces
-│   │
-│   └── VortexKit/                      # Visualization library in this repo
-│       ├── Core/
-│       │   ├── AnimatedCanvas.cs       # Time-synced SkiaSharp canvas base
-│       │   ├── PlaybackController.cs   # Shared playback timeline
-│       │   ├── ITimeSeries.cs          # Generic time-series interface
-│       │   ├── ExportService.cs        # PNG frame/sequence export
-│       │   └── SvgExportService.cs     # Layered SVG export
-│       ├── Annotations/
-│       │   └── IAnnotation.cs          # Typed annotation system
-│       └── Theme/
-│           └── VortexColors.cs         # Semantic color palette
-│
-├── tests/
-│   ├── ScalarScope.FixtureTests/       # Golden-file fixture tests
-│   ├── ScalarScope.DeterminismTests/   # Reproducibility verification
-│   ├── ScalarScope.SoakTests/          # Long-running stability tests
-│   └── Fixtures/                       # Shared test data
-│
-├── docs/                               # Design docs, results, limitations
-├── .github/workflows/
-│   ├── build.yml                       # CI: restore, build, format check, pack, artifacts
-│   ├── publish.yml                     # NuGet publish
-│   └── release.yml                     # GitHub Release + Store submission
-├── global.json                         # .NET SDK 9.0.100
-├── ScalarScope.sln                     # Solution file
-├── CHANGELOG.md                        # Keep-a-Changelog format
-├── PRIVACY.md                          # Privacy policy (no telemetry)
-├── SECURITY.md                         # Security policy
-└── STORE_LISTING.md                    # Microsoft Store listing copy
+├── rust/                 # The app: ScalarScope 3.x (egui)
+│   ├── src/              # review, geometry, workbench, history, bundles, settings, UI
+│   └── tests/            # Rust tests and fixtures (real and simulated aspire-si exports, the knob folder)
+├── samples/              # Files a first-time user or tester can open
+├── packaging/            # AppxManifest.xml and pack.ps1 (the Store package)
+├── src/ScalarScope/      # The 2.0 .NET app, kept as the reference
+├── src/VortexKit/        # 2.0's visualization library
+├── tests/                # .NET fixture tests and the 2.0 fixtures
+├── site/                 # Landing page and handbook
+└── docs/                 # The 3.x spec, receipts and release notes
 ```
 
 ---
 
-## Test
+## Correlato
 
-```bash
-# Run all tests
-dotnet test
-
-# Fixture smoke tests only
-dotnet test --filter Category=FixtureSmoke
-
-# Determinism tests (verifies reproducible deltas)
-dotnet test --filter Category=Determinism
-
-# With coverage
-dotnet test --collect:"XPlat Code Coverage"
-
-# Rust review. Line coverage has to stay above 90%.
-cd rust
-cargo llvm-cov --offline --locked --all-targets --fail-under-lines 90
-```
-
----
-
-## Scorciatoie da tastiera
-
-| Scorciatoia | Azione |
-|----------|--------|
-| `Space` | Riproduci / Pausa |
-| `Left` / `Right` | Passo indietro / avanti (1%) |
-| `Shift+Left` / `Shift+Right` | Passo fine (0,1%) |
-| `Home` / `End` | Vai all'inizio / alla fine |
-| `Up` / `+` | Aumenta la velocità di riproduzione |
-| `Down` / `-` | Diminuisci la velocità di riproduzione |
-| `0` | Ripristina la velocità a 1x |
-| `S` o `Ctrl+S` | Tenta di scrivere un PNG nella cartella di esportazione dalle impostazioni o in Documents/ScalarScope Exports quando non è impostata alcuna cartella. Non viene visualizzata alcuna notifica. Ctrl+E non è mappato. |
-| `1`–`6` | Richiede una panoramica delle route, della traiettoria, degli scalari, della geometria, del confronto e degli errori. Non Home, Confronta, Guida o Impostazioni. Premendo 1 non si apre Home. |
-| `?` | Apri la guida |
-
----
-
-## Correlati
-
-- [Handbook](https://mcp-tool-shop-org.github.io/scalarscope/handbook/) — La guida per la revisione
-- [RESULTS_AND_LIMITATIONS.md](docs/RESULTS_AND_LIMITATIONS.md) — Risultati sperimentali completi
-- [CHANGELOG.md](CHANGELOG.md) — Cronologia delle versioni
-- [PRIVACY.md](PRIVACY.md) — Informativa sulla privacy
-- [ROADMAP.md](ROADMAP.md) — Un piano più vecchio non verificato, non la revisione corrente
+- [Manuale](https://mcp-tool-shop-org.github.io/scalarscope/handbook/): la guida alla revisione
+- [Parità e oltre](docs/parity-and-beyond.spec.md): cosa la versione 3.x mantiene dalla 2.0, cosa cambia e perché, con i relativi riferimenti
+- [CHANGELOG.md](CHANGELOG.md): cronologia delle versioni
+- [PRIVACY.md](PRIVACY.md): informativa sulla privacy
+- [TESTING.md](TESTING.md): come testare questa versione
+- [L'ambiente di lavoro](https://github.com/mcp-tool-shop-org/runforge): condiviso con RunForge
 
 ---
 
 ## Licenza
 
-[MIT](LICENSE) — Copyright (c) 2025-2026 ScalarScope Project (mcp-tool-shop-org)
+[MIT](LICENSE). Copyright (c) 2025-2026 Progetto ScalarScope (mcp-tool-shop-org)
 
 <p align="center">
   Built by <a href="https://mcp-tool-shop.github.io/">MCP Tool Shop</a>

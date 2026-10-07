@@ -1,6 +1,6 @@
 # scalarscope: how it works
 
-Mapped at 2026-10-07 from commit d06cf13 by Atlas 1.24.0.
+Mapped at 2026-10-07 from commit 5d36725 by Atlas 1.24.0.
 
 ## What this is
 
@@ -8,14 +8,11 @@ A review of two machine-learning runs. The app is the Rust program in rust/, pac
 
 10 parts, mostly C# (181 files), Rust (39), CSS (2), PowerShell (2), TypeScript (2), Astro (1), JavaScript (1), Python (1) and shell (1). Work enters through 7 doors; the busiest is Build and Test, which reaches 4 parts. It deploys a site to GitHub Pages. People run scalarscope.
 
-## What changed since 2026-10-07 (975415b)
+## What changed since 2026-10-07 (d06cf13)
 
-- Coverage now also runs rust/tests/samples_tests.rs.
-- samples/README.md is new and belongs to no part, so atlas check fails on it against the previous map.
-- samples/geometry/composite-teacher.drift.geometry.json is new and belongs to no part, so atlas check fails on it against the previous map.
-- samples/geometry/composite-teacher.geometry.json is new and belongs to no part, so atlas check fails on it against the previous map.
-- And 13 more new files that belong to no part.
-- 43 files added and 48 changed content, across 8 parts.
+- rust/samples/baseline.csv is now also read by rust/tests/review_tests.rs.
+- rust/samples/optimized.csv is now also read by rust/tests/review_tests.rs.
+- 18 files changed content, across 3 parts.
 
 ## What comes in
 
@@ -59,11 +56,11 @@ packaging and src hold only C# and PowerShell files, which this map does not rea
 
 ## What tends to change together
 
-- **rust/src/open.rs** and **rust/tests/review_tests.rs** changed together in 10 of 12 commits, inside the rust part.
-- **rust/src/review.rs** and **rust/src/ui.rs** changed together in 16 of 24 commits, inside the rust part.
-- **rust/src/ui.rs** and **rust/src/ui_tests.rs** changed together in 15 of 25 commits, inside the rust part.
-- **rust/src/ui_tests.rs** and **rust/tests/edge_tests.rs** changed together in 10 of 17 commits, inside the rust part.
-- **rust/src/review.rs** and **rust/tests/review_tests.rs** changed together in 10 of 18 commits, inside the rust part.
+- **rust/src/open.rs** and **rust/tests/review_tests.rs** changed together in 10 of 13 commits, inside the rust part.
+- **rust/src/review.rs** and **rust/src/ui.rs** changed together in 17 of 26 commits, inside the rust part.
+- **rust/src/ui.rs** and **rust/src/ui_tests.rs** changed together in 17 of 27 commits, inside the rust part.
+- **rust/src/review.rs** and **rust/tests/review_tests.rs** changed together in 11 of 19 commits, inside the rust part.
+- **rust/src/open.rs** and **rust/tests/bundle_tests.rs** changed together in 6 of 11 commits, inside the rust part.
 
 Confidence is low: fewer than 25 source files reach 10 revisions in the window.
 
@@ -105,7 +102,7 @@ Read those in order to follow one run of scalarscope end to end. This path follo
 
 - 5 writes and 4 reads use paths built at run time and are not named here.
 - 5 writes and 12 reads go to a path their caller passes, not to this repository.
-- 1 write goes to a temporary directory, not to this repository.
+- 2 writes go to a temporary directory, not to this repository.
 - 16 files belong to no part: samples/README.md, samples/geometry/composite-teacher.drift.geometry.json, samples/geometry/composite-teacher.geometry.json and 13 more.
 - Statistics confidence is low: fewer than 25 source files reach 10 revisions in the window.
 

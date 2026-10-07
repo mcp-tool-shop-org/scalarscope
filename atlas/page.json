@@ -35,56 +35,38 @@
   ],
   "changes": {
     "fileCounts": {
-      "added": 43,
-      "changed": 48,
+      "added": 0,
+      "changed": 18,
       "moved": 0,
-      "parts": 8,
+      "parts": 3,
       "removed": 0
     },
     "items": [
       {
-        "kind": "door",
-        "sentence": "Coverage now also runs rust/tests/samples_tests.rs.",
+        "kind": "landing",
+        "sentence": "rust/samples/baseline.csv is now also read by rust/tests/review_tests.rs.",
         "subjects": [
-          ".github/workflows/coverage.yml",
-          "rust/tests/samples_tests.rs"
+          "rust/samples/baseline.csv",
+          "rust/tests/review_tests.rs"
         ]
       },
       {
-        "kind": "unassigned",
-        "sentence": "samples/README.md is new and belongs to no part, so atlas check fails on it against the previous map.",
+        "kind": "landing",
+        "sentence": "rust/samples/optimized.csv is now also read by rust/tests/review_tests.rs.",
         "subjects": [
-          "samples/README.md"
+          "rust/samples/optimized.csv",
+          "rust/tests/review_tests.rs"
         ]
-      },
-      {
-        "kind": "unassigned",
-        "sentence": "samples/geometry/composite-teacher.drift.geometry.json is new and belongs to no part, so atlas check fails on it against the previous map.",
-        "subjects": [
-          "samples/geometry/composite-teacher.drift.geometry.json"
-        ]
-      },
-      {
-        "kind": "unassigned",
-        "sentence": "samples/geometry/composite-teacher.geometry.json is new and belongs to no part, so atlas check fails on it against the previous map.",
-        "subjects": [
-          "samples/geometry/composite-teacher.geometry.json"
-        ]
-      },
-      {
-        "kind": "unassigned",
-        "sentence": "And 13 more new files that belong to no part.",
-        "subjects": []
       },
       {
         "kind": "counts",
-        "sentence": "43 files added and 48 changed content, across 8 parts.",
+        "sentence": "18 files changed content, across 3 parts.",
         "subjects": []
       }
     ],
     "since": {
-      "commit": "975415be0d0d26172bae62e253f1395706ad6367",
-      "generatedAt": "2026-10-07T02:11:43.887Z"
+      "commit": "d06cf13b2b5c2b6a95de1f21307c79889b35339a",
+      "generatedAt": "2026-10-07T04:18:30.716Z"
     },
     "unchanged": false
   },
@@ -92,7 +74,7 @@
     {
       "a": "rust/src/open.rs",
       "b": "rust/tests/review_tests.rs",
-      "either": 12,
+      "either": 13,
       "partLabels": [
         "rust",
         "rust"
@@ -107,7 +89,7 @@
     {
       "a": "rust/src/review.rs",
       "b": "rust/src/ui.rs",
-      "either": 24,
+      "either": 26,
       "partLabels": [
         "rust",
         "rust"
@@ -117,12 +99,12 @@
         "rust"
       ],
       "relation": "inside",
-      "shared": 16
+      "shared": 17
     },
     {
       "a": "rust/src/ui.rs",
       "b": "rust/src/ui_tests.rs",
-      "either": 25,
+      "either": 27,
       "partLabels": [
         "rust",
         "rust"
@@ -132,27 +114,12 @@
         "rust"
       ],
       "relation": "inside",
-      "shared": 15
-    },
-    {
-      "a": "rust/src/ui_tests.rs",
-      "b": "rust/tests/edge_tests.rs",
-      "either": 17,
-      "partLabels": [
-        "rust",
-        "rust"
-      ],
-      "parts": [
-        "rust",
-        "rust"
-      ],
-      "relation": "inside",
-      "shared": 10
+      "shared": 17
     },
     {
       "a": "rust/src/review.rs",
       "b": "rust/tests/review_tests.rs",
-      "either": 18,
+      "either": 19,
       "partLabels": [
         "rust",
         "rust"
@@ -162,7 +129,22 @@
         "rust"
       ],
       "relation": "inside",
-      "shared": 10
+      "shared": 11
+    },
+    {
+      "a": "rust/src/open.rs",
+      "b": "rust/tests/bundle_tests.rs",
+      "either": 11,
+      "partLabels": [
+        "rust",
+        "rust"
+      ],
+      "parts": [
+        "rust",
+        "rust"
+      ],
+      "relation": "inside",
+      "shared": 6
     }
   ],
   "changesTogetherNote": [
@@ -170,7 +152,7 @@
     "Window: 180 days; a pair counts from 3 shared commits, since 8 source files reach 10 revisions; the floor rises to 10 when 25 do."
   ],
   "changesTogetherWithTests": 0,
-  "commit": "d06cf13b2b5c2b6a95de1f21307c79889b35339a",
+  "commit": "5d367251987fe3c1fdc23b22509d3540834d9ca4",
   "defaultBranch": "main",
   "derived": "10 parts, mostly C# (181 files), Rust (39), CSS (2), PowerShell (2), TypeScript (2), Astro (1), JavaScript (1), Python (1) and shell (1). Work enters through 7 doors; the busiest is Build and Test, which reaches 4 parts. It deploys a site to GitHub Pages. People run scalarscope.",
   "doors": [
@@ -437,11 +419,11 @@
   "edges": [],
   "engine": "1.24.0",
   "generated": [],
-  "generatedAt": "2026-10-07T04:18:30.716Z",
+  "generatedAt": "2026-10-07T05:00:40.845Z",
   "limits": [
     "5 writes and 4 reads use paths built at run time and are not named here.",
     "5 writes and 12 reads go to a path their caller passes, not to this repository.",
-    "1 write goes to a temporary directory, not to this repository.",
+    "2 writes go to a temporary directory, not to this repository.",
     "16 files belong to no part: samples/README.md, samples/geometry/composite-teacher.drift.geometry.json, samples/geometry/composite-teacher.geometry.json and 13 more.",
     "Statistics confidence is low: fewer than 25 source files reach 10 revisions in the window."
   ],
