@@ -1,6 +1,6 @@
 # Store listing screenshots (3.1.0)
 
-Six screenshots at 1920 × 1080, taken from the release build at text scale 1.3, on the files in `samples/` and the built-in sample. No path or personal data is on screen.
+Six screenshots at 1920 × 1080, taken from the release build on the files in `samples/` and the built-in sample: text scale 1.3, except shot 5 at 1.0 so a whole session fits. No path or personal data is on screen.
 
 | Order | File | Caption |
 |---|---|---|
@@ -8,7 +8,7 @@ Six screenshots at 1920 × 1080, taken from the release build at text scale 1.3,
 | 2 | `2-distribution-why.png` | Every delta explains itself: the rule and this pair's numbers. Drag a threshold to read P(latency > x) for each run. |
 | 3 | `3-heat-map.png` | Six views, none animated. The heat map shows where each run's samples fall, step by step, on a shared scale. |
 | 4 | `4-geometry-drift.png` | ASPIRE training geometry. A reading the data cannot support is withheld, with the reason. |
-| 5 | `5-workbench.png` | Workbench: weigh a setting across many runs. A local model proposes; ScalarScope tests and decides. |
+| 5 | `5-workbench.png` | Workbench: a local model proposes what a setting does. ScalarScope tests each hypothesis and sets its state, and the model's note is labelled as its words. |
 | 6 | `6-guide.png` | A searchable guide to every rule on the page. |
 
 ## Sources
@@ -17,7 +17,7 @@ Six screenshots at 1920 × 1080, taken from the release build at text scale 1.3,
 |---|---|
 | 1–3 | The built-in sample comparison (`rust/samples/baseline.csv`, `rust/samples/optimized.csv`): Series view, then Distribution with the ΔO Why panel open, then Heat map |
 | 4 | `samples/geometry/local-teacher.drift.geometry.json` against `composite-teacher.drift.geometry.json`, from two real aspire-si training runs |
-| 5 | The nine simulated runs in `samples/workbench` (the page says they are filed under "simulated") |
+| 5 | The nine simulated runs in `samples/workbench` (the page says they are filed under "simulated"), after a real session with qwen3:14b on the local GPU (2026-10-07). The program recorded two hypotheses: tail heaviness up with batch size, inconclusive; throughput up with batch size, passes on these runs alone. The model's note calls the second "supported", which is why the note sits under the label saying it is the model's words. |
 | 6 | Guide |
 
 ## Retaking them
@@ -29,5 +29,7 @@ SCALARSCOPE_CAPTURE=docs/store/1-compare-headline.png SCALARSCOPE_CAPTURE_SCALE=
 SCALARSCOPE_CAPTURE_PAGE=compare SCALARSCOPE_CAPTURE_VIEW=1 \
   rust/target/release/scalarscope.exe rust/samples/baseline.csv rust/samples/optimized.csv
 ```
+
+Shot 5 adds `SCALARSCOPE_CAPTURE_RUNS=samples/workbench` and `SCALARSCOPE_CAPTURE_ASK="<your call>"`, which runs a real session against a local Ollama model that can call tools and waits for it. Check the GPU is free first, and unload the model after.
 
 The other variables are `SCALARSCOPE_CAPTURE_WHY` (a delta symbol such as `ΔO`) and `SCALARSCOPE_CAPTURE_RUNS` (a folder of runs for the Workbench). `SCALARSCOPE_CAPTURE_PAGE` takes `welcome`, `compare`, `workbench`, `history`, `guide` or `settings`.
