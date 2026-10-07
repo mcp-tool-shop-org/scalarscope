@@ -9,7 +9,7 @@
   ],
   "breaks": [
     {
-      "doors": 4,
+      "doors": 5,
       "importedBy": [],
       "importedByTests": [],
       "kind": "part",
@@ -35,30 +35,64 @@
   ],
   "changes": {
     "fileCounts": {
-      "added": 0,
-      "changed": 6,
+      "added": 16,
+      "changed": 15,
       "moved": 0,
       "parts": 3,
       "removed": 0
     },
     "items": [
       {
+        "kind": "door",
+        "sentence": "Coverage now also runs rust/tests/aspire_export_tests.rs, rust/tests/bundle_tests.rs, rust/tests/compat_tests.rs and 8 more.",
+        "subjects": [
+          ".github/workflows/coverage.yml",
+          "rust/tests/aspire_export_tests.rs",
+          "rust/tests/bundle_tests.rs",
+          "rust/tests/compat_tests.rs",
+          "rust/tests/edge_tests.rs",
+          "rust/tests/geometry_delta_tests.rs",
+          "rust/tests/history_tests.rs",
+          "rust/tests/prefs_tests.rs",
+          "rust/tests/review_tests.rs",
+          "rust/tests/runtrace_tests.rs",
+          "rust/tests/sources_tests.rs",
+          "rust/tests/workbench_tests.rs"
+        ]
+      },
+      {
+        "kind": "door",
+        "sentence": "Coverage no longer runs rust/tests/.",
+        "subjects": [
+          ".github/workflows/coverage.yml",
+          "rust/tests/"
+        ]
+      },
+      {
+        "kind": "door",
+        "sentence": "live_workbench (rust/Cargo.toml) is a new command. It runs rust/examples/live_workbench.rs.",
+        "subjects": [
+          "rust/Cargo.toml",
+          "rust/examples/live_workbench.rs"
+        ]
+      },
+      {
         "kind": "counts",
-        "sentence": "Nothing structural changed since 2026-10-07; 6 files changed content.",
+        "sentence": "16 files added and 15 changed content, across 3 parts.",
         "subjects": []
       }
     ],
     "since": {
-      "commit": "3d471dc241a2d0012b248b22e032f9b354cf47bd",
-      "generatedAt": "2026-10-07T01:31:59.876Z"
+      "commit": "9a109beaa472b07f3f1f1a096967e3337876907b",
+      "generatedAt": "2026-10-07T01:45:52.315Z"
     },
-    "unchanged": true
+    "unchanged": false
   },
   "changesTogether": [
     {
       "a": "rust/src/open.rs",
       "b": "rust/tests/review_tests.rs",
-      "either": 11,
+      "either": 12,
       "partLabels": [
         "rust",
         "rust"
@@ -68,12 +102,12 @@
         "rust"
       ],
       "relation": "inside",
-      "shared": 9
+      "shared": 10
     },
     {
       "a": "rust/src/review.rs",
       "b": "rust/src/ui.rs",
-      "either": 19,
+      "either": 20,
       "partLabels": [
         "rust",
         "rust"
@@ -88,7 +122,7 @@
     {
       "a": "rust/src/ui.rs",
       "b": "rust/src/ui_tests.rs",
-      "either": 19,
+      "either": 21,
       "partLabels": [
         "rust",
         "rust"
@@ -98,12 +132,27 @@
         "rust"
       ],
       "relation": "inside",
-      "shared": 12
+      "shared": 13
+    },
+    {
+      "a": "rust/src/ui_tests.rs",
+      "b": "rust/tests/edge_tests.rs",
+      "either": 15,
+      "partLabels": [
+        "rust",
+        "rust"
+      ],
+      "parts": [
+        "rust",
+        "rust"
+      ],
+      "relation": "inside",
+      "shared": 9
     },
     {
       "a": "rust/src/review.rs",
       "b": "rust/tests/review_tests.rs",
-      "either": 16,
+      "either": 17,
       "partLabels": [
         "rust",
         "rust"
@@ -114,31 +163,16 @@
       ],
       "relation": "inside",
       "shared": 10
-    },
-    {
-      "a": "rust/src/ui_tests.rs",
-      "b": "rust/tests/edge_tests.rs",
-      "either": 13,
-      "partLabels": [
-        "rust",
-        "rust"
-      ],
-      "parts": [
-        "rust",
-        "rust"
-      ],
-      "relation": "inside",
-      "shared": 8
     }
   ],
   "changesTogetherNote": [
     "Confidence is low: fewer than 25 source files reach 10 revisions in the window.",
-    "Window: 180 days; a pair counts from 3 shared commits, since 6 source files reach 10 revisions; the floor rises to 10 when 25 do."
+    "Window: 180 days; a pair counts from 3 shared commits, since 8 source files reach 10 revisions; the floor rises to 10 when 25 do."
   ],
   "changesTogetherWithTests": 0,
-  "commit": "9a109beaa472b07f3f1f1a096967e3337876907b",
+  "commit": "893523cfe5cfaa0cf89185d96c84e5494dbd0007",
   "defaultBranch": "main",
-  "derived": "10 parts, mostly C# (181 files), Rust (30), CSS (2), PowerShell (2), TypeScript (2), Astro (1), JavaScript (1) and shell (1). Work enters through 6 doors; the busiest is Build and Test, which reaches 4 parts. It deploys a site to GitHub Pages. People run scalarscope.",
+  "derived": "10 parts, mostly C# (181 files), Rust (35), CSS (2), PowerShell (2), TypeScript (2), Astro (1), JavaScript (1), Python (1) and shell (1). Work enters through 7 doors; the busiest is Build and Test, which reaches 4 parts. It deploys a site to GitHub Pages. People run scalarscope.",
   "doors": [
     {
       "builds": [
@@ -165,7 +199,7 @@
         {
           "boundary": "rust",
           "depth": 0,
-          "files": 20
+          "files": 23
         },
         {
           "boundary": "src",
@@ -215,7 +249,7 @@
         {
           "boundary": "rust",
           "depth": 0,
-          "files": 20
+          "files": 23
         }
       ],
       "runs": [
@@ -246,7 +280,7 @@
         {
           "boundary": "rust",
           "depth": 0,
-          "files": 28
+          "files": 32
         }
       ],
       "runs": [
@@ -257,10 +291,20 @@
         "rust/src/ui_geometry.rs",
         "rust/src/ui_tests.rs",
         "rust/src/views.rs",
-        "rust/tests/"
+        "rust/tests/aspire_export_tests.rs",
+        "rust/tests/bundle_tests.rs",
+        "rust/tests/compat_tests.rs",
+        "rust/tests/edge_tests.rs",
+        "rust/tests/geometry_delta_tests.rs",
+        "rust/tests/history_tests.rs",
+        "rust/tests/prefs_tests.rs",
+        "rust/tests/review_tests.rs",
+        "rust/tests/runtrace_tests.rs",
+        "rust/tests/sources_tests.rs",
+        "rust/tests/workbench_tests.rs"
       ],
-      "runsCount": 8,
-      "runsMore": 14,
+      "runsCount": 18,
+      "runsMore": 15,
       "sends": [
         "uploads coverage to Codecov"
       ],
@@ -334,6 +378,34 @@
       "checks": [],
       "checksCount": 0,
       "checksMore": 0,
+      "example": true,
+      "file": "rust/Cargo.toml",
+      "id": "rust/Cargo.toml#live_workbench",
+      "kind": "command",
+      "landings": [],
+      "name": "live_workbench",
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "rust",
+          "depth": 0,
+          "files": 10
+        }
+      ],
+      "runWith": "cargo run --example live_workbench",
+      "runs": [
+        "rust/examples/live_workbench.rs"
+      ],
+      "runsCount": 1,
+      "runsMore": 0,
+      "sends": [],
+      "stages": [],
+      "triggers": []
+    },
+    {
+      "checks": [],
+      "checksCount": 0,
+      "checksMore": 0,
       "file": "rust/Cargo.toml",
       "id": "rust/Cargo.toml#scalarscope",
       "kind": "command",
@@ -344,7 +416,7 @@
         {
           "boundary": "rust",
           "depth": 0,
-          "files": 19
+          "files": 22
         }
       ],
       "runs": [
@@ -363,10 +435,10 @@
   "edges": [],
   "engine": "1.24.0",
   "generated": [],
-  "generatedAt": "2026-10-07T01:45:52.315Z",
+  "generatedAt": "2026-10-07T01:55:55.420Z",
   "limits": [
-    "3 writes and 3 reads use paths built at run time and are not named here.",
-    "4 writes and 11 reads go to a path their caller passes, not to this repository.",
+    "5 writes and 4 reads use paths built at run time and are not named here.",
+    "5 writes and 12 reads go to a path their caller passes, not to this repository.",
     "1 write goes to a temporary directory, not to this repository.",
     "Statistics confidence is low: fewer than 25 source files reach 10 revisions in the window."
   ],
@@ -396,11 +468,11 @@
   "startReason": "This path follows scalarscope (a command people run) from its entry, since Build and Test only checks code.",
   "summary": "A review of two machine-learning runs. The app is the Rust program in rust/, packed as an MSIX for the Microsoft Store; src/ holds the earlier .NET MAUI app the Store copy still runs.",
   "summaryFrom": "person",
-  "testFiles": 55,
+  "testFiles": 67,
   "testedBy": {
-    "rust": 17
+    "rust": 18
   },
-  "unnamedWrites": 3,
+  "unnamedWrites": 5,
   "unread": [],
   "unreadCode": [
     "packaging",

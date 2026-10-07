@@ -113,7 +113,7 @@
       "confidence": "low",
       "highWater": null,
       "name": "rust",
-      "qualifyingSourceCommits": 25,
+      "qualifyingSourceCommits": 29,
       "rebaseline": null
     },
     {
@@ -214,13 +214,13 @@
         "path": ".github/workflows/release.yml"
       },
       {
-        "commits": 5,
-        "lines": 36,
+        "commits": 6,
+        "lines": 39,
         "path": ".gitignore"
       },
       {
-        "commits": 38,
-        "lines": 450,
+        "commits": 41,
+        "lines": 470,
         "path": "CHANGELOG.md"
       },
       {
@@ -234,8 +234,8 @@
         "path": "LICENSE"
       },
       {
-        "commits": 4,
-        "lines": 79,
+        "commits": 5,
+        "lines": 81,
         "path": "PRIVACY.md"
       },
       {
@@ -349,8 +349,8 @@
         "path": "assets/logo.png"
       },
       {
-        "commits": 5,
-        "lines": 228,
+        "commits": 7,
+        "lines": 240,
         "path": "atlas/README.md"
       },
       {
@@ -359,18 +359,18 @@
         "path": "atlas/boundaries.yaml"
       },
       {
-        "commits": 5,
-        "lines": 872,
+        "commits": 7,
+        "lines": 900,
         "path": "atlas/page.json"
       },
       {
-        "commits": 5,
-        "lines": 4774,
+        "commits": 7,
+        "lines": 4910,
         "path": "atlas/statistics.json"
       },
       {
-        "commits": 5,
-        "lines": 7622,
+        "commits": 7,
+        "lines": 7652,
         "path": "atlas/structure.json"
       },
       {
@@ -479,8 +479,8 @@
         "path": "docs/index.md"
       },
       {
-        "commits": 16,
-        "lines": 887,
+        "commits": 18,
+        "lines": 901,
         "path": "docs/parity-and-beyond.spec.md"
       },
       {
@@ -549,14 +549,19 @@
         "path": "phase32_validation_report.md"
       },
       {
-        "commits": 6,
-        "lines": 4655,
+        "commits": 8,
+        "lines": 4666,
         "path": "rust/Cargo.lock"
       },
       {
-        "commits": 6,
-        "lines": 24,
+        "commits": 7,
+        "lines": 25,
         "path": "rust/Cargo.toml"
+      },
+      {
+        "commits": 2,
+        "lines": 75,
+        "path": "rust/examples/live_workbench.rs"
       },
       {
         "commits": 2,
@@ -579,8 +584,8 @@
         "path": "rust/src/geometry.rs"
       },
       {
-        "commits": 6,
-        "lines": 6083,
+        "commits": 7,
+        "lines": 6252,
         "path": "rust/src/geometry_deltas.rs"
       },
       {
@@ -589,8 +594,13 @@
         "path": "rust/src/history.rs"
       },
       {
-        "commits": 18,
-        "lines": 31,
+        "commits": 1,
+        "lines": 135,
+        "path": "rust/src/knobs.rs"
+      },
+      {
+        "commits": 19,
+        "lines": 33,
         "path": "rust/src/lib.rs"
       },
       {
@@ -604,8 +614,8 @@
         "path": "rust/src/milestones.rs"
       },
       {
-        "commits": 16,
-        "lines": 1557,
+        "commits": 17,
+        "lines": 1585,
         "path": "rust/src/open.rs"
       },
       {
@@ -624,8 +634,8 @@
         "path": "rust/src/review.rs"
       },
       {
-        "commits": 5,
-        "lines": 1237,
+        "commits": 6,
+        "lines": 1246,
         "path": "rust/src/runtrace.rs"
       },
       {
@@ -644,8 +654,8 @@
         "path": "rust/src/svg.rs"
       },
       {
-        "commits": 32,
-        "lines": 2951,
+        "commits": 33,
+        "lines": 2960,
         "path": "rust/src/ui.rs"
       },
       {
@@ -654,14 +664,19 @@
         "path": "rust/src/ui_geometry.rs"
       },
       {
-        "commits": 3,
-        "lines": 400,
+        "commits": 5,
+        "lines": 410,
         "path": "rust/src/ui_pages.rs"
       },
       {
-        "commits": 24,
-        "lines": 1046,
+        "commits": 26,
+        "lines": 1158,
         "path": "rust/src/ui_tests.rs"
+      },
+      {
+        "commits": 1,
+        "lines": 456,
+        "path": "rust/src/ui_workbench.rs"
       },
       {
         "commits": 4,
@@ -669,23 +684,28 @@
         "path": "rust/src/views.rs"
       },
       {
+        "commits": 1,
+        "lines": 370,
+        "path": "rust/src/workbench.rs"
+      },
+      {
         "commits": 3,
         "lines": 156,
         "path": "rust/tests/aspire_export_tests.rs"
       },
       {
-        "commits": 11,
-        "lines": 366,
+        "commits": 12,
+        "lines": 367,
         "path": "rust/tests/bundle_tests.rs"
       },
       {
-        "commits": 6,
-        "lines": 183,
+        "commits": 7,
+        "lines": 186,
         "path": "rust/tests/compat_tests.rs"
       },
       {
-        "commits": 18,
-        "lines": 746,
+        "commits": 19,
+        "lines": 750,
         "path": "rust/tests/edge_tests.rs"
       },
       {
@@ -699,8 +719,63 @@
         "path": "rust/tests/fixtures/aspire-si/steady.json"
       },
       {
-        "commits": 6,
-        "lines": 1580,
+        "commits": 1,
+        "lines": 0,
+        "path": "rust/tests/fixtures/workbench}/README.md"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "rust/tests/fixtures/workbench}/batch1_seed1_runtrace.json"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "rust/tests/fixtures/workbench}/batch1_seed2_runtrace.json"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "rust/tests/fixtures/workbench}/batch1_seed3_runtrace.json"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "rust/tests/fixtures/workbench}/batch4_seed1_runtrace.json"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "rust/tests/fixtures/workbench}/batch4_seed2_runtrace.json"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "rust/tests/fixtures/workbench}/batch4_seed3_runtrace.json"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "rust/tests/fixtures/workbench}/batch8_seed1_runtrace.json"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "rust/tests/fixtures/workbench}/batch8_seed2_runtrace.json"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "rust/tests/fixtures/workbench}/batch8_seed3_runtrace.json"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "rust/tests/fixtures/workbench}/generate.py"
+      },
+      {
+        "commits": 7,
+        "lines": 1686,
         "path": "rust/tests/geometry_delta_tests.rs"
       },
       {
@@ -714,8 +789,8 @@
         "path": "rust/tests/prefs_tests.rs"
       },
       {
-        "commits": 19,
-        "lines": 649,
+        "commits": 20,
+        "lines": 650,
         "path": "rust/tests/review_tests.rs"
       },
       {
@@ -727,6 +802,11 @@
         "commits": 10,
         "lines": 416,
         "path": "rust/tests/sources_tests.rs"
+      },
+      {
+        "commits": 2,
+        "lines": 241,
+        "path": "rust/tests/workbench_tests.rs"
       },
       {
         "commits": 3,
@@ -2004,6 +2084,61 @@
         "path": "tests/Fixtures/InferenceOptimization/optimized_tfrt_runtrace.json"
       },
       {
+        "commits": 1,
+        "lines": 7,
+        "path": "tests/Fixtures/Workbench/README.md"
+      },
+      {
+        "commits": 1,
+        "lines": 2080,
+        "path": "tests/Fixtures/Workbench/batch1_seed1_runtrace.json"
+      },
+      {
+        "commits": 1,
+        "lines": 2080,
+        "path": "tests/Fixtures/Workbench/batch1_seed2_runtrace.json"
+      },
+      {
+        "commits": 1,
+        "lines": 2080,
+        "path": "tests/Fixtures/Workbench/batch1_seed3_runtrace.json"
+      },
+      {
+        "commits": 1,
+        "lines": 2080,
+        "path": "tests/Fixtures/Workbench/batch4_seed1_runtrace.json"
+      },
+      {
+        "commits": 1,
+        "lines": 2080,
+        "path": "tests/Fixtures/Workbench/batch4_seed2_runtrace.json"
+      },
+      {
+        "commits": 1,
+        "lines": 2080,
+        "path": "tests/Fixtures/Workbench/batch4_seed3_runtrace.json"
+      },
+      {
+        "commits": 1,
+        "lines": 2080,
+        "path": "tests/Fixtures/Workbench/batch8_seed1_runtrace.json"
+      },
+      {
+        "commits": 1,
+        "lines": 2080,
+        "path": "tests/Fixtures/Workbench/batch8_seed2_runtrace.json"
+      },
+      {
+        "commits": 1,
+        "lines": 2080,
+        "path": "tests/Fixtures/Workbench/batch8_seed3_runtrace.json"
+      },
+      {
+        "commits": 1,
+        "lines": 98,
+        "path": "tests/Fixtures/Workbench/generate.py"
+      },
+      {
         "commits": 4,
         "lines": 80,
         "path": "tests/ScalarScope.DeterminismTests/DeterminismSuiteTests.cs"
@@ -2139,17 +2274,17 @@
     "level": "low",
     "reason": "fewer than 25 source files reach 10 revisions in the window"
   },
-  "generatedAt": "2026-10-07T01:45:52.315Z",
+  "generatedAt": "2026-10-07T01:55:55.420Z",
   "generatedFrom": {
-    "commit": "9a109beaa472b07f3f1f1a096967e3337876907b"
+    "commit": "893523cfe5cfaa0cf89185d96c84e5494dbd0007"
   },
   "pairs": [
     {
-      "a": "CHANGELOG.md",
-      "b": "rust/src/ui.rs",
-      "either": 28,
-      "shared": 15,
-      "strength": 0.535714
+      "a": "rust/Cargo.lock",
+      "b": "rust/Cargo.toml",
+      "either": 6,
+      "shared": 5,
+      "strength": 0.833333
     },
     {
       "a": "rust/src/bundle.rs",
@@ -2161,121 +2296,107 @@
     {
       "a": "rust/src/bundle.rs",
       "b": "rust/src/ui.rs",
-      "either": 19,
-      "shared": 10,
-      "strength": 0.526316
-    },
-    {
-      "a": "rust/src/bundle.rs",
-      "b": "rust/src/ui_tests.rs",
-      "either": 14,
-      "shared": 8,
-      "strength": 0.571429
-    },
-    {
-      "a": "rust/src/bundle.rs",
-      "b": "rust/tests/edge_tests.rs",
-      "either": 12,
-      "shared": 7,
-      "strength": 0.583333
-    },
-    {
-      "a": "rust/src/bundle.rs",
-      "b": "rust/tests/runtrace_tests.rs",
-      "either": 10,
-      "shared": 5,
-      "strength": 0.5
-    },
-    {
-      "a": "rust/src/open.rs",
-      "b": "rust/src/review.rs",
-      "either": 16,
-      "shared": 8,
-      "strength": 0.5
-    },
-    {
-      "a": "rust/src/open.rs",
-      "b": "rust/tests/bundle_tests.rs",
-      "either": 10,
-      "shared": 5,
-      "strength": 0.5
-    },
-    {
-      "a": "rust/src/open.rs",
-      "b": "rust/tests/edge_tests.rs",
-      "either": 12,
-      "shared": 6,
-      "strength": 0.5
-    },
-    {
-      "a": "rust/src/open.rs",
-      "b": "rust/tests/review_tests.rs",
-      "either": 11,
-      "shared": 9,
-      "strength": 0.818182
-    },
-    {
-      "a": "rust/src/review.rs",
-      "b": "rust/src/ui.rs",
-      "either": 19,
-      "shared": 15,
-      "strength": 0.789474
-    },
-    {
-      "a": "rust/src/review.rs",
-      "b": "rust/src/ui_tests.rs",
-      "either": 18,
-      "shared": 9,
-      "strength": 0.5
-    },
-    {
-      "a": "rust/src/review.rs",
-      "b": "rust/tests/edge_tests.rs",
-      "either": 16,
-      "shared": 8,
-      "strength": 0.5
-    },
-    {
-      "a": "rust/src/review.rs",
-      "b": "rust/tests/review_tests.rs",
-      "either": 16,
-      "shared": 10,
-      "strength": 0.625
-    },
-    {
-      "a": "rust/src/ui.rs",
-      "b": "rust/src/ui_tests.rs",
-      "either": 19,
-      "shared": 12,
-      "strength": 0.631579
-    },
-    {
-      "a": "rust/src/ui.rs",
-      "b": "rust/tests/review_tests.rs",
       "either": 20,
       "shared": 10,
       "strength": 0.5
     },
     {
-      "a": "rust/src/ui_tests.rs",
-      "b": "rust/tests/edge_tests.rs",
-      "either": 13,
+      "a": "rust/src/bundle.rs",
+      "b": "rust/src/ui_tests.rs",
+      "either": 16,
       "shared": 8,
-      "strength": 0.615385
+      "strength": 0.5
     },
     {
-      "a": "rust/tests/bundle_tests.rs",
+      "a": "rust/src/bundle.rs",
       "b": "rust/tests/edge_tests.rs",
+      "either": 13,
+      "shared": 7,
+      "strength": 0.538462
+    },
+    {
+      "a": "rust/src/bundle.rs",
+      "b": "rust/tests/runtrace_tests.rs",
       "either": 10,
       "shared": 5,
       "strength": 0.5
     },
     {
+      "a": "rust/src/open.rs",
+      "b": "rust/tests/bundle_tests.rs",
+      "either": 11,
+      "shared": 6,
+      "strength": 0.545455
+    },
+    {
+      "a": "rust/src/open.rs",
+      "b": "rust/tests/edge_tests.rs",
+      "either": 13,
+      "shared": 7,
+      "strength": 0.538462
+    },
+    {
+      "a": "rust/src/open.rs",
+      "b": "rust/tests/review_tests.rs",
+      "either": 12,
+      "shared": 10,
+      "strength": 0.833333
+    },
+    {
+      "a": "rust/src/review.rs",
+      "b": "rust/src/ui.rs",
+      "either": 20,
+      "shared": 15,
+      "strength": 0.75
+    },
+    {
+      "a": "rust/src/review.rs",
+      "b": "rust/tests/review_tests.rs",
+      "either": 17,
+      "shared": 10,
+      "strength": 0.588235
+    },
+    {
+      "a": "rust/src/ui.rs",
+      "b": "rust/src/ui_tests.rs",
+      "either": 21,
+      "shared": 13,
+      "strength": 0.619048
+    },
+    {
+      "a": "rust/src/ui.rs",
+      "b": "rust/tests/edge_tests.rs",
+      "either": 20,
+      "shared": 10,
+      "strength": 0.5
+    },
+    {
+      "a": "rust/src/ui.rs",
+      "b": "rust/tests/review_tests.rs",
+      "either": 21,
+      "shared": 11,
+      "strength": 0.52381
+    },
+    {
+      "a": "rust/src/ui_tests.rs",
+      "b": "rust/tests/edge_tests.rs",
+      "either": 15,
+      "shared": 9,
+      "strength": 0.6
+    },
+    {
+      "a": "rust/tests/bundle_tests.rs",
+      "b": "rust/tests/edge_tests.rs",
+      "either": 11,
+      "shared": 6,
+      "strength": 0.545455
+    },
+    {
       "a": "rust/tests/edge_tests.rs",
       "b": "rust/tests/runtrace_tests.rs",
-      "either": 9,
+      "either": 10,
       "shared": 5,
-      "strength": 0.555556
+      "strength": 0.5
     },
     {
       "a": "src/ScalarScope/ViewModels/ComparisonViewModel.cs",
@@ -2295,16 +2416,16 @@
     "floor": "fallen",
     "floorHeld": false,
     "floorTrigger": "revision-depth",
-    "headDate": "2026-10-06T21:45:45-04:00",
-    "inScopeFiles": 393,
+    "headDate": "2026-10-06T21:55:49-04:00",
+    "inScopeFiles": 409,
     "pinnedStart": null,
     "priorFloor": "fallen",
-    "qualifyingCommits": 55,
+    "qualifyingCommits": 60,
     "qualifyingMinimum": 30,
     "revisions": 5,
     "shared": 10,
     "sharedFloorUsed": 3,
-    "since": "2026-04-10T01:45:45.000Z",
+    "since": "2026-04-10T01:55:49.000Z",
     "sourceExtensions": [
       ".js",
       ".mjs",
@@ -2320,7 +2441,7 @@
     ],
     "sourceFileReach": 20,
     "sourceFileRise": 25,
-    "sourceFilesReachingStrongFloor": 6,
+    "sourceFilesReachingStrongFloor": 8,
     "strength": 0.5,
     "windowDays": 180
   },
