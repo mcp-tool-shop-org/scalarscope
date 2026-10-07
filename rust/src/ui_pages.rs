@@ -58,6 +58,14 @@ pub const GUIDE: &[Section] = &[
         body: "A latency CSV, a benchmark JSON, a Chrome or PyTorch profiler trace (.json or .json.gz), a runtime log, a ScalarScope RunTrace JSON, a run folder, or a backpropagate run_history.json. CSV columns for elapsed time (time_s), throughput, memory, CPU and GPU are read when present.",
     },
     Section {
+        title: "The workbench",
+        body: "The Workbench tab weighs knobs across many runs. Open runs there, or it uses the runs being compared. When you press Ask, a local model that can call tools (through Ollama on this computer; cloud models are refused) measures the runs with formulas, builds formula tools and proposes what a knob does. ScalarScope computes every number and sets every verdict. A hypothesis fixes its knob, formula and direction when it is proposed. On one set of runs it is not testable, confounded, inconclusive, supported or refuted by an exact rank test. Verdicts across sets of runs come only at checkpoints, one every five new sets, by e-BH at a 5% false discovery rate. Write your own call before you ask. The model's note sits below the verdicts, labelled as its words. Save session record keeps the model, its digest, every call and answer, and no paths.",
+    },
+    Section {
+        title: "Knobs",
+        body: "A knob is a setting a run was made with: batch size, precision, TensorRT, threads, CUDA graphs, input shape. It is read from the first place that has it: a knobs object in the RunTrace metadata, a knobs.json beside the run, then key=value pairs in the folder name, such as batch=8_precision=fp16. The page says where each came from. A run set counts as evidence about a knob only when that knob differs and the others match.",
+    },
+    Section {
         title: "Keyboard shortcuts",
         body: "F1: Guide. Ctrl+,: Settings. Ctrl+H: Welcome. On Compare, 1 to 6 choose Series, Warmup, Distribution, Difference, Spectrum and Heat map. Esc closes the Why panel.",
     },

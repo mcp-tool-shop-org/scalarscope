@@ -41,6 +41,7 @@ fn inference(label: &str, latency: Vec<f64>, steady: Option<i64>, warmup: Option
         gpu_percent: Vec::new(),
         trace: None,
         replicates: Vec::new(),
+        knobs: Default::default(),
     })
 }
 
@@ -212,6 +213,7 @@ fn a_step_list_that_does_not_match_the_samples_is_not_a_stabilization_time() {
         gpu_percent: Vec::new(),
         trace: None,
         replicates: Vec::new(),
+        knobs: Default::default(),
     };
     let right = InferenceRun {
         label: "right".to_string(),
@@ -226,6 +228,7 @@ fn a_step_list_that_does_not_match_the_samples_is_not_a_stabilization_time() {
         gpu_percent: Vec::new(),
         trace: None,
         replicates: Vec::new(),
+        knobs: Default::default(),
     };
     let Pair::Inference(review) = pair(&Side::Inference(left.clone()), &Side::Inference(right)).unwrap() else { panic!("inference") };
     // Two and three samples are too short to tell where a run settles.
@@ -249,6 +252,7 @@ fn a_step_list_that_does_not_match_the_samples_is_not_a_stabilization_time() {
         gpu_percent: Vec::new(),
         trace: None,
         replicates: Vec::new(),
+        knobs: Default::default(),
     };
     let Pair::Inference(review) = pair(&Side::Inference(left), &Side::Inference(right)).unwrap() else { panic!("inference") };
     assert!(!review.fired.iter().any(|symbol| symbol == "ΔO"));

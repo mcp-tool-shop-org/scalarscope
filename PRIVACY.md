@@ -32,6 +32,8 @@ ScalarScope does not integrate with any third-party analytics, advertising, or t
 
 This build does not load files from URLs and does not check for updates. It does not send analytics. Comparison data stays on the machine unless you export it.
 
+The Workbench tab connects to one address only, and only when you press Ask: a local Ollama at 127.0.0.1 on this computer. It sends the measures it computed from your runs and the runs' names and knobs to that local model. It refuses Ollama's cloud models, so nothing it sends leaves the machine. Its memory (learned formulas, hypotheses, checkpoints) is kept in the app's local data and holds no file paths.
+
 ## Your Rights
 
 Since we don't collect data, there's nothing to:

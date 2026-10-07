@@ -2849,6 +2849,7 @@ dependencies = [
  "serde",
  "serde_json",
  "sha2",
+ "workbench",
  "zip",
 ]
 
@@ -4253,6 +4254,14 @@ name = "wit-bindgen"
 version = "0.57.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1ebf944e87a7c253233ad6766e082e3cd714b5d03812acc24c318f549614536e"
+
+[[package]]
+name = "workbench"
+version = "2.0.0"
+source = "git+https://github.com/mcp-tool-shop-org/runforge?rev=c51063120f19073b3a359fb1d51b9de265e0420d#c51063120f19073b3a359fb1d51b9de265e0420d"
+dependencies = [
+ "serde_json",
+]
 
 [[package]]
 name = "writeable"

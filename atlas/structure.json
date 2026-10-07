@@ -212,7 +212,7 @@
           "path": "docs/index.md"
         },
         {
-          "hash": "2dfd4f9ffb0da3260f3385a3e86e68b3be60820fd387f328406c02fd534acc3a",
+          "hash": "fd0defa11c0f154b088108b6edc1c9e7b58582b71d2c28a87288e5dbf297ad96",
           "path": "docs/parity-and-beyond.spec.md"
         }
       ],
@@ -290,11 +290,11 @@
       "externals": 0,
       "files": [
         {
-          "hash": "ef37cc5bd20b76347044b5e9ff8b67169269c90170aa64537a019915a4d94c76",
+          "hash": "44ee9382bba176303ee6d12f387246d8d7a5e22f271eceea9984e598a51af9d7",
           "path": ".gitignore"
         },
         {
-          "hash": "989a4b6c2b67104821310a6a74d9645c8acb2c9eef47d8ce1b6af8df8d3e2e17",
+          "hash": "a588e568c3acc592b409ee2164018b77b0c19c854d1de125c97057436a6d0e9e",
           "path": "CHANGELOG.md"
         },
         {
@@ -306,7 +306,7 @@
           "path": "LICENSE"
         },
         {
-          "hash": "d77ab81b373014308860b4028c4c59707c068c913518e185e18398d4eac40b61",
+          "hash": "8ff7b28630bd453b39eaa19b531ca1f38641e64387c68ae969c46a4d70e1ade6",
           "path": "PRIVACY.md"
         },
         {
@@ -409,10 +409,10 @@
       "unresolvedSites": 0
     },
     {
-      "dynamicReads": 3,
+      "dynamicReads": 4,
       "dynamicSpawns": 0,
       "dynamicSpawnsInTests": 0,
-      "dynamicWrites": 3,
+      "dynamicWrites": 5,
       "entryPoints": [
         "rust/src/lib.rs",
         "rust/src/main.rs"
@@ -420,12 +420,204 @@
       "externals": 0,
       "files": [
         {
-          "hash": "4f627beb1373d53fe523514ff3108b7eca206bd75b1b560cd9a4cdbd295f9c1b",
+          "hash": "cb816a5e317d8192f0457ec12d046650116153afb9f5b421d227ac4c379952c9",
           "path": "rust/Cargo.lock"
         },
         {
-          "hash": "82745ba9254df7f0fb079358bccb4d1d8292abc1c28a58341f93a8a16eb3beab",
+          "hash": "4efd9ddb9f50478dab5aa3d65862e216f3cd15eb93fc31387688c9eaeefed825",
           "path": "rust/Cargo.toml"
+        },
+        {
+          "entry": "main",
+          "entryRule": 1,
+          "hash": "23e106b01586758ba96ebc3864f3dd3c3d9e9afa68d96ef53f3d021af6bf2b69",
+          "importsFiles": [
+            "rust/src/open.rs",
+            "rust/src/stats.rs",
+            "rust/src/workbench.rs"
+          ],
+          "library": "rust/src/lib.rs",
+          "path": "rust/examples/live_workbench.rs",
+          "sequences": [
+            {
+              "calls": [
+                {
+                  "line": 23,
+                  "name": "open_path",
+                  "target": {
+                    "file": "rust/src/open.rs"
+                  }
+                }
+              ],
+              "exported": false,
+              "invokedAtTopLevel": false,
+              "isDefaultExport": false,
+              "name": "inference"
+            },
+            {
+              "calls": [
+                {
+                  "line": 30,
+                  "name": "board",
+                  "target": {
+                    "file": "rust/src/workbench.rs"
+                  }
+                },
+                {
+                  "line": 35,
+                  "name": "session_record",
+                  "target": {
+                    "file": "rust/src/workbench.rs"
+                  }
+                }
+              ],
+              "exported": false,
+              "invokedAtTopLevel": false,
+              "isDefaultExport": false,
+              "name": "session"
+            },
+            {
+              "calls": [
+                {
+                  "inner": [
+                    {
+                      "branch": "path.is_dir()",
+                      "line": 227,
+                      "name": "detect_steady_start",
+                      "target": {
+                        "file": "rust/src/milestones.rs"
+                      },
+                      "via": "open_folder_sources"
+                    },
+                    {
+                      "branch": "path.is_dir()",
+                      "line": 163,
+                      "name": "from_trace",
+                      "target": {
+                        "file": "rust/src/knobs.rs"
+                      },
+                      "via": "open_folder"
+                    },
+                    {
+                      "line": 706,
+                      "name": "detect_warmup_end",
+                      "target": {
+                        "file": "rust/src/milestones.rs"
+                      },
+                      "via": "finish"
+                    },
+                    {
+                      "line": 709,
+                      "name": "run_shape",
+                      "target": {
+                        "file": "rust/src/shape.rs"
+                      },
+                      "via": "finish"
+                    },
+                    {
+                      "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                      "line": 410,
+                      "name": "looks_like_runtrace",
+                      "target": {
+                        "file": "rust/src/runtrace.rs"
+                      },
+                      "via": "open_json"
+                    },
+                    {
+                      "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                      "line": 716,
+                      "name": "parse",
+                      "target": {
+                        "file": "rust/src/runtrace.rs"
+                      },
+                      "via": "open_runtrace"
+                    },
+                    {
+                      "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                      "line": 717,
+                      "name": "validate",
+                      "target": {
+                        "file": "rust/src/runtrace.rs"
+                      },
+                      "via": "open_runtrace"
+                    },
+                    {
+                      "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                      "line": 718,
+                      "name": "series",
+                      "target": {
+                        "file": "rust/src/runtrace.rs"
+                      },
+                      "via": "open_runtrace"
+                    },
+                    {
+                      "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                      "line": 768,
+                      "name": "milestone",
+                      "target": {
+                        "file": "rust/src/runtrace.rs"
+                      },
+                      "via": "open_runtrace"
+                    },
+                    {
+                      "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                      "line": 783,
+                      "name": "guardrails",
+                      "target": {
+                        "file": "rust/src/runtrace.rs"
+                      },
+                      "via": "open_runtrace"
+                    },
+                    {
+                      "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                      "line": 789,
+                      "name": "from_trace",
+                      "target": {
+                        "file": "rust/src/knobs.rs"
+                      },
+                      "via": "open_runtrace"
+                    },
+                    {
+                      "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                      "line": 411,
+                      "name": "looks_like_geometry",
+                      "target": {
+                        "file": "rust/src/geometry.rs"
+                      },
+                      "via": "open_json"
+                    }
+                  ],
+                  "innerTruncated": true,
+                  "line": 23,
+                  "name": "open_path",
+                  "target": {
+                    "file": "rust/src/open.rs"
+                  },
+                  "via": "inference"
+                },
+                {
+                  "line": 30,
+                  "name": "board",
+                  "target": {
+                    "file": "rust/src/workbench.rs"
+                  },
+                  "via": "session"
+                },
+                {
+                  "line": 35,
+                  "name": "session_record",
+                  "target": {
+                    "file": "rust/src/workbench.rs"
+                  },
+                  "via": "session"
+                }
+              ],
+              "exported": false,
+              "invokedAtTopLevel": true,
+              "isDefaultExport": false,
+              "name": "main"
+            }
+          ]
         },
         {
           "hash": "ddb2e2af72081a81e599d6bcedbe421fdb71bba0dd0827c3d1f106c894d5f9d5",
@@ -584,12 +776,20 @@
           "path": "rust/src/history.rs"
         },
         {
-          "hash": "fa6b0e8ed656e45bc341548c9c26499bce5fde3e220f2698837ce89391b02970",
+          "exports": [
+            "from_name"
+          ],
+          "hash": "93eac81c4c5d4eb0da76f7c4500a970fcd92588f64658f449bc164cd46675fd5",
+          "path": "rust/src/knobs.rs"
+        },
+        {
+          "hash": "bd0fb100d7b68a35665c6c3ef801fce5f7de2b9ab381c1f981b95f0bf6e04ea3",
           "importsFiles": [
             "rust/src/bundle.rs",
             "rust/src/geometry.rs",
             "rust/src/geometry_deltas.rs",
             "rust/src/history.rs",
+            "rust/src/knobs.rs",
             "rust/src/milestones.rs",
             "rust/src/open.rs",
             "rust/src/prefs.rs",
@@ -600,7 +800,8 @@
             "rust/src/stats.rs",
             "rust/src/svg.rs",
             "rust/src/ui.rs",
-            "rust/src/views.rs"
+            "rust/src/views.rs",
+            "rust/src/workbench.rs"
           ],
           "path": "rust/src/lib.rs"
         },
@@ -648,6 +849,8 @@
           "path": "rust/src/milestones.rs"
         },
         {
+          "entry": "open_paths",
+          "entryRule": 4,
           "exports": [
             "is_runtime_log",
             "open_folder",
@@ -660,47 +863,42 @@
             {
               "in": "open_paths",
               "kind": "err",
-              "line": 108
+              "line": 110
             },
             {
               "in": "open_paths",
               "kind": "err",
-              "line": 113
+              "line": 115
             },
             {
               "in": "open_log",
               "kind": "err",
-              "line": 358
+              "line": 379
             },
             {
               "in": "open_json",
               "kind": "err",
-              "line": 395
+              "line": 416
             },
             {
               "in": "open_json",
               "kind": "err",
-              "line": 398
+              "line": 419
             },
             {
               "in": "open_trace",
               "kind": "err",
-              "line": 422
+              "line": 443
             },
             {
               "in": "open_benchmark",
               "kind": "err",
-              "line": 516
+              "line": 537
             },
             {
               "in": "open_csv",
               "kind": "err",
-              "line": 550
-            },
-            {
-              "in": "open_csv",
-              "kind": "err",
-              "line": 553
+              "line": 571
             },
             {
               "in": "open_csv",
@@ -708,30 +906,1047 @@
               "line": 574
             },
             {
+              "in": "open_csv",
+              "kind": "err",
+              "line": 595
+            },
+            {
               "in": "open_training",
               "kind": "err",
-              "line": 608
+              "line": 630
             },
             {
               "in": "open_runtrace",
               "kind": "err",
-              "line": 734
+              "line": 757
             }
           ],
-          "hash": "78575cd698db5c2985e206c510ed88cfaa3d3558c9c3fbc4b768362dddc174f6",
-          "importOrder": [
-            "rust/src/milestones.rs",
-            "rust/src/runtrace.rs",
-            "rust/src/geometry.rs",
-            "rust/src/shape.rs"
-          ],
+          "hash": "52909684ddec062d6ef615d74cd9d4f46f29d0bb2aa892dd46732d67eae6c9af",
           "importsFiles": [
             "rust/src/geometry.rs",
+            "rust/src/knobs.rs",
             "rust/src/milestones.rs",
             "rust/src/runtrace.rs",
             "rust/src/shape.rs"
           ],
-          "path": "rust/src/open.rs"
+          "path": "rust/src/open.rs",
+          "sequences": [
+            {
+              "calls": [
+                {
+                  "branch": "path.is_dir()",
+                  "line": 227,
+                  "name": "detect_steady_start",
+                  "target": {
+                    "file": "rust/src/milestones.rs"
+                  },
+                  "via": "open_folder_sources"
+                },
+                {
+                  "branch": "path.is_dir()",
+                  "line": 163,
+                  "name": "from_trace",
+                  "target": {
+                    "file": "rust/src/knobs.rs"
+                  },
+                  "via": "open_folder"
+                },
+                {
+                  "line": 706,
+                  "name": "detect_warmup_end",
+                  "target": {
+                    "file": "rust/src/milestones.rs"
+                  },
+                  "via": "finish"
+                },
+                {
+                  "line": 709,
+                  "name": "run_shape",
+                  "target": {
+                    "file": "rust/src/shape.rs"
+                  },
+                  "via": "finish"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 410,
+                  "name": "looks_like_runtrace",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_json"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 716,
+                  "name": "parse",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 717,
+                  "name": "validate",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 718,
+                  "name": "series",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 768,
+                  "name": "milestone",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 783,
+                  "name": "guardrails",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 789,
+                  "name": "from_trace",
+                  "target": {
+                    "file": "rust/src/knobs.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 411,
+                  "name": "looks_like_geometry",
+                  "target": {
+                    "file": "rust/src/geometry.rs"
+                  },
+                  "via": "open_json"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 412,
+                  "name": "read",
+                  "target": {
+                    "file": "rust/src/geometry.rs"
+                  },
+                  "via": "open_json"
+                }
+              ],
+              "exported": true,
+              "invokedAtTopLevel": false,
+              "isDefaultExport": false,
+              "name": "open_paths"
+            },
+            {
+              "calls": [
+                {
+                  "branch": "path.is_dir()",
+                  "line": 227,
+                  "name": "detect_steady_start",
+                  "target": {
+                    "file": "rust/src/milestones.rs"
+                  },
+                  "via": "open_folder_sources"
+                },
+                {
+                  "branch": "path.is_dir()",
+                  "line": 163,
+                  "name": "from_trace",
+                  "target": {
+                    "file": "rust/src/knobs.rs"
+                  },
+                  "via": "open_folder"
+                },
+                {
+                  "line": 706,
+                  "name": "detect_warmup_end",
+                  "target": {
+                    "file": "rust/src/milestones.rs"
+                  },
+                  "via": "finish"
+                },
+                {
+                  "line": 709,
+                  "name": "run_shape",
+                  "target": {
+                    "file": "rust/src/shape.rs"
+                  },
+                  "via": "finish"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 410,
+                  "name": "looks_like_runtrace",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_json"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 716,
+                  "name": "parse",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 717,
+                  "name": "validate",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 718,
+                  "name": "series",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 768,
+                  "name": "milestone",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 783,
+                  "name": "guardrails",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 789,
+                  "name": "from_trace",
+                  "target": {
+                    "file": "rust/src/knobs.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 411,
+                  "name": "looks_like_geometry",
+                  "target": {
+                    "file": "rust/src/geometry.rs"
+                  },
+                  "via": "open_json"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 412,
+                  "name": "read",
+                  "target": {
+                    "file": "rust/src/geometry.rs"
+                  },
+                  "via": "open_json"
+                }
+              ],
+              "exported": true,
+              "invokedAtTopLevel": false,
+              "isDefaultExport": false,
+              "name": "open_path"
+            },
+            {
+              "calls": [
+                {
+                  "line": 706,
+                  "name": "detect_warmup_end",
+                  "target": {
+                    "file": "rust/src/milestones.rs"
+                  },
+                  "via": "finish"
+                },
+                {
+                  "line": 709,
+                  "name": "run_shape",
+                  "target": {
+                    "file": "rust/src/shape.rs"
+                  },
+                  "via": "finish"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 410,
+                  "name": "looks_like_runtrace",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_json"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 716,
+                  "name": "parse",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 717,
+                  "name": "validate",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 718,
+                  "name": "series",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 768,
+                  "name": "milestone",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 783,
+                  "name": "guardrails",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 789,
+                  "name": "from_trace",
+                  "target": {
+                    "file": "rust/src/knobs.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 411,
+                  "name": "looks_like_geometry",
+                  "target": {
+                    "file": "rust/src/geometry.rs"
+                  },
+                  "via": "open_json"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 412,
+                  "name": "read",
+                  "target": {
+                    "file": "rust/src/geometry.rs"
+                  },
+                  "via": "open_json"
+                },
+                {
+                  "line": 227,
+                  "name": "detect_steady_start",
+                  "target": {
+                    "file": "rust/src/milestones.rs"
+                  },
+                  "via": "open_folder_sources"
+                },
+                {
+                  "line": 163,
+                  "name": "from_trace",
+                  "target": {
+                    "file": "rust/src/knobs.rs"
+                  }
+                }
+              ],
+              "exported": true,
+              "invokedAtTopLevel": false,
+              "isDefaultExport": false,
+              "name": "open_folder"
+            },
+            {
+              "calls": [
+                {
+                  "line": 163,
+                  "name": "from_trace",
+                  "target": {
+                    "file": "rust/src/knobs.rs"
+                  },
+                  "via": "open_folder"
+                },
+                {
+                  "line": 706,
+                  "name": "detect_warmup_end",
+                  "target": {
+                    "file": "rust/src/milestones.rs"
+                  },
+                  "via": "finish"
+                },
+                {
+                  "line": 709,
+                  "name": "run_shape",
+                  "target": {
+                    "file": "rust/src/shape.rs"
+                  },
+                  "via": "finish"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 410,
+                  "name": "looks_like_runtrace",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_json"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 716,
+                  "name": "parse",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 717,
+                  "name": "validate",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 718,
+                  "name": "series",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 768,
+                  "name": "milestone",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 783,
+                  "name": "guardrails",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 789,
+                  "name": "from_trace",
+                  "target": {
+                    "file": "rust/src/knobs.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 411,
+                  "name": "looks_like_geometry",
+                  "target": {
+                    "file": "rust/src/geometry.rs"
+                  },
+                  "via": "open_json"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 412,
+                  "name": "read",
+                  "target": {
+                    "file": "rust/src/geometry.rs"
+                  },
+                  "via": "open_json"
+                },
+                {
+                  "line": 227,
+                  "name": "detect_steady_start",
+                  "target": {
+                    "file": "rust/src/milestones.rs"
+                  }
+                }
+              ],
+              "exported": false,
+              "invokedAtTopLevel": false,
+              "isDefaultExport": false,
+              "name": "open_folder_sources"
+            },
+            {
+              "calls": [
+                {
+                  "line": 706,
+                  "name": "detect_warmup_end",
+                  "target": {
+                    "file": "rust/src/milestones.rs"
+                  },
+                  "via": "finish"
+                },
+                {
+                  "line": 709,
+                  "name": "run_shape",
+                  "target": {
+                    "file": "rust/src/shape.rs"
+                  },
+                  "via": "finish"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 410,
+                  "name": "looks_like_runtrace",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_json"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 716,
+                  "name": "parse",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 717,
+                  "name": "validate",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 718,
+                  "name": "series",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 768,
+                  "name": "milestone",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 783,
+                  "name": "guardrails",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 789,
+                  "name": "from_trace",
+                  "target": {
+                    "file": "rust/src/knobs.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 411,
+                  "name": "looks_like_geometry",
+                  "target": {
+                    "file": "rust/src/geometry.rs"
+                  },
+                  "via": "open_json"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 412,
+                  "name": "read",
+                  "target": {
+                    "file": "rust/src/geometry.rs"
+                  },
+                  "via": "open_json"
+                },
+                {
+                  "line": 227,
+                  "name": "detect_steady_start",
+                  "target": {
+                    "file": "rust/src/milestones.rs"
+                  },
+                  "via": "open_folder_sources"
+                },
+                {
+                  "line": 163,
+                  "name": "from_trace",
+                  "target": {
+                    "file": "rust/src/knobs.rs"
+                  },
+                  "via": "open_folder"
+                }
+              ],
+              "exported": false,
+              "invokedAtTopLevel": false,
+              "isDefaultExport": false,
+              "name": "open_run_set"
+            },
+            {
+              "calls": [
+                {
+                  "line": 706,
+                  "name": "detect_warmup_end",
+                  "target": {
+                    "file": "rust/src/milestones.rs"
+                  },
+                  "via": "finish"
+                },
+                {
+                  "line": 709,
+                  "name": "run_shape",
+                  "target": {
+                    "file": "rust/src/shape.rs"
+                  },
+                  "via": "finish"
+                }
+              ],
+              "exported": true,
+              "invokedAtTopLevel": false,
+              "isDefaultExport": false,
+              "name": "open_log"
+            },
+            {
+              "calls": [
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 706,
+                  "name": "detect_warmup_end",
+                  "target": {
+                    "file": "rust/src/milestones.rs"
+                  },
+                  "via": "finish"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 709,
+                  "name": "run_shape",
+                  "target": {
+                    "file": "rust/src/shape.rs"
+                  },
+                  "via": "finish"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 410,
+                  "name": "looks_like_runtrace",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_json"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 716,
+                  "name": "parse",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 717,
+                  "name": "validate",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 718,
+                  "name": "series",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 768,
+                  "name": "milestone",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 783,
+                  "name": "guardrails",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 789,
+                  "name": "from_trace",
+                  "target": {
+                    "file": "rust/src/knobs.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 411,
+                  "name": "looks_like_geometry",
+                  "target": {
+                    "file": "rust/src/geometry.rs"
+                  },
+                  "via": "open_json"
+                },
+                {
+                  "branch": "trimmed.starts_with('{') || trimmed.starts_with('[')",
+                  "line": 412,
+                  "name": "read",
+                  "target": {
+                    "file": "rust/src/geometry.rs"
+                  },
+                  "via": "open_json"
+                }
+              ],
+              "exported": true,
+              "invokedAtTopLevel": false,
+              "isDefaultExport": false,
+              "name": "open_text"
+            },
+            {
+              "calls": [
+                {
+                  "line": 706,
+                  "name": "detect_warmup_end",
+                  "target": {
+                    "file": "rust/src/milestones.rs"
+                  },
+                  "via": "finish"
+                },
+                {
+                  "line": 709,
+                  "name": "run_shape",
+                  "target": {
+                    "file": "rust/src/shape.rs"
+                  },
+                  "via": "finish"
+                },
+                {
+                  "line": 410,
+                  "name": "looks_like_runtrace",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  }
+                },
+                {
+                  "line": 716,
+                  "name": "parse",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "line": 717,
+                  "name": "validate",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "line": 718,
+                  "name": "series",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "line": 768,
+                  "name": "milestone",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "line": 783,
+                  "name": "guardrails",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "line": 789,
+                  "name": "from_trace",
+                  "target": {
+                    "file": "rust/src/knobs.rs"
+                  },
+                  "via": "open_runtrace"
+                },
+                {
+                  "line": 411,
+                  "name": "looks_like_geometry",
+                  "target": {
+                    "file": "rust/src/geometry.rs"
+                  }
+                },
+                {
+                  "line": 412,
+                  "name": "read",
+                  "target": {
+                    "file": "rust/src/geometry.rs"
+                  }
+                }
+              ],
+              "exported": false,
+              "invokedAtTopLevel": false,
+              "isDefaultExport": false,
+              "name": "open_json"
+            },
+            {
+              "calls": [
+                {
+                  "line": 706,
+                  "name": "detect_warmup_end",
+                  "target": {
+                    "file": "rust/src/milestones.rs"
+                  },
+                  "via": "finish"
+                },
+                {
+                  "line": 709,
+                  "name": "run_shape",
+                  "target": {
+                    "file": "rust/src/shape.rs"
+                  },
+                  "via": "finish"
+                }
+              ],
+              "exported": false,
+              "invokedAtTopLevel": false,
+              "isDefaultExport": false,
+              "name": "open_trace"
+            },
+            {
+              "calls": [
+                {
+                  "line": 706,
+                  "name": "detect_warmup_end",
+                  "target": {
+                    "file": "rust/src/milestones.rs"
+                  },
+                  "via": "finish"
+                },
+                {
+                  "line": 709,
+                  "name": "run_shape",
+                  "target": {
+                    "file": "rust/src/shape.rs"
+                  },
+                  "via": "finish"
+                }
+              ],
+              "exported": false,
+              "invokedAtTopLevel": false,
+              "isDefaultExport": false,
+              "name": "open_benchmark"
+            },
+            {
+              "calls": [
+                {
+                  "line": 706,
+                  "name": "detect_warmup_end",
+                  "target": {
+                    "file": "rust/src/milestones.rs"
+                  },
+                  "via": "finish"
+                },
+                {
+                  "line": 709,
+                  "name": "run_shape",
+                  "target": {
+                    "file": "rust/src/shape.rs"
+                  },
+                  "via": "finish"
+                }
+              ],
+              "exported": false,
+              "invokedAtTopLevel": false,
+              "isDefaultExport": false,
+              "name": "open_csv"
+            },
+            {
+              "calls": [
+                {
+                  "line": 706,
+                  "name": "detect_warmup_end",
+                  "target": {
+                    "file": "rust/src/milestones.rs"
+                  },
+                  "via": "finish"
+                },
+                {
+                  "line": 709,
+                  "name": "run_shape",
+                  "target": {
+                    "file": "rust/src/shape.rs"
+                  },
+                  "via": "finish"
+                }
+              ],
+              "exported": false,
+              "invokedAtTopLevel": false,
+              "isDefaultExport": false,
+              "name": "series"
+            },
+            {
+              "calls": [
+                {
+                  "line": 706,
+                  "name": "detect_warmup_end",
+                  "target": {
+                    "file": "rust/src/milestones.rs"
+                  }
+                },
+                {
+                  "line": 709,
+                  "name": "run_shape",
+                  "target": {
+                    "file": "rust/src/shape.rs"
+                  }
+                }
+              ],
+              "exported": false,
+              "invokedAtTopLevel": false,
+              "isDefaultExport": false,
+              "name": "finish"
+            },
+            {
+              "calls": [
+                {
+                  "line": 716,
+                  "name": "parse",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  }
+                },
+                {
+                  "line": 717,
+                  "name": "validate",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  }
+                },
+                {
+                  "line": 718,
+                  "name": "series",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  }
+                },
+                {
+                  "line": 768,
+                  "name": "milestone",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  }
+                },
+                {
+                  "line": 783,
+                  "name": "guardrails",
+                  "target": {
+                    "file": "rust/src/runtrace.rs"
+                  }
+                },
+                {
+                  "line": 789,
+                  "name": "from_trace",
+                  "target": {
+                    "file": "rust/src/knobs.rs"
+                  }
+                },
+                {
+                  "line": 706,
+                  "name": "detect_warmup_end",
+                  "target": {
+                    "file": "rust/src/milestones.rs"
+                  },
+                  "via": "finish"
+                },
+                {
+                  "line": 709,
+                  "name": "run_shape",
+                  "target": {
+                    "file": "rust/src/shape.rs"
+                  },
+                  "via": "finish"
+                }
+              ],
+              "exported": false,
+              "invokedAtTopLevel": false,
+              "isDefaultExport": false,
+              "name": "open_runtrace"
+            }
+          ]
         },
         {
           "exports": [
@@ -847,25 +2062,25 @@
             {
               "in": "parse",
               "kind": "err",
-              "line": 134
+              "line": 141
             },
             {
               "in": "parse",
               "kind": "err",
-              "line": 146
+              "line": 153
             },
             {
               "in": "parse",
               "kind": "err",
-              "line": 161
+              "line": 168
             },
             {
               "in": "parse",
               "kind": "err",
-              "line": 163
+              "line": 170
             }
           ],
-          "hash": "710f9a9eb3db5b61fc3d0d95680db872289aaf26ca43c5ed844055e58e35640d",
+          "hash": "007b9e43cfbded7ac72f397299dc885aa3aeb7f0508140afa135787bccebce83",
           "path": "rust/src/runtrace.rs"
         },
         {
@@ -933,32 +2148,22 @@
             {
               "in": "page",
               "kind": "match-err",
-              "line": 309
+              "line": 315
             },
             {
               "in": "load",
               "kind": "match-err",
-              "line": 398
+              "line": 404
             },
             {
               "in": "open_bundle",
               "kind": "match-err",
-              "line": 421
+              "line": 427
             },
             {
               "in": "save_bundle",
               "kind": "match-err",
-              "line": 435
-            },
-            {
-              "in": "save_bundle",
-              "kind": "match-err",
-              "line": 452
-            },
-            {
-              "in": "save_bundle",
-              "kind": "match-err",
-              "line": 456
+              "line": 441
             },
             {
               "in": "save_bundle",
@@ -966,57 +2171,67 @@
               "line": 458
             },
             {
+              "in": "save_bundle",
+              "kind": "match-err",
+              "line": 462
+            },
+            {
+              "in": "save_bundle",
+              "kind": "match-err",
+              "line": 464
+            },
+            {
               "in": "export_svg",
               "kind": "match-err",
-              "line": 643
+              "line": 649
             },
             {
               "in": "receive_screenshot",
               "kind": "match-err",
-              "line": 667
+              "line": 673
             },
             {
               "in": "settings_changed",
               "kind": "match-err",
-              "line": 706
+              "line": 712
             },
             {
               "in": "draw_settings",
               "kind": "match-err",
-              "line": 753
+              "line": 759
             },
             {
               "in": "remember",
               "kind": "match-err",
-              "line": 1140
+              "line": 1146
             },
             {
               "in": "open_saved_path",
               "kind": "match-err",
-              "line": 1266
+              "line": 1272
             },
             {
               "in": "remember_opened_file",
               "kind": "match-err",
-              "line": 1280
+              "line": 1286
             },
             {
               "in": "reopen",
               "kind": "match-err",
-              "line": 1297
+              "line": 1303
             },
             {
               "in": "reopen",
               "kind": "match-err",
-              "line": 1312
+              "line": 1318
             },
             {
               "in": "reopen",
               "kind": "match-err",
-              "line": 1312
+              "line": 1318
             }
           ],
-          "hash": "7c934725d52f66564ec5068999cd45ec056e5bca23ef8d23a9cc9cdde688b375",
+          "hash": "9529bd3d49e3a94ab5ddc46434ba7281270b854244f260f07f5c573aab0df7d9",
           "importOrder": [
             "rust/src/bundle.rs",
             "rust/src/history.rs",
@@ -1025,6 +2240,7 @@
             "rust/src/readings.rs",
             "rust/src/review.rs",
             "rust/src/views.rs",
+            "rust/src/ui_workbench.rs",
             "rust/src/svg.rs",
             "rust/src/stats.rs",
             "rust/src/ui_pages.rs",
@@ -1043,6 +2259,7 @@
             "rust/src/ui_geometry.rs",
             "rust/src/ui_pages.rs",
             "rust/src/ui_tests.rs",
+            "rust/src/ui_workbench.rs",
             "rust/src/views.rs"
           ],
           "path": "rust/src/ui.rs",
@@ -1050,7 +2267,7 @@
             {
               "calls": [
                 {
-                  "line": 934,
+                  "line": 940,
                   "name": "nines",
                   "target": {
                     "file": "rust/src/views.rs"
@@ -1065,7 +2282,7 @@
             {
               "calls": [
                 {
-                  "line": 955,
+                  "line": 961,
                   "name": "spectrum",
                   "target": {
                     "file": "rust/src/views.rs"
@@ -1080,14 +2297,14 @@
             {
               "calls": [
                 {
-                  "line": 987,
+                  "line": 993,
                   "name": "heat_range",
                   "target": {
                     "file": "rust/src/views.rs"
                   }
                 },
                 {
-                  "line": 1004,
+                  "line": 1010,
                   "name": "heat_cells",
                   "target": {
                     "file": "rust/src/views.rs"
@@ -1102,7 +2319,7 @@
             {
               "calls": [
                 {
-                  "line": 1379,
+                  "line": 1385,
                   "name": "stored_pair",
                   "target": {
                     "file": "rust/src/bundle.rs"
@@ -1146,15 +2363,15 @@
             {
               "in": "load_sample",
               "kind": "match-err",
-              "line": 133
+              "line": 141
             },
             {
               "in": "load_sample",
               "kind": "match-err",
-              "line": 133
+              "line": 141
             }
           ],
-          "hash": "b5cbe8f6ab66a601eeaee725f253353d23641e264805addc960e94b68c2d2bdd",
+          "hash": "4bcbf0065e84cf39277bd4f5496d875d1a30f06c29128b6a235b3eaa5524f653",
           "importOrder": [
             "rust/src/ui.rs",
             "rust/src/open.rs"
@@ -1166,7 +2383,14 @@
           "path": "rust/src/ui_pages.rs"
         },
         {
-          "hash": "aba0c498134f6f225507ff3e89a92c0060e7e437e1a47f064f10f05e38ce5edd",
+          "failurePaths": [
+            {
+              "in": "the_workbench_page_asks_for_runs_then_weighs_a_picked_folder",
+              "kind": "match-err",
+              "line": 765
+            }
+          ],
+          "hash": "095e45616e8358794f008a56456d3b741e392e43228a3ec5bc42982a54ac2930",
           "importOrder": [
             "rust/src/bundle.rs",
             "rust/src/history.rs",
@@ -1177,7 +2401,9 @@
             "rust/src/ui.rs",
             "rust/src/stats.rs",
             "rust/src/ui_pages.rs",
-            "rust/src/svg.rs"
+            "rust/src/svg.rs",
+            "rust/src/workbench.rs",
+            "rust/src/ui_workbench.rs"
           ],
           "importsFiles": [
             "rust/src/bundle.rs",
@@ -1189,10 +2415,95 @@
             "rust/src/stats.rs",
             "rust/src/svg.rs",
             "rust/src/ui.rs",
-            "rust/src/ui_pages.rs"
+            "rust/src/ui_pages.rs",
+            "rust/src/ui_workbench.rs",
+            "rust/src/workbench.rs"
           ],
           "path": "rust/src/ui_tests.rs",
           "testsInside": true
+        },
+        {
+          "exports": [
+            "open_runs"
+          ],
+          "failurePaths": [
+            {
+              "in": "open_runs",
+              "kind": "match-err",
+              "line": 84
+            },
+            {
+              "in": "open_runs",
+              "kind": "err",
+              "line": 84
+            },
+            {
+              "in": "open_runs",
+              "kind": "match-err",
+              "line": 85
+            },
+            {
+              "in": "open_runs",
+              "kind": "err",
+              "line": 90
+            },
+            {
+              "in": "retest",
+              "kind": "match-err",
+              "line": 156
+            },
+            {
+              "in": "retest",
+              "kind": "match-err",
+              "line": 161
+            },
+            {
+              "in": "poll_workbench",
+              "kind": "match-err",
+              "line": 188
+            },
+            {
+              "in": "poll_workbench",
+              "kind": "match-err",
+              "line": 189
+            },
+            {
+              "in": "keep_session",
+              "kind": "match-err",
+              "line": 213
+            },
+            {
+              "in": "open_bench_runs",
+              "kind": "match-err",
+              "line": 247
+            },
+            {
+              "in": "save_session_record",
+              "kind": "match-err",
+              "line": 265
+            },
+            {
+              "in": "draw_workbench",
+              "kind": "match-err",
+              "line": 328
+            }
+          ],
+          "hash": "6d198edcb34eeeca207620350d32e528e94bd51dc85675c13ca61a2f440494b8",
+          "importOrder": [
+            "rust/src/open.rs",
+            "rust/src/workbench.rs",
+            "rust/src/ui.rs",
+            "rust/src/bundle.rs",
+            "rust/src/stats.rs"
+          ],
+          "importsFiles": [
+            "rust/src/bundle.rs",
+            "rust/src/open.rs",
+            "rust/src/stats.rs",
+            "rust/src/ui.rs",
+            "rust/src/workbench.rs"
+          ],
+          "path": "rust/src/ui_workbench.rs"
         },
         {
           "exports": [
@@ -1213,6 +2524,89 @@
           "testsInside": true
         },
         {
+          "exports": [
+            "board",
+            "known_runs",
+            "measures_not_used",
+            "memory_file",
+            "note_board",
+            "run_identity",
+            "runs_of",
+            "session_record"
+          ],
+          "failurePaths": [
+            {
+              "in": "measure",
+              "kind": "err",
+              "line": 83
+            },
+            {
+              "in": "measure",
+              "kind": "err",
+              "line": 89
+            },
+            {
+              "in": "measure",
+              "kind": "err",
+              "line": 106
+            },
+            {
+              "in": "measure",
+              "kind": "err",
+              "line": 113
+            },
+            {
+              "in": "steady_quantile",
+              "kind": "err",
+              "line": 162
+            },
+            {
+              "in": "steady_quantile",
+              "kind": "err",
+              "line": 166
+            }
+          ],
+          "hash": "dbf6c4dca43c0684ff825f433cb3cf5dac1ea2d7520e492fdbfe59eb6157e2a9",
+          "importsFiles": [
+            "rust/src/open.rs",
+            "rust/src/stats.rs"
+          ],
+          "path": "rust/src/workbench.rs",
+          "sequences": [
+            {
+              "calls": [
+                {
+                  "line": 165,
+                  "name": "quantile_support",
+                  "target": {
+                    "file": "rust/src/stats.rs"
+                  }
+                }
+              ],
+              "exported": false,
+              "invokedAtTopLevel": false,
+              "isDefaultExport": false,
+              "name": "steady_quantile"
+            },
+            {
+              "calls": [
+                {
+                  "line": 165,
+                  "name": "quantile_support",
+                  "target": {
+                    "file": "rust/src/stats.rs"
+                  },
+                  "via": "steady_quantile"
+                }
+              ],
+              "exported": false,
+              "invokedAtTopLevel": false,
+              "isDefaultExport": false,
+              "name": "warmup_cost"
+            }
+          ]
+        },
+        {
           "hash": "5db842cddeda984eb002f5459520112826749dbdd9e516fe83c0e40a0861a3c1",
           "importsFiles": [
             "rust/src/geometry_deltas.rs",
@@ -1224,7 +2618,7 @@
           "testsInside": true
         },
         {
-          "hash": "bd19342e65d33f290ba47967ab0f2d81dbed3dfecb36fe50964b82b1b1558380",
+          "hash": "c49c8d315694b6185a8063e9647755979e3693f6467e135e6e204f851e5563a5",
           "importsFiles": [
             "rust/src/bundle.rs",
             "rust/src/open.rs",
@@ -1246,7 +2640,7 @@
           "testsInside": true
         },
         {
-          "hash": "cec1d0cce4f232dd3cd3bf0be7fb2d62f10b841f43efd93965d08bd4f171072a",
+          "hash": "89568d9bf54c803e53cbbd5e1adcf5b9c114342fd752fed49672ca5c89180ae5",
           "importsFiles": [
             "rust/src/bundle.rs",
             "rust/src/history.rs",
@@ -1267,6 +2661,53 @@
         {
           "hash": "fc53c3e8d26207b8a299f0a7ddaec6534947537c9d1295fcaaa2b600bb0ebb6f",
           "path": "rust/tests/fixtures/aspire-si/steady.json"
+        },
+        {
+          "hash": "1527a473177b065971d3852a52f9ac31feb36021bbf157b93e2fbf66af3653f6",
+          "path": "rust/tests/fixtures/workbench/README.md"
+        },
+        {
+          "hash": "977d056c409cef79cdd9077732b2b3ab1c7ff026a8b19d8e6eee39d8458d6ed6",
+          "path": "rust/tests/fixtures/workbench/batch1_seed1_runtrace.json"
+        },
+        {
+          "hash": "e8adaa5c946b945de265dc30450bbb086f1a5b86e8c7541b253aa55c251fb6a8",
+          "path": "rust/tests/fixtures/workbench/batch1_seed2_runtrace.json"
+        },
+        {
+          "hash": "b9b502a5ab2011e440435a9c6b4ada9888518012664ec5832ef3415acabeaf1a",
+          "path": "rust/tests/fixtures/workbench/batch1_seed3_runtrace.json"
+        },
+        {
+          "hash": "c269eb93d404706d7705a772ca68cebb10a961596cffcf1cb34cf7327af0c2e4",
+          "path": "rust/tests/fixtures/workbench/batch4_seed1_runtrace.json"
+        },
+        {
+          "hash": "c51e18a8a2a75b9811e583bd8921d635d7a0756f622b492e88f4e31f77a81ed2",
+          "path": "rust/tests/fixtures/workbench/batch4_seed2_runtrace.json"
+        },
+        {
+          "hash": "33ef21e6d3d91712db7d30e93fff995d2fc03b26a5efe78a340a00cb3b7c598f",
+          "path": "rust/tests/fixtures/workbench/batch4_seed3_runtrace.json"
+        },
+        {
+          "hash": "499a88b9901605c6359678cfe47583736154b7892b2f0369501e741c42147f0e",
+          "path": "rust/tests/fixtures/workbench/batch8_seed1_runtrace.json"
+        },
+        {
+          "hash": "d69f8457d353ea9a364f40dba0c747f306a53ea3d3ccdc5ba4fca37ed930744e",
+          "path": "rust/tests/fixtures/workbench/batch8_seed2_runtrace.json"
+        },
+        {
+          "hash": "ba8477a4258ef75b6102a83ef09e549c917a58d5bc4cabf32d779dd95017516d",
+          "path": "rust/tests/fixtures/workbench/batch8_seed3_runtrace.json"
+        },
+        {
+          "exports": [
+            "run"
+          ],
+          "hash": "7abbc9f73d1fa7e620072b2073dc95c070b2db51a8fce44450e11b83d486288e",
+          "path": "rust/tests/fixtures/workbench/generate.py"
         },
         {
           "hash": "da13c3980edfffc8616bceac0a8f3a30e1aa24ee502744fe97a4f40db129acf2",
@@ -1297,7 +2738,7 @@
           "testsInside": true
         },
         {
-          "hash": "a68c428d07b87e789d145eb08887022eae61c0a18aaf9e4f970639382d3abdc4",
+          "hash": "1264c33ae0a234fdccf3cf9028886c1cd899f412a0e883dd6f1be568888c2755",
           "importsFiles": [
             "rust/src/milestones.rs",
             "rust/src/open.rs",
@@ -1328,6 +2769,18 @@
           "library": "rust/src/lib.rs",
           "path": "rust/tests/sources_tests.rs",
           "testsInside": true
+        },
+        {
+          "hash": "3a621a964bd39687e926e7209703086fef9f307dd07c6c8470a23f5fa8e21086",
+          "importsFiles": [
+            "rust/src/knobs.rs",
+            "rust/src/open.rs",
+            "rust/src/stats.rs",
+            "rust/src/workbench.rs"
+          ],
+          "library": "rust/src/lib.rs",
+          "path": "rust/tests/workbench_tests.rs",
+          "testsInside": true
         }
       ],
       "globs": [
@@ -1338,11 +2791,11 @@
       "origin": "authored",
       "outsidePlaces": [
         {
-          "reads": 11,
+          "reads": 12,
           "where": [
             "caller"
           ],
-          "writes": 4
+          "writes": 5
         },
         {
           "reads": 0,
@@ -1352,13 +2805,13 @@
           "writes": 1
         }
       ],
-      "outsideReads": 11,
-      "outsideWrites": 5,
+      "outsideReads": 12,
+      "outsideWrites": 6,
       "role": "code",
       "testRunners": [
         "cargo test"
       ],
-      "testedBy": 17,
+      "testedBy": 18,
       "unresolvedSites": 0
     },
     {
@@ -2728,7 +4181,7 @@
         {
           "boundary": "rust",
           "depth": 0,
-          "files": 20
+          "files": 23
         },
         {
           "boundary": "src",
@@ -2959,7 +4412,7 @@
         {
           "boundary": "rust",
           "depth": 0,
-          "files": 28
+          "files": 32
         }
       ],
       "readers": [],
@@ -3014,15 +4467,84 @@
           "via": "cargo test"
         },
         {
-          "directory": true,
           "job": "test",
           "matched": true,
-          "path": "rust/tests/",
+          "path": "rust/tests/aspire_export_tests.rs",
+          "runKind": "executes",
+          "via": "cargo test"
+        },
+        {
+          "job": "test",
+          "matched": true,
+          "path": "rust/tests/bundle_tests.rs",
+          "runKind": "executes",
+          "via": "cargo test"
+        },
+        {
+          "job": "test",
+          "matched": true,
+          "path": "rust/tests/compat_tests.rs",
+          "runKind": "executes",
+          "via": "cargo test"
+        },
+        {
+          "job": "test",
+          "matched": true,
+          "path": "rust/tests/edge_tests.rs",
+          "runKind": "executes",
+          "via": "cargo test"
+        },
+        {
+          "job": "test",
+          "matched": true,
+          "path": "rust/tests/geometry_delta_tests.rs",
+          "runKind": "executes",
+          "via": "cargo test"
+        },
+        {
+          "job": "test",
+          "matched": true,
+          "path": "rust/tests/history_tests.rs",
+          "runKind": "executes",
+          "via": "cargo test"
+        },
+        {
+          "job": "test",
+          "matched": true,
+          "path": "rust/tests/prefs_tests.rs",
+          "runKind": "executes",
+          "via": "cargo test"
+        },
+        {
+          "job": "test",
+          "matched": true,
+          "path": "rust/tests/review_tests.rs",
+          "runKind": "executes",
+          "via": "cargo test"
+        },
+        {
+          "job": "test",
+          "matched": true,
+          "path": "rust/tests/runtrace_tests.rs",
+          "runKind": "executes",
+          "via": "cargo test"
+        },
+        {
+          "job": "test",
+          "matched": true,
+          "path": "rust/tests/sources_tests.rs",
+          "runKind": "executes",
+          "via": "cargo test"
+        },
+        {
+          "job": "test",
+          "matched": true,
+          "path": "rust/tests/workbench_tests.rs",
           "runKind": "executes",
           "via": "cargo test"
         }
       ],
-      "runsCount": 8,
+      "runsCount": 18,
       "secrets": [],
       "sends": {
         "deploysPages": false,
@@ -3039,7 +4561,7 @@
         {
           "coverage": true,
           "dir": "rust",
-          "files": 17,
+          "files": 18,
           "job": "test",
           "runner": "cargo test",
           "step": "Test"
@@ -3407,7 +4929,7 @@
         {
           "boundary": "rust",
           "depth": 0,
-          "files": 20
+          "files": 23
         }
       ],
       "readers": [],
@@ -3475,6 +4997,49 @@
       "checksCount": 0,
       "commands": [],
       "elsewhere": [],
+      "example": true,
+      "file": "rust/Cargo.toml",
+      "kind": "command",
+      "landings": [],
+      "mentions": [],
+      "name": "live_workbench",
+      "permissions": [],
+      "pushes": false,
+      "reach": [
+        {
+          "boundary": "rust",
+          "depth": 0,
+          "files": 10
+        }
+      ],
+      "readers": [],
+      "runs": [
+        {
+          "path": "rust/examples/live_workbench.rs",
+          "runKind": "executes"
+        }
+      ],
+      "runsCount": 1,
+      "secrets": [],
+      "sends": {
+        "deploysPages": false,
+        "dispatchesTo": [],
+        "opensIssues": false,
+        "opensIssuesOnFailure": false,
+        "opensPullRequests": false,
+        "publishes": false,
+        "publishesTo": [],
+        "releases": false
+      },
+      "stages": [],
+      "triggers": [],
+      "uses": [],
+      "usesWorkflowToken": false
+    },
+    {
+      "checksCount": 0,
+      "commands": [],
+      "elsewhere": [],
       "file": "rust/Cargo.toml",
       "kind": "command",
       "landings": [],
@@ -3486,7 +5051,7 @@
         {
           "boundary": "rust",
           "depth": 0,
-          "files": 19
+          "files": 22
         }
       ],
       "readers": [],
@@ -3517,8 +5082,8 @@
   "edges": [],
   "engine": "1.24.0",
   "generatedFrom": {
-    "commit": "9a109beaa472b07f3f1f1a096967e3337876907b",
-    "tracked": 388
+    "commit": "893523cfe5cfaa0cf89185d96c84e5494dbd0007",
+    "tracked": 404
   },
   "landings": [
     {
@@ -3797,6 +5362,6 @@
   "overlaps": [],
   "submodules": [],
   "symlinks": [],
-  "testFiles": 55,
+  "testFiles": 67,
   "unassigned": []
 }

@@ -19,6 +19,7 @@ pub enum Page {
     Welcome,
     Compare,
     Guide,
+    Workbench,
     Settings,
 }
 
@@ -187,6 +188,8 @@ pub struct ScalarScopeApp {
     paint: Paint,
     text_scale: f32,
     sitting_key: String,
+    /// The Workbench page.
+    bench: bench_page::BenchState,
 }
 
 impl Default for ScalarScopeApp {
@@ -221,6 +224,7 @@ impl Default for ScalarScopeApp {
             paint: Paint::from_palette(prefs::series_palette(saved.color_vision, saved.high_contrast)),
             text_scale: saved.text_scale,
             sitting_key: String::new(),
+            bench: Default::default(),
         }
     }
 }
@@ -249,6 +253,7 @@ impl ScalarScopeApp {
             ui.heading(RichText::new("ScalarScope").color(paint.mark));
             ui.selectable_value(&mut self.page, Page::Welcome, "Welcome");
             ui.selectable_value(&mut self.page, Page::Compare, "Compare");
+            ui.selectable_value(&mut self.page, Page::Workbench, "Workbench");
             ui.selectable_value(&mut self.page, Page::Guide, "Guide");
             ui.selectable_value(&mut self.page, Page::Settings, "Settings");
         });
@@ -257,6 +262,7 @@ impl ScalarScopeApp {
             Page::Settings => return self.draw_settings(ui),
             Page::Welcome => return self.draw_welcome(ui),
             Page::Guide => return self.draw_guide(ui),
+            Page::Workbench => return self.draw_workbench(ui),
             Page::Compare => {}
         }
         let reviewing = self.opened.is_some();
@@ -1402,6 +1408,9 @@ mod pages;
 
 #[path = "ui_geometry.rs"]
 mod geometry_views;
+
+#[path = "ui_workbench.rs"]
+mod bench_page;
 
 #[cfg(test)]
 #[path = "ui_tests.rs"]

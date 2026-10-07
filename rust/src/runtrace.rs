@@ -98,6 +98,10 @@ pub struct RunTrace {
     pub milestones: Vec<Milestone>,
     pub fingerprints: Fingerprints,
     pub capabilities: Map<String, Value>,
+    /// `metadata.seed`, when it is a whole number.
+    pub seed: Option<i64>,
+    /// `metadata.knobs`: the settings this run was made with, such as batch size or precision.
+    pub knobs: Map<String, Value>,
 }
 
 /// What a stored trace adds to an inference run: where it came from, and what the validator found.
@@ -109,6 +113,9 @@ pub struct TraceInfo {
     pub guardrails: Vec<String>,
     /// True when the milestones came from the file, not from the latency values.
     pub stored_milestones: bool,
+    /// The trace's framework, such as `tfrt`.
+    pub framework: String,
+    pub seed: Option<i64>,
 }
 
 /// A JSON object is a stored RunTrace when it has a string `schemaVersion` and a `scalars.series` array.
@@ -206,6 +213,8 @@ pub fn parse(map: &Map<String, Value>) -> Result<RunTrace, String> {
             environment: fingerprint("environmentFingerprint"),
         },
         capabilities: map.get("capabilities").and_then(Value::as_object).cloned().unwrap_or_default(),
+        seed: metadata.and_then(|metadata| metadata.get("seed")).and_then(Value::as_i64),
+        knobs: metadata.and_then(|metadata| metadata.get("knobs")).and_then(Value::as_object).cloned().unwrap_or_default(),
     })
 }
 
