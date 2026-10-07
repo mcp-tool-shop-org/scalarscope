@@ -878,3 +878,17 @@ fn the_history_page_draws_a_project_its_shift_and_the_empty_cases() {
     unpackaged.page = super::Page::History;
     show(&mut unpackaged);
 }
+
+#[test]
+fn the_geometry_page_draws_the_real_drift_pair_unordered() {
+    let fixture = |name: &str| PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/aspire-si").join(name);
+    let mut app = blank(None);
+    app.open_pair(&fixture("real-local-teacher.drift.geometry.json"), &fixture("real-composite-teacher.drift.geometry.json"));
+    assert!(app.left.is_some() && app.right.is_some(), "{}", app.note);
+    show(&mut app);
+    app.open_pair(&fixture("real-local-teacher.geometry.json"), &fixture("real-composite-teacher.geometry.json"));
+    show(&mut app);
+    // A path that does not open leaves its side empty with the reason.
+    app.open_pair(&fixture("missing.json"), &fixture("real-local-teacher.geometry.json"));
+    assert!(app.left.is_none() && !app.note.is_empty());
+}

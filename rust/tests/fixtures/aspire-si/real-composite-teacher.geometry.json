@@ -1,5 +1,5 @@
 {
- "schema_version": "1.0",
+ "schema_version": "1.1",
  "run_metadata": {
   "run_id": "real-composite-teacher",
   "condition": "composite (vote): local:Qwen2.5-32B-Instruct + local:gemma-4-31B-it",
@@ -7,7 +7,9 @@
   "training_items": 32,
   "cycles": 3,
   "holdout_professor": null,
-  "conscience_tier": "UNKNOWN"
+  "conscience_tier": "UNKNOWN",
+  "step_axis": "training_step",
+  "scalar_source": "replayed"
  },
  "reduction": {
   "method": "PCA",

@@ -55,6 +55,34 @@ pub struct RunMetadata {
     pub holdout_professor: Option<String>,
     #[serde(default = "unknown")]
     pub conscience_tier: String,
+    /// `training_step` (time-ordered) or `checkpoint_by_item` (blocks per checkpoint over a fixed
+    /// item order, not time within a block). New in schema 1.1; see the spec's export contract.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub step_axis: Option<String>,
+    /// With `checkpoint_by_item`: how many checkpoint blocks the steps hold.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub checkpoints: Option<i64>,
+    /// `live`, `replayed` (epochs after the first replay cached scores) or `fixed_per_item`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub scalar_source: Option<String>,
+}
+
+/// Step axes the contract names.
+pub const STEP_AXES: [&str; 2] = ["training_step", "checkpoint_by_item"];
+/// Score sources the contract names.
+pub const SCALAR_SOURCES: [&str; 3] = ["live", "replayed", "fixed_per_item"];
+
+impl RunMetadata {
+    /// False when the export says its steps are checkpoint blocks over items, not time. A file
+    /// that says nothing (schema 1.0, or an unknown value) is read as time, as 2.0 read it.
+    pub fn steps_are_time(&self) -> bool {
+        self.step_axis.as_deref() != Some("checkpoint_by_item")
+    }
+
+    /// `Some(source)` when the export says its scores repeat (`replayed` or `fixed_per_item`).
+    pub fn repeated_scores(&self) -> Option<&str> {
+        self.scalar_source.as_deref().filter(|source| *source == "replayed" || *source == "fixed_per_item")
+    }
 }
 
 fn unknown() -> String {
@@ -246,6 +274,12 @@ pub fn read(value: &Value) -> Result<Opened, String> {
     }
     if run.evaluators.professors.is_empty() {
         warnings.push("No evaluator vectors - professor arrows won't be shown".to_string());
+    }
+    if let Some(axis) = run.metadata.step_axis.as_deref().filter(|axis| !STEP_AXES.contains(axis)) {
+        warnings.push(format!("Unknown step_axis \"{axis}\" - steps are read as training time"));
+    }
+    if let Some(source) = run.metadata.scalar_source.as_deref().filter(|source| !SCALAR_SOURCES.contains(source)) {
+        warnings.push(format!("Unknown scalar_source \"{source}\" - scores are read as live"));
     }
     Ok(Opened { run, warnings })
 }

@@ -7,8 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Evaluator labels on the geometry trajectory no longer overlap when two evaluators point the same way.
+- With `scalarscope <A> <B>`, a side that does not open keeps its error on the page after the other side loads.
+
 ### Added
 - `scalarscope <path A> <path B>` opens that pair on Compare at launch.
+- The geometry export contract (schema 1.1): `run_metadata.step_axis`, `checkpoints` and `scalar_source`. When a run's steps are checkpoints × items rather than time, ΔTc, ΔO and ΔF are withheld with that reason, and the trajectory is drawn as unordered points per checkpoint. When its scores are replayed or fixed per item, ΔF is withheld. The headline speaks only from deltas that stand, and the header and score panels state the layout. Files that state neither field read exactly as before.
 - Fixtures from real aspire-si training runs (`rust/tests/fixtures/aspire-si/real-*`): per-step and drift exports of a local-teacher run and a composite-teacher run. Tests check that they open in full and that the evaluator-spectrum reading holds.
 - A Workbench tab, on the workbench RunForge shares with it. Open runs there, or use the runs being compared. Press Ask and a local model that can call tools (Ollama on this computer; cloud models are refused) measures the runs, builds formula tools and proposes what each knob does. ScalarScope computes every number and sets every verdict: a hypothesis is not testable, confounded, inconclusive, supported or refuted on one set of runs, and verdicts across sets come only at checkpoints, by e-BH at a 5% false discovery rate. The page puts the program's verdicts first, with how many hypotheses were tried and how many hold. It then has a box for your own call before you ask, and the model's note labelled as its words. It also lists the measures the model never looked at, and Save session record writes the model, its digest, every call and answer, and no paths.
 - Knobs. A run's settings are read from `metadata.knobs` in a RunTrace, a `knobs.json` beside the run, or `key=value` pairs in its folder name, in that order, and the page says where each came from.
