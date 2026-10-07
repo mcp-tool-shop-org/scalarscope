@@ -14,7 +14,7 @@
 //! bare double prints as .NET prints it), see [`fixed`] and [`dotnet_double`].
 //!
 //! Behaviour believed to be a bug in 2.0 was ported as it was and listed as G1-G10 in the spec.
-//! The director's rulings of 2026-10-06 are applied and marked `G<n> (ruled ...)` where they
+//! The rulings of 2026-10-06 (spec "Decision brief") are applied and marked `G<n> (ruled ...)` where they
 //! change 2.0's answer, or `kept as 2.0` where they do not. G10 waits for real exports and is
 //! still marked `C# BUG?`.
 

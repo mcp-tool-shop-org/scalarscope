@@ -371,7 +371,7 @@ fn dotnet_number_formatting() {
     assert_eq!(dotnet_double(1.5e15), "1.5E+15");
 }
 
-// The director's rulings on the port's open questions (2026-10-06, spec "Decision brief").
+// The rulings of 2026-10-06 (spec "Decision brief") on the port's open questions.
 
 #[test]
 fn g1_convergence_alignment_follows_the_config_delta_tc_reads() {
