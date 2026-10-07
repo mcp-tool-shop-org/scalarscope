@@ -168,6 +168,50 @@ It works like RunForge's (`docs/sidecar-workbench.md` in runforge), on the share
 - **The person first.** An optional box records the user's own call before Ask. The verdict and its interval sit above the model's note, which is labelled a proposal (M6).
 - **Memory.** The workbench file holds tools, hypotheses, checkpoints and notes. It holds no paths and stays local.
 
+### Phase 5 plan (2026-10-06)
+
+The section above says what phase 5 does, but not how the code moves. This plan fills that gap. It was written after reading RunForge at `c0c5042`: `crates/runforge-core/src/{expr,bench,session}.rs` and `crates/runforge/src/sidecar.rs`.
+
+**What is shared today, and what is not.** RunForge's workbench is generic in its method but not in its types. `expr` evaluates a formula against a `Series`, and its measures (`low`, `median_between`, `slope_between`) are loss-over-epoch readings. `bench` and `session` take a `Board`, and they read `Series.recipe`, `Series.seed` and the loss samples (for `run_fingerprint`). The statistics (`exact_p`, `permutation_e`, `lambda_for`, Holm, e-BH, `Book` checkpoints), the wording fence, the phases, the caps and the Ollama loop never touch a loss value. They are what moves.
+
+**5a. The shared crate, by pull request to runforge.**
+
+- It lives at `crates/workbench` in the runforge workspace (crate name `workbench`, `publish = false`). ScalarScope depends on it with `git = "https://github.com/mcp-tool-shop-org/runforge"`, pinned to a `rev`. A pin moves by pull request, as the Atlas pin does. It does not get a repo of its own: D2 sends the change to runforge, and one home keeps one history for the evidence code.
+- **The interface** is a concrete `Run` plus one trait the host implements:
+  - `Run { name, seed: Option<i64>, knobs: Map<String, Value>, identity: String }`. `identity` is computed by the host. RunForge keeps "seed + hash of the first 32 samples". ScalarScope uses seed + a hash of the first 32 latency samples.
+  - `trait Measures { fn catalogue(&self) -> &[Measure]; fn measure(&self, run: usize, name: &str, args: &[Arg]) -> Result<f64, String>; fn format(&self, name: &str, value: f64) -> String; fn method(&self) -> String; }`. `method` is the board key that hypotheses are filed under. RunForge's is the training method. ScalarScope's is the TFRT preset or the framework.
+  - The crate keeps `knob('name')` and the math functions (`abs`, `sqrt`, `ln`, `exp`, `min`, `max`). It adds them to every host's catalogue, so a host cannot shadow them.
+- **What moves:** the formula grammar, its caps and canonical form (`expr`, without `RunView`); everything in `bench` except `run_fingerprint`; `session`; and from `sidecar.rs` the Ollama loop, `choose_tool_model`, `candidates`, `can_call_tools` and the HTTP code. RunForge keeps `LossMeasures` (today's `RunView`), its `Board`, its pane and its file locations.
+- **D4, pinned and recorded.** RunForge's sidecar chooses a model by preference order and does not save which one it used (its own doc defers this). The shared loop records the model name and its Ollama digest in the session record, so both apps reach PIN_PER_STEP 3. The preference order stays RunForge's. On this rig `qwen3:14b` is not installed (2026-10-06), so the loop falls to `qwen2.5:14b`, the second in that order.
+- **Tests carry over.** `tests/evidence.rs` and the unit tests in `expr`, `bench`, `session` and `sidecar.rs` (including the fake-Ollama end-to-end test) move into the crate and run against a test `Measures`. RunForge's full suite stays green, with the same test count across both crates. This is the first half of the exit test.
+
+**5b. The workbench in ScalarScope.**
+
+- **Knobs.** They are read in this order, and the first source that has a knob wins: a `knobs` object in the RunTrace `metadata`; a `knobs.json` beside the run; then `key=value` pairs in the run's folder name, split on `_` or `,` (`batch=8_precision=fp16`). The pane shows where each knob came from. The 2.0 fixtures carry no knobs, so on the golden pair every hypothesis is "not testable". That is a program-set state, and it is the honest answer for those files.
+- **Measures.** The catalogue is the built-in set the spec names: `p50`, `p90`, `p99`, `p99_over_p50`, `steady_mean`, `warmup_cost` (ms × warmup steps, from the S5 shape), `anomaly_rate` (under the rule the review uses), `throughput_p50` and `memory_peak`. It adds `quantile_between(a, b, q)` and `mean_between(a, b)` over steps, so the model can build windows. A measure that a run cannot supply (no memory series, no milestone) is a refusal with a reason, never a zero. Kernel measures (K3) wait for a profiler-trace fixture that carries per-kernel times. Until then they are listed as deferred, not offered.
+- **The pane.** It is a "Workbench" tab beside the comparison. It shows the program's verdicts and intervals first. Below them, an optional "Your call" box is saved before Ask (M6). Then the model's note, labelled "the model's words, not a measurement", then "N tried, M hold", the measures not yet used (M4), the pinned model and digest, and the step log. Ask is disabled while a bundle is open in review mode.
+- **Memory.** `workbench.json` sits in the preferences directory (the 2.0 `LocalState` path when packaged). It holds tools, hypotheses, the checkpoint book and notes. It holds no paths: a run is named by its identity hash. Its compensators are RunForge's: delete an entry, or delete the file.
+- **Exit fixture.** A knob-varying folder is added as `tests/Fixtures/Workbench/`: batch 1, 4 and 8, three seeds each, as nine RunTrace files with `metadata.knobs`. These are **simulated**, with latency drawn from a stated model in a committed generator script, and the folder's README says so. Real inference timings would be better. They need GPU time and a model to serve, so they are a director's call (question P2).
+
+**5c. History (H, K4).**
+
+- A **project** is the pair (dataset fingerprint, model fingerprint) of side B. Code and environment are left out of the key, because their changes are what the history is for. A 2.0 log entry without fingerprints goes to "Unsorted".
+- Each comparison-log entry gains an optional `measures` object: side B's built-in measures, as the review computed them. 2.0 entries lack it, and they are kept and shown without a series.
+- For each measure, the project's entries in date order go through PELT (`shape::pelt`) with a fixed penalty, which is recorded on the view. With fewer than six entries the view says "too few reviews for change points" and draws only the points.
+- An entry whose code or environment fingerprint differs from the one before it is marked on the axis. A shift that falls within one entry of such a mark names the mark: "p99 shifted at 2026-10-09, with an environment change". The program writes that sentence, and it claims coincidence, not cause.
+
+**Exit test, restated.** (1) RunForge's workbench tests pass on the shared crate, with RunForge's suite green and its count unchanged. (2) A live session with the local tool model on the golden pair and on `tests/Fixtures/Workbench/` ends with every hypothesis in a program-set state. The session record, with no paths, is committed under `docs/receipts/` as the receipt. (3) The history view draws a project of at least six logged reviews, with a fixture that holds one environment change and one shift.
+
+**Order of pull requests.** 5a (runforge), then 5b (ScalarScope, pinned to 5a's merge commit), then 5c. Each is merged by the director. A live session loads a local model on the GPU, so it is announced before it starts.
+
+**Questions for the director.**
+
+| # | Question | Recommendation |
+|---|---|---|
+| P1 | Where the shared crate lives | `crates/workbench` in runforge, pinned by git `rev` (above). The alternative is a new repo, which would also need its own Atlas map, CI and shipcheck. |
+| P2 | Simulated or real knob runs for the exit fixture | Simulated now, so the exit test is runnable. Real runs later, if they are worth the GPU time. |
+| P3 | Project key for history | (dataset, model) fingerprints of side B, as above |
+
 ## Phases
 
 | Phase | Content | Exit test |
@@ -179,7 +223,7 @@ It works like RunForge's (`docs/sidecar-workbench.md` in runforge), on the share
 | 4b. Geometry views (D1) | Geometry import and deltas with 2.0 defaults, static trajectory/eigen/evaluator/failure views, optional playback, frame export | The 2.0 geometry tests pass in Rust. The demo pair and an export from 4a render |
 | 5. Workbench and history | The shared crate (D2), knobs, measures, hypotheses, evidence, envelope, history change points | The RunForge workbench tests pass on the shared crate. A live session on the golden folders ends with program-set states |
 
-Store submission follows phase 4b (D1). WACK, the listing, screenshots, samples for testers and certification notes come then, as they did for RunForge.
+Store submission is held by the director (2026-10-06) until phase 5 lands and a geometry export from a real aspire-si training run has been opened in ScalarScope and its comparison checked by a person. This replaces "follows phase 4b". WACK, the listing, screenshots, samples for testers and certification notes come then, as they did for RunForge.
 
 ## Verdict changes from 2.0
 
