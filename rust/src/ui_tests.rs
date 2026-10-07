@@ -997,3 +997,18 @@ fn file_dialogs_start_in_the_folder_used_last_and_never_the_working_directory() 
     fs::remove_dir_all(&out).unwrap();
     assert_ne!(app.start_folder().as_deref(), Some(out.as_path()));
 }
+
+#[test]
+fn review_mode_draws_an_older_bundle_with_its_stored_verdict_and_the_labelled_current_reading() {
+    let mut app = blank(None);
+    app.page = super::Page::Compare;
+    queue_pick(Some(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/bundles/drift-saved-by-3.1.0.scbundle")));
+    app.open_bundle();
+    assert!(app.note.is_empty(), "{}", app.note);
+    show(&mut app);
+    assert_eq!(
+        super::geometry_views::current_reading_note("No meaningful divergence between the runs."),
+        "Current reading (rules since 3.1.1): 'No meaningful divergence between the runs.'. This bundle was saved with the reading above."
+    );
+    assert!(super::geometry_views::CURRENT_TILES.starts_with("Current reading:"));
+}

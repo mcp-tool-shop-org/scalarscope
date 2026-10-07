@@ -35,32 +35,24 @@
   ],
   "changes": {
     "fileCounts": {
-      "added": 0,
+      "added": 1,
       "changed": 15,
       "moved": 0,
-      "parts": 4,
+      "parts": 3,
       "removed": 0
     },
     "items": [
       {
-        "kind": "door",
-        "sentence": "Coverage now also runs rust/src/geometry_deltas.rs.",
-        "subjects": [
-          ".github/workflows/coverage.yml",
-          "rust/src/geometry_deltas.rs"
-        ]
-      },
-      {
         "kind": "counts",
-        "sentence": "15 files changed content, across 4 parts.",
+        "sentence": "Nothing structural changed since 2026-10-07; 1 file added and 15 changed content.",
         "subjects": []
       }
     ],
     "since": {
-      "commit": "925ce1c6873bc5af9b87929dc90735277b7cb543",
-      "generatedAt": "2026-10-07T08:13:54.259Z"
+      "commit": "529c1cf972481f44ff047b6d2b3a7b825449248b",
+      "generatedAt": "2026-10-07T08:23:49.262Z"
     },
-    "unchanged": false
+    "unchanged": true
   },
   "changesTogether": [
     {
@@ -144,7 +136,7 @@
     "Window: 180 days; a pair counts from 3 shared commits, since 8 source files reach 10 revisions; the floor rises to 10 when 25 do."
   ],
   "changesTogetherWithTests": 0,
-  "commit": "529c1cf972481f44ff047b6d2b3a7b825449248b",
+  "commit": "acaf17f3153e2cd47bac6c0a8046a89b1553ed37",
   "defaultBranch": "main",
   "derived": "10 parts, mostly C# (181 files), Rust (40), CSS (2), PowerShell (2), TypeScript (2), Astro (1), JavaScript (1), Python (1) and shell (1). Work enters through 7 doors; the busiest is Build and Test, which reaches 4 parts. It deploys a site to GitHub Pages. People run scalarscope.",
   "doors": [
@@ -415,7 +407,7 @@
   "edges": [],
   "engine": "1.24.0",
   "generated": [],
-  "generatedAt": "2026-10-07T08:23:49.262Z",
+  "generatedAt": "2026-10-07T08:37:45.666Z",
   "limits": [
     "5 writes and 4 reads use paths built at run time and are not named here.",
     "5 writes and 12 reads go to a path their caller passes, not to this repository.",
@@ -454,7 +446,7 @@
   "startReason": "This path follows Coverage, since Build and Test only checks code.",
   "summary": "A review of two machine-learning runs. The app is the Rust program in rust/, packed as an MSIX for the Microsoft Store; src/ holds the earlier .NET MAUI app the Store copy still runs.",
   "summaryFrom": "person",
-  "testFiles": 82,
+  "testFiles": 83,
   "testedBy": {
     "rust": 21
   },

@@ -96,6 +96,14 @@ fn checkpoint_blocks(path: &[[f64; 2]], checkpoints: Option<i64>) -> Vec<Vec<[f6
     path.chunks(size).map(<[[f64; 2]]>::to_vec).collect()
 }
 
+/// Review mode: today's verdict, when it differs from the verdict the bundle stored.
+pub(super) fn current_reading_note(current: &str) -> String {
+    format!("Current reading (rules since 3.1.1): '{current}'. This bundle was saved with the reading above.")
+}
+
+/// Review mode: the bundle stored only its verdict, so the tiles come from today's rules.
+pub(super) const CURRENT_TILES: &str = "Current reading: this bundle stored no tiles, so these are drawn by today's rules.";
+
 /// A label position moved down until its line clears every label already placed. A label is
 /// wide and short, so two clash when they are within `gap` vertically and eight gaps sideways.
 fn clear_of(placed: &[[f64; 2]], mut at: [f64; 2], gap: f64) -> [f64; 2] {
@@ -135,6 +143,12 @@ impl ScalarScopeApp {
             ui.label(RichText::new(warning).color(paint.note));
         }
         ui.label(RichText::new(&review.verdict).color(paint.text));
+        if let Some(current) = &review.current_verdict {
+            ui.label(RichText::new(current_reading_note(current)).color(paint.mark));
+        }
+        if review.tiles_are_current {
+            ui.label(RichText::new(CURRENT_TILES).color(paint.note));
+        }
         self.draw_tiles(ui, &review.explanations);
         let Some((start, end)) = time_range(&review.left, &review.right) else {
             ui.label(RichText::new("Neither run has a trajectory to draw.").color(paint.note));

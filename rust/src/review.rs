@@ -149,6 +149,10 @@ pub struct GeometryReview {
     pub verdict: String,
     /// One tile per delta.
     pub explanations: Vec<Explanation>,
+    /// Review mode only: what today's rules say, when it differs from the stored verdict above.
+    pub current_verdict: Option<String>,
+    /// Review mode only: the bundle stored no tiles, so these were drawn by today's rules.
+    pub tiles_are_current: bool,
 }
 
 /// Choices that change how a review reads its samples. Recorded in the caption, so a stored
@@ -834,6 +838,8 @@ pub fn geometry_with_deltas(
         verdict: result.comparative_summary,
         deltas: result.deltas,
         explanations,
+        current_verdict: None,
+        tiles_are_current: false,
     }
 }
 

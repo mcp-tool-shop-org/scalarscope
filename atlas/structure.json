@@ -378,7 +378,7 @@
           "path": ".gitignore"
         },
         {
-          "hash": "c361e1c0f1280b45e46524b87c57a9ed6cba93b830eaa47b4a204071dad1bae3",
+          "hash": "068872131b715a9d3949897f02b8ece83bf5b47c613a838fb3ffb56b5ff87750",
           "path": "CHANGELOG.md"
         },
         {
@@ -394,35 +394,35 @@
           "path": "PRIVACY.md"
         },
         {
-          "hash": "f03304c1760f76183c4ff4772c0eded9dd0fd44342343adc4d6f62dbd22a4184",
+          "hash": "26ba4f2118bb96b7afe003a23c39eafbcf0c5ffd5ba0655418ea2cbf1da2f484",
           "path": "README.es.md"
         },
         {
-          "hash": "6f34f2b3eb0ee97d8fcf429c9872964f7dc3ccc2193f6d68820678e42ede7264",
+          "hash": "ed31ff52ddb8d6033fe166ef54e988b522d77dea7745405701213f045269b346",
           "path": "README.fr.md"
         },
         {
-          "hash": "61f4e930960d6286b8b0b42b2e233556a28402a8eae285b341b4856679aef917",
+          "hash": "df16ff3b54cc8fa14d3404a4fcb2261b5c51aa83e727665336abbb1856b93fbc",
           "path": "README.hi.md"
         },
         {
-          "hash": "96551505b0facfda7ddac6077a0cf500e745252f746ce032f3193076b52219e6",
+          "hash": "18bc353df008a329be5b8248d2b62af28feca206c67aa905f30a8ee1255a1349",
           "path": "README.it.md"
         },
         {
-          "hash": "c6363024e848cfe4ff8fcac2508ca92e59e7201b99e883b73e87383a1633e47a",
+          "hash": "2aae4fd93020fea24bf3d8fe3e5ee831182c9fb15c7fb53567599c76be372909",
           "path": "README.ja.md"
         },
         {
-          "hash": "aad1a7243e74a5947e718ff90fdfa0185777b7159e3236e8286718accfe87039",
+          "hash": "20dccd56dc844fe73fc0d2009663477296af5ebba0e4dbefd2e3c38904f991f7",
           "path": "README.md"
         },
         {
-          "hash": "53c6762519e3a27a7592e1adf6fe549a656f17d86520b51606a9f5de61e4b145",
+          "hash": "69d81127762c8d5a10df9be36f38b68186bb74054470143e8cdff5fd8715dc42",
           "path": "README.pt-BR.md"
         },
         {
-          "hash": "40531e2bffc7a3bb0b44d91837219dfd2ecf2e4245580c3107bc750824eabe0b",
+          "hash": "53b302ce992c086d7c45cc40545170ff48f9663136229516c3709f6f75a6c698",
           "path": "README.zh.md"
         },
         {
@@ -764,35 +764,35 @@
             {
               "in": "pack",
               "kind": "err",
-              "line": 604
+              "line": 615
             },
             {
               "in": "pack",
               "kind": "err",
-              "line": 607
+              "line": 618
             },
             {
               "in": "findings_only",
               "kind": "err",
-              "line": 794
+              "line": 805
             },
             {
               "in": "to_json",
               "kind": "err",
-              "line": 900
+              "line": 911
             },
             {
               "in": "canon_json",
               "kind": "err",
-              "line": 909
+              "line": 920
             },
             {
               "in": "normalize",
               "kind": "err",
-              "line": 1035
+              "line": 1046
             }
           ],
-          "hash": "b162feb4a2c9aa052ba8c873a552d0c6820bc2db3a8ac3b9d0399054a21347e2",
+          "hash": "fa480b816f6ebe702704e0e6c492439c322501b19417c16dd6527a8bab099ada",
           "importOrder": [
             "rust/src/readings.rs",
             "rust/src/review.rs",
@@ -2112,20 +2112,20 @@
             {
               "in": "pair_with",
               "kind": "err",
-              "line": 173
+              "line": 177
             },
             {
               "in": "blocked",
               "kind": "err",
-              "line": 480
+              "line": 484
             },
             {
               "in": "blocked",
               "kind": "err",
-              "line": 487
+              "line": 491
             }
           ],
-          "hash": "566d4ad8ecbf1285e4955edcec7a6bc5e501d5e2edd87280529684d28beb6ef6",
+          "hash": "ddb60bb823441656333d0e629885f10ee756b0fd5a22327cf4b3b5ff2c6487cb",
           "importOrder": [
             "rust/src/open.rs",
             "rust/src/readings.rs",
@@ -2466,12 +2466,13 @@
         },
         {
           "exports": [
+            "current_reading_note",
             "position_at",
             "professor_tips",
             "reach",
             "time_range"
           ],
-          "hash": "2054e6e05430e710609a9cfa39174d7b646bc89f2580b2f86c58eaab8e5e1d54",
+          "hash": "dea74c9a65219814b16db48cab606403d909077c7544304ee6a12c4d7e4c17d4",
           "importOrder": [
             "rust/src/ui.rs",
             "rust/src/geometry.rs",
@@ -2530,7 +2531,7 @@
               "line": 770
             }
           ],
-          "hash": "e5c560b37d24e26168c83c2e3cfe374a94463cafe98a33b18eb9fa120bf783bb",
+          "hash": "846beaa4f7bfe4a3eaf6131ca78fe6543130424ea115cac0123f85f18755e0f3",
           "importOrder": [
             "rust/src/bundle.rs",
             "rust/src/history.rs",
@@ -2543,7 +2544,8 @@
             "rust/src/ui_pages.rs",
             "rust/src/svg.rs",
             "rust/src/workbench.rs",
-            "rust/src/ui_workbench.rs"
+            "rust/src/ui_workbench.rs",
+            "rust/src/ui_geometry.rs"
           ],
           "importsFiles": [
             "rust/src/bundle.rs",
@@ -2555,6 +2557,7 @@
             "rust/src/stats.rs",
             "rust/src/svg.rs",
             "rust/src/ui.rs",
+            "rust/src/ui_geometry.rs",
             "rust/src/ui_pages.rs",
             "rust/src/ui_workbench.rs",
             "rust/src/workbench.rs"
@@ -2765,7 +2768,7 @@
           "testsInside": true
         },
         {
-          "hash": "c49c8d315694b6185a8063e9647755979e3693f6467e135e6e204f851e5563a5",
+          "hash": "7da83394e3e9fed299625373884b548f3bae7711e0fd5f307a4a3be40266f987",
           "importsFiles": [
             "rust/src/bundle.rs",
             "rust/src/open.rs",
@@ -2848,6 +2851,10 @@
         {
           "hash": "fc53c3e8d26207b8a299f0a7ddaec6534947537c9d1295fcaaa2b600bb0ebb6f",
           "path": "rust/tests/fixtures/aspire-si/steady.json"
+        },
+        {
+          "hash": "cd036913b7f80d8e20d479e37f45d638d1388599a9e91158ce84c1d582c4ace5",
+          "path": "rust/tests/fixtures/bundles/drift-saved-by-3.1.0.scbundle"
         },
         {
           "hash": "6d981971557bd3ed9b3c59e7781dc7fc7afbcdd7f89bbc0f8b370e8a5c02e539",
@@ -3067,7 +3074,7 @@
           "path": "site/src/content/docs/handbook/beginners.md"
         },
         {
-          "hash": "aa8c54686ecda5d298689ac40ff65d96ef6099283d52dde0302709bbb12f9c93",
+          "hash": "f0e753e30288d40bb71e1cb45e4c919690be178442475f40c3740181a0715655",
           "path": "site/src/content/docs/handbook/bundles.md"
         },
         {
@@ -5359,8 +5366,8 @@
   "edges": [],
   "engine": "1.24.0",
   "generatedFrom": {
-    "commit": "529c1cf972481f44ff047b6d2b3a7b825449248b",
-    "tracked": 463
+    "commit": "acaf17f3153e2cd47bac6c0a8046a89b1553ed37",
+    "tracked": 464
   },
   "landings": [
     {
@@ -5601,7 +5608,7 @@
   "overlaps": [],
   "submodules": [],
   "symlinks": [],
-  "testFiles": 82,
+  "testFiles": 83,
   "unassigned": [
     {
       "hash": "20c54ca3354e05fbed8e4c606149cb099f04ee1062791c8c1b0f1a717131388c",

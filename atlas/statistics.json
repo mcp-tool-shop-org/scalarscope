@@ -113,7 +113,7 @@
       "confidence": "full",
       "highWater": null,
       "name": "rust",
-      "qualifyingSourceCommits": 44,
+      "qualifyingSourceCommits": 45,
       "rebaseline": null
     },
     {
@@ -219,8 +219,8 @@
         "path": ".gitignore"
       },
       {
-        "commits": 59,
-        "lines": 531,
+        "commits": 61,
+        "lines": 534,
         "path": "CHANGELOG.md"
       },
       {
@@ -239,43 +239,43 @@
         "path": "PRIVACY.md"
       },
       {
-        "commits": 16,
-        "lines": 1224,
+        "commits": 18,
+        "lines": 1228,
         "path": "README.es.md"
       },
       {
-        "commits": 16,
-        "lines": 1230,
+        "commits": 18,
+        "lines": 1234,
         "path": "README.fr.md"
       },
       {
-        "commits": 16,
-        "lines": 1220,
+        "commits": 18,
+        "lines": 1224,
         "path": "README.hi.md"
       },
       {
-        "commits": 16,
-        "lines": 1234,
+        "commits": 18,
+        "lines": 1238,
         "path": "README.it.md"
       },
       {
-        "commits": 16,
-        "lines": 1234,
+        "commits": 18,
+        "lines": 1238,
         "path": "README.ja.md"
       },
       {
-        "commits": 25,
-        "lines": 1081,
+        "commits": 27,
+        "lines": 1085,
         "path": "README.md"
       },
       {
-        "commits": 16,
-        "lines": 1222,
+        "commits": 18,
+        "lines": 1226,
         "path": "README.pt-BR.md"
       },
       {
-        "commits": 16,
-        "lines": 1230,
+        "commits": 18,
+        "lines": 1234,
         "path": "README.zh.md"
       },
       {
@@ -354,8 +354,8 @@
         "path": "assets/logo.png"
       },
       {
-        "commits": 22,
-        "lines": 570,
+        "commits": 24,
+        "lines": 600,
         "path": "atlas/README.md"
       },
       {
@@ -364,18 +364,18 @@
         "path": "atlas/boundaries.yaml"
       },
       {
-        "commits": 22,
-        "lines": 1934,
+        "commits": 24,
+        "lines": 2004,
         "path": "atlas/page.json"
       },
       {
-        "commits": 22,
-        "lines": 9520,
+        "commits": 24,
+        "lines": 9984,
         "path": "atlas/statistics.json"
       },
       {
-        "commits": 22,
-        "lines": 12978,
+        "commits": 24,
+        "lines": 13080,
         "path": "atlas/structure.json"
       },
       {
@@ -484,8 +484,8 @@
         "path": "docs/index.md"
       },
       {
-        "commits": 28,
-        "lines": 998,
+        "commits": 30,
+        "lines": 1013,
         "path": "docs/parity-and-beyond.spec.md"
       },
       {
@@ -704,8 +704,8 @@
         "path": "rust/src/geometry.rs"
       },
       {
-        "commits": 12,
-        "lines": 6430,
+        "commits": 14,
+        "lines": 6690,
         "path": "rust/src/geometry_deltas.rs"
       },
       {
@@ -749,8 +749,8 @@
         "path": "rust/src/readings.rs"
       },
       {
-        "commits": 31,
-        "lines": 2387,
+        "commits": 32,
+        "lines": 2394,
         "path": "rust/src/review.rs"
       },
       {
@@ -819,8 +819,8 @@
         "path": "rust/src/workbench.rs"
       },
       {
-        "commits": 11,
-        "lines": 582,
+        "commits": 13,
+        "lines": 684,
         "path": "rust/tests/aspire_export_tests.rs"
       },
       {
@@ -1174,13 +1174,13 @@
         "path": "site/src/content/docs/handbook/bundles.md"
       },
       {
-        "commits": 6,
-        "lines": 288,
+        "commits": 7,
+        "lines": 290,
         "path": "site/src/content/docs/handbook/delta-analysis.md"
       },
       {
-        "commits": 5,
-        "lines": 117,
+        "commits": 7,
+        "lines": 122,
         "path": "site/src/content/docs/handbook/geometry.md"
       },
       {
@@ -2624,205 +2624,198 @@
     "level": "low",
     "reason": "fewer than 25 source files reach 10 revisions in the window"
   },
-  "generatedAt": "2026-10-07T08:23:49.262Z",
+  "generatedAt": "2026-10-07T08:37:45.666Z",
   "generatedFrom": {
-    "commit": "529c1cf972481f44ff047b6d2b3a7b825449248b"
+    "commit": "acaf17f3153e2cd47bac6c0a8046a89b1553ed37"
   },
   "pairs": [
     {
-      "a": "CHANGELOG.md",
-      "b": "rust/src/ui.rs",
-      "either": 42,
-      "shared": 21,
-      "strength": 0.5
-    },
-    {
       "a": "README.es.md",
       "b": "README.fr.md",
-      "either": 9,
-      "shared": 9,
+      "either": 10,
+      "shared": 10,
       "strength": 1
     },
     {
       "a": "README.es.md",
       "b": "README.hi.md",
-      "either": 9,
-      "shared": 9,
+      "either": 10,
+      "shared": 10,
       "strength": 1
     },
     {
       "a": "README.es.md",
       "b": "README.it.md",
-      "either": 9,
-      "shared": 9,
+      "either": 10,
+      "shared": 10,
       "strength": 1
     },
     {
       "a": "README.es.md",
       "b": "README.ja.md",
-      "either": 9,
-      "shared": 9,
+      "either": 10,
+      "shared": 10,
       "strength": 1
     },
     {
       "a": "README.es.md",
       "b": "README.pt-BR.md",
-      "either": 9,
-      "shared": 9,
+      "either": 10,
+      "shared": 10,
       "strength": 1
     },
     {
       "a": "README.es.md",
       "b": "README.zh.md",
-      "either": 9,
-      "shared": 9,
+      "either": 10,
+      "shared": 10,
       "strength": 1
     },
     {
       "a": "README.fr.md",
       "b": "README.hi.md",
-      "either": 9,
-      "shared": 9,
+      "either": 10,
+      "shared": 10,
       "strength": 1
     },
     {
       "a": "README.fr.md",
       "b": "README.it.md",
-      "either": 9,
-      "shared": 9,
+      "either": 10,
+      "shared": 10,
       "strength": 1
     },
     {
       "a": "README.fr.md",
       "b": "README.ja.md",
-      "either": 9,
-      "shared": 9,
+      "either": 10,
+      "shared": 10,
       "strength": 1
     },
     {
       "a": "README.fr.md",
       "b": "README.pt-BR.md",
-      "either": 9,
-      "shared": 9,
+      "either": 10,
+      "shared": 10,
       "strength": 1
     },
     {
       "a": "README.fr.md",
       "b": "README.zh.md",
-      "either": 9,
-      "shared": 9,
+      "either": 10,
+      "shared": 10,
       "strength": 1
     },
     {
       "a": "README.hi.md",
       "b": "README.it.md",
-      "either": 9,
-      "shared": 9,
+      "either": 10,
+      "shared": 10,
       "strength": 1
     },
     {
       "a": "README.hi.md",
       "b": "README.ja.md",
-      "either": 9,
-      "shared": 9,
+      "either": 10,
+      "shared": 10,
       "strength": 1
     },
     {
       "a": "README.hi.md",
       "b": "README.pt-BR.md",
-      "either": 9,
-      "shared": 9,
+      "either": 10,
+      "shared": 10,
       "strength": 1
     },
     {
       "a": "README.hi.md",
       "b": "README.zh.md",
-      "either": 9,
-      "shared": 9,
+      "either": 10,
+      "shared": 10,
       "strength": 1
     },
     {
       "a": "README.it.md",
       "b": "README.ja.md",
-      "either": 9,
-      "shared": 9,
+      "either": 10,
+      "shared": 10,
       "strength": 1
     },
     {
       "a": "README.it.md",
       "b": "README.pt-BR.md",
-      "either": 9,
-      "shared": 9,
+      "either": 10,
+      "shared": 10,
       "strength": 1
     },
     {
       "a": "README.it.md",
       "b": "README.zh.md",
-      "either": 9,
-      "shared": 9,
+      "either": 10,
+      "shared": 10,
       "strength": 1
     },
     {
       "a": "README.ja.md",
       "b": "README.pt-BR.md",
-      "either": 9,
-      "shared": 9,
+      "either": 10,
+      "shared": 10,
       "strength": 1
     },
     {
       "a": "README.ja.md",
       "b": "README.zh.md",
-      "either": 9,
-      "shared": 9,
+      "either": 10,
+      "shared": 10,
       "strength": 1
     },
     {
       "a": "README.pt-BR.md",
       "b": "README.zh.md",
-      "either": 9,
-      "shared": 9,
+      "either": 10,
+      "shared": 10,
       "strength": 1
     },
     {
       "a": "atlas/README.md",
       "b": "atlas/page.json",
-      "either": 12,
-      "shared": 12,
+      "either": 13,
+      "shared": 13,
       "strength": 1
     },
     {
       "a": "atlas/README.md",
       "b": "atlas/statistics.json",
-      "either": 12,
-      "shared": 12,
+      "either": 13,
+      "shared": 13,
       "strength": 1
     },
     {
       "a": "atlas/README.md",
       "b": "atlas/structure.json",
-      "either": 12,
-      "shared": 12,
+      "either": 13,
+      "shared": 13,
       "strength": 1
     },
     {
       "a": "atlas/page.json",
       "b": "atlas/statistics.json",
-      "either": 12,
-      "shared": 12,
+      "either": 13,
+      "shared": 13,
       "strength": 1
     },
     {
       "a": "atlas/page.json",
       "b": "atlas/structure.json",
-      "either": 12,
-      "shared": 12,
+      "either": 13,
+      "shared": 13,
       "strength": 1
     },
     {
       "a": "atlas/statistics.json",
       "b": "atlas/structure.json",
-      "either": 12,
-      "shared": 12,
+      "either": 13,
+      "shared": 13,
       "strength": 1
     },
     {
@@ -2906,16 +2899,16 @@
     "floor": "fallen",
     "floorHeld": false,
     "floorTrigger": "revision-depth",
-    "headDate": "2026-10-07T04:19:41-04:00",
-    "inScopeFiles": 468,
+    "headDate": "2026-10-07T01:32:27-07:00",
+    "inScopeFiles": 469,
     "pinnedStart": null,
     "priorFloor": "fallen",
-    "qualifyingCommits": 84,
+    "qualifyingCommits": 85,
     "qualifyingMinimum": 30,
     "revisions": 5,
     "shared": 10,
     "sharedFloorUsed": 3,
-    "since": "2026-04-10T08:19:41.000Z",
+    "since": "2026-04-10T08:32:27.000Z",
     "sourceExtensions": [
       ".js",
       ".mjs",

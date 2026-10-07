@@ -46,13 +46,12 @@ This lets recipients understand what data the bundle contains before opening it.
 
 ## Review mode
 
-Open any `.scbundle` without recomputing:
+**Open bundle** shows the review as it was saved:
 
 - A matching SHA-256 checks the archived bytes. It is a content check, not a signature.
-- Frozen deltas are displayed exactly as they were at export time
-- A review-mode banner says the stored review is shown, not recomputed
-- The insights tray shows frozen insight events from the bundle
-- Both parties see identical results when sharing bundles
+- The headline and the tiles are the stored ones, the text the hash vouches for.
+- A geometry bundle stores both runs in full, so its views redraw from them. Today's rules then read the runs again. If they reach a different verdict, it appears below the stored one, labelled "Current reading (rules since 3.1.1)", and it is never shown as the stored verdict. A geometry bundle that stored no tiles shows tiles from today's rules, labelled "Current reading".
+- Both parties see the same stored review when sharing bundles.
 
 Review mode is read-only — you cannot modify the bundle contents from within the app.
 
