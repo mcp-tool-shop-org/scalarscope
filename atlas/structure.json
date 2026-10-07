@@ -378,7 +378,7 @@
           "path": ".gitignore"
         },
         {
-          "hash": "b2ab2cee0761d1d48985b0d16a44a6a464d390442633f6822e4ac61d4eb766ee",
+          "hash": "38c2e01172bb40169772359c296ee7843cdbf7db119d95d4e6db2ca4055e208b",
           "path": "CHANGELOG.md"
         },
         {
@@ -2745,7 +2745,7 @@
           ]
         },
         {
-          "hash": "5ffea9ac3ee64c24a70f3910676b4943dfb335fedd90bc3c2191468050776d1a",
+          "hash": "73b9074fd1d00c98ad077efeb3fa882af5b1362a82c310948be4e1be04cd0d08",
           "importOrder": [
             "rust/src/geometry_deltas.rs",
             "rust/src/open.rs",
@@ -2818,6 +2818,30 @@
         {
           "hash": "e7e17e1d87e54f1c47e1fb67f8f557ec7064a476da4666cf61637ec74fc176ef",
           "path": "rust/tests/fixtures/aspire-si/regressing.json"
+        },
+        {
+          "hash": "2e678fa4bed8cb4af6bf28764b83a475b74002cc99379c70673a3d4871aa1fc5",
+          "path": "rust/tests/fixtures/aspire-si/sft-composite-teacher.drift-from-base.geometry.json"
+        },
+        {
+          "hash": "f4c225e850dac95f1562edb57e10d185603730c6dee595fe99815b27aab7420f",
+          "path": "rust/tests/fixtures/aspire-si/sft-composite-teacher.drift-from-sft.geometry.json"
+        },
+        {
+          "hash": "1e0b621413832d3ba2a055479038896e5b57286e4760ad1ab3c79e111c40d710",
+          "path": "rust/tests/fixtures/aspire-si/sft-composite-teacher.geometry.json"
+        },
+        {
+          "hash": "7a423c2d117352a8eb0b3dc27fd6418ace63713fb55c43a2671b6223b3ea2280",
+          "path": "rust/tests/fixtures/aspire-si/sft-local-teacher.drift-from-base.geometry.json"
+        },
+        {
+          "hash": "86943ee7fa776eeed1c06b1ec0ae068e81d4f83f7fa8e7d4ddd743cd1bcc72d3",
+          "path": "rust/tests/fixtures/aspire-si/sft-local-teacher.drift-from-sft.geometry.json"
+        },
+        {
+          "hash": "70a20e2edb8f14f7e4d85da8d9e152134e8916a23899fb6ee35e1b0afe7762d0",
+          "path": "rust/tests/fixtures/aspire-si/sft-local-teacher.geometry.json"
         },
         {
           "hash": "fc53c3e8d26207b8a299f0a7ddaec6534947537c9d1295fcaaa2b600bb0ebb6f",
@@ -5326,8 +5350,8 @@
   "edges": [],
   "engine": "1.24.0",
   "generatedFrom": {
-    "commit": "67fa43554a51ddc6dd32e09e52f20fc10779a843",
-    "tracked": 457
+    "commit": "2639d27bb087591010d32fe14225c102361386c9",
+    "tracked": 463
   },
   "landings": [
     {
@@ -5568,7 +5592,7 @@
   "overlaps": [],
   "submodules": [],
   "symlinks": [],
-  "testFiles": 75,
+  "testFiles": 81,
   "unassigned": [
     {
       "hash": "20c54ca3354e05fbed8e4c606149cb099f04ee1062791c8c1b0f1a717131388c",
