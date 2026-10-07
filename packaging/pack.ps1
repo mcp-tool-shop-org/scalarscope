@@ -16,6 +16,11 @@ if (-not $makeappx) {
     throw 'makeappx.exe was not found in the Windows SDK.'
 }
 
+# The version comes from the manifest this script packs, so a file name cannot drift from it.
+[xml]$source = Get-Content -Raw (Join-Path $PSScriptRoot 'AppxManifest.xml')
+$version = $source.Package.Identity.Version
+if ($version -notmatch '^\d+\.\d+\.\d+\.\d+$') { throw "AppxManifest.xml Identity Version is '$version'" }
+
 $stage = Join-Path ([System.IO.Path]::GetTempPath()) ('scalarscope-msix-' + [guid]::NewGuid().ToString('n'))
 New-Item -ItemType Directory -Force -Path $stage | Out-Null
 try {
@@ -29,7 +34,7 @@ try {
 
     $release = Join-Path $root 'release'
     New-Item -ItemType Directory -Force -Path $release | Out-Null
-    $msixName = 'ScalarScope_3.0.0.0_x64.msix'
+    $msixName = "ScalarScope_${version}_x64.msix"
     $msix = Join-Path $release $msixName
     & $makeappx.FullName pack /d $stage /p $msix /o
     if ($LASTEXITCODE -ne 0) {
@@ -47,7 +52,7 @@ try {
         $identity = $manifest.Package.Identity
         if ($identity.Name -ne 'mcp-tool-shop.ScalarScope') { throw "Package name is $($identity.Name)" }
         if ($identity.Publisher -ne 'CN=5305D976-6952-4F00-9C21-3A5DB090359F') { throw 'Publisher does not match the Store listing.' }
-        if ($identity.Version -ne '3.0.0.0') { throw "Version is $($identity.Version)" }
+        if ($identity.Version -ne $version) { throw "Version is $($identity.Version), not $version" }
         if ($identity.ProcessorArchitecture -ne 'x64') { throw "Architecture is $($identity.ProcessorArchitecture)" }
         $executable = $manifest.Package.Applications.Application.Executable
         if ($executable -ne 'scalarscope.exe') { throw "Executable is $executable" }
@@ -60,7 +65,7 @@ try {
         $zip.Dispose()
     }
 
-    $uploadName = 'ScalarScope_3.0.0.0_Store.msixupload'
+    $uploadName = "ScalarScope_${version}_Store.msixupload"
     $upload = Join-Path $release $uploadName
     $bundleStage = Join-Path ([System.IO.Path]::GetTempPath()) ('scalarscope-upload-' + [guid]::NewGuid().ToString('n'))
     New-Item -ItemType Directory -Force -Path $bundleStage | Out-Null
@@ -80,7 +85,7 @@ try {
     $msixHash = (Get-FileHash $msix -Algorithm SHA256).Hash
     "$uploadHash  $uploadName`r`n$msixHash  $msixName" | Set-Content -Encoding ascii $checks
     Write-Output "Packed $msixName"
-    Write-Output "Identity mcp-tool-shop.ScalarScope 3.0.0.0 x64"
+    Write-Output "Identity mcp-tool-shop.ScalarScope $version x64"
 }
 finally {
     if (Test-Path $stage) { Remove-Item $stage -Recurse -Force }

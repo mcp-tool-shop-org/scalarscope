@@ -18,8 +18,8 @@ MAJOR.MINOR.PATCH[-PRERELEASE]
 ### Current Version
 - **Display version 3.0.0** — `ApplicationDisplayVersion` in `ScalarScope.csproj`. Settings > About shows this string.
 - **ApplicationVersion 30** — the package integer in the same csproj. It is not the About string.
-- **csproj `Version` 3.0.0.0**
-- **`Package.appxmanifest` Identity Version 3.0.0.0**
+- **csproj `Version` 3.1.0.0**
+- **`Package.appxmanifest` Identity Version 3.1.0.0**
 - These are four fields. Read each one. Do not collapse them into a single label.
 - Store `9P3HT1PHBKQK`. Package name `mcp-tool-shop.ScalarScope`. Publisher `CN=5305D976-6952-4F00-9C21-3A5DB090359F`. Publisher display name `mcp-tool-shop`.
 - Unsigned MSIX. Partner Center signs it on ingestion.
@@ -70,8 +70,8 @@ git push origin vX.Y.Z
    - [ ] Attach checksums file
 
 2. **Artifacts**
-   - [ ] Unsigned `release/ScalarScope_3.0.0.0_x64.msix` is attached
-   - [ ] Unsigned `release/ScalarScope_3.0.0.0_Store.msixupload` is attached
+   - [ ] Unsigned `release/ScalarScope_3.1.0.0_x64.msix` is attached
+   - [ ] Unsigned `release/ScalarScope_3.1.0.0_Store.msixupload` is attached
    - [ ] `release/checksums.txt` is attached
    - [ ] Partner Center signs the upload during ingestion. This repo does not produce a signed MSIX.
 
@@ -81,11 +81,11 @@ git push origin vX.Y.Z
 
 ## Artifact Naming
 
-The pack script writes these names. The package version stays `3.0.0.0`.
+The pack script writes these names. The package version stays `3.1.0.0`.
 
 ```
-release/ScalarScope_3.0.0.0_x64.msix
-release/ScalarScope_3.0.0.0_Store.msixupload
+release/ScalarScope_3.1.0.0_x64.msix
+release/ScalarScope_3.1.0.0_Store.msixupload
 release/checksums.txt
 ```
 

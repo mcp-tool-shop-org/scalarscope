@@ -28,7 +28,7 @@ use crate::review::{Finding, InferenceReview, Pair, TrainingReview};
 pub const CONTENT_CHECK: &str = "A matching hash checks these bytes. It is not a signature.";
 
 const SPEC: &str = "1.0.0";
-const APP: &str = "3.0.0";
+const APP: &str = env!("CARGO_PKG_VERSION");
 const REVIEW_PATH: &str = "review/review.json";
 
 #[derive(Clone, Debug, PartialEq, Serialize, serde::Deserialize)]

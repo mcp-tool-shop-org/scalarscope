@@ -56,14 +56,14 @@ public class VersionConsistencyTests
         identity.Attribute("Publisher")!.Value.Should().Be("CN=5305D976-6952-4F00-9C21-3A5DB090359F");
         var manifestVersion = identity.Attribute("Version")!.Value;
         manifestVersion.Should().MatchRegex(@"^\d+\.\d+\.\d+\.\d+$");
-        manifestVersion.Should().Be("3.0.0.0");
+        manifestVersion.Should().Be("3.1.0.0");
         properties.Element(ns + "PublisherDisplayName")!.Value.Should().Be("mcp-tool-shop");
 
         var csproj = XDocument.Load(Path.Combine(root, "src", "ScalarScope", "ScalarScope.csproj"));
         var display = csproj.Descendants("ApplicationDisplayVersion").First().Value;
         var packaged = csproj.Descendants("Version").First().Value;
-        display.Should().Be("3.0.0");
-        packaged.Should().Be("3.0.0.0");
+        display.Should().Be("3.1.0");
+        packaged.Should().Be("3.1.0.0");
         packaged.Should().Be(manifestVersion);
         csproj.Descendants("ApplicationId").First().Value.Should().Be("org.mcptoolshop.scalarscope");
 
@@ -77,6 +77,26 @@ public class VersionConsistencyTests
 
         // ApplicationVersion is the MSIX revision counter, not the fourth Identity component.
         int.Parse(csproj.Descendants("ApplicationVersion").First().Value)
-            .Should().BeGreaterThanOrEqualTo(30, "ApplicationVersion is the package revision and must stay above the 2.x revision");
+            .Should().BeGreaterThanOrEqualTo(31, "ApplicationVersion is the package revision and must stay above 3.0's 30");
     }
+
+    [Fact]
+    public void Pack_script_takes_its_version_from_the_manifest_it_packs()
+    {
+        var root = FindRepoRoot();
+        XNamespace ns = "http://schemas.microsoft.com/appx/manifest/foundation/windows10";
+        var packed = XDocument.Load(Path.Combine(root, "packaging", "AppxManifest.xml")).Root!.Element(ns + "Identity")!.Attribute("Version")!.Value;
+        var maui = XDocument.Load(Path.Combine(root, "src", "ScalarScope", "Platforms", "Windows", "Package.appxmanifest")).Root!.Element(ns + "Identity")!.Attribute("Version")!.Value;
+        packed.Should().Be(maui, "the Rust package and the MAUI manifest carry one Store identity version");
+
+        var pack = File.ReadAllText(Path.Combine(root, "packaging", "pack.ps1"));
+        pack.Should().Contain("$version = $source.Package.Identity.Version");
+        pack.Should().Contain("\"ScalarScope_${version}_x64.msix\"");
+        pack.Should().Contain("\"ScalarScope_${version}_Store.msixupload\"");
+        pack.Should().NotMatchRegex(@"ScalarScope_\d+\.\d+\.\d+\.\d+_", "no file name is pinned to a version in the script");
+
+        var cargo = File.ReadAllText(Path.Combine(root, "rust", "Cargo.toml"));
+        cargo.Should().Contain($"version = \"{packed[..packed.LastIndexOf('.')]}\"", "the Rust crate's version is the package version without its revision");
+    }
+
 }

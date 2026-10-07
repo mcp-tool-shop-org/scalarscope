@@ -793,7 +793,7 @@ impl ScalarScopeApp {
         }
         ui.add_space(8.0);
         ui.heading("About");
-        ui.label(format!("ScalarScope {} (package 3.0.0.0, Microsoft Store 9P3HT1PHBKQK)", env!("CARGO_PKG_VERSION")));
+        ui.label(format!("ScalarScope {0} (package {0}.0, Microsoft Store 9P3HT1PHBKQK)", env!("CARGO_PKG_VERSION")));
         ui.label(RichText::new("Privacy: ScalarScope reads only the files you open and writes only the bundles you save and its own settings and history in its package folder. It sends nothing anywhere: no account, no telemetry, no analytics.").color(paint.note));
         ui.horizontal(|ui| {
             ui.hyperlink_to("Report an issue", ISSUES_URL);

@@ -63,16 +63,16 @@ public class FeatureSliceTests
         var packAt = build.IndexOf("pack-review:", StringComparison.Ordinal);
         packAt.Should().BeGreaterThan(0);
         var pack = build[packAt..];
-        pack.Should().Contain("release/ScalarScope_3.0.0.0_x64.msix");
-        pack.Should().Contain("release/ScalarScope_3.0.0.0_Store.msixupload");
+        pack.Should().Contain("release/ScalarScope_3.1.0.0_x64.msix");
+        pack.Should().Contain("release/ScalarScope_3.1.0.0_Store.msixupload");
         pack.Should().Contain("release/checksums.txt");
         pack.Should().Contain("if-no-files-found: error");
-        pack.Should().Contain("name: scalarscope-store-3.0.0.0");
+        pack.Should().Contain("name: scalarscope-store-3.1.0.0");
         pack.Should().NotContain("dotnet publish");
 
         var verify = Read("docs/VERIFY_RELEASE.md");
         verify.Should().Contain("./packaging/pack.ps1");
-        verify.Should().Contain("release/ScalarScope_3.0.0.0_Store.msixupload");
+        verify.Should().Contain("release/ScalarScope_3.1.0.0_Store.msixupload");
         verify.Should().NotContain("dotnet publish src/ScalarScope/ScalarScope.csproj");
     }
 
@@ -81,8 +81,8 @@ public class FeatureSliceTests
     {
         var project = Read("src/ScalarScope/ScalarScope.csproj");
         project.Should().Contain("<WindowsPackageType>MSIX</WindowsPackageType>");
-        project.Should().Contain("<ApplicationDisplayVersion>3.0.0</ApplicationDisplayVersion>");
-        project.Should().Contain("<Version>3.0.0.0</Version>");
+        project.Should().Contain("<ApplicationDisplayVersion>3.1.0</ApplicationDisplayVersion>");
+        project.Should().Contain("<Version>3.1.0.0</Version>");
         project.Should().Contain("not the Partner Center upload");
         project.Should().Contain("RejectMauiAsStoreUpload");
         project.Should().Contain("Do not publish this MAUI app as that upload.");

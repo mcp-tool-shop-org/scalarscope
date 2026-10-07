@@ -27,7 +27,7 @@ The app is published. Store id `9P3HT1PHBKQK`.
 2. Click Get
 3. Launch ScalarScope from the Start menu
 
-An update must keep package name `mcp-tool-shop.ScalarScope`, publisher `CN=5305D976-6952-4F00-9C21-3A5DB090359F`, and publisher display name `mcp-tool-shop`. The next package version is `3.0.0.0`.
+An update must keep package name `mcp-tool-shop.ScalarScope`, publisher `CN=5305D976-6952-4F00-9C21-3A5DB090359F`, and publisher display name `mcp-tool-shop`. The next package version is `3.1.0.0`.
 
 ### Method 2: Partner Center upload
 
@@ -113,7 +113,7 @@ Uninstall does not leave the review behind in `%LOCALAPPDATA%\ScalarScope\`. Del
 
 **Symptom**: "App Installer cannot install this package"
 
-The unsigned `ScalarScope_3.0.0.0_x64.msix` in this repo is the upload file. Windows will not install it on double-click. Developer Mode does not install this file. Install from the Store, or from a package Partner Center has signed.
+The unsigned `ScalarScope_3.1.0.0_x64.msix` in this repo is the upload file. Windows will not install it on double-click. Developer Mode does not install this file. Install from the Store, or from a package Partner Center has signed.
 
 ### App Won't Start
 

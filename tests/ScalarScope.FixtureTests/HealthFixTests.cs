@@ -204,7 +204,7 @@ public class HealthFixTests
         yml.Should().Contain("persist-credentials: false");
         yml.Should().Contain("actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a");
         yml.Should().Contain("actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c");
-        yml.Should().Contain("3.0.0.0");
+        yml.Should().Contain("3.1.0.0");
         yml.Should().NotContain("llvm-tools");
 
         var buildAt = yml.IndexOf("build-release:", StringComparison.Ordinal);
