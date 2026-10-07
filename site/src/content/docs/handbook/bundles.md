@@ -1,75 +1,73 @@
 ---
 title: Bundles & Review
-description: Reproducible exports and review mode.
+description: Saving a review as a .scbundle, how its hash is checked, and review mode.
 sidebar:
   order: 7
 ---
 
-## Reproducible bundles
+A bundle is a review saved as one `.scbundle` file, a zip archive. Open it later, or send it to someone, and it shows the review that was saved. Its SHA-256 hash is a content check, not a signature.
 
-Export comparison results as `.scbundle` archives (ComparisonBundle v1.0.0). Bundles are self-contained. A matching SHA-256 is a content check, not a signature.
+## Saving
 
-### Bundle contents
+**Save bundle** on Compare writes the review open on the page. Both sides have to be open. The page then says "Saved the stored review" and gives the bundle's hash.
 
-| File | Purpose |
-|------|---------|
-| `manifest.json` | Bundle metadata, app version, comparison labels, alignment mode, privacy disclosure |
-| `repro/repro.json` | Input fingerprints, preset hash, determinism seed, environment info |
-| `findings/deltas.json` | Canonical deltas with confidence scores, anchors, trigger types, and debug info |
-| `findings/why.json` | Human-readable explanations, guardrails, parameter chips, confidence breakdowns |
-| `findings/summary.md` | Auto-generated Markdown summary |
-| `insights/insights.json` | *(optional)* Insight feed events for the Review Mode insights tray |
+## What a bundle holds
 
-Bundles exported with the **Audit** profile may also include a `repro/audit.json` payload with full reproducibility audit data.
+| File | What it holds |
+|------|---------------|
+| `review/review.json` | The stored review: the headline, the tiles, the notices, and what the page needs to redraw (see below) |
+| `findings/deltas.json` | The deltas that fired, as 2.0 wrote them, so 2.0 can read the bundle |
+| `findings/why.json` | The sentence for each of those deltas, as 2.0 wrote it |
+| `findings/summary.md` | The review in Markdown |
+| `repro/repro.json` | Hashes of the stored review and of the findings, and the sample count |
+| `environment/environment.json` | The app version, the platform and whether the process was 64-bit |
+| `manifest.json` | The bundle id, the versions and a privacy block |
+| `README.md` | A short note on what the file is |
+| `integrity.json` | Each file's hash and the bundle hash |
 
-### Bundle profiles
+What `review/review.json` keeps for redrawing depends on the review:
+- **An inference review:** the steady-state series, the bands, the distributions and the percentiles of both runs.
+- **A training review:** both loss curves.
+- **A geometry review:** both runs in full.
 
-Bundles can be exported in three profiles:
+File paths and the machine name are not stored. In an inference or training review, a run label that is a file path is cut to its last part.
 
-- **Share** — standard export for team sharing
-- **Review** — optimized for read-only review
-- **Audit** — includes extended reproducibility and audit data
+## The hash
 
-### Integrity
+1. Each file's SHA-256 is taken over its bytes as stored in the archive.
+2. The paths are sorted in ordinal order, and each is written as `path:hash` on its own line.
+3. The SHA-256 of that text is the bundle hash.
 
-Every file in the bundle is hashed with SHA-256. The bundle hash is a content check, not a signature. If any file has been modified since export, the hash does not match and Review Mode flags the discrepancy.
+`integrity.json` lists every file's hash and the bundle hash, and is not part of the hash itself. The hash checks that the bytes are the ones it was computed from. It does not say who made them: anyone who changes a file can write a new `integrity.json` to match.
 
-### Privacy
+## Opening a bundle
 
-The manifest includes a privacy disclosure block that records:
+**Open bundle** checks the hash before anything is shown. ScalarScope refuses the bundle, and opens nothing, when:
+- `integrity.json` is missing or cannot be read;
+- a listed file is missing, or a file's bytes do not match its hash;
+- the archive holds a file that is not listed;
+- the bundle hash does not match.
 
-- Whether raw run data is included
-- Whether any PII is present
-- What redactions were applied (none, labels only, paths removed)
-
-This lets recipients understand what data the bundle contains before opening it.
+The message names what failed: "The bundle hash does not match these bytes (…)". The one exception is a 2.0 auto-saved review, described below.
 
 ## Review mode
 
-**Open bundle** shows the review as it was saved:
+A bundle that opens puts the page in review mode. A banner says a stored review is open, and loading runs is off until **Close review**. The page shows the hash and **Copy hash**.
 
-- A matching SHA-256 checks the archived bytes. It is a content check, not a signature.
-- The headline and the tiles are the stored ones, the text the hash vouches for.
-- A geometry bundle stores both runs in full, so its views redraw from them. Today's rules then read the runs again. If they reach a different verdict, it appears below the stored one, labelled "Current reading (rules since 3.1.1)", and it is never shown as the stored verdict. A geometry bundle that stored no tiles shows tiles from today's rules, labelled "Current reading".
-- Both parties see the same stored review when sharing bundles.
+- **The headline and the tiles are the stored ones**, the text the hash vouches for.
+- **Inference and training reviews** draw their charts from the stored series.
+- **A geometry review** redraws its views from the two stored runs, and today's rules read those runs again.
+  - If today's rules reach a different verdict, it appears below the stored one, labelled "Current reading (rules since 3.1.1)". It is never shown as the stored verdict.
+  - If the bundle stored no tiles, the tiles come from today's rules and are labelled "Current reading".
 
-Review mode is read-only — you cannot modify the bundle contents from within the app.
+Review mode is read-only. Nothing on the page changes the bundle.
 
-### Reproducibility status
+## Bundles from 2.0
 
-Each bundle tracks its reproducibility status:
-
-- **Reproducible** — inputs and configuration match; results can be recreated
-- **Modified** — something changed (inputs, preset, seed, or delta spec)
-- **Nondeterministic** — results may vary between runs
-
-The specific reason flags (inputs changed, preset changed, seed changed, delta spec changed) are recorded so you can trace exactly what diverged.
-
-## Export workflow
-
-1. Complete a comparison in the **Compare** tab
-2. Click **Export Bundle** in the bundle export panel
-3. Choose a profile (Share, Review, or Audit)
-4. Choose a location for the `.scbundle` file
-5. Share the file with your team
-6. Recipients open it in ScalarScope — Review mode activates automatically
+- **A 2.0 comparison bundle** has `integrity.json` and its `findings/` files, but no `review/review.json`.
+  - Its hash is checked as above, and a mismatch is refused.
+  - The page shows the findings 2.0 stored, as tiles, without recomputing them.
+  - It has no series, so there is no chart.
+- **A 2.0 auto-saved review** is `review/review.json` alone, with no `integrity.json`, so nothing can check its bytes.
+  - It opens marked "Unverified 2.0 review", and the hash shown is the one its JSON states.
+  - The tiles are the deltas 2.0 stored, and there is no chart.
