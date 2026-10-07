@@ -266,6 +266,7 @@ fn marked(label: &str, latency: Vec<f64>, steady: Option<i64>) -> Side {
         gpu_percent: Vec::new(),
         trace: None,
         replicates: Vec::new(),
+        knobs: Default::default(),
     })
 }
 

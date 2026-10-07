@@ -51,6 +51,7 @@ fn blank(history: Option<PathBuf>) -> ScalarScopeApp {
         paint: Paint::from_palette(prefs::series_palette(0, false)),
         text_scale: 1.0,
         sitting_key: String::new(),
+        bench: Default::default(),
     }
 }
 
@@ -731,4 +732,113 @@ fn the_band_is_one_convex_trapezoid_per_step() {
         assert_eq!([polygon[0][0], polygon[1][0], polygon[2][0], polygon[3][0]], [x, x + 1.0, x + 1.0, x]);
         assert!(polygon[0][1] <= polygon[3][1] && polygon[1][1] <= polygon[2][1]);
     }
+}
+
+fn workbench_folder() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../tests/Fixtures/Workbench")
+}
+
+#[test]
+fn the_workbench_page_asks_for_runs_then_weighs_a_picked_folder() {
+    let dir = directory();
+    let mut app = blank(Some(dir.clone()));
+    app.page = super::Page::Workbench;
+    show(&mut app);
+    assert!(app.bench_board().is_none());
+
+    // A folder of runs, picked on the page.
+    queue_pick(Some(workbench_folder()));
+    app.open_bench_runs();
+    assert_eq!(app.bench.runs.len(), 9);
+    let board = app.bench_board().unwrap();
+    assert_eq!(board.varying, vec!["batch".to_string()]);
+    show(&mut app);
+    // The memory is in the Store folder, and the new set of runs counts toward a checkpoint.
+    assert!(dir.join(crate::workbench::MEMORY_FILE).exists());
+    assert_eq!(app.bench.book.since, 1);
+    show(&mut app);
+    assert_eq!(app.bench.book.since, 1, "the same runs count once");
+
+    app.bench.formula = "p99 / p50".to_string();
+    app.bench.formula_lines = match workbench::evaluate(&board, &app.bench.formula, &[]) {
+        Ok(column) => column.lines(),
+        Err(reason) => vec![reason],
+    };
+    assert_eq!(app.bench.formula_lines.len(), 9);
+
+    // A file that is not a run is refused with its reason; a folder with no runs too.
+    queue_pick(Some(dir.join("missing.json")));
+    app.open_bench_runs();
+    assert!(!app.bench.status.is_empty());
+    assert_eq!(app.bench.runs.len(), 9);
+    assert!(super::bench_page::open_runs(&[directory()]).unwrap_err().contains("No inference run"));
+}
+
+#[test]
+fn a_finished_session_is_kept_shown_and_saved_without_paths() {
+    let dir = directory();
+    let mut app = blank(Some(dir.clone()));
+    app.page = super::Page::Workbench;
+    app.bench.runs = super::bench_page::open_runs(&[workbench_folder()]).unwrap();
+    let board = app.bench_board().unwrap();
+    let mut bench = workbench::Workbench::new(board, Vec::new(), Vec::new(), "2026-10-06");
+    bench.call("measure", &serde_json::json!({"formula": "p50"}));
+    bench.call("learn_tool", &serde_json::json!({"name": "tail_weight", "formula": "p99 / p90", "meaning": "how far the slowest steps sit past the ninetieth percentile"}));
+    bench.call("propose_hypothesis", &serde_json::json!({"knob": "batch", "formula": "p50", "knob_change": "raise", "formula_moves": "up", "why": "A bigger batch does more work per step."}));
+    bench.call("finish", &serde_json::json!({"note": "Latency rises with the batch; precision did not vary."}));
+    app.bench.your_call = "Batch raises latency.".to_string();
+
+    // The reply arrives as the model loop would send it.
+    let (tx, rx) = std::sync::mpsc::channel();
+    tx.send(workbench::BenchReply::Done {
+        model: "qwen2.5:14b".to_string(),
+        digest: Some("7cdf5a0187d5aaaa".to_string()),
+        bench: Box::new(bench),
+        stopped: "The model finished.".to_string(),
+    })
+    .unwrap();
+    app.bench.ask = Some(rx);
+    show(&mut app);
+    assert!(app.bench.ask.is_none());
+    let last = app.bench.last.as_ref().unwrap();
+    assert_eq!(last.proposed.len(), 1);
+    assert_eq!(last.proposed[0].0, "When batch size goes up, p50 goes higher.");
+    assert_eq!(last.learned.len(), 1);
+    assert_eq!(app.bench.hypotheses.len(), 1);
+    assert_eq!(workbench::read_hypotheses(&dir.join(crate::workbench::MEMORY_FILE)).len(), 1);
+    assert_eq!(workbench::read_tools(&dir.join(crate::workbench::MEMORY_FILE)).len(), 1);
+    show(&mut app);
+
+    let out = dir.join("session.json");
+    queue_save(Some(out.clone()));
+    app.save_session_record();
+    let text = fs::read_to_string(&out).unwrap();
+    let record: serde_json::Value = serde_json::from_str(&text).unwrap();
+    assert_eq!(record["digest"], "7cdf5a0187d5aaaa");
+    assert_eq!(record["your_call"], "Batch raises latency.");
+    assert!(!text.contains("Fixtures") && !text.contains("Temp"), "the record holds a path");
+
+    // No model: the page says why.
+    let (tx, rx) = std::sync::mpsc::channel();
+    tx.send(workbench::BenchReply::Absent("The local model is not running.".to_string())).unwrap();
+    app.bench.ask = Some(rx);
+    show(&mut app);
+    assert_eq!(app.bench.status, "The local model is not running.");
+    let (tx, rx) = std::sync::mpsc::channel::<workbench::BenchReply>();
+    drop(tx);
+    app.bench.ask = Some(rx);
+    app.poll_workbench();
+    assert!(app.bench.status.contains("stopped without an answer"));
+}
+
+#[test]
+fn an_unpackaged_window_keeps_a_session_only_while_it_is_open() {
+    let mut app = blank(None);
+    app.bench.runs = super::bench_page::open_runs(&[workbench_folder()]).unwrap();
+    let board = app.bench_board().unwrap();
+    let bench = workbench::Workbench::new(board, Vec::new(), Vec::new(), "2026-10-06");
+    app.keep_session("qwen2.5:14b", None, &bench, "The model finished.");
+    assert!(app.bench.status.contains("nothing is kept"));
+    app.page = super::Page::Workbench;
+    show(&mut app);
 }

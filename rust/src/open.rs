@@ -37,6 +37,8 @@ pub struct InferenceRun {
     /// More runs of the same side (repeats of the same configuration). The headline and the
     /// difference resample across all of them; the series view and the deltas use this run.
     pub replicates: Vec<InferenceRun>,
+    /// The settings this run was made with, and where each was read.
+    pub knobs: crate::knobs::Knobs,
 }
 
 impl InferenceRun {
@@ -138,7 +140,10 @@ pub fn open_path(path: &Path) -> Result<Loaded, String> {
         .rsplit_once('.')
         .map_or(&name[..stem.len()], |(base, _)| base)
         .to_string();
-    let side = if stem.ends_with(".log") { open_log(&text, &label)? } else { open_text(&text, &label)? };
+    let mut side = if stem.ends_with(".log") { open_log(&text, &label)? } else { open_text(&text, &label)? };
+    if let (Side::Inference(run), Some(folder)) = (&mut side, path.parent()) {
+        run.knobs.fill_from_folder(folder);
+    }
     Ok(Loaded {
         path: path.display().to_string(),
         side,
@@ -152,6 +157,22 @@ const FOLDER_SEARCH_DEPTH: usize = 6;
 /// A run folder. The best source in it is opened, and a `config.json` with
 /// `warmup_steps` (or `warmup_iterations`) sets where warmup ends.
 pub fn open_folder(folder: &Path) -> Result<Loaded, String> {
+    let mut loaded = open_folder_sources(folder)?;
+    if let Side::Inference(run) = &mut loaded.side {
+        // The folder's own knobs come before the parent's, which the file reader already added.
+        let mut knobs = crate::knobs::Knobs::from_trace(&Default::default());
+        for (key, value) in &run.knobs.values {
+            if run.knobs.sources.get(key) == Some(&crate::knobs::Source::Trace) {
+                knobs.fill(&std::iter::once((key.clone(), value.clone())).collect(), crate::knobs::Source::Trace);
+            }
+        }
+        knobs.fill_from_folder(folder);
+        run.knobs = knobs;
+    }
+    Ok(loaded)
+}
+
+fn open_folder_sources(folder: &Path) -> Result<Loaded, String> {
     let label = folder.file_name().and_then(|name| name.to_str()).unwrap_or("run").to_string();
     if let Some(loaded) = open_run_set(folder, &label) {
         return Ok(loaded);
@@ -595,6 +616,7 @@ fn open_csv(text: &str, label: &str) -> Result<Side, String> {
         memory_mb: Vec::new(),
         trace: None,
         replicates: Vec::new(),
+        knobs: Default::default(),
     })))
 }
 
@@ -673,6 +695,7 @@ fn series(label: &str, latency: Vec<f64>, throughput: Vec<f64>) -> InferenceRun 
         gpu_percent: Vec::new(),
         trace: None,
         replicates: Vec::new(),
+        knobs: Default::default(),
     })
 }
 
@@ -760,7 +783,10 @@ fn open_runtrace(map: &serde_json::Map<String, Value>, label: &str) -> Result<Si
             guardrails: runtrace::guardrails(&trace),
             validation,
             stored_milestones: stored,
+            framework: trace.framework.clone(),
+            seed: trace.seed,
         }),
+        knobs: crate::knobs::Knobs::from_trace(&trace.knobs),
         ..InferenceRun::default()
     };
     Ok(Side::Inference(if stored {
