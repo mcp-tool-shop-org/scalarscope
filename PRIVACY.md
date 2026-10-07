@@ -22,7 +22,7 @@ All data stays on your device:
 - Comparison history stored in local application data
 - User preferences stored in local settings
 - The Workbench's memory (learned formulas, hypotheses, checkpoints) stored in local application data, with no file paths in it
-- Exported bundles saved to locations you choose
+- Exported bundles saved to locations you choose. A bundle contains the runs it compares, and its manifest says so; share it only if you would share the runs.
 - No cloud sync or remote backup
 
 ## Third-Party Services

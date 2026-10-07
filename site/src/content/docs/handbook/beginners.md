@@ -67,7 +67,7 @@ When the data cannot carry a reading, ScalarScope says so instead of guessing. F
 
 ### Bundles
 
-A `.scbundle` is a self-contained archive of a review. A matching SHA-256 is a content check, not a signature: it says the bytes are intact, not who wrote them.
+A `.scbundle` is a self-contained archive of a review. It contains the runs it compares, so share it only if you would share them. A matching SHA-256 is a content check, not a signature: it says the bytes are intact, not who wrote them.
 
 ## Keyboard shortcuts
 

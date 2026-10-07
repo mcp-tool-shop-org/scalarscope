@@ -103,6 +103,7 @@ Accessibility in the Rust review: it applies color vision, high contrast and tex
 ```bash
 cd rust
 cargo test
+cd ..
 
 # The 2.0 oracles and the version surfaces
 dotnet test tests/ScalarScope.FixtureTests

@@ -18,14 +18,14 @@
 
 **Compare two machine-learning runs, and see how sure the comparison is.** ScalarScope opens two inference traces, two training histories, or two ASPIRE geometry exports. It says how run B differs from run A, gives each difference an interval or its reason, and holds back what the data cannot support.
 
-Version **3.1.1** is a rewrite in Rust. It is the Windows app on the Microsoft Store as [9P3HT1PHBKQK](https://apps.microsoft.com/detail/9P3HT1PHBKQK), as package 3.1.1.0, an update of the same listing. The package name `mcp-tool-shop.ScalarScope` and the publisher `CN=5305D976-6952-4F00-9C21-3A5DB090359F` are unchanged, so files, saved reviews and settings from 2.0 carry over.
+ScalarScope 3.x is a rewrite in Rust. Version **3.1.1** is the Windows app on the Microsoft Store as [9P3HT1PHBKQK](https://apps.microsoft.com/detail/9P3HT1PHBKQK), package 3.1.1.0, an update of the same listing. The package name `mcp-tool-shop.ScalarScope` and the publisher `CN=5305D976-6952-4F00-9C21-3A5DB090359F` are unchanged, so files, saved reviews and settings from 2.0 carry over.
 
 ## Trust model
 
 - **What it reads.** The files you open. The Store package also reads and writes `comparison-log.json`, `preferences.json` and `workbench.json` in its own LocalState folder, the folder 2.0 used. An unpackaged build writes none of them.
 - **What it writes.** A bundle, a picture or a session record, only to a path you pick.
 - **Network.** There is no account, no telemetry and no analytics. The one connection the app can make is from the Workbench tab, and only when you press **Ask**: to a local Ollama at `127.0.0.1` on this computer. Ollama's cloud models are refused. Nothing leaves the machine.
-- **Bundles.** A matching SHA-256 is a content check, not a signature. It says the bytes are intact. It does not say who wrote the file.
+- **Bundles.** A bundle contains the runs it compares, so share it only if you would share them. A matching SHA-256 is a content check, not a signature. It says the bytes are intact. It does not say who wrote the file.
 - **Plugins.** Plugins left in the 2.0 folder are not loaded.
 
 ---
@@ -47,7 +47,7 @@ Version **3.1.1** is a rewrite in Rust. It is the Windows app on the Microsoft S
 **Geometry: two ASPIRE training runs.**
 - **What it reads:** the geometry export that [aspire-si](https://github.com/mcp-tool-shop-org/aspire-si) writes, with its trajectory, evaluator scores, eigen spectrum and failures.
 - **Five deltas:** ΔF, ΔTc, ΔTd, ΔĀ (spectrum concentration) and ΔO. They are ported from 2.0 and checked against 2.0's own results, with the corrections recorded in [the spec](docs/parity-and-beyond.spec.md).
-- **Export contract (schema 1.1).** An export can state that its steps are checkpoints × items rather than time, or that its scores were replayed. When it does, the deltas that read time or score dips are withheld with that reason, and the headline speaks only from the deltas that stand. Older exports read as before.
+- **Export contract (schema 1.1).** An export can state that its steps are checkpoints × items rather than time, or that its scores were replayed or are fixed per item. When it does, the deltas that depend on step order or on score dips are withheld with that reason, and ΔĀ is compared checkpoint by checkpoint. When the scores are fixed per item, ΔĀ says it compares the evaluators, not the runs. The headline speaks only from the deltas that stand. Older exports read as before.
 
 **Workbench.**
 - **Open many runs** that differ in a setting, such as batch size or precision.
@@ -58,7 +58,7 @@ Version **3.1.1** is a rewrite in Rust. It is the Windows app on the Microsoft S
 **History.** In the Store package, the comparisons you finish are grouped by side B's dataset and model. Each measure is drawn across those reviews, with the points where its level shifted. A code or environment change beside a shift is named, and called a coincidence, not a cause. The log keeps the last 40 reviews.
 
 **Bundles and saved state.**
-- **Save bundle** writes the review as a `.scbundle`. **Open bundle** shows it exactly as saved, in review mode.
+- **Save bundle** writes the review as a `.scbundle`. **Open bundle** checks its hash, refuses it on a mismatch, and shows it exactly as saved, in review mode. If today's rules read a saved geometry review differently, that reading is shown below it, labelled.
 - **2.0 bundles** open: comparison bundles with their stored deltas, and inference reviews marked unverified.
 - **2.0's settings** carry over: theme, color-vision palettes, high contrast, text scale, the recent-file limit and the anomaly rule.
 - **Export** the current view as SVG, or the window as PNG.
@@ -113,12 +113,12 @@ Getting Started in the [handbook](https://mcp-tool-shop-org.github.io/scalarscop
 ## Testing
 
 ```bash
-# The review: 228 tests. Line coverage must stay above 90%.
+# The review: 229 tests. Line coverage must stay above 90%.
 cd rust
 cargo test
 cargo llvm-cov --locked --all-targets --fail-under-lines 90
 
-# The .NET fixture tests: the 2.0 oracles, bundle compatibility and the version surfaces (134 tests)
+# The .NET fixture tests: the 2.0 oracles, bundle compatibility and the version surfaces (135 tests)
 dotnet test tests/ScalarScope.FixtureTests
 ```
 

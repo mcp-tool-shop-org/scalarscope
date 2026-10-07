@@ -1,6 +1,6 @@
-# Store listing screenshots (3.1.0)
+# Store listing screenshots (3.1.1)
 
-Six screenshots at 1920 × 1080, taken from the release build on the files in `samples/` and the built-in sample: text scale 1.3, except shot 5 at 1.0 so a whole session fits. No path or personal data is on screen.
+Six screenshots at 1920 × 1080, taken from the release build on the files in `samples/` and the built-in sample: text scale 1.3, except shot 5 at 1.0 so a whole session fits. No path or personal data is on screen. Shots 4 and 6 were retaken for 3.1.1: the drift pair now withholds ΔTd and reads ΔĀ as a difference between the evaluator setups, and the Guide has a geometry section. Shots 1–3 and 5 are unchanged from 3.1.0, and 3.1.1 draws those pages the same way.
 
 | Order | File | Caption |
 |---|---|---|
@@ -30,6 +30,6 @@ SCALARSCOPE_CAPTURE_PAGE=compare SCALARSCOPE_CAPTURE_VIEW=1 \
   rust/target/release/scalarscope.exe rust/samples/baseline.csv rust/samples/optimized.csv
 ```
 
-Shot 5 adds `SCALARSCOPE_CAPTURE_RUNS=samples/workbench` and `SCALARSCOPE_CAPTURE_ASK="<your call>"`, which runs a real session against a local Ollama model that can call tools and waits for it. Check the GPU is free first, and unload the model after.
+Shot 4 opens the two drift files in `samples/geometry` instead, and shot 6 sets `SCALARSCOPE_CAPTURE_PAGE=guide` with no files. Shot 5 adds `SCALARSCOPE_CAPTURE_RUNS=samples/workbench` and `SCALARSCOPE_CAPTURE_ASK="<your call>"`, which runs a real session against a local Ollama model that can call tools and waits for it. Check the GPU is free first, and unload the model after.
 
 The other variables are `SCALARSCOPE_CAPTURE_WHY` (a delta symbol such as `ΔO`) and `SCALARSCOPE_CAPTURE_RUNS` (a folder of runs for the Workbench). `SCALARSCOPE_CAPTURE_PAGE` takes `welcome`, `compare`, `workbench`, `history`, `guide` or `settings`.
