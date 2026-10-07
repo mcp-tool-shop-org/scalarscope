@@ -18,7 +18,7 @@
 
 **Compare two machine-learning runs, and see how sure the comparison is.** ScalarScope opens two inference traces, two training histories, or two ASPIRE geometry exports. It says how run B differs from run A, gives each difference an interval or its reason, and holds back what the data cannot support.
 
-Version **3.1.0** is a rewrite in Rust. It is the Windows app on the Microsoft Store as [9P3HT1PHBKQK](https://apps.microsoft.com/detail/9P3HT1PHBKQK), as package 3.1.0.0, an update of the same listing. The package name `mcp-tool-shop.ScalarScope` and the publisher `CN=5305D976-6952-4F00-9C21-3A5DB090359F` are unchanged, so files, saved reviews and settings from 2.0 carry over.
+Version **3.1.1** is a rewrite in Rust. It is the Windows app on the Microsoft Store as [9P3HT1PHBKQK](https://apps.microsoft.com/detail/9P3HT1PHBKQK), as package 3.1.1.0, an update of the same listing. The package name `mcp-tool-shop.ScalarScope` and the publisher `CN=5305D976-6952-4F00-9C21-3A5DB090359F` are unchanged, so files, saved reviews and settings from 2.0 carry over.
 
 ## Trust model
 

@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**ScalarScope** | Version 3.1.0 | Policy effective: January 2025, updated 2026-10-07
+**ScalarScope** | Version 3.1.1 | Policy effective: January 2025, updated 2026-10-07
 
 ## Summary
 

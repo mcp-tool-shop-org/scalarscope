@@ -1,6 +1,6 @@
 # Samples
 
-Files to open in ScalarScope 3.1.0. [TESTING.md](../TESTING.md) says which to open where.
+Files to open in ScalarScope 3.1.1. [TESTING.md](../TESTING.md) says which to open where.
 
 | Folder | What it is | Where it comes from |
 |---|---|---|

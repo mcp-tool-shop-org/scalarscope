@@ -23,6 +23,6 @@ Welcome to the ScalarScope handbook: the guide to comparing two machine-learning
 
 ScalarScope opens two inference traces, two training histories, or two ASPIRE geometry exports. It says how run B differs from run A, gives each difference an interval or its reason, and holds back what the data cannot support. A matching SHA-256 on a saved review is a content check, not a signature.
 
-Version 3.1.0 is the Rust review, on the Microsoft Store as `9P3HT1PHBKQK`, an update of the same listing. Its tabs are **Welcome**, **Compare**, **Workbench**, **History**, **Guide** and **Settings**. Files, bundles and settings from 2.0 carry over.
+Version 3.1.1 is the Rust review, on the Microsoft Store as `9P3HT1PHBKQK`, an update of the same listing. Its tabs are **Welcome**, **Compare**, **Workbench**, **History**, **Guide** and **Settings**. Files, bundles and settings from 2.0 carry over.
 
 [Back to landing page](/scalarscope/)

@@ -173,8 +173,8 @@ public class StageCWordingTests
         beta.Should().Contain("Guide page");
 
         var process = Read("docs/RELEASE_PROCESS.md");
-        process.Should().Contain("ScalarScope_3.1.0.0_x64.msix");
-        process.Should().Contain("ScalarScope_3.1.0.0_Store.msixupload");
+        process.Should().Contain("ScalarScope_3.1.1.0_x64.msix");
+        process.Should().Contain("ScalarScope_3.1.1.0_Store.msixupload");
         process.Should().Contain("Partner Center signs");
         process.Should().NotContain("MSIX is signed");
         process.Should().Contain("Do not look for `ScalarScope-{version}-{arch}.msix`");
@@ -189,7 +189,7 @@ public class StageCWordingTests
     public void Release_workflows_pin_the_pack_and_refuse_another_tag()
     {
         var release = Read(".github/workflows/release.yml");
-        release.Should().Contain("refs/tags/v3.1.0.0");
+        release.Should().Contain("refs/tags/v3.1.1.0");
         release.Should().Contain("--locked");
         release.Should().Contain("--remap-path-prefix=$env:GITHUB_WORKSPACE=.");
         release.Should().Contain("toolchain: 1.98.1");
@@ -205,6 +205,6 @@ public class StageCWordingTests
         build.Should().Contain("packaging/**");
         build.Should().Contain("rust/**");
         build.Should().Contain("--locked");
-        build.Should().Contain("ScalarScope_3.1.0.0_x64.msix");
+        build.Should().Contain("ScalarScope_3.1.1.0_x64.msix");
     }
 }

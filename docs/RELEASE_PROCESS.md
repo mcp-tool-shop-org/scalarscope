@@ -16,19 +16,14 @@ MAJOR.MINOR.PATCH[-PRERELEASE]
 - `alpha.N` - Alpha release (e.g., `1.0.0-alpha.1`)
 
 ### Current Version
-- **Display version 3.0.0** — `ApplicationDisplayVersion` in `ScalarScope.csproj`. Settings > About shows this string.
-- **ApplicationVersion 30** — the package integer in the same csproj. It is not the About string.
-- **csproj `Version` 3.1.0.0**
-- **`Package.appxmanifest` Identity Version 3.1.0.0**
-- These are four fields. Read each one. Do not collapse them into a single label.
+- **Display version 3.1.1** — `version` in `rust/Cargo.toml`. Settings > About shows this string.
+- **Package identity version 3.1.1.0** — `packaging/AppxManifest.xml`, which `pack.ps1` reads. The embedded `rust/app.manifest` and the MAUI `Package.appxmanifest` carry the same value, and a test holds them equal.
+- **ApplicationVersion 32** — the package integer in `src/ScalarScope/ScalarScope.csproj`, beside csproj `Version` 3.1.1.0 and `ApplicationDisplayVersion` 3.1.1. It is not the About string.
+- **The tag** is `v3.1.1.0`. `.github/workflows/release.yml` runs only for it, and `build.yml` names its artifacts with it.
+- These are separate fields. Read each one. Do not collapse them into a single label.
 - Store `9P3HT1PHBKQK`. Package name `mcp-tool-shop.ScalarScope`. Publisher `CN=5305D976-6952-4F00-9C21-3A5DB090359F`. Publisher display name `mcp-tool-shop`.
 - Unsigned MSIX. Partner Center signs it on ingestion.
-- **2.0.0** - Previous Microsoft Store release
-  - New Welcome experience (Phase H)
-  - Unified design system
-  - Simplified navigation (4 tabs)
-  - Self-contained MSIX (78 MB)
-
+- **3.1.0** - Previous Microsoft Store release, the first Rust package.
 ## Release Checklist
 
 ### Before Tagging
@@ -50,8 +45,7 @@ MAJOR.MINOR.PATCH[-PRERELEASE]
    - [ ] Light and dark theme verified
 
 4. **Version Bump**
-   - [ ] Update version in `ScalarScope.csproj`
-   - [ ] Update version in `VortexKit.csproj`
+   - [ ] Update every field under Current Version, above
    - [ ] Commit: "chore: bump version to X.Y.Z"
 
 ### Tagging
@@ -70,8 +64,8 @@ git push origin vX.Y.Z
    - [ ] Attach checksums file
 
 2. **Artifacts**
-   - [ ] Unsigned `release/ScalarScope_3.1.0.0_x64.msix` is attached
-   - [ ] Unsigned `release/ScalarScope_3.1.0.0_Store.msixupload` is attached
+   - [ ] Unsigned `release/ScalarScope_3.1.1.0_x64.msix` is attached
+   - [ ] Unsigned `release/ScalarScope_3.1.1.0_Store.msixupload` is attached
    - [ ] `release/checksums.txt` is attached
    - [ ] Partner Center signs the upload during ingestion. This repo does not produce a signed MSIX.
 
@@ -81,11 +75,11 @@ git push origin vX.Y.Z
 
 ## Artifact Naming
 
-The pack script writes these names. The package version stays `3.1.0.0`.
+The pack script writes these names. The package version stays `3.1.1.0`.
 
 ```
-release/ScalarScope_3.1.0.0_x64.msix
-release/ScalarScope_3.1.0.0_Store.msixupload
+release/ScalarScope_3.1.1.0_x64.msix
+release/ScalarScope_3.1.1.0_Store.msixupload
 release/checksums.txt
 ```
 

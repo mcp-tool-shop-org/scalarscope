@@ -21,12 +21,12 @@
 		<!-- App Identifier -->
 		<ApplicationId>org.mcptoolshop.scalarscope</ApplicationId>
 
-		<!-- Store identity version is Package.appxmanifest Version, literal 3.1.0.0.
+		<!-- Store identity version is Package.appxmanifest Version, literal 3.1.1.0.
 		     MAUI only overwrites that attribute when it is 0.0.0.0.
 		     ApplicationVersion 31 stays above 3.0's 30 and the 2.x value of 22. -->
-		<ApplicationDisplayVersion>3.1.0</ApplicationDisplayVersion>
-		<ApplicationVersion>31</ApplicationVersion>
-		<Version>3.1.0.0</Version>
+		<ApplicationDisplayVersion>3.1.1</ApplicationDisplayVersion>
+		<ApplicationVersion>32</ApplicationVersion>
+		<Version>3.1.1.0</Version>
 
 		<!-- Package metadata -->
 		<Authors>ScalarScope Project (mcp-tool-shop-org)</Authors>
@@ -38,7 +38,7 @@
 
 		<!-- This MAUI project is not the Partner Center upload.
 		     That upload is the Rust pack from packaging/pack.ps1:
-		     ScalarScope_3.1.0.0_x64.msix, ScalarScope_3.1.0.0_Store.msixupload, and checksums.txt.
+		     ScalarScope_3.1.1.0_x64.msix, ScalarScope_3.1.1.0_Store.msixupload, and checksums.txt.
 		     Name, Publisher, and Version stay the Store identity. -->
 		<WindowsPackageType>MSIX</WindowsPackageType>
 		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
@@ -83,7 +83,7 @@
 	</ItemGroup>
 
 	<Target Name="RejectMauiAsStoreUpload" BeforeTargets="Publish">
-		<Error Text="This project is not the Partner Center upload. packaging/pack.ps1 packs the Rust review as ScalarScope_3.1.0.0_Store.msixupload. Do not publish this MAUI app as that upload." />
+		<Error Text="This project is not the Partner Center upload. packaging/pack.ps1 packs the Rust review as ScalarScope_3.1.1.0_Store.msixupload. Do not publish this MAUI app as that upload." />
 	</Target>
 
 </Project>

@@ -9,7 +9,7 @@ export const config: SiteConfig = {
   footerText: 'MIT Licensed — built by <a href="https://github.com/mcp-tool-shop-org" style="color:var(--color-muted);text-decoration:underline">mcp-tool-shop-org</a>',
 
   hero: {
-    badge: 'Version 3.1.0 · Windows',
+    badge: 'Version 3.1.1 · Windows',
     headline: 'Two ML runs,',
     headlineAccent: 'compared with intervals.',
     description: 'ScalarScope says how run B differs from run A, gives each difference an interval or its reason, and holds back what the data cannot support. Inference traces, training histories and ASPIRE geometry exports. It works offline. A matching SHA-256 is a content check, not a signature.',

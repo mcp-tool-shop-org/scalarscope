@@ -6,16 +6,16 @@
 **Publisher display name:** mcp-tool-shop  
 **Package Family Name:** mcp-tool-shop.ScalarScope_yn6b8xqrexa5j  
 **Package SID:** S-1-15-2-850189134-3642041993-2632034504-2327210781-2703906947-3194312410-3859322172  
-**Display version:** 3.1.0 (the crate version. Settings > About shows "ScalarScope 3.1.0 (package 3.1.0.0 …)".)
-**ApplicationVersion:** 31 (package integer, not the About string)
-**Package identity version:** 3.1.0.0 (`packaging/AppxManifest.xml`, which `pack.ps1` reads, and the MAUI `Package.appxmanifest`, held equal by a test)
+**Display version:** 3.1.1 (the crate version. Settings > About shows "ScalarScope 3.1.1 (package 3.1.1.0 …)".)
+**ApplicationVersion:** 32 (package integer, not the About string)
+**Package identity version:** 3.1.1.0 (`packaging/AppxManifest.xml`, which `pack.ps1` reads, and the MAUI `Package.appxmanifest`, held equal by a test)
 
 Packages already in the Partner Center submission:
 
 - `ScalarScope_1.0.3.0_x64.msix`
 - `ScalarScope_v2.0.0_Store.msixupload`
 
-The next upload is `ScalarScope_3.1.0.0_Store.msixupload`. Its package version is `3.1.0.0`, which is above both of those. 3.0.0.0 was never uploaded.
+The next upload is `ScalarScope_3.1.1.0_Store.msixupload`. Its package version is `3.1.1.0`, which is above both of those. 3.0.0.0 was never uploaded.
 
 ---
 
@@ -71,7 +71,7 @@ The quick checks a certification tester can run are in `TESTING.md`, on the file
 ### Install Flow
 1. [ ] Download from Microsoft Store (9P3HT1PHBKQK)
 2. [ ] Launch ScalarScope. Welcome appears with Try the sample comparison, Compare two runs and Open a review bundle.
-3. [ ] Settings > About shows ScalarScope 3.1.0, package 3.1.0.0.
+3. [ ] Settings > About shows ScalarScope 3.1.1, package 3.1.1.0.
 
 ### Core Workflow
 4. [ ] Try the sample comparison: Compare shows the headline, three tiles and the series.
@@ -116,7 +116,7 @@ The quick checks a certification tester can run are in `TESTING.md`, on the file
 
 ---
 
-## Release Notes (v3.1.0.0)
+## Release Notes (v3.1.1.0)
 
 ScalarScope 3.1 is a rewrite. It is the same product, name and publisher, and your 2.0 files, bundles and settings carry over.
 

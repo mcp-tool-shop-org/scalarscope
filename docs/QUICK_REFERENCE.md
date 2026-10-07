@@ -104,4 +104,4 @@ Generate with aspire-si: `aspire train --geometry` (schema 1.1 states its step a
 
 ---
 
-*ScalarScope 3.1.0 | Scientific instrument for evaluative learning dynamics*
+*ScalarScope 3.1.1 | Scientific instrument for evaluative learning dynamics*

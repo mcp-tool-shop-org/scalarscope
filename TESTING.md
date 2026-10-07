@@ -1,4 +1,4 @@
-# Testing ScalarScope 3.1.0
+# Testing ScalarScope 3.1.1
 
 Each check below takes under a minute, using the files in [`samples/`](samples/). Nothing here needs a network connection, an account or a GPU.
 

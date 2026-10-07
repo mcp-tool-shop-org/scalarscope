@@ -78,7 +78,7 @@ The shell has four tabs: Home, Compare, Guide, and Settings. Trajectory, Scalars
 
 ## Environment
 - OS: [e.g., Windows 11 23H2]
-- Version: [e.g., 3.1.0]
+- Version: [e.g., 3.1.1]
 - GPU: [e.g., NVIDIA RTX 5080]
 
 ## Support Bundle
@@ -101,7 +101,7 @@ When reporting issues, include:
 
 ## Known Limitations
 
-For the current release (display version 3.1.0):
+For the current release (display version 3.1.1):
 - **Windows only** - macOS/Linux not yet tested
 - **Unsigned upload** - Do not double-click the MSIX. Windows will not install that file. Wait for the Partner Center signed install. Developer Mode is not the fix.
 - **No auto-update** - Manual download for new versions
@@ -120,7 +120,7 @@ For the current release (display version 3.1.0):
 |-------|-------|-------|
 | RC1 Beta | Feb 2025 | Stability, core features |
 | RC2 | TBD | Bug fixes, polish |
-| Store | current | Display version 3.1.0 is on the Store (9P3HT1PHBKQK). Do not report 1.0.0-rc.1. |
+| Store | current | Display version 3.1.1 is on the Store (9P3HT1PHBKQK). Do not report 1.0.0-rc.1. |
 
 ## Thank You!
 
