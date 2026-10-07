@@ -114,6 +114,14 @@ impl Host for LatencyHost {
         }
     }
 
+    fn reason_hint(&self) -> &str {
+        "The mechanism you suspect, in words; name a measure by its name, such as p99, and write no other numbers."
+    }
+
+    fn note_hint(&self) -> &str {
+        "What you looked at and what is still open, in words; name a measure by its name, such as p99, and write no other numbers."
+    }
+
     fn knob_label(&self, key: &str) -> String {
         match key {
             "batch" | "batch_size" => "batch size".to_string(),
@@ -291,6 +299,7 @@ pub fn session_record(
             "knobs": run.knobs,
         })).collect::<Vec<_>>(),
         "steps": bench.steps.iter().map(|step| json!({
+            "round": step.round,
             "tool": step.tool,
             "args": step.args,
             "ok": step.ok,

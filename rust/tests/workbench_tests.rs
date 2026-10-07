@@ -210,6 +210,9 @@ fn a_session_record_names_the_model_and_holds_no_paths() {
     let mut bench = Workbench::new(board, Vec::new(), Vec::new(), "2026-10-06");
     assert!(bench.system_prompt().contains("You are the ScalarScope workbench"));
     assert!(bench.system_prompt().contains("quantile_between(a, b, q)"));
+    let specs = bench.tool_specs();
+    let why = specs[3]["function"]["parameters"]["properties"]["why"]["description"].as_str().unwrap();
+    assert!(why.contains("name a measure by its name, such as p99"), "{why}");
     assert!(bench.opening().contains("batch (batch 1 seed 1 1"), "{}", bench.opening());
     bench.call("measure", &json!({"formula": "p50"}));
     bench.call("propose_hypothesis", &json!({"knob": "batch", "formula": "p99_over_p50", "knob_change": "raise", "formula_moves": "up", "why": "Bigger batches spike more often."}));
@@ -219,6 +222,7 @@ fn a_session_record_names_the_model_and_holds_no_paths() {
     assert_eq!(record["digest"], "7cdf5a0187d5");
     assert_eq!(record["your_call"], "I expect batch to raise the tail.");
     assert_eq!(record["runs"].as_array().unwrap().len(), 9);
+    assert_eq!(record["steps"][0]["round"], 0);
     assert_eq!(record["proposed"][0]["statement"], "When batch size goes up, p99_over_p50 goes higher.");
     assert!(record["proposed"][0]["state"].is_string());
     assert_eq!(record["model_note"], "The tail grows with the batch; precision did not vary.");

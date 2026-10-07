@@ -15,5 +15,5 @@ rfd = "0.15"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 sha2 = "0.10"
-workbench = { git = "https://github.com/mcp-tool-shop-org/runforge", rev = "39c0ce7f85f9a022185b93092a3448799c399ee0" }
+workbench = { git = "https://github.com/mcp-tool-shop-org/runforge", rev = "019236654f633e224479163b1593dba57cac5c7c" }
 zip = { version = "2", default-features = false, features = ["deflate"] }
