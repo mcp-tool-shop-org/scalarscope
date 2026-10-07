@@ -276,7 +276,8 @@ pub fn seal(document: &BundleDocument, created_at: &str) -> Result<Sealed, Strin
         app_version: APP,
         delta_spec_version: SPEC,
         privacy: Privacy {
-            includes_raw_data: document.review.inference.is_some() || document.review.training.is_some(),
+            // Every kind 3.x saves stores its runs: the series, the loss curves, or both geometry runs in full.
+            includes_raw_data: document.review.inference.is_some() || document.review.training.is_some() || document.review.geometry.is_some(),
             includes_file_paths: false,
             includes_machine_name: false,
             data_classification: "local-review",

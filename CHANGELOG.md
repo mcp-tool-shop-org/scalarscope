@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- A geometry bundle's manifest said `includesRawData: false` although the bundle stores both runs in full. Every bundle that stores run data now says true. Bundles saved before keep their bytes, so they still verify.
 - Review mode shows a geometry bundle's stored verdict and tiles, the text its hash vouches for. Before, it redrew them by the current rules, so a drift bundle saved by 3.1.0 showed a verdict it does not contain under its verified hash. When today's rules read the stored runs differently, that reading is shown below, labelled "Current reading (rules since 3.1.1)".
 
 ### Changed

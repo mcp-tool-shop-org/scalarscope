@@ -386,3 +386,27 @@ fn a_bundle_saved_under_todays_rules_shows_no_extra_reading() {
     assert!(review.tiles_are_current);
     assert_eq!(review.explanations, live.explanations);
 }
+
+#[test]
+fn every_bundle_that_stores_its_runs_says_so_in_the_manifest() {
+    let raw = |built: &Pair| {
+        let sealed = seal(&document_from_pair(built), STAMP).unwrap();
+        String::from_utf8(entry(&unpack(&sealed.bytes).unwrap(), "manifest.json")).unwrap()
+    };
+    // Inference: the steady-state series.
+    assert!(raw(&spike()).contains("\"includesRawData\": true"));
+    // Training: both loss curves.
+    let left = r#"[{"run_id":"left-run","status":"completed","loss_history":[1.0,0.5],"final_loss":0.4}]"#;
+    let right = r#"[{"run_id":"right-run","status":"completed","loss_history":[0.9,0.2],"final_loss":0.1}]"#;
+    assert!(raw(&pair(&open_text(left, "left").unwrap(), &open_text(right, "right").unwrap()).unwrap()).contains("\"includesRawData\": true"));
+    // Geometry: both runs in full.
+    let left = scalarscope::open::open_path(&fixture("aspire-si/real-local-teacher.drift.geometry.json")).unwrap().side;
+    let right = scalarscope::open::open_path(&fixture("aspire-si/real-composite-teacher.drift.geometry.json")).unwrap().side;
+    assert!(raw(&pair(&left, &right).unwrap()).contains("\"includesRawData\": true"));
+
+    // A bundle saved by 3.1.0 said false for geometry. Its bytes are unchanged, so it still verifies.
+    let bytes = std::fs::read(fixture("bundles/drift-saved-by-3.1.0.scbundle")).unwrap();
+    assert!(verify(&bytes).unwrap().valid);
+    let old = String::from_utf8(entry(&unpack(&bytes).unwrap(), "manifest.json")).unwrap();
+    assert!(old.contains("\"includesRawData\": false"));
+}
