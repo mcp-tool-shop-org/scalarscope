@@ -212,7 +212,7 @@
           "path": "docs/index.md"
         },
         {
-          "hash": "d70ef326ba741ae839745f1b7e0cefeb3371239c6df0884acaba37028b3bd431",
+          "hash": "78ed3cca5e5e3c3448176ae0f7b8c672b58f45b01142a35606bc2c36a81d7d43",
           "path": "docs/parity-and-beyond.spec.md"
         }
       ],
@@ -3516,7 +3516,7 @@
   "edges": [],
   "engine": "1.24.0",
   "generatedFrom": {
-    "commit": "4584e94b9ec5a70fabe0433ea741a234f9f8eaf0",
+    "commit": "fd6dcdac68952b42899d6474f8bb64534b63d484",
     "tracked": 388
   },
   "landings": [

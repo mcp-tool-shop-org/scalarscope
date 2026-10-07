@@ -1,6 +1,6 @@
 # scalarscope: how it works
 
-Mapped at 2026-10-07 from commit 4584e94 by Atlas 1.24.0.
+Mapped at 2026-10-07 from commit fd6dcda by Atlas 1.24.0.
 
 ## What this is
 
@@ -8,9 +8,9 @@ A review of two machine-learning runs. The app is the Rust program in rust/, pac
 
 10 parts, mostly C# (181 files), Rust (30), CSS (2), PowerShell (2), TypeScript (2), Astro (1), JavaScript (1) and shell (1). Work enters through 6 doors; the busiest is Build and Test, which reaches 4 parts. It deploys a site to GitHub Pages. People run scalarscope.
 
-## What changed since the last map
+## What changed since 2026-10-07 (4584e94)
 
-This is the first map.
+Nothing structural changed since 2026-10-07; 1 file changed content.
 
 ## What comes in
 
@@ -57,7 +57,7 @@ packaging and src hold only C# and PowerShell files, which this map does not rea
 - **rust/src/review.rs** and **rust/tests/review_tests.rs** changed together in 10 of 16 commits, inside the rust part.
 - **rust/src/ui_tests.rs** and **rust/tests/edge_tests.rs** changed together in 8 of 13 commits, inside the rust part.
 
-Confidence is low: fewer than 20 source files reach 10 revisions in the window.
+Confidence is low: fewer than 25 source files reach 10 revisions in the window.
 
 Window: 180 days; a pair counts from 3 shared commits, since 6 source files reach 10 revisions; the floor rises to 10 when 25 do.
 
@@ -98,6 +98,6 @@ Read those in order to follow one run of scalarscope end to end. This path follo
 - 3 writes and 3 reads use paths built at run time and are not named here.
 - 4 writes and 11 reads go to a path their caller passes, not to this repository.
 - 1 write goes to a temporary directory, not to this repository.
-- Statistics confidence is low: fewer than 20 source files reach 10 revisions in the window.
+- Statistics confidence is low: fewer than 25 source files reach 10 revisions in the window.
 
 Regenerate with `npx --yes @dogfood-lab/atlas map`.

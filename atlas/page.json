@@ -34,7 +34,25 @@
     }
   ],
   "changes": {
-    "first": true
+    "fileCounts": {
+      "added": 0,
+      "changed": 1,
+      "moved": 0,
+      "parts": 1,
+      "removed": 0
+    },
+    "items": [
+      {
+        "kind": "counts",
+        "sentence": "Nothing structural changed since 2026-10-07; 1 file changed content.",
+        "subjects": []
+      }
+    ],
+    "since": {
+      "commit": "4584e94b9ec5a70fabe0433ea741a234f9f8eaf0",
+      "generatedAt": "2026-10-07T01:12:36.950Z"
+    },
+    "unchanged": true
   },
   "changesTogether": [
     {
@@ -114,11 +132,11 @@
     }
   ],
   "changesTogetherNote": [
-    "Confidence is low: fewer than 20 source files reach 10 revisions in the window.",
+    "Confidence is low: fewer than 25 source files reach 10 revisions in the window.",
     "Window: 180 days; a pair counts from 3 shared commits, since 6 source files reach 10 revisions; the floor rises to 10 when 25 do."
   ],
   "changesTogetherWithTests": 0,
-  "commit": "4584e94b9ec5a70fabe0433ea741a234f9f8eaf0",
+  "commit": "fd6dcdac68952b42899d6474f8bb64534b63d484",
   "defaultBranch": "main",
   "derived": "10 parts, mostly C# (181 files), Rust (30), CSS (2), PowerShell (2), TypeScript (2), Astro (1), JavaScript (1) and shell (1). Work enters through 6 doors; the busiest is Build and Test, which reaches 4 parts. It deploys a site to GitHub Pages. People run scalarscope.",
   "doors": [
@@ -345,12 +363,12 @@
   "edges": [],
   "engine": "1.24.0",
   "generated": [],
-  "generatedAt": "2026-10-07T01:12:36.950Z",
+  "generatedAt": "2026-10-07T01:23:03.739Z",
   "limits": [
     "3 writes and 3 reads use paths built at run time and are not named here.",
     "4 writes and 11 reads go to a path their caller passes, not to this repository.",
     "1 write goes to a temporary directory, not to this repository.",
-    "Statistics confidence is low: fewer than 20 source files reach 10 revisions in the window."
+    "Statistics confidence is low: fewer than 25 source files reach 10 revisions in the window."
   ],
   "mainDoor": ".github/workflows/build.yml",
   "partLabels": {

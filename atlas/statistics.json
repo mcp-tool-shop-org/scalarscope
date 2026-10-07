@@ -194,8 +194,8 @@
         "path": ".github/workflows/build.yml"
       },
       {
-        "commits": 1,
-        "lines": 70,
+        "commits": 2,
+        "lines": 86,
         "path": ".github/workflows/coverage.yml"
       },
       {
@@ -350,6 +350,31 @@
       },
       {
         "commits": 1,
+        "lines": 103,
+        "path": "atlas/README.md"
+      },
+      {
+        "commits": 1,
+        "lines": 42,
+        "path": "atlas/boundaries.yaml"
+      },
+      {
+        "commits": 1,
+        "lines": 401,
+        "path": "atlas/page.json"
+      },
+      {
+        "commits": 1,
+        "lines": 2303,
+        "path": "atlas/statistics.json"
+      },
+      {
+        "commits": 1,
+        "lines": 3801,
+        "path": "atlas/structure.json"
+      },
+      {
+        "commits": 1,
         "lines": 29,
         "path": "codecov.yml"
       },
@@ -454,8 +479,8 @@
         "path": "docs/index.md"
       },
       {
-        "commits": 11,
-        "lines": 680,
+        "commits": 15,
+        "lines": 877,
         "path": "docs/parity-and-beyond.spec.md"
       },
       {
@@ -2112,11 +2137,11 @@
   },
   "confidence": {
     "level": "low",
-    "reason": "fewer than 20 source files reach 10 revisions in the window"
+    "reason": "fewer than 25 source files reach 10 revisions in the window"
   },
-  "generatedAt": "2026-10-07T01:12:36.950Z",
+  "generatedAt": "2026-10-07T01:23:03.739Z",
   "generatedFrom": {
-    "commit": "4584e94b9ec5a70fabe0433ea741a234f9f8eaf0"
+    "commit": "fd6dcdac68952b42899d6474f8bb64534b63d484"
   },
   "pairs": [
     {
@@ -2270,16 +2295,16 @@
     "floor": "fallen",
     "floorHeld": false,
     "floorTrigger": "revision-depth",
-    "headDate": "2026-10-06T16:25:22-07:00",
+    "headDate": "2026-10-06T21:22:44-04:00",
     "inScopeFiles": 393,
     "pinnedStart": null,
-    "priorFloor": null,
-    "qualifyingCommits": 47,
+    "priorFloor": "fallen",
+    "qualifyingCommits": 50,
     "qualifyingMinimum": 30,
     "revisions": 5,
     "shared": 10,
     "sharedFloorUsed": 3,
-    "since": "2026-04-09T23:25:22.000Z",
+    "since": "2026-04-10T01:22:44.000Z",
     "sourceExtensions": [
       ".js",
       ".mjs",
