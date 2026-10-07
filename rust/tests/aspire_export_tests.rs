@@ -50,3 +50,61 @@ fn two_aspire_si_runs_compare_with_all_five_deltas_decided() {
         assert!(delta.left_value.is_finite() && delta.right_value.is_finite(), "{}", delta.id);
     }
 }
+
+// Real exports from aspire-si training runs (2026-10-07, aspire-si 0972ef5): Qwen2.5-1.5B-Instruct
+// with LoRA, 32 prompts × 3 epochs, against a local Qwen2.5-32B teacher or a composite of it and
+// Gemma 4 31B. The `.drift` files are each checkpoint's hidden state minus the base student's, per
+// prompt, checkpoint-major. Their steps are checkpoint × prompt, not time.
+
+fn geometry(name: &str) -> scalarscope::open::GeometrySide {
+    let Side::Geometry(side) = export(name) else { panic!("{name}: not read as a geometry export") };
+    side
+}
+
+#[test]
+fn the_real_exports_open_in_full_without_warnings() {
+    for (name, professors) in [
+        ("real-local-teacher.geometry.json", 1),
+        ("real-composite-teacher.geometry.json", 2),
+        ("real-local-teacher.drift.geometry.json", 1),
+        ("real-composite-teacher.drift.geometry.json", 2),
+    ] {
+        let side = geometry(name);
+        assert!(side.warnings.is_empty(), "{name}: {:?}", side.warnings);
+        let run = &side.run;
+        assert_eq!(run.trajectory.timesteps.len(), 96, "{name}");
+        assert_eq!(run.geometry.eigenvalues.len(), 96, "{name}");
+        assert_eq!(run.dimension_names().len(), 9, "{name}");
+        assert_eq!(run.evaluators.professors.len(), professors, "{name}");
+        for step in &run.trajectory.timesteps {
+            assert!(step.curvature.is_finite() && step.state_2d.iter().all(|value| value.is_finite()), "{name}");
+        }
+    }
+}
+
+#[test]
+fn the_real_pairs_compare_as_the_runs_say() {
+    use scalarscope::geometry_deltas::{compute, Alignment, DeltaConfig};
+    let delta = |deltas: &[scalarscope::geometry_deltas::GeometryDelta], symbol: &str| {
+        deltas.iter().find(|delta| delta.symbol == symbol).unwrap().clone()
+    };
+    // Per step: the trajectory follows which prompt each step drew, so nothing settles.
+    let (local, composite) = (geometry("real-local-teacher.geometry.json").run, geometry("real-composite-teacher.geometry.json").run);
+    let deltas = compute(&local, &composite, Alignment::ByStep, 1.0, &DeltaConfig::default());
+    assert_eq!(deltas.len(), 5);
+    assert_eq!(delta(&deltas, "ΔTc").status, DeltaStatus::Suppressed);
+    // The composite's two disagreeing teachers concentrate its evaluator spectrum.
+    let concentration = delta(&deltas, "Δ\u{0100}");
+    assert_eq!(concentration.status, DeltaStatus::Present);
+    assert!(concentration.right_value > concentration.left_value, "{:?}", concentration.explanation);
+
+    // Drift: the same reading of the spectrum holds.
+    let (local, composite) = (geometry("real-local-teacher.drift.geometry.json").run, geometry("real-composite-teacher.drift.geometry.json").run);
+    let deltas = compute(&local, &composite, Alignment::ByStep, 1.0, &DeltaConfig::default());
+    let concentration = delta(&deltas, "Δ\u{0100}");
+    assert_eq!(concentration.status, DeltaStatus::Present);
+    assert!(concentration.right_value > concentration.left_value);
+    for delta in &deltas {
+        assert!(delta.left_value.is_finite() && delta.right_value.is_finite(), "{}", delta.id);
+    }
+}

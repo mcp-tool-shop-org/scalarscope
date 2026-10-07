@@ -12,7 +12,13 @@ fn main() -> eframe::Result {
         options,
         Box::new(|creation| {
             install_style(creation);
-            Ok(Box::new(ScalarScopeApp::default()))
+            let mut app = ScalarScopeApp::default();
+            // `scalarscope <path A> <path B>` opens that pair on Compare.
+            let paths: Vec<std::path::PathBuf> = std::env::args_os().skip(1).map(std::path::PathBuf::from).collect();
+            if let [left, right] = paths.as_slice() {
+                app.open_pair(left, right);
+            }
+            Ok(Box::new(app))
         }),
     )
 }
