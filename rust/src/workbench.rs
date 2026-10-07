@@ -18,11 +18,14 @@ use crate::stats::{self, AnomalyRule, Support};
 pub const MEMORY_FILE: &str = "workbench.json";
 
 /// The latency measures. The workbench adds `knob` and arithmetic.
+///
+/// No `means` carries a digit: the model reads them in the tool schema and echoes them, and
+/// the wording fence refuses a digit it writes (live runs 1 and 2, docs/receipts).
 pub const MEASURES: &[Measure] = &[
     Measure { name: "p50", args: "", means: "the median latency of the steady samples, in ms" },
-    Measure { name: "p90", args: "", means: "the 90th percentile of the steady samples, in ms" },
-    Measure { name: "p99", args: "", means: "the 99th percentile of the steady samples, in ms" },
-    Measure { name: "p99_over_p50", args: "", means: "p99 divided by p50: how heavy the tail is" },
+    Measure { name: "p90", args: "", means: "the upper tail of the steady samples, in ms" },
+    Measure { name: "p99", args: "", means: "the far tail of the steady samples, in ms" },
+    Measure { name: "p99_over_p50", args: "", means: "the far tail divided by the median: how heavy the tail is" },
     Measure { name: "steady_mean", args: "", means: "the mean latency of the steady samples, in ms" },
     Measure {
         name: "warmup_cost",
@@ -32,7 +35,7 @@ pub const MEASURES: &[Measure] = &[
     Measure {
         name: "anomaly_rate",
         args: "",
-        means: "the share of steady samples the anomaly rule marks, from 0 to 1",
+        means: "the share of steady samples the anomaly rule marks, from none to all",
     },
     Measure { name: "throughput_p50", args: "", means: "the median throughput of the steady samples" },
     Measure { name: "memory_peak", args: "", means: "the highest memory sample, in MiB" },
@@ -40,7 +43,7 @@ pub const MEASURES: &[Measure] = &[
     Measure {
         name: "quantile_between",
         args: "a, b, q",
-        means: "the q quantile (0 to 1) of the latency at steps a to b",
+        means: "the latency at quantile q (a fraction, such as a half) at steps a to b",
     },
     Measure { name: "mean_between", args: "a, b", means: "the mean latency at steps a to b" },
 ];

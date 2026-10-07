@@ -36,3 +36,20 @@ Three things seen in the record. None changes a state, and each is for the workb
 3. h1's run plan says "batch size at 1 and 4" after comparing 1 against 8. The plan picks two levels by its own rule, and whether that is the intended pair should be checked in `experiment_for`.
 
 The first two runs stay as the record of what it took: the fence fix (runforge#9), then the host's own reason hint (runforge#10).
+
+## Run 4, 2026-10-06, with digit-free measure descriptions
+
+The Publisher found a likely root cause for runs 1 and 2. ScalarScope's own measure catalogue described p90 and p99 as "the 90th / 99th percentile of the steady samples". The model reads those descriptions in its prompt and echoed them into its reasons, where the fence refuses the digits. **Runs 1 to 3 all had the digit-bearing descriptions.** Run 4 rewords every description so none carries a digit: p90 is "the upper tail" and p99 "the far tail". The names are unchanged, and a test keeps digits out of the descriptions.
+
+Same model, digest and driver. The GPU was checked free before the run and the model unloaded after it. The files are in `run4/`. The knob folder records the same two hypotheses with the same states as run 3, in rounds 3 and 4. No reason was refused, and neither session's note was dropped.
+
+## The four runs
+
+| Run | What changed | Model | Proposed | Refused (why) | Recorded |
+|---|---|---|---|---|---|
+| 1 | — | qwen3:14b | 1, twice | 2 ("99th percentile" in the reason) | 0 |
+| 2 | Fence lets `p99` through (runforge#9) | qwen3:14b | 1, twice | 2 (same) | 0 |
+| 3 | ScalarScope's reason hint (runforge#10) | qwen3:14b | 2 | 0 | 2: h1 inconclusive, h2 passes on these runs alone |
+| 4 | Measure descriptions without digits | qwen3:14b | 2 | 0 | 2: same as run 3 |
+
+The fallback models (nemotron-3.5-lightning, muse-glimmer) were not run, because qwen3:14b recorded hypotheses from run 3 on.

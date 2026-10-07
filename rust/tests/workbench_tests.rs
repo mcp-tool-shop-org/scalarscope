@@ -213,6 +213,10 @@ fn a_session_record_names_the_model_and_holds_no_paths() {
     let specs = bench.tool_specs();
     let why = specs[3]["function"]["parameters"]["properties"]["why"]["description"].as_str().unwrap();
     assert!(why.contains("name a measure by its name, such as p99"), "{why}");
+    // No measure's description carries a digit the model could echo into its words.
+    for measure in scalarscope::workbench::MEASURES {
+        assert!(!measure.means.chars().any(|ch| ch.is_ascii_digit()), "{}: {}", measure.name, measure.means);
+    }
     assert!(bench.opening().contains("batch (batch 1 seed 1 1"), "{}", bench.opening());
     bench.call("measure", &json!({"formula": "p50"}));
     bench.call("propose_hypothesis", &json!({"knob": "batch", "formula": "p99_over_p50", "knob_change": "raise", "formula_moves": "up", "why": "Bigger batches spike more often."}));
