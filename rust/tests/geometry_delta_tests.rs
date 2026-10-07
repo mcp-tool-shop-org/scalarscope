@@ -79,9 +79,12 @@ fn the_2_0_oracle_orthogonal_against_correlated() {
         ["failurePresence", "structuralEmergence", "evaluatorAlignment", "stabilityOscillation"]
     );
 
-    expect(find(&deltas, "failurePresence"), 1.0, 0.0, -1.0, 1.0, "Only Path A experienced correctness_dip near step 6");
+    // 2.0 said "correctness_dip near step 6": the first failure's kind at the third's time. G8 takes
+    // both from the third. The 2.0 bundle in tests/Fixtures/Bundles keeps 2.0's words.
+    expect(find(&deltas, "failurePresence"), 1.0, 0.0, -1.0, 1.0, "Only Path A experienced tradeoffs_failure near step 6");
     expect(find(&deltas, "structuralEmergence"), -1.0, 0.2, 1.0, 1.0, "Path B developed dominant direction; Path A remained distributed");
-    expect(find(&deltas, "evaluatorAlignment"), 0.32000000000000006, 0.6333333333333333, 0.31333333333333324, 1.0, "Path B maintained higher evaluator agreement over 6 steps");
+    // 2.0 said "Path B maintained higher evaluator agreement over 6 steps". G5 names the measure.
+    expect(find(&deltas, "evaluatorAlignment"), 0.32000000000000006, 0.6333333333333333, 0.31333333333333324, 1.0, "Path B kept a more concentrated spectrum over 6 steps");
     expect(find(&deltas, "stabilityOscillation"), 0.0, 0.23000000000000004, 0.23000000000000004, 1.0, "Path B showed sustained instability during training (4 steps)");
     assert_ne!(find(&deltas, "convergenceTiming").status, DeltaStatus::Present);
 
@@ -90,7 +93,8 @@ fn the_2_0_oracle_orthogonal_against_correlated() {
     assert_eq!((failure.name.as_str(), failure.delta_type, failure.visual_anchor_time), ("Failure Events", DeltaType::Event, Some(0.6)));
     assert_eq!((failure.t_fail_a, failure.t_fail_b, failure.failed_a, failure.failed_b), (Some(6), None, Some(true), Some(false)));
     let alignment = find(&deltas, "evaluatorAlignment");
-    assert_eq!(alignment.summary_sentence.as_deref(), Some("Path B showed stronger internal alignment (sustained 6 steps)"));
+    assert_eq!(alignment.summary_sentence.as_deref(), Some("Path B had a more concentrated spectrum (sustained 6 steps)"));
+    assert_eq!(alignment.name, "Spectrum concentration");
     close(alignment.magnitude, 0.3133333333333333, "alignment magnitude");
     assert_eq!((alignment.delta_type, alignment.visual_anchor_time), (DeltaType::Structure, Some(0.0)));
     let stability = find(&deltas, "stabilityOscillation");
@@ -103,7 +107,7 @@ fn the_2_0_oracle_orthogonal_against_correlated() {
     let result = compute_with_summary(&left, &right, Alignment::ByStep, 1.0, &DeltaConfig::default());
     assert_eq!(result.deltas, deltas);
     assert_eq!(result.alignment.description, "Aligned by training step");
-    assert_eq!(result.comparative_summary, "Only Path A experienced correctness_dip near step 6 and distinct structural emergence.");
+    assert_eq!(result.comparative_summary, "Only Path A experienced tradeoffs_failure near step 6 and distinct structural emergence.");
 }
 
 #[test]
@@ -123,9 +127,9 @@ fn the_reverse_pair_mirrors_the_oracle() {
         close(b.delta, -a.delta, &format!("{id} delta"));
         close(b.magnitude, a.magnitude, &format!("{id} magnitude"));
     }
-    assert_eq!(find(&reverse, "failurePresence").explanation, "Only Path B experienced correctness_dip near step 6");
+    assert_eq!(find(&reverse, "failurePresence").explanation, "Only Path B experienced tradeoffs_failure near step 6");
     assert_eq!(find(&reverse, "structuralEmergence").explanation, "Path A developed dominant direction; Path B remained distributed");
-    assert_eq!(find(&reverse, "evaluatorAlignment").explanation, "Path A maintained higher evaluator agreement over 6 steps");
+    assert_eq!(find(&reverse, "evaluatorAlignment").explanation, "Path A kept a more concentrated spectrum over 6 steps");
     assert_eq!(find(&reverse, "stabilityOscillation").explanation, "Path A showed sustained instability during training (4 steps)");
     assert_eq!(find(&reverse, "stabilityOscillation").summary_sentence.as_deref(), Some("Path A showed 0.23 more oscillation"));
 }
@@ -226,15 +230,15 @@ fn evaluator_alignment_is_suppressed_below_the_floor_or_when_the_difference_is_b
     let same = flat_eigen(11, &[2.0, 1.0, 1.0]);
     let deltas = compute_default(&run(&calm(11), &same, &[]), &run(&calm(11), &same, &[]));
     let alignment = find(&deltas, "evaluatorAlignment");
-    assert_eq!((alignment.status, alignment.explanation.as_str()), (DeltaStatus::Suppressed, "Similar evaluator alignment"));
-    assert_eq!(alignment.notes, ["Persistence-weighted alignment difference below threshold"]);
+    assert_eq!((alignment.status, alignment.explanation.as_str()), (DeltaStatus::Suppressed, "Similar spectrum concentration"));
+    assert_eq!(alignment.notes, ["Persistence-weighted concentration difference below threshold"]);
     close(alignment.magnitude, 0.0, "magnitude");
 
     // A large difference for only 2 steps: over the floor but under MinPersistenceSteps (4).
     let other: Vec<&[f64]> = (0..11).map(|i| if i == 3 || i == 4 { &[3.0, 1.0][..] } else { &[2.0, 1.0, 1.0][..] }).collect();
     let deltas = compute_default(&run(&calm(11), &same, &[]), &run(&calm(11), &other, &[]));
     let alignment = find(&deltas, "evaluatorAlignment");
-    assert_eq!((alignment.status, alignment.explanation.as_str()), (DeltaStatus::Suppressed, "Brief alignment difference"));
+    assert_eq!((alignment.status, alignment.explanation.as_str()), (DeltaStatus::Suppressed, "Brief concentration difference"));
     assert_eq!(alignment.notes, ["Sustained segment (2 steps) below minimum (4)"]);
 
     // No eigenvalues at all: nothing paired.
@@ -365,4 +369,88 @@ fn dotnet_number_formatting() {
     assert_eq!(dotnet_double(3.0), "3");
     assert_eq!(dotnet_double(1e-7), "1E-07");
     assert_eq!(dotnet_double(1.5e15), "1.5E+15");
+}
+
+// The director's rulings on the port's open questions (2026-10-06, spec "Decision brief").
+
+#[test]
+fn g1_convergence_alignment_follows_the_config_delta_tc_reads() {
+    // Speed settles at step 3 within a window of 3, but jumps again at step 7, so a window of 5
+    // first holds from step 8.
+    let speeds = [5.0, 0.0, 5.0, 1.0, 1.0, 1.0, 1.0, 3.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
+    let a = run(&speeds.iter().map(|speed| (*speed, 0.0)).collect::<Vec<_>>(), &[], &[]);
+    let b = run(&calm(16), &[], &[]);
+    let default = create_alignment_map(&a, &b, Alignment::ByConvergence);
+    assert_eq!(default.description, "Aligned at convergence (A: step 8, B: step 5)");
+    let short = ConvergenceConfig { window: 3, ..ConvergenceConfig::default() };
+    let moved = create_alignment_map_with(&a, &b, Alignment::ByConvergence, &short);
+    assert_eq!(moved.description, "Aligned at convergence (A: step 3, B: step 3)");
+    // compute takes its alignment from the same config.
+    let config = DeltaConfig { convergence: short, ..DeltaConfig::default() };
+    let result = compute_with_summary(&a, &b, Alignment::ByConvergence, 1.0, &config);
+    assert_eq!(result.alignment.description, moved.description);
+}
+
+#[test]
+fn g2_first_instability_reads_absolute_curvature() {
+    // A run that bends one way: 2.0's signed mean is negative, its threshold 0.3, and no signed
+    // curvature passes it. On absolute curvature the threshold is 2 × 0.65 and step 6 passes.
+    let mut bends: Vec<(f64, f64)> = vec![(1.0, -0.5); 11];
+    bends[6] = (1.0, -2.0);
+    let a = run(&bends, &[], &[]);
+    let b = run(&calm(11), &[], &[]);
+    let map = create_alignment_map(&a, &b, Alignment::ByFirstInstability);
+    assert_eq!(map.description, "Aligned at first change (A: step 6, B: step 2)");
+}
+
+#[test]
+fn g3_a_failure_on_the_last_step_is_on_the_last_step() {
+    // Eleven steps, the third recorded failure at normalised time 1: step 10, not 11.
+    let failing = run(&calm(11), &[], &[0.2, 0.5, 1.0]);
+    let deltas = compute_default(&failing, &run(&calm(11), &[], &[]));
+    let failure = find(&deltas, "failurePresence");
+    assert_eq!(failure.t_fail_a, Some(10));
+    assert_eq!(failure.explanation, "Only Path A experienced spike near step 10");
+}
+
+#[test]
+fn g4_the_sign_says_which_run_settled() {
+    let steady = run(&calm(20), &[], &[]);
+    let jumpy = run(&jumpy(), &[], &[]);
+    let only_a = find(&compute_default(&steady, &jumpy), "convergenceTiming").delta;
+    let only_b = find(&compute_default(&jumpy, &steady), "convergenceTiming").clone();
+    assert_eq!(only_a, 1.0);
+    assert_eq!((only_b.status, only_b.delta, only_b.magnitude), (DeltaStatus::Present, -1.0, 1.0));
+    assert_eq!(only_b.explanation, "Path B stabilized; Path A did not within observed steps");
+}
+
+#[test]
+fn g8_the_persistence_window_is_read_and_one_failure_gives_time_and_kind() {
+    let mut failing = run(&calm(11), &[], &[]);
+    failing.failures = [(0.1, "dip"), (0.4, "spike"), (0.8, "collapse")]
+        .iter()
+        .map(|(t, category)| Failure { t: *t, category: category.to_string(), severity: "high".to_string(), description: String::new() })
+        .collect();
+    let quiet = run(&calm(11), &[], &[]);
+    let default = find(&compute_default(&failing, &quiet), "failurePresence").clone();
+    assert_eq!(default.explanation, "Only Path A experienced collapse near step 8");
+    let two = DeltaConfig { failure: FailureConfig { persistence_window: 2, ..FailureConfig::default() }, ..DeltaConfig::default() };
+    let windowed = find(&compute(&failing, &quiet, Alignment::ByStep, 1.0, &two), "failurePresence").clone();
+    assert_eq!(windowed.explanation, "Only Path A experienced spike near step 4");
+    let four = DeltaConfig { failure: FailureConfig { persistence_window: 4, ..FailureConfig::default() }, ..DeltaConfig::default() };
+    assert_eq!(find(&compute(&failing, &quiet, Alignment::ByStep, 1.0, &four), "failurePresence").status, DeltaStatus::Suppressed);
+}
+
+#[test]
+fn g9_a_step_short_of_eigenvalues_is_left_out() {
+    // Both runs concentrate half their spectrum in the first direction, except one step of B that
+    // has a single eigenvalue. 2.0 counted it as 0 and saw a difference; it is left out.
+    let full = flat_eigen(11, &[2.0, 1.0, 1.0]);
+    let mut sparse = full.clone();
+    sparse[5] = &[1.0];
+    let deltas = compute_default(&run(&calm(11), &full, &[]), &run(&calm(11), &sparse, &[]));
+    let alignment = find(&deltas, "evaluatorAlignment");
+    assert_eq!(alignment.status, DeltaStatus::Suppressed);
+    close(alignment.magnitude, 0.0, "magnitude");
+    close(alignment.mean_align_b.unwrap(), 0.5, "B's mean over the steps it has");
 }
