@@ -31,7 +31,7 @@ Open two on **Compare** with Open path A and Open path B.
 - **The failures** on a shared timeline.
 - **A time slider** that moves a marker through every view. Nothing animates.
 
-The five rules are 2.0's, ported and checked against 2.0's own results. The corrections made in 3.x are listed with their reasons in the spec ([decision brief](https://github.com/mcp-tool-shop-org/scalarscope/blob/main/docs/parity-and-beyond.spec.md)).
+The five rules are 2.0's, ported and checked against 2.0's own results. The export contract below changes what they do on checkpoint × item exports. The corrections made in 3.x are listed with their reasons in the spec ([decision brief](https://github.com/mcp-tool-shop-org/scalarscope/blob/main/docs/parity-and-beyond.spec.md)).
 
 ## The export contract (schema 1.1)
 

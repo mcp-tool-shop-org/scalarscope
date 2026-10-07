@@ -44,7 +44,7 @@ A complete `ProfilerStep` in a Chrome trace is one inference. The ops inside tha
 
 ## Saving and exporting
 
-- **Save bundle** writes the review as a `.scbundle`. The hash is SHA-256 of the archived file bytes. A matching hash is a content check, not a signature.
+- **Save bundle** writes the review as a `.scbundle`. Its hash is built from the SHA-256 of each archived file, and a matching hash is a content check, not a signature. **Open bundle** refuses a bundle whose hash does not match; see [Bundles & Review](/scalarscope/handbook/bundles/).
 - **Export SVG** writes the current view as a vector drawing. **Export PNG** saves a picture of the window.
 
 ## The package

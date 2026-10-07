@@ -113,7 +113,7 @@
       "confidence": "full",
       "highWater": null,
       "name": "rust",
-      "qualifyingSourceCommits": 45,
+      "qualifyingSourceCommits": 46,
       "rebaseline": null
     },
     {
@@ -219,8 +219,8 @@
         "path": ".gitignore"
       },
       {
-        "commits": 61,
-        "lines": 534,
+        "commits": 62,
+        "lines": 537,
         "path": "CHANGELOG.md"
       },
       {
@@ -239,43 +239,43 @@
         "path": "PRIVACY.md"
       },
       {
-        "commits": 18,
-        "lines": 1228,
+        "commits": 19,
+        "lines": 1230,
         "path": "README.es.md"
       },
       {
-        "commits": 18,
-        "lines": 1234,
+        "commits": 19,
+        "lines": 1236,
         "path": "README.fr.md"
       },
       {
-        "commits": 18,
-        "lines": 1224,
+        "commits": 19,
+        "lines": 1226,
         "path": "README.hi.md"
       },
       {
-        "commits": 18,
-        "lines": 1238,
+        "commits": 19,
+        "lines": 1240,
         "path": "README.it.md"
       },
       {
-        "commits": 18,
-        "lines": 1238,
+        "commits": 19,
+        "lines": 1240,
         "path": "README.ja.md"
       },
       {
-        "commits": 27,
-        "lines": 1085,
+        "commits": 28,
+        "lines": 1087,
         "path": "README.md"
       },
       {
-        "commits": 18,
-        "lines": 1226,
+        "commits": 19,
+        "lines": 1228,
         "path": "README.pt-BR.md"
       },
       {
-        "commits": 18,
-        "lines": 1234,
+        "commits": 19,
+        "lines": 1236,
         "path": "README.zh.md"
       },
       {
@@ -354,8 +354,8 @@
         "path": "assets/logo.png"
       },
       {
-        "commits": 24,
-        "lines": 600,
+        "commits": 25,
+        "lines": 607,
         "path": "atlas/README.md"
       },
       {
@@ -364,18 +364,18 @@
         "path": "atlas/boundaries.yaml"
       },
       {
-        "commits": 24,
-        "lines": 2004,
+        "commits": 25,
+        "lines": 2030,
         "path": "atlas/page.json"
       },
       {
-        "commits": 24,
-        "lines": 9984,
+        "commits": 25,
+        "lines": 10189,
         "path": "atlas/statistics.json"
       },
       {
-        "commits": 24,
-        "lines": 13080,
+        "commits": 25,
+        "lines": 13143,
         "path": "atlas/structure.json"
       },
       {
@@ -694,8 +694,8 @@
         "path": "rust/samples/optimized.csv"
       },
       {
-        "commits": 21,
-        "lines": 1583,
+        "commits": 22,
+        "lines": 1602,
         "path": "rust/src/bundle.rs"
       },
       {
@@ -749,8 +749,8 @@
         "path": "rust/src/readings.rs"
       },
       {
-        "commits": 32,
-        "lines": 2394,
+        "commits": 33,
+        "lines": 2400,
         "path": "rust/src/review.rs"
       },
       {
@@ -784,8 +784,8 @@
         "path": "rust/src/ui.rs"
       },
       {
-        "commits": 6,
-        "lines": 978,
+        "commits": 7,
+        "lines": 992,
         "path": "rust/src/ui_geometry.rs"
       },
       {
@@ -799,8 +799,8 @@
         "path": "rust/src/ui_pages.rs"
       },
       {
-        "commits": 37,
-        "lines": 1590,
+        "commits": 38,
+        "lines": 1605,
         "path": "rust/src/ui_tests.rs"
       },
       {
@@ -824,8 +824,8 @@
         "path": "rust/tests/aspire_export_tests.rs"
       },
       {
-        "commits": 13,
-        "lines": 368,
+        "commits": 14,
+        "lines": 427,
         "path": "rust/tests/bundle_tests.rs"
       },
       {
@@ -897,6 +897,11 @@
         "commits": 3,
         "lines": 8367,
         "path": "rust/tests/fixtures/aspire-si/steady.json"
+      },
+      {
+        "commits": 1,
+        "lines": 0,
+        "path": "rust/tests/fixtures/bundles/drift-saved-by-3.1.0.scbundle"
       },
       {
         "commits": 2,
@@ -1169,8 +1174,8 @@
         "path": "site/src/content/docs/handbook/beginners.md"
       },
       {
-        "commits": 6,
-        "lines": 94,
+        "commits": 7,
+        "lines": 103,
         "path": "site/src/content/docs/handbook/bundles.md"
       },
       {
@@ -2624,198 +2629,198 @@
     "level": "low",
     "reason": "fewer than 25 source files reach 10 revisions in the window"
   },
-  "generatedAt": "2026-10-07T08:37:45.666Z",
+  "generatedAt": "2026-10-07T08:41:13.721Z",
   "generatedFrom": {
-    "commit": "acaf17f3153e2cd47bac6c0a8046a89b1553ed37"
+    "commit": "0180c44cf7a61a19fe50c449cf456a4b773b171b"
   },
   "pairs": [
     {
       "a": "README.es.md",
       "b": "README.fr.md",
-      "either": 10,
-      "shared": 10,
+      "either": 11,
+      "shared": 11,
       "strength": 1
     },
     {
       "a": "README.es.md",
       "b": "README.hi.md",
-      "either": 10,
-      "shared": 10,
+      "either": 11,
+      "shared": 11,
       "strength": 1
     },
     {
       "a": "README.es.md",
       "b": "README.it.md",
-      "either": 10,
-      "shared": 10,
+      "either": 11,
+      "shared": 11,
       "strength": 1
     },
     {
       "a": "README.es.md",
       "b": "README.ja.md",
-      "either": 10,
-      "shared": 10,
+      "either": 11,
+      "shared": 11,
       "strength": 1
     },
     {
       "a": "README.es.md",
       "b": "README.pt-BR.md",
-      "either": 10,
-      "shared": 10,
+      "either": 11,
+      "shared": 11,
       "strength": 1
     },
     {
       "a": "README.es.md",
       "b": "README.zh.md",
-      "either": 10,
-      "shared": 10,
+      "either": 11,
+      "shared": 11,
       "strength": 1
     },
     {
       "a": "README.fr.md",
       "b": "README.hi.md",
-      "either": 10,
-      "shared": 10,
+      "either": 11,
+      "shared": 11,
       "strength": 1
     },
     {
       "a": "README.fr.md",
       "b": "README.it.md",
-      "either": 10,
-      "shared": 10,
+      "either": 11,
+      "shared": 11,
       "strength": 1
     },
     {
       "a": "README.fr.md",
       "b": "README.ja.md",
-      "either": 10,
-      "shared": 10,
+      "either": 11,
+      "shared": 11,
       "strength": 1
     },
     {
       "a": "README.fr.md",
       "b": "README.pt-BR.md",
-      "either": 10,
-      "shared": 10,
+      "either": 11,
+      "shared": 11,
       "strength": 1
     },
     {
       "a": "README.fr.md",
       "b": "README.zh.md",
-      "either": 10,
-      "shared": 10,
+      "either": 11,
+      "shared": 11,
       "strength": 1
     },
     {
       "a": "README.hi.md",
       "b": "README.it.md",
-      "either": 10,
-      "shared": 10,
+      "either": 11,
+      "shared": 11,
       "strength": 1
     },
     {
       "a": "README.hi.md",
       "b": "README.ja.md",
-      "either": 10,
-      "shared": 10,
+      "either": 11,
+      "shared": 11,
       "strength": 1
     },
     {
       "a": "README.hi.md",
       "b": "README.pt-BR.md",
-      "either": 10,
-      "shared": 10,
+      "either": 11,
+      "shared": 11,
       "strength": 1
     },
     {
       "a": "README.hi.md",
       "b": "README.zh.md",
-      "either": 10,
-      "shared": 10,
+      "either": 11,
+      "shared": 11,
       "strength": 1
     },
     {
       "a": "README.it.md",
       "b": "README.ja.md",
-      "either": 10,
-      "shared": 10,
+      "either": 11,
+      "shared": 11,
       "strength": 1
     },
     {
       "a": "README.it.md",
       "b": "README.pt-BR.md",
-      "either": 10,
-      "shared": 10,
+      "either": 11,
+      "shared": 11,
       "strength": 1
     },
     {
       "a": "README.it.md",
       "b": "README.zh.md",
-      "either": 10,
-      "shared": 10,
+      "either": 11,
+      "shared": 11,
       "strength": 1
     },
     {
       "a": "README.ja.md",
       "b": "README.pt-BR.md",
-      "either": 10,
-      "shared": 10,
+      "either": 11,
+      "shared": 11,
       "strength": 1
     },
     {
       "a": "README.ja.md",
       "b": "README.zh.md",
-      "either": 10,
-      "shared": 10,
+      "either": 11,
+      "shared": 11,
       "strength": 1
     },
     {
       "a": "README.pt-BR.md",
       "b": "README.zh.md",
-      "either": 10,
-      "shared": 10,
+      "either": 11,
+      "shared": 11,
       "strength": 1
     },
     {
       "a": "atlas/README.md",
       "b": "atlas/page.json",
-      "either": 13,
-      "shared": 13,
+      "either": 14,
+      "shared": 14,
       "strength": 1
     },
     {
       "a": "atlas/README.md",
       "b": "atlas/statistics.json",
-      "either": 13,
-      "shared": 13,
+      "either": 14,
+      "shared": 14,
       "strength": 1
     },
     {
       "a": "atlas/README.md",
       "b": "atlas/structure.json",
-      "either": 13,
-      "shared": 13,
+      "either": 14,
+      "shared": 14,
       "strength": 1
     },
     {
       "a": "atlas/page.json",
       "b": "atlas/statistics.json",
-      "either": 13,
-      "shared": 13,
+      "either": 14,
+      "shared": 14,
       "strength": 1
     },
     {
       "a": "atlas/page.json",
       "b": "atlas/structure.json",
-      "either": 13,
-      "shared": 13,
+      "either": 14,
+      "shared": 14,
       "strength": 1
     },
     {
       "a": "atlas/statistics.json",
       "b": "atlas/structure.json",
-      "either": 13,
-      "shared": 13,
+      "either": 14,
+      "shared": 14,
       "strength": 1
     },
     {
@@ -2828,9 +2833,9 @@
     {
       "a": "rust/src/open.rs",
       "b": "rust/tests/bundle_tests.rs",
-      "either": 11,
+      "either": 12,
       "shared": 6,
-      "strength": 0.545455
+      "strength": 0.5
     },
     {
       "a": "rust/src/open.rs",
@@ -2849,37 +2854,23 @@
     {
       "a": "rust/src/review.rs",
       "b": "rust/src/ui.rs",
-      "either": 28,
+      "either": 29,
       "shared": 17,
-      "strength": 0.607143
+      "strength": 0.586207
     },
     {
       "a": "rust/src/review.rs",
       "b": "rust/tests/review_tests.rs",
-      "either": 20,
+      "either": 21,
       "shared": 11,
-      "strength": 0.55
+      "strength": 0.52381
     },
     {
       "a": "rust/src/ui.rs",
       "b": "rust/src/ui_tests.rs",
-      "either": 28,
+      "either": 29,
       "shared": 18,
-      "strength": 0.642857
-    },
-    {
-      "a": "rust/src/ui_tests.rs",
-      "b": "rust/tests/edge_tests.rs",
-      "either": 20,
-      "shared": 10,
-      "strength": 0.5
-    },
-    {
-      "a": "rust/tests/bundle_tests.rs",
-      "b": "rust/tests/edge_tests.rs",
-      "either": 12,
-      "shared": 6,
-      "strength": 0.5
+      "strength": 0.62069
     },
     {
       "a": "src/ScalarScope/ViewModels/ComparisonViewModel.cs",
@@ -2899,16 +2890,16 @@
     "floor": "fallen",
     "floorHeld": false,
     "floorTrigger": "revision-depth",
-    "headDate": "2026-10-07T01:32:27-07:00",
+    "headDate": "2026-10-07T04:38:06-04:00",
     "inScopeFiles": 469,
     "pinnedStart": null,
     "priorFloor": "fallen",
-    "qualifyingCommits": 85,
+    "qualifyingCommits": 86,
     "qualifyingMinimum": 30,
     "revisions": 5,
     "shared": 10,
     "sharedFloorUsed": 3,
-    "since": "2026-04-10T08:32:27.000Z",
+    "since": "2026-04-10T08:38:06.000Z",
     "sourceExtensions": [
       ".js",
       ".mjs",

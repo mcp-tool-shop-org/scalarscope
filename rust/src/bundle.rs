@@ -6,7 +6,8 @@
 //! preimage. The bytes that are hashed are the bytes stored in the zip.
 //! A matching hash checks those bytes. It is not a signature.
 //!
-//! Reopening reads `review/review.json`. It does not run the detectors again.
+//! Reopening reads `review/review.json`: its verdict and tiles are what the page shows. A geometry
+//! review also redraws from its stored runs, and today's reading is shown apart (`stored_pair`).
 //! Numbers written into the archive are finite, and a zero is positive zero.
 //! The hash is of those UTF-8 bytes. It is not a hash of float bits, and it
 //! does not call a transcendental.

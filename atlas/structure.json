@@ -744,55 +744,55 @@
             {
               "in": "seal",
               "kind": "err",
-              "line": 214
+              "line": 215
             },
             {
               "in": "verify",
               "kind": "match-err",
-              "line": 335
+              "line": 336
             },
             {
               "in": "verify",
               "kind": "match-err",
-              "line": 345
+              "line": 346
             },
             {
               "in": "open_bytes",
               "kind": "err",
-              "line": 413
+              "line": 414
             },
             {
               "in": "pack",
               "kind": "err",
-              "line": 615
+              "line": 616
             },
             {
               "in": "pack",
               "kind": "err",
-              "line": 618
+              "line": 619
             },
             {
               "in": "findings_only",
               "kind": "err",
-              "line": 805
+              "line": 806
             },
             {
               "in": "to_json",
               "kind": "err",
-              "line": 911
+              "line": 912
             },
             {
               "in": "canon_json",
               "kind": "err",
-              "line": 920
+              "line": 921
             },
             {
               "in": "normalize",
               "kind": "err",
-              "line": 1046
+              "line": 1047
             }
           ],
-          "hash": "fa480b816f6ebe702704e0e6c492439c322501b19417c16dd6527a8bab099ada",
+          "hash": "d0a66102d1fb1e12f060b330f65c7959d51ee184dba1d79c80ce89e7ec5e8c5e",
           "importOrder": [
             "rust/src/readings.rs",
             "rust/src/review.rs",
@@ -3074,15 +3074,15 @@
           "path": "site/src/content/docs/handbook/beginners.md"
         },
         {
-          "hash": "f0e753e30288d40bb71e1cb45e4c919690be178442475f40c3740181a0715655",
+          "hash": "55a9afaa253f5f24e20ec320be6235a67bcbf7b3f83ec74c8fb00a0b3ede4da3",
           "path": "site/src/content/docs/handbook/bundles.md"
         },
         {
-          "hash": "42b20ae764fb29321a90f7c68ea3fac329eb726438f2f70cb22f4b04388eebea",
+          "hash": "73dc70d8a646935d69e2974a7692767530ff6b4c2c98421e818810886df2574c",
           "path": "site/src/content/docs/handbook/delta-analysis.md"
         },
         {
-          "hash": "573420eaf96e9ee6507faca9eae30a2a80430f5edb0605ff5c072d793b28096a",
+          "hash": "3f9dab75c0510e60aa04e5af8718a12c4fd96dd27d4f183186e1ca1907078cab",
           "path": "site/src/content/docs/handbook/geometry.md"
         },
         {
@@ -3094,11 +3094,11 @@
           "path": "site/src/content/docs/handbook/history.md"
         },
         {
-          "hash": "84b2fba4793c97117e2d6782142ff37ea383825381677d30d2e5f6d84bf52583",
+          "hash": "af06a43e6320f73f9e7775ed226f0c7d405aa3ec1133eeb537ceff5ee5faa8aa",
           "path": "site/src/content/docs/handbook/index.md"
         },
         {
-          "hash": "c9abd4aea866e633eb03e1ac8fecbd59675eb5ed92235a84c770e89d1ca93556",
+          "hash": "38fdfa3852fa6659359b1b8f9ad99a9e3186380af4bd45f7644e5154e98e99fb",
           "path": "site/src/content/docs/handbook/rust-review.md"
         },
         {
@@ -5366,7 +5366,7 @@
   "edges": [],
   "engine": "1.24.0",
   "generatedFrom": {
-    "commit": "acaf17f3153e2cd47bac6c0a8046a89b1553ed37",
+    "commit": "0180c44cf7a61a19fe50c449cf456a4b773b171b",
     "tracked": 464
   },
   "landings": [

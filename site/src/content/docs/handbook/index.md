@@ -15,7 +15,7 @@ Welcome to the ScalarScope handbook: the guide to comparing two machine-learning
 - **[Geometry](/scalarscope/handbook/geometry/)**: two ASPIRE training runs, and the export contract
 - **[Workbench](/scalarscope/handbook/workbench/)**: weigh a setting across many runs with a local model
 - **[History](/scalarscope/handbook/history/)**: a project's measures across its logged reviews
-- **[Bundles & Review](/scalarscope/handbook/bundles/)**: reproducible exports and review mode
+- **[Bundles & Review](/scalarscope/handbook/bundles/)**: saved reviews, the hash check and review mode
 - **[Beginners](/scalarscope/handbook/beginners/)**: a step-by-step first comparison
 - **[VortexKit](/scalarscope/handbook/vortexkit/)**: 2.0's visualization library, kept in the repo
 

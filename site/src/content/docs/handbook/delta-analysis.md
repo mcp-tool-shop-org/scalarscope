@@ -31,7 +31,7 @@ These are 3.x's rules. Where they answer differently from 2.0, the [spec](https:
 
 ## Geometry: five deltas
 
-For two ASPIRE training runs. These are 2.0's rules with 2.0's defaults, ported and checked against 2.0's results, with the corrections ruled on 2026-10-06.
+For two ASPIRE training runs. These are 2.0's rules with 2.0's defaults, ported and checked against 2.0's results, with the corrections ruled on 2026-10-06. On exports whose steps are checkpoints × items, the rules ruled on 2026-10-07 apply instead (see Withheld, below, and [Geometry](/scalarscope/handbook/geometry/)).
 
 | Delta | What it asks | Defaults |
 |---|---|---|
