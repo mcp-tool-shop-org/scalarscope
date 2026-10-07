@@ -9,7 +9,7 @@ export const config: SiteConfig = {
   footerText: 'MIT Licensed — built by <a href="https://github.com/mcp-tool-shop-org" style="color:var(--color-muted);text-decoration:underline">mcp-tool-shop-org</a>',
 
   hero: {
-    badge: 'Version 3.1.0 · Windows',
+    badge: 'Version 3.1.1 · Windows',
     headline: 'Two ML runs,',
     headlineAccent: 'compared with intervals.',
     description: 'ScalarScope says how run B differs from run A, gives each difference an interval or its reason, and holds back what the data cannot support. Inference traces, training histories and ASPIRE geometry exports. It works offline. A matching SHA-256 is a content check, not a signature.',
@@ -48,7 +48,7 @@ export const config: SiteConfig = {
         },
         {
           title: 'Reviews you can reopen',
-          desc: 'Save a .scbundle and reopen it exactly as saved. Bundles, settings and recent files from 2.0 carry over. A matching SHA-256 checks the bytes; it does not say who wrote them.',
+          desc: 'Save a .scbundle and reopen it exactly as saved. It contains the runs it compares, so share it as you would share them. A matching SHA-256 checks the bytes; it does not say who wrote them. Bundles, settings and recent files from 2.0 carry over.',
         },
       ],
     },
@@ -69,11 +69,11 @@ export const config: SiteConfig = {
       kind: 'features',
       id: 'beyond',
       title: 'Geometry, a workbench and a history',
-      subtitle: 'New in 3.1.0.',
+      subtitle: 'New in 3.1.',
       features: [
         {
           title: 'ASPIRE geometry',
-          desc: 'Two training runs side by side: trajectory, evaluator scores, eigen spectrum and failures, with five geometry deltas. When an export says its steps are not time, or its scores were replayed, the readings that depend on them are withheld with that reason.',
+          desc: 'Two training runs side by side: trajectory, evaluator scores, eigen spectrum and failures, with five geometry deltas. When an export says its steps are not time, or its scores were replayed, the readings that depend on them are withheld with that reason. On a drift export, spectrum concentration is compared checkpoint by checkpoint, and it says when it is comparing the evaluators rather than the runs.',
         },
         {
           title: 'A local workbench',

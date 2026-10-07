@@ -1,4 +1,4 @@
-# Testing ScalarScope 3.1.0
+# Testing ScalarScope 3.1.1
 
 Each check below takes under a minute, using the files in [`samples/`](samples/). Nothing here needs a network connection, an account or a GPU.
 
@@ -20,7 +20,7 @@ Each check below takes under a minute, using the files in [`samples/`](samples/)
 
 1. Open path A: `samples/geometry/local-teacher.drift.geometry.json`.
 2. Open path B: `samples/geometry/composite-teacher.drift.geometry.json`.
-3. The page shows a trajectory plot, a panel per evaluator score and five tiles. ΔF, ΔTc and ΔO say **withheld**, with the reason "steps are checkpoint × item, not time". ΔĀ fires.
+3. The page shows a trajectory plot, a panel per evaluator score and five tiles. ΔF, ΔTc, ΔTd and ΔO say **withheld**, with the reason "steps are checkpoint × item, not time". ΔĀ fires and says the evaluator setups differ: these scores are fixed per item, so it compares the evaluators, not the runs. The headline reads "No meaningful divergence between the runs; the evaluator setups differ (spectrum concentration)."
 4. For the same runs per training step, open `local-teacher.geometry.json` and `composite-teacher.geometry.json`. Here ΔF is withheld because the scores were replayed.
 
 ## 4. The Workbench

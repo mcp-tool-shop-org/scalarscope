@@ -1012,3 +1012,13 @@ fn review_mode_draws_an_older_bundle_with_its_stored_verdict_and_the_labelled_cu
     );
     assert!(super::geometry_views::CURRENT_TILES.starts_with("Current reading:"));
 }
+#[test]
+fn the_guide_covers_the_geometry_export_contract_and_review_mode() {
+    let geometry = super::pages::search("checkpoints × items");
+    assert_eq!(geometry.len(), 1);
+    assert!(geometry[0].body.contains("ΔTc, ΔTd, ΔO and ΔF are withheld"));
+    assert!(geometry[0].body.contains("compares the evaluators, not the runs"));
+    let bundles = super::pages::search("refuses it on a mismatch");
+    assert_eq!(bundles.len(), 1);
+    assert!(bundles[0].body.contains("share it only if you would share them"));
+}

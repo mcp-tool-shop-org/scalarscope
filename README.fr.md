@@ -18,14 +18,14 @@
 
 **Comparez deux exécutions d’apprentissage automatique et voyez à quel point la comparaison est fiable.** ScalarScope ouvre deux séries d’inférences, deux historiques d’entraînement ou deux exportations de géométrie ASPIRE. Il indique en quoi l’exécution B diffère de l’exécution A, attribue à chaque différence un intervalle ou sa raison, et retient les informations que les données ne peuvent pas étayer.
 
-La version **3.1.0** est une réécriture en Rust. Il s’agit de l’application Windows disponible sur le Microsoft Store sous le nom [9P3HT1PHBKQK](https://apps.microsoft.com/detail/9P3HT1PHBKQK), en tant que package 3.1.0.0, une mise à jour de la même version. Le nom du package `mcp-tool-shop.ScalarScope` et l’éditeur `CN=5305D976-6952-4F00-9C21-3A5DB090359F` restent inchangés, de sorte que les fichiers, les évaluations et les paramètres enregistrés de la version 2.0 sont conservés.
+ScalarScope 3.x est une réécriture en Rust. La version **3.1.1** est l’application Windows disponible sur le Microsoft Store à l’adresse [9P3HT1PHBKQK](https://apps.microsoft.com/detail/9P3HT1PHBKQK), package 3.1.1.0, une mise à jour de la même version. Le nom du package `mcp-tool-shop.ScalarScope` et l’éditeur `CN=5305D976-6952-4F00-9C21-3A5DB090359F` restent inchangés, les fichiers, les évaluations et les paramètres enregistrés de la version 2.0 sont donc conservés.
 
 ## Modèle de confiance
 
 - **Ce qu’il lit.** Les fichiers que vous ouvrez. Le package du Store lit et écrit également `comparison-log.json`, `preferences.json` et `workbench.json` dans son propre dossier LocalState, le dossier utilisé par la version 2.0. Une version non empaquetée n’en écrit aucun.
-- **Ce qu’il écrit.** Un ensemble de données, une image ou un enregistrement de session, uniquement dans un chemin que vous choisissez.
-- **Réseau.** Il n’y a pas de compte, pas de télémétrie et pas d’analyse. La seule connexion que l’application peut établir provient de l’onglet Workbench, et uniquement lorsque vous appuyez sur **Demander** : vers un Ollama local à l’emplacement `127.0.0.1` sur cet ordinateur. Les modèles cloud d’Ollama sont refusés. Rien ne quitte la machine.
-- **Paquets (bundles).** Un hachage SHA-256 correspondant est une vérification du contenu, et non une signature. Cela indique que les octets sont intacts. Cela n’indique pas qui a écrit le fichier.
+- **Ce qu’il écrit.** Un paquet (bundle), une image ou un enregistrement de session, uniquement dans un chemin que vous choisissez.
+- **Réseau.** Il n’y a pas de compte, pas de télémétrie et pas d’analyse. La seule connexion que l’application peut établir est à partir de l’onglet Workbench, et uniquement lorsque vous appuyez sur **Ask** : vers un Ollama local à l’adresse `127.0.0.1` sur cet ordinateur. Les modèles cloud d’Ollama sont refusés. Rien ne quitte la machine.
+- **Paquets (bundles).** Un paquet contient les exécutions qu’il compare : ne le partagez que si vous partageriez ces exécutions. Un hachage SHA-256 correspondant est une vérification du contenu, et non une signature. Cela indique que les octets sont intacts. Cela n’indique pas qui a écrit le fichier.
 - **Modules complémentaires.** Les modules complémentaires laissés dans le dossier 2.0 ne sont pas chargés.
 
 ---
@@ -33,49 +33,49 @@ La version **3.1.0** est une réécriture en Rust. Il s’agit de l’applicatio
 ## Ce qu’il fait
 
 **Inférence : deux exécutions de latence par étape.**
-- **Le titre** est B/A aux valeurs p50, p90 et p99. Chaque rapport est assorti d’un intervalle de bootstrap à bloc mobile de 95 %.
+- **Le titre** est B/A aux valeurs p50, p90 et p99. Chaque rapport est accompagné d’un intervalle de bootstrap à blocs mobiles de 95 %.
 - **Plusieurs exécutions de chaque côté** peuvent être ouvertes. L’intervalle rééchantillonne alors également l’ensemble des exécutions, et il est qualifié d’indicatif lorsque le nombre d’exécutions de chaque côté est inférieur à trois.
-- **Un percentile sans suffisamment d’échantillons** n’est pas affiché ; p99 nécessite 368.
+- **Un percentile sans suffisamment d’échantillons** n’est pas affiché ; p99 nécessite 368 échantillons.
 - **Trois deltas,** chacun avec une vignette indiquant s’il a été déclenché, s’il est resté inactif ou s’il a été retenu, et pourquoi :
-- **ΔF (nouvelles anomalies)** compte les échantillons stables au-delà de 5 écarts robustes. Il ne se déclenche que lorsque l’excès de B est supérieur à ce qui pourrait être dû au hasard.
-- **ΔO (variabilité)** se déclenche lorsque l’intervalle de la dispersion relative de B par rapport à A exclut 1.
-- **ΔTc (stabilisation)** attribue une forme à chaque exécution. Il ne se déclenche que lorsque les deux se stabilisent et que leurs plages de stabilisation ne se chevauchent pas.
-- **Six vues :** Série, Échauffement, Distribution avec un seuil que vous faites glisser, Différence par percentile, Spectre et Carte thermique. Aucune ne s’anime.
+- **ΔF (nouvelles anomalies)** compte les échantillons stables au-delà de 5 écarts robustes. Il est déclenché uniquement lorsque l’excès de B est supérieur à ce qui pourrait être dû au hasard.
+- **ΔO (variabilité)** est déclenché lorsque l’intervalle de la dispersion relative de B par rapport à A exclut 1.
+- **ΔTc (stabilisation)** attribue une forme à chaque exécution. Il est déclenché uniquement lorsque les deux se stabilisent et que leurs plages de stabilisation ne se chevauchent pas.
+- **Six vues :** Série, Échauffement, Distribution avec un seuil que vous faites glisser, Différence par percentile, Spectre et Carte thermique. Aucune n’est animée.
 
 **Entraînement.** Une rétropropagation `run_history.json` est affichée sous forme de perte d’entraînement, avec la perte retenue, la perplexité et les mesures de tâche à côté. Les deltas d’inférence ne sont pas calculés sur celle-ci.
 
 **Géométrie : deux exécutions d’entraînement ASPIRE.**
 - **Ce qu’il lit :** l’exportation de géométrie que [aspire-si](https://github.com/mcp-tool-shop-org/aspire-si) écrit, avec sa trajectoire, les scores de l’évaluateur, le spectre propre et les échecs.
 - **Cinq deltas :** ΔF, ΔTc, ΔTd, ΔĀ (concentration du spectre) et ΔO. Ils sont importés de la version 2.0 et vérifiés par rapport aux résultats de la version 2.0, les corrections étant enregistrées dans [la spécification](docs/parity-and-beyond.spec.md).
-- **Contrat d’exportation (schéma 1.1).** Une exportation peut indiquer que ses étapes sont des points de contrôle × éléments plutôt que du temps, ou que ses scores ont été rejoués. Dans ce cas, les deltas qui lisent le temps ou les baisses de score sont retenus avec cette raison, et le titre ne se base que sur les deltas qui sont pris en compte. Les anciennes exportations sont lues comme auparavant.
+- **Contrat d’exportation (schéma 1.1).** Une exportation peut indiquer que ses étapes sont des points de contrôle × éléments plutôt que du temps, ou que ses scores ont été rejoués ou sont fixes par élément. Dans ce cas, les deltas qui dépendent de l’ordre des étapes ou des baisses de score sont retenus avec cette raison, et ΔĀ est comparé point de contrôle par point de contrôle. Lorsque les scores sont fixes par élément, ΔĀ indique qu’il compare les évaluateurs, et non les exécutions. Le titre ne se base que sur les deltas qui sont affichés. Les anciennes exportations sont lues comme auparavant.
 
 **Workbench.**
 - **Ouvrez de nombreuses exécutions** qui diffèrent par un paramètre, tel que la taille du lot ou la précision.
-- **Demander :** un modèle local capable d’appeler des outils mesure les exécutions à l’aide de formules et propose ce que chaque paramètre fait.
+- **Ask :** un modèle local capable d’appeler des outils mesure les exécutions à l’aide de formules et propose ce que chaque paramètre fait.
 - **Le programme définit chaque nombre et chaque verdict.** Une hypothèse est testée par un test de rang exact sur chaque ensemble d’exécutions. Les verdicts entre les ensembles ne sont donnés qu’aux points de contrôle, par e-BH avec un taux de faux positifs de 5 %.
-- **C’est à vous de décider en premier.** Vous pouvez écrire votre propre demande avant de demander. La note du modèle est affichée sous les verdicts, et est étiquetée comme étant de son cru.
+- **C’est à vous de décider en premier.** Vous pouvez écrire votre propre appel avant de demander. La note du modèle est affichée sous les verdicts, avec la mention « selon lui ».
 
 **Historique.** Dans le package du Store, les comparaisons que vous effectuez sont regroupées par l’ensemble de données et le modèle du côté B. Chaque mesure est affichée pour ces évaluations, avec les points où son niveau a changé. Un changement de code ou d’environnement à côté d’un changement est nommé et qualifié de coïncidence, et non de cause. Le journal conserve les 40 dernières évaluations.
 
-**Ensembles de données et état enregistré.**
-- **Enregistrer l’ensemble de données** enregistre l’évaluation sous forme de `.scbundle`. **Ouvrir l’ensemble de données** l’affiche exactement comme elle a été enregistrée, en mode évaluation.
-- **Les ensembles de données de la version 2.0** s’ouvrent : les ensembles de données de comparaison avec leurs deltas stockés, et les évaluations d’inférence marquées comme non vérifiées.
+**Paquets (bundles) et état enregistré.**
+- **Save bundle** enregistre l’évaluation sous forme de `.scbundle`. **Open bundle** vérifie son hachage, le refuse en cas de non-correspondance et l’affiche exactement comme il a été enregistré, en mode évaluation. Si les règles d’aujourd’hui lisent différemment une évaluation de géométrie enregistrée, cette lecture est affichée en dessous, avec la mention correspondante.
+- **Les paquets de la version 2.0** s’ouvrent : les paquets de comparaison avec leurs deltas enregistrés, et les évaluations d’inférence marquées comme non vérifiées.
 - **Les paramètres de la version 2.0** sont conservés : thème, palettes de couleurs, contraste élevé, échelle du texte, limite des fichiers récents et règle d’anomalie.
-- **Exporter** la vue actuelle au format SVG, ou la fenêtre au format PNG.
+- **Exportez** la vue actuelle au format SVG, ou la fenêtre au format PNG.
 
 ---
 
 ## Démarrage rapide
 
-### Depuis le Microsoft Store
+### À partir du Microsoft Store
 
-1. Installez **ScalarScope** depuis le [Microsoft Store](https://apps.microsoft.com/detail/9P3HT1PHBKQK). Il nécessite Windows 10 version 1809 (build 17763) ou ultérieure, x64.
+1. Installez **ScalarScope** à partir du [Microsoft Store](https://apps.microsoft.com/detail/9P3HT1PHBKQK). Il nécessite Windows 10 version 1809 (build 17763) ou ultérieure, x64.
 2. Dans **Bienvenue**, cliquez sur **Essayez la comparaison d’exemple**. Ou cliquez sur **Comparer deux exécutions** et ouvrez le chemin A et le chemin B.
 3. Lisez le titre, puis cliquez sur une vignette pour afficher **Pourquoi** et **Montrez-moi**.
 
-Les fichiers d’exemple à essayer, une paire d’inférence, une paire de géométrie et un dossier d’exécutions pour le Workbench, se trouvent dans [`samples/`](samples/). [TESTING.md](TESTING.md) indique lesquels ouvrir et où.
+Les fichiers d’exemple à essayer, une paire d’inférence, une paire de géométrie et un dossier d’exécutions pour Workbench, se trouvent dans [`samples/`](samples/). [TESTING.md](TESTING.md) indique lesquels ouvrir et où.
 
-### Depuis la source
+### À partir du code source
 
 ```bash
 git clone https://github.com/mcp-tool-shop-org/scalarscope.git
@@ -89,12 +89,12 @@ cargo run --release --manifest-path rust/Cargo.toml
 
 | Type | Fichiers |
 |---|---|
-| Inférence | Un fichier CSV de latence, un fichier JSON de référence, une trace de profilage Chrome ou PyTorch (`.json` ou `.json.gz`), un journal d’exécution, un fichier JSON ScalarScope RunTrace ou un dossier d’exécution |
+| Inférence | Un fichier CSV de latence, un fichier JSON de référence, une trace d’analyseur Chrome ou PyTorch (`.json` ou `.json.gz`), un journal d’exécution, un fichier JSON ScalarScope RunTrace ou un dossier d’exécution |
 | Entraînement | Une rétropropagation `run_history.json` |
 | Géométrie | Une exportation de géométrie ASPIRE (aspire-si, schéma 1.x) |
 | Relecture | Un `.scbundle` de 3.x ou 2.0 |
 
-La section « Premiers pas » du [manuel](https://mcp-tool-shop-org.github.io/scalarscope/handbook/getting-started/) contient un court exemple pour chaque fichier.
+La section « Premiers pas » du [manuel](https://mcp-tool-shop-org.github.io/scalarscope/handbook/getting-started/) contient un court exemple de chaque fichier.
 
 ---
 
@@ -105,7 +105,7 @@ La section « Premiers pas » du [manuel](https://mcp-tool-shop-org.github.io/
 | `F1` | Guide |
 | `Ctrl+,` | Paramètres |
 | `Ctrl+H` | Bienvenue |
-| `1`–`6` | Dans « Comparer » : séries, phase de test, distribution, différence, spectre, carte thermique |
+| `1`–`6` | Dans « Comparer » : séries, échauffement, distribution, différence, spectre, carte thermique |
 | `Esc` | Fermer le panneau « Pourquoi » |
 
 ---
@@ -113,16 +113,16 @@ La section « Premiers pas » du [manuel](https://mcp-tool-shop-org.github.io/
 ## Tests
 
 ```bash
-# The review: 228 tests. Line coverage must stay above 90%.
+# The review: 229 tests. Line coverage must stay above 90%.
 cd rust
 cargo test
 cargo llvm-cov --locked --all-targets --fail-under-lines 90
 
-# The .NET fixture tests: the 2.0 oracles, bundle compatibility and the version surfaces (134 tests)
+# The .NET fixture tests: the 2.0 oracles, bundle compatibility and the version surfaces (135 tests)
 dotnet test tests/ScalarScope.FixtureTests
 ```
 
-Le projet .NET dans `src/ScalarScope` est l’application 2.0. Il reste dans le dépôt en tant que référence par rapport à laquelle la version 3.x est vérifiée. Le package Store est créé à partir de `rust/` par `packaging/pack.ps1`, et le projet MAUI refuse d’être publié sous cette forme.
+Le projet .NET dans `src/ScalarScope` est l’application 2.0. Il reste dans le dépôt en tant que référence par rapport à laquelle 3.x est vérifié. Le package Store est créé à partir de `rust/` par `packaging/pack.ps1`, et le projet MAUI refuse d’être publié sous cette forme.
 
 ---
 
@@ -144,14 +144,14 @@ scalarscope/
 
 ---
 
-## Éléments connexes
+## Articles connexes
 
-- [Manuel](https://mcp-tool-shop-org.github.io/scalarscope/handbook/) : le guide pour la relecture
-- [Parité et au-delà](docs/parity-and-beyond.spec.md) : ce que la version 3.x conserve de la version 2.0, ce qu’elle modifie et pourquoi, avec les sources
+- [Manuel](https://mcp-tool-shop-org.github.io/scalarscope/handbook/) : le guide de la relecture
+- [Parité et au-delà](docs/parity-and-beyond.spec.md) : ce que 3.x conserve de 2.0, ce qu’il modifie et pourquoi, avec les sources
 - [CHANGELOG.md](CHANGELOG.md) : historique des versions
 - [PRIVACY.md](PRIVACY.md) : politique de confidentialité
 - [TESTING.md](TESTING.md) : comment tester cette version
-- [L’environnement de travail](https://github.com/mcp-tool-shop-org/runforge) : partagé avec RunForge
+- [L’atelier](https://github.com/mcp-tool-shop-org/runforge) : partagé avec RunForge
 
 ---
 

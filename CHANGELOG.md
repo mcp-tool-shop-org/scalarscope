@@ -5,20 +5,33 @@ All notable changes to ScalarScope will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [3.1.1] - 2026-10-07
+
+3.1.1 is about geometry reviews of drift exports, and about trusting a saved review. A drift export's steps are checkpoints × items, not time, so readings that depend on step order are now held back. A saved review now opens showing what was saved.
 
 ### Fixed
-- A geometry bundle's manifest said `includesRawData: false` although the bundle stores both runs in full. Every bundle that stores run data now says true. Bundles saved before keep their bytes, so they still verify.
-- Review mode shows a geometry bundle's stored verdict and tiles, the text its hash vouches for. Before, it redrew them by the current rules, so a drift bundle saved by 3.1.0 showed a verdict it does not contain under its verified hash. When today's rules read the stored runs differently, that reading is shown below, labelled "Current reading (rules since 3.1.1)".
+- **A saved geometry review shows what was saved.** Opening a geometry bundle used to recompute its headline and tiles with the current rules. A drift review saved by 3.1.0 would therefore open under its verified hash with a headline the bundle does not contain. Now the stored headline and tiles come first, because they are what the hash vouches for. If today's rules read the stored runs differently, that reading is shown below, labelled "Current reading (rules since 3.1.1)", and it is never presented as the stored one.
+- **A geometry bundle now says it contains your runs.** Every bundle's manifest has a privacy flag, `includesRawData`. A geometry bundle stores both runs in full, but its flag said `false`. It now says `true`, as inference and training bundles already did. Treat a bundle like the runs inside it, and share it only if you would share them.
+  - **Bundles saved by 3.1.0 keep the old `false` label.** A bundle's hash covers every file inside it, the manifest included. Correcting the flag in an old bundle would make its hash fail, and the bundle would no longer open. So old bundles are left exactly as written, and they still verify.
 
 ### Changed
-- On a geometry export whose steps are checkpoints × items, ΔĀ is compared checkpoint by checkpoint instead of over the longest stretch of consecutive steps. Each run's λ1/Σλ is averaged over a checkpoint's items, and ΔĀ fires only when one run is more concentrated by at least the floor at every checkpoint ("Path B had a more concentrated spectrum at all 3 checkpoints"). A sign that changes between checkpoints is quiet, and runs with different numbers of checkpoints are withheld. Time-ordered exports keep 2.0's rule.
-- When both runs' scores are fixed per item, ΔĀ says it compares the evaluators, not the training runs ("Evaluator setups differ: …"), and stays out of the run headline. A drift pair whose only finding is ΔĀ reads "No meaningful divergence between the runs; the evaluator setups differ (spectrum concentration)."
-- On a geometry export whose steps are checkpoints × items, ΔTd is withheld too, with the same reason as ΔTc, ΔO and ΔF: when a dominant direction emerges depends on step order, and those steps are not time.
+- **ΔTd is held back on drift exports.** On an export whose steps are checkpoints × items, ΔTd (when a dominant direction emerges) is now withheld, with the same reason as ΔTc, ΔO and ΔF: "steps are checkpoint × item, not time". When something emerges depends on step order, and those steps are not a timeline.
+- **ΔĀ is compared checkpoint by checkpoint on drift exports.** It no longer looks for the longest run of consecutive steps, which also depends on step order.
+  - Each run's spectrum concentration (λ1/Σλ) is averaged over each checkpoint's items.
+  - ΔĀ fires only when one run is more concentrated by at least 0.05 at every checkpoint: "Path B had a more concentrated spectrum at all 3 checkpoints".
+  - It stays quiet when the sign changes between checkpoints, and it is withheld when the two runs have different numbers of checkpoints.
+  - Exports whose steps are training time keep 2.0's rule.
+- **ΔĀ says when it compares the evaluators, not the runs.** When both runs' scores are fixed per item, the eigenvalues come from the evaluators' fixed scores. They are the same for any two runs under the same teachers, so the comparison is about the evaluator setups.
+  - The tile now says so: "Evaluator setups differ: … The scores are fixed per item, so this compares the evaluators, not the training runs."
+  - The headline keeps it apart from what the runs did: "No meaningful divergence between the runs; the evaluator setups differ (spectrum concentration)."
+- **The handbook's Bundles page describes 3.x.** It used to describe 2.0's bundles: export profiles, an export panel, an insights tray, and a hash mismatch that was only flagged. It now says:
+  - what a bundle holds;
+  - how its hash is built;
+  - that a bundle whose hash does not match is refused;
+  - how review mode and 2.0 bundles behave.
 
 ### Added
-- Fixtures from aspire-si's fine-tune-then-ASPIRE run (`rust/tests/fixtures/aspire-si/sft-*`): per-step exports, drift from the base student over four checkpoints, and drift from the fine-tuned student over three, for both teachers.
-
+- Test fixtures from aspire-si's fine-tune-then-ASPIRE run, for the local and the composite teacher: per-step exports, drift from the base student over four checkpoints, and drift from the fine-tuned student over three. They check that four-checkpoint exports read like three-checkpoint ones.
 ## [3.1.0] - 2026-10-07
 
 ### Fixed

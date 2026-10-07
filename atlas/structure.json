@@ -25,7 +25,7 @@
           "path": ".github/PULL_REQUEST_TEMPLATE.md"
         },
         {
-          "hash": "f8f05c324ee5f7e5291a77727518e23a5676ca5e8f7bbe47cd915ecfd7122496",
+          "hash": "26a3b254942c269b28cff625d66113a9dc305ad76048d6427a4d8a41717c00b4",
           "path": ".github/workflows/build.yml"
         },
         {
@@ -41,7 +41,7 @@
           "path": ".github/workflows/publish.yml"
         },
         {
-          "hash": "a91a988073d3627291ffaec198cdbf7fa8716df4faa0e74bc4bf89b02d53849a",
+          "hash": "4c4e622e520442cfe40495bc8f95c0d47a3de4d3b3adcbd2dc91213b52ca1ad0",
           "path": ".github/workflows/release.yml"
         }
       ],
@@ -132,7 +132,7 @@
       "externals": 0,
       "files": [
         {
-          "hash": "14ba46a6634323ce1d370a1ea9e9659164bbd6c282b236d18cf0b610bce34f61",
+          "hash": "81ac82c07cc9435fd27775b4830757428a5552fa37ade4000e4ad28fb508f427",
           "path": "docs/BETA_GUIDE.md"
         },
         {
@@ -152,7 +152,7 @@
           "path": "docs/DETERMINISM.md"
         },
         {
-          "hash": "e8a43224e391e0465a3f0afeefc24cb4f275bd7e3685ecbfc419d73acdd36582",
+          "hash": "c2974295f447f32f38f218a78d462172ef0e3d1cf16c370049c307bd49e0c02d",
           "path": "docs/INSTALL_RUNBOOK.md"
         },
         {
@@ -168,11 +168,11 @@
           "path": "docs/PHASE12_AUDIT.md"
         },
         {
-          "hash": "e5d116156741f2fc6b380d2126f9e2bafdf2858986ecb949dc826e0d8b470b5f",
+          "hash": "ecd13829e07e481dce822682df33634750da790bbabb3e891318322c42c3a14b",
           "path": "docs/QUICK_REFERENCE.md"
         },
         {
-          "hash": "d1603993393e5b12e62aa722182b0201c51d9391725162242dc7397991516eb7",
+          "hash": "2037721a3ccc6706e3255f1a3a31c988b34c238b84cfa147b85af827a38e61a2",
           "path": "docs/RELEASE_PROCESS.md"
         },
         {
@@ -200,7 +200,7 @@
           "path": "docs/THESIS.md"
         },
         {
-          "hash": "f63d6ba2b8791986960780414e7ef2f634984da4e82dd6a265824167234fe137",
+          "hash": "7ac81890632a732973440ab446486bd002821e76e65801cdf05bf0bde9b09675",
           "path": "docs/VERIFY_RELEASE.md"
         },
         {
@@ -284,7 +284,7 @@
           "path": "docs/store/3-heat-map.png"
         },
         {
-          "hash": "bc4bb79b2af49e67240d53f9eeb786686fe7974b928f6793bafb1c7c0ded1156",
+          "hash": "d5f7d7d6a86fb5c7ca426ca72d7a3ca39cd9536eda7e8c5c1fb60fd6d007eee6",
           "path": "docs/store/4-geometry-drift.png"
         },
         {
@@ -292,11 +292,11 @@
           "path": "docs/store/5-workbench.png"
         },
         {
-          "hash": "b234ca1c788cf344aab951852517d98932cc5caaa934e19e03f32c6b07df30bf",
+          "hash": "72fb0a872da05a0928ca169760449af8e1026590dcc2a664e068bea5d4f92b44",
           "path": "docs/store/6-guide.png"
         },
         {
-          "hash": "9617e42747ac93c7042a58a5de09cc2bc06aa36cae0d1ce52cbfcd3c648eee0d",
+          "hash": "c12d933dba2591ea17ef1ff232f920db21737f236f2f40b7c4491b731e4b4015",
           "path": "docs/store/README.md"
         }
       ],
@@ -319,7 +319,7 @@
       "externals": 0,
       "files": [
         {
-          "hash": "3c4581837900d0ec7b341a6fc482d39b3c94ace666c47b113fce0ecdf2a4f0b6",
+          "hash": "ba3a8f8f491e6f5c2906dddf745a368f83f7c6cb8993684a6626cb8472da1aec",
           "path": "packaging/AppxManifest.xml"
         },
         {
@@ -378,11 +378,11 @@
           "path": ".gitignore"
         },
         {
-          "hash": "068872131b715a9d3949897f02b8ece83bf5b47c613a838fb3ffb56b5ff87750",
+          "hash": "77ac96173939df2af07887dc5ed77986a11e157a48ef3dcec17f6d4604a0c471",
           "path": "CHANGELOG.md"
         },
         {
-          "hash": "925cb206637b9e0a2cb11128b0a15bf5953330e2aa8b9192d88a61ed9cf359f6",
+          "hash": "23e43d104c8f4d9d092aaad2d6972f2568d5303f4dfafbf517332ad672e6a765",
           "path": "FINAL_SHIP_VERIFICATION.md"
         },
         {
@@ -390,39 +390,39 @@
           "path": "LICENSE"
         },
         {
-          "hash": "0cf294e01cd1e9a6c3b72b234626a73262a633b51b4004d2fb66428939a04c0b",
+          "hash": "92a92252a49bde62569e058fa4c49ba46d0a8ea2c60629ae052f35c433c6713f",
           "path": "PRIVACY.md"
         },
         {
-          "hash": "5e409d7656d473a5b43f92e0383d972c87b15bc246e28d6db82493c00553a8ac",
+          "hash": "382170a5df43ba52041874a1658daf6fa4ecaa239f17a094367d4d59f3f99ecb",
           "path": "README.es.md"
         },
         {
-          "hash": "8279194aa95232bdb36e9909fa2b4a37dbec5f93a43a29bc969c52a452a7be69",
+          "hash": "53a81ef0e4eb206a2e3bbf021752f34e669af197cdf4f6af2e4208420f60a8e1",
           "path": "README.fr.md"
         },
         {
-          "hash": "bfb9931dbce30828e64287cbe6a5009ead4d91a0d9c39855201e08c5fd54e523",
+          "hash": "41c00dd83c0985dfe8d63ce1502e740c6eebc41bc1e50c39059d808d455bd93c",
           "path": "README.hi.md"
         },
         {
-          "hash": "b6d34171d1befe504a0461d7b2ef232605bacac7a5037488243d824ed483d6ac",
+          "hash": "1dc284848c21e6e43606e36e64875a0e20b6e1fe94b9c513cb9e8d8a6912bd9d",
           "path": "README.it.md"
         },
         {
-          "hash": "49672d53b60812011bd9b6799d17de2272af902bf7ad6b6131e9c2d3186e7906",
+          "hash": "f3009bcbacf3aeea77e4dc3c4e763c7aa03794b70afd6149e7e5ec5827b60b08",
           "path": "README.ja.md"
         },
         {
-          "hash": "8458c304d71890fe59d9b6d05ceb4bf377c994ea0f4e53520d6b07fd51519188",
+          "hash": "e69867d2f78ec1c71fa03e7f1cde28656e2e913ba0a5660a4bdb6c63c7156c66",
           "path": "README.md"
         },
         {
-          "hash": "44016cc37f67066b0945206ba8af50ec9964e03b795a5347ae18ddf041ba44d4",
+          "hash": "a31120dd72bfffbf8c3391f22096afdd8596c3ce96dffbc2e9ff2fdb1fd7c46c",
           "path": "README.pt-BR.md"
         },
         {
-          "hash": "f3a37ee9a9c8ca8e6f9c84cc9f5a8dc9cb78b1873e0616e67472fd5f7009a848",
+          "hash": "ccf0ee7c33fa8165197a1ddacc91d37053123d4191f84fbfeb7c2a567472e800",
           "path": "README.zh.md"
         },
         {
@@ -434,7 +434,7 @@
           "path": "SCORECARD.md"
         },
         {
-          "hash": "aa36a2737089e1216ab70f857b03d0e5a9781287f5834518330850ae9de4f761",
+          "hash": "0bb6ed3a352d784237e9a161f490f0b03db1eaa26700820b0496a21907ebcc16",
           "path": "SECURITY.md"
         },
         {
@@ -442,7 +442,7 @@
           "path": "SHIP_GATE.md"
         },
         {
-          "hash": "26a699b174e63569a26e568587aad88d15e88355e34499df11c07b7a27e84e07",
+          "hash": "7c4b4bfcaf6e23f5799e73fc0e9f7bee963e72ec435a38c5ab9429b90243bfde",
           "path": "STORE_LISTING.md"
         },
         {
@@ -454,7 +454,7 @@
           "path": "ScalarScope_UI_Reference_Pack_v2.zip"
         },
         {
-          "hash": "24da1048bf08fb5e801b3aab2bea0b8ad3d06d89d9d5101841af4b2972e7b0de",
+          "hash": "506f4d84893cb8d3e7937f6e605b154c2fe76448a7dfe59b711664b438363e74",
           "path": "TESTING.md"
         },
         {
@@ -470,7 +470,7 @@
           "path": "logo.png"
         },
         {
-          "hash": "c54f0d5a2355e1a0e7c07c5d988b3db609044e2b0afd8d7b1725545aabca4d1d",
+          "hash": "bc86aea76841879e8b753937955f1593d7da30628399a665eaea2d1291a492f3",
           "path": "passport.json"
         },
         {
@@ -508,15 +508,15 @@
       "externals": 0,
       "files": [
         {
-          "hash": "f1d1a6db1e3822446f559cbb1e8d9f44af2962906139147fa9a9f46c9ebc0eb8",
+          "hash": "d4e2d9c9f429df236cccac56ea19bb2aba5399520401e743af70d26f27e00bdc",
           "path": "rust/Cargo.lock"
         },
         {
-          "hash": "c7c63cb769dd65d961863fde7984e2f21fe740d598a89cf550f68d6306c921bb",
+          "hash": "fe569e4227c06ffe381a093ef60c3298268c4d4a86b9b937d5b171abaa7089b4",
           "path": "rust/Cargo.toml"
         },
         {
-          "hash": "afd9a6f7c5458042fdc254df37be74a27017cf9c532d6c510a4667225655acba",
+          "hash": "573618b1ec317d7f7d8c20beec3dd6546ed6aef4cf2a6e8ee5175502220aa898",
           "path": "rust/app.manifest"
         },
         {
@@ -2504,15 +2504,15 @@
             {
               "in": "load_sample",
               "kind": "match-err",
-              "line": 145
+              "line": 149
             },
             {
               "in": "load_sample",
               "kind": "match-err",
-              "line": 145
+              "line": 149
             }
           ],
-          "hash": "8de15913f3fff3550d25591ffb926e9e3aeecff32f8075481dc9c687c39f86d0",
+          "hash": "709b5a185b6d352c43e99998ac5ab74ca4922f7c94bdb166331d6fb4a9ab559e",
           "importOrder": [
             "rust/src/ui.rs",
             "rust/src/open.rs"
@@ -2531,7 +2531,7 @@
               "line": 770
             }
           ],
-          "hash": "846beaa4f7bfe4a3eaf6131ca78fe6543130424ea115cac0123f85f18755e0f3",
+          "hash": "e6b189e050bb158555df70e65a777c8a68c249ce6c38f48cff81d0ec6425b6f2",
           "importOrder": [
             "rust/src/bundle.rs",
             "rust/src/history.rs",
@@ -3070,7 +3070,7 @@
           "path": "site/src/content.config.ts"
         },
         {
-          "hash": "491d6d726c08593a65c142b0f1c72d5e3f842a30ef90f5f764c743dfa3c269d7",
+          "hash": "76284c224d24642e70f190492279dcc49b137f3ec4ba417cf934421173441924",
           "path": "site/src/content/docs/handbook/beginners.md"
         },
         {
@@ -3078,15 +3078,15 @@
           "path": "site/src/content/docs/handbook/bundles.md"
         },
         {
-          "hash": "73dc70d8a646935d69e2974a7692767530ff6b4c2c98421e818810886df2574c",
+          "hash": "1ea33c130cb32c57a0afb001a0d0b491ffcd4f511ed49a4b416f7ee691192235",
           "path": "site/src/content/docs/handbook/delta-analysis.md"
         },
         {
-          "hash": "3f9dab75c0510e60aa04e5af8718a12c4fd96dd27d4f183186e1ca1907078cab",
+          "hash": "f1a4877dd3fdb0f8a8e455421b8b8da0980bbbcf6d6a31cd521414e0a3d9019f",
           "path": "site/src/content/docs/handbook/geometry.md"
         },
         {
-          "hash": "07f42066edfa7311e408a76cdd7f178d5b3440107586f2ee5f18ba6f4937cee3",
+          "hash": "295636c1e44492f80ccf7e88a6b201dc33f06ccc43da3d3bf059bec7ad462b98",
           "path": "site/src/content/docs/handbook/getting-started.md"
         },
         {
@@ -3094,11 +3094,11 @@
           "path": "site/src/content/docs/handbook/history.md"
         },
         {
-          "hash": "af06a43e6320f73f9e7775ed226f0c7d405aa3ec1133eeb537ceff5ee5faa8aa",
+          "hash": "e66a48fcc020a9806b9228a13412588b55632b4577902249deac88d0098c7cd7",
           "path": "site/src/content/docs/handbook/index.md"
         },
         {
-          "hash": "38fdfa3852fa6659359b1b8f9ad99a9e3186380af4bd45f7644e5154e98e99fb",
+          "hash": "dfc3064ab328ccbc796c127524cf12543c21ab7baeb2a974de9cd6d9eeb87894",
           "path": "site/src/content/docs/handbook/rust-review.md"
         },
         {
@@ -3123,7 +3123,7 @@
         },
         {
           "constantOnly": true,
-          "hash": "be1ac9245abda3e0ac8f5de2aba3d478836a26b9dd104bd4c2038dd2026f55b7",
+          "hash": "eb279325c3ebd9685fa878ea298a9b946450f84f84fe69ae5aa57c382083fbf1",
           "path": "site/src/site-config.ts"
         },
         {
@@ -3238,7 +3238,7 @@
           "path": "src/ScalarScope/Platforms/Windows/App.xaml.cs"
         },
         {
-          "hash": "c61ad4112be150288a24b53f2064b1c68a501152f99fc7d735eb9893c8515a3d",
+          "hash": "421a2ca135f13eac05415a6c5c33585c31b3b02b6a714863f7561738008f96d4",
           "path": "src/ScalarScope/Platforms/Windows/Package.appxmanifest"
         },
         {
@@ -3334,7 +3334,7 @@
           "path": "src/ScalarScope/Resources/Styles/Styles.xaml"
         },
         {
-          "hash": "5dcb1e99127a7f30a0d883657005a67570786c5290b7dcf3678c6befe23da613",
+          "hash": "23b573362bb61111d269cc401c4fbcd4bbbd9f25b325d23259d5b6539ad053b7",
           "path": "src/ScalarScope/ScalarScope.csproj"
         },
         {
@@ -4097,7 +4097,7 @@
           "path": "tests/Fixtures/Bundles/dotnet-inference-review.scbundle"
         },
         {
-          "hash": "d1bcc4fa572e1bf9c7974e7b4e2b6f9985d508f8cbea7296d0602afaac52e110",
+          "hash": "880f09bca36f687b4de36878618c6030a7ef243452791c6f9a705005e18389e0",
           "path": "tests/Fixtures/Bundles/rust-inference-review.scbundle"
         },
         {
@@ -4153,7 +4153,7 @@
           "path": "tests/ScalarScope.FixtureTests/ComparisonLogTests.cs"
         },
         {
-          "hash": "8bb23fdd6210b5c1653acd859376f4a4a1e4323e2986e7d9c82900fb7c37ce6e",
+          "hash": "c6e0591ca72e0929b2d0361a4f74f81889c6b30206ee94bd5e9f63b3d985090b",
           "path": "tests/ScalarScope.FixtureTests/FeatureSliceTests.cs"
         },
         {
@@ -4165,7 +4165,7 @@
           "path": "tests/ScalarScope.FixtureTests/FixtureSmokeTests.cs"
         },
         {
-          "hash": "a1da1e7926ff5b6625de57e8f777cd2666563de15b0cd1412a3d48bb8b9bddd5",
+          "hash": "8e7b635f1cd0f5d9023ec659c9570c88fa62ae6a03199c06130fbba9e59c046e",
           "path": "tests/ScalarScope.FixtureTests/HealthFixTests.cs"
         },
         {
@@ -4189,7 +4189,7 @@
           "path": "tests/ScalarScope.FixtureTests/StageCShellTests.cs"
         },
         {
-          "hash": "d85288c81df128649a6105f2639b1d0bd5c0ac03d7d7b6d9eb1e07fda85e1e0a",
+          "hash": "0185376bfe86be2e3a9a3c5d5837fa991a06fb1583946f799a28376685b4fe7a",
           "path": "tests/ScalarScope.FixtureTests/StageCWordingTests.cs"
         },
         {
@@ -4205,7 +4205,7 @@
           "path": "tests/ScalarScope.FixtureTests/TraceReviewTests.cs"
         },
         {
-          "hash": "02e0bf8ee56bc110295a3ee4bea9a4a2ba156b1cbfa59aea224e4f09bfc828c7",
+          "hash": "a830e7e0fb5d434f80cdfc13d51b2c569bb838c98479bf8e2989d9a60ca959db",
           "path": "tests/ScalarScope.FixtureTests/VersionConsistencyTests.cs"
         },
         {
@@ -5366,7 +5366,7 @@
   "edges": [],
   "engine": "1.24.0",
   "generatedFrom": {
-    "commit": "8e56823361d426f8c98cfbe5c4397d786c586184",
+    "commit": "79874fbf27fb0482a101a18d41d2b55e8d500e93",
     "tracked": 464
   },
   "landings": [
@@ -5611,7 +5611,7 @@
   "testFiles": 83,
   "unassigned": [
     {
-      "hash": "20c54ca3354e05fbed8e4c606149cb099f04ee1062791c8c1b0f1a717131388c",
+      "hash": "ad49e4674452bc0d29d4c241cf9aa952ffe06745e4a67547cb7fc46c8877bb9e",
       "path": "samples/README.md"
     },
     {

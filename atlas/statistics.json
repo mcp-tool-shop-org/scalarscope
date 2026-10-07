@@ -113,7 +113,7 @@
       "confidence": "full",
       "highWater": null,
       "name": "rust",
-      "qualifyingSourceCommits": 47,
+      "qualifyingSourceCommits": 49,
       "rebaseline": null
     },
     {
@@ -129,7 +129,7 @@
       "confidence": "low",
       "highWater": null,
       "name": "site",
-      "qualifyingSourceCommits": 6,
+      "qualifyingSourceCommits": 8,
       "rebaseline": null
     },
     {
@@ -189,8 +189,8 @@
         "path": ".github/PULL_REQUEST_TEMPLATE.md"
       },
       {
-        "commits": 6,
-        "lines": 181,
+        "commits": 7,
+        "lines": 191,
         "path": ".github/workflows/build.yml"
       },
       {
@@ -209,8 +209,8 @@
         "path": ".github/workflows/publish.yml"
       },
       {
-        "commits": 9,
-        "lines": 288,
+        "commits": 10,
+        "lines": 292,
         "path": ".github/workflows/release.yml"
       },
       {
@@ -219,13 +219,13 @@
         "path": ".gitignore"
       },
       {
-        "commits": 62,
-        "lines": 537,
+        "commits": 66,
+        "lines": 571,
         "path": "CHANGELOG.md"
       },
       {
-        "commits": 6,
-        "lines": 182,
+        "commits": 7,
+        "lines": 194,
         "path": "FINAL_SHIP_VERIFICATION.md"
       },
       {
@@ -234,48 +234,48 @@
         "path": "LICENSE"
       },
       {
-        "commits": 8,
-        "lines": 89,
+        "commits": 10,
+        "lines": 93,
         "path": "PRIVACY.md"
       },
       {
-        "commits": 19,
-        "lines": 1230,
+        "commits": 23,
+        "lines": 1238,
         "path": "README.es.md"
       },
       {
-        "commits": 19,
-        "lines": 1236,
+        "commits": 23,
+        "lines": 1244,
         "path": "README.fr.md"
       },
       {
-        "commits": 19,
-        "lines": 1226,
+        "commits": 23,
+        "lines": 1234,
         "path": "README.hi.md"
       },
       {
-        "commits": 19,
-        "lines": 1240,
+        "commits": 23,
+        "lines": 1248,
         "path": "README.it.md"
       },
       {
-        "commits": 19,
-        "lines": 1240,
+        "commits": 23,
+        "lines": 1248,
         "path": "README.ja.md"
       },
       {
-        "commits": 28,
-        "lines": 1087,
+        "commits": 33,
+        "lines": 1107,
         "path": "README.md"
       },
       {
-        "commits": 19,
-        "lines": 1228,
+        "commits": 23,
+        "lines": 1236,
         "path": "README.pt-BR.md"
       },
       {
-        "commits": 19,
-        "lines": 1236,
+        "commits": 23,
+        "lines": 1244,
         "path": "README.zh.md"
       },
       {
@@ -289,8 +289,8 @@
         "path": "SCORECARD.md"
       },
       {
-        "commits": 5,
-        "lines": 76,
+        "commits": 6,
+        "lines": 78,
         "path": "SECURITY.md"
       },
       {
@@ -299,8 +299,8 @@
         "path": "SHIP_GATE.md"
       },
       {
-        "commits": 7,
-        "lines": 515,
+        "commits": 9,
+        "lines": 550,
         "path": "STORE_LISTING.md"
       },
       {
@@ -314,8 +314,8 @@
         "path": "ScalarScope_UI_Reference_Pack_v2.zip"
       },
       {
-        "commits": 2,
-        "lines": 82,
+        "commits": 4,
+        "lines": 86,
         "path": "TESTING.md"
       },
       {
@@ -354,8 +354,8 @@
         "path": "assets/logo.png"
       },
       {
-        "commits": 26,
-        "lines": 621,
+        "commits": 30,
+        "lines": 654,
         "path": "atlas/README.md"
       },
       {
@@ -364,18 +364,18 @@
         "path": "atlas/boundaries.yaml"
       },
       {
-        "commits": 26,
-        "lines": 2058,
+        "commits": 30,
+        "lines": 2140,
         "path": "atlas/page.json"
       },
       {
-        "commits": 26,
-        "lines": 10420,
+        "commits": 30,
+        "lines": 11008,
         "path": "atlas/statistics.json"
       },
       {
-        "commits": 26,
-        "lines": 13177,
+        "commits": 30,
+        "lines": 13358,
         "path": "atlas/structure.json"
       },
       {
@@ -384,8 +384,8 @@
         "path": "codecov.yml"
       },
       {
-        "commits": 7,
-        "lines": 190,
+        "commits": 8,
+        "lines": 196,
         "path": "docs/BETA_GUIDE.md"
       },
       {
@@ -409,8 +409,8 @@
         "path": "docs/DETERMINISM.md"
       },
       {
-        "commits": 6,
-        "lines": 276,
+        "commits": 7,
+        "lines": 280,
         "path": "docs/INSTALL_RUNBOOK.md"
       },
       {
@@ -429,13 +429,13 @@
         "path": "docs/PHASE12_AUDIT.md"
       },
       {
-        "commits": 6,
-        "lines": 133,
+        "commits": 7,
+        "lines": 135,
         "path": "docs/QUICK_REFERENCE.md"
       },
       {
-        "commits": 7,
-        "lines": 204,
+        "commits": 8,
+        "lines": 234,
         "path": "docs/RELEASE_PROCESS.md"
       },
       {
@@ -469,8 +469,8 @@
         "path": "docs/THESIS.md"
       },
       {
-        "commits": 7,
-        "lines": 267,
+        "commits": 8,
+        "lines": 277,
         "path": "docs/VERIFY_RELEASE.md"
       },
       {
@@ -574,7 +574,7 @@
         "path": "docs/store/3-heat-map.png"
       },
       {
-        "commits": 2,
+        "commits": 3,
         "lines": 0,
         "path": "docs/store/4-geometry-drift.png"
       },
@@ -584,13 +584,13 @@
         "path": "docs/store/5-workbench.png"
       },
       {
-        "commits": 2,
+        "commits": 3,
         "lines": 0,
         "path": "docs/store/6-guide.png"
       },
       {
-        "commits": 4,
-        "lines": 82,
+        "commits": 5,
+        "lines": 88,
         "path": "docs/store/README.md"
       },
       {
@@ -604,8 +604,8 @@
         "path": "logo.png"
       },
       {
-        "commits": 5,
-        "lines": 65,
+        "commits": 6,
+        "lines": 67,
         "path": "packaging/AppxManifest.xml"
       },
       {
@@ -649,8 +649,8 @@
         "path": "packaging/pack.ps1"
       },
       {
-        "commits": 4,
-        "lines": 103,
+        "commits": 5,
+        "lines": 105,
         "path": "passport.json"
       },
       {
@@ -659,18 +659,18 @@
         "path": "phase32_validation_report.md"
       },
       {
-        "commits": 17,
-        "lines": 4691,
+        "commits": 18,
+        "lines": 4693,
         "path": "rust/Cargo.lock"
       },
       {
-        "commits": 16,
-        "lines": 42,
+        "commits": 17,
+        "lines": 44,
         "path": "rust/Cargo.toml"
       },
       {
-        "commits": 2,
-        "lines": 44,
+        "commits": 3,
+        "lines": 46,
         "path": "rust/app.manifest"
       },
       {
@@ -694,8 +694,8 @@
         "path": "rust/samples/optimized.csv"
       },
       {
-        "commits": 23,
-        "lines": 1605,
+        "commits": 27,
+        "lines": 1633,
         "path": "rust/src/bundle.rs"
       },
       {
@@ -749,8 +749,8 @@
         "path": "rust/src/readings.rs"
       },
       {
-        "commits": 33,
-        "lines": 2400,
+        "commits": 34,
+        "lines": 2406,
         "path": "rust/src/review.rs"
       },
       {
@@ -784,8 +784,8 @@
         "path": "rust/src/ui.rs"
       },
       {
-        "commits": 7,
-        "lines": 992,
+        "commits": 8,
+        "lines": 1006,
         "path": "rust/src/ui_geometry.rs"
       },
       {
@@ -794,13 +794,13 @@
         "path": "rust/src/ui_history.rs"
       },
       {
-        "commits": 8,
-        "lines": 426,
+        "commits": 9,
+        "lines": 434,
         "path": "rust/src/ui_pages.rs"
       },
       {
-        "commits": 38,
-        "lines": 1605,
+        "commits": 40,
+        "lines": 1632,
         "path": "rust/src/ui_tests.rs"
       },
       {
@@ -824,8 +824,8 @@
         "path": "rust/tests/aspire_export_tests.rs"
       },
       {
-        "commits": 14,
-        "lines": 427,
+        "commits": 17,
+        "lines": 534,
         "path": "rust/tests/bundle_tests.rs"
       },
       {
@@ -899,7 +899,7 @@
         "path": "rust/tests/fixtures/aspire-si/steady.json"
       },
       {
-        "commits": 1,
+        "commits": 2,
         "lines": 0,
         "path": "rust/tests/fixtures/bundles/drift-saved-by-3.1.0.scbundle"
       },
@@ -1069,8 +1069,8 @@
         "path": "rust/tests/workbench_tests.rs"
       },
       {
-        "commits": 2,
-        "lines": 22,
+        "commits": 3,
+        "lines": 24,
         "path": "samples/README.md"
       },
       {
@@ -1169,28 +1169,28 @@
         "path": "site/src/content.config.ts"
       },
       {
-        "commits": 8,
-        "lines": 442,
+        "commits": 9,
+        "lines": 444,
         "path": "site/src/content/docs/handbook/beginners.md"
       },
       {
-        "commits": 8,
-        "lines": 201,
+        "commits": 12,
+        "lines": 312,
         "path": "site/src/content/docs/handbook/bundles.md"
       },
       {
-        "commits": 8,
-        "lines": 292,
+        "commits": 10,
+        "lines": 295,
         "path": "site/src/content/docs/handbook/delta-analysis.md"
       },
       {
-        "commits": 8,
-        "lines": 124,
+        "commits": 10,
+        "lines": 132,
         "path": "site/src/content/docs/handbook/geometry.md"
       },
       {
-        "commits": 7,
-        "lines": 432,
+        "commits": 8,
+        "lines": 433,
         "path": "site/src/content/docs/handbook/getting-started.md"
       },
       {
@@ -1199,13 +1199,13 @@
         "path": "site/src/content/docs/handbook/history.md"
       },
       {
-        "commits": 7,
-        "lines": 87,
+        "commits": 9,
+        "lines": 91,
         "path": "site/src/content/docs/handbook/index.md"
       },
       {
-        "commits": 4,
-        "lines": 120,
+        "commits": 6,
+        "lines": 128,
         "path": "site/src/content/docs/handbook/rust-review.md"
       },
       {
@@ -1224,8 +1224,8 @@
         "path": "site/src/pages/index.astro"
       },
       {
-        "commits": 8,
-        "lines": 389,
+        "commits": 10,
+        "lines": 397,
         "path": "site/src/site-config.ts"
       },
       {
@@ -1344,8 +1344,8 @@
         "path": "src/ScalarScope/Platforms/Windows/App.xaml.cs"
       },
       {
-        "commits": 4,
-        "lines": 54,
+        "commits": 5,
+        "lines": 56,
         "path": "src/ScalarScope/Platforms/Windows/Package.appxmanifest"
       },
       {
@@ -1464,8 +1464,8 @@
         "path": "src/ScalarScope/Resources/Styles/Styles.xaml"
       },
       {
-        "commits": 5,
-        "lines": 127,
+        "commits": 6,
+        "lines": 139,
         "path": "src/ScalarScope/ScalarScope.csproj"
       },
       {
@@ -2394,7 +2394,7 @@
         "path": "tests/Fixtures/Bundles/dotnet-inference-review.scbundle"
       },
       {
-        "commits": 4,
+        "commits": 5,
         "lines": 0,
         "path": "tests/Fixtures/Bundles/rust-inference-review.scbundle"
       },
@@ -2519,8 +2519,8 @@
         "path": "tests/ScalarScope.FixtureTests/ComparisonLogTests.cs"
       },
       {
-        "commits": 4,
-        "lines": 141,
+        "commits": 5,
+        "lines": 155,
         "path": "tests/ScalarScope.FixtureTests/FeatureSliceTests.cs"
       },
       {
@@ -2534,8 +2534,8 @@
         "path": "tests/ScalarScope.FixtureTests/FixtureSmokeTests.cs"
       },
       {
-        "commits": 3,
-        "lines": 247,
+        "commits": 4,
+        "lines": 249,
         "path": "tests/ScalarScope.FixtureTests/HealthFixTests.cs"
       },
       {
@@ -2564,8 +2564,8 @@
         "path": "tests/ScalarScope.FixtureTests/StageCShellTests.cs"
       },
       {
-        "commits": 4,
-        "lines": 230,
+        "commits": 5,
+        "lines": 238,
         "path": "tests/ScalarScope.FixtureTests/StageCWordingTests.cs"
       },
       {
@@ -2584,8 +2584,8 @@
         "path": "tests/ScalarScope.FixtureTests/TraceReviewTests.cs"
       },
       {
-        "commits": 8,
-        "lines": 232,
+        "commits": 9,
+        "lines": 238,
         "path": "tests/ScalarScope.FixtureTests/VersionConsistencyTests.cs"
       },
       {
@@ -2629,213 +2629,297 @@
     "level": "low",
     "reason": "fewer than 25 source files reach 10 revisions in the window"
   },
-  "generatedAt": "2026-10-07T08:46:57.932Z",
+  "generatedAt": "2026-10-07T15:30:03.201Z",
   "generatedFrom": {
-    "commit": "8e56823361d426f8c98cfbe5c4397d786c586184"
+    "commit": "79874fbf27fb0482a101a18d41d2b55e8d500e93"
   },
   "pairs": [
     {
+      "a": ".github/workflows/build.yml",
+      "b": ".github/workflows/release.yml",
+      "either": 8,
+      "shared": 4,
+      "strength": 0.5
+    },
+    {
+      "a": ".github/workflows/build.yml",
+      "b": "docs/INSTALL_RUNBOOK.md",
+      "either": 6,
+      "shared": 4,
+      "strength": 0.666667
+    },
+    {
+      "a": ".github/workflows/build.yml",
+      "b": "docs/RELEASE_PROCESS.md",
+      "either": 6,
+      "shared": 4,
+      "strength": 0.666667
+    },
+    {
+      "a": ".github/workflows/build.yml",
+      "b": "docs/VERIFY_RELEASE.md",
+      "either": 6,
+      "shared": 4,
+      "strength": 0.666667
+    },
+    {
+      "a": ".github/workflows/release.yml",
+      "b": "docs/INSTALL_RUNBOOK.md",
+      "either": 8,
+      "shared": 4,
+      "strength": 0.5
+    },
+    {
+      "a": ".github/workflows/release.yml",
+      "b": "docs/RELEASE_PROCESS.md",
+      "either": 8,
+      "shared": 4,
+      "strength": 0.5
+    },
+    {
+      "a": "PRIVACY.md",
+      "b": "STORE_LISTING.md",
+      "either": 7,
+      "shared": 5,
+      "strength": 0.714286
+    },
+    {
+      "a": "PRIVACY.md",
+      "b": "docs/BETA_GUIDE.md",
+      "either": 7,
+      "shared": 4,
+      "strength": 0.571429
+    },
+    {
       "a": "README.es.md",
       "b": "README.fr.md",
-      "either": 11,
-      "shared": 11,
+      "either": 13,
+      "shared": 13,
       "strength": 1
     },
     {
       "a": "README.es.md",
       "b": "README.hi.md",
-      "either": 11,
-      "shared": 11,
+      "either": 13,
+      "shared": 13,
       "strength": 1
     },
     {
       "a": "README.es.md",
       "b": "README.it.md",
-      "either": 11,
-      "shared": 11,
+      "either": 13,
+      "shared": 13,
       "strength": 1
     },
     {
       "a": "README.es.md",
       "b": "README.ja.md",
-      "either": 11,
-      "shared": 11,
+      "either": 13,
+      "shared": 13,
       "strength": 1
     },
     {
       "a": "README.es.md",
       "b": "README.pt-BR.md",
-      "either": 11,
-      "shared": 11,
+      "either": 13,
+      "shared": 13,
       "strength": 1
     },
     {
       "a": "README.es.md",
       "b": "README.zh.md",
-      "either": 11,
-      "shared": 11,
+      "either": 13,
+      "shared": 13,
       "strength": 1
     },
     {
       "a": "README.fr.md",
       "b": "README.hi.md",
-      "either": 11,
-      "shared": 11,
+      "either": 13,
+      "shared": 13,
       "strength": 1
     },
     {
       "a": "README.fr.md",
       "b": "README.it.md",
-      "either": 11,
-      "shared": 11,
+      "either": 13,
+      "shared": 13,
       "strength": 1
     },
     {
       "a": "README.fr.md",
       "b": "README.ja.md",
-      "either": 11,
-      "shared": 11,
+      "either": 13,
+      "shared": 13,
       "strength": 1
     },
     {
       "a": "README.fr.md",
       "b": "README.pt-BR.md",
-      "either": 11,
-      "shared": 11,
+      "either": 13,
+      "shared": 13,
       "strength": 1
     },
     {
       "a": "README.fr.md",
       "b": "README.zh.md",
-      "either": 11,
-      "shared": 11,
+      "either": 13,
+      "shared": 13,
       "strength": 1
     },
     {
       "a": "README.hi.md",
       "b": "README.it.md",
-      "either": 11,
-      "shared": 11,
+      "either": 13,
+      "shared": 13,
       "strength": 1
     },
     {
       "a": "README.hi.md",
       "b": "README.ja.md",
-      "either": 11,
-      "shared": 11,
+      "either": 13,
+      "shared": 13,
       "strength": 1
     },
     {
       "a": "README.hi.md",
       "b": "README.pt-BR.md",
-      "either": 11,
-      "shared": 11,
+      "either": 13,
+      "shared": 13,
       "strength": 1
     },
     {
       "a": "README.hi.md",
       "b": "README.zh.md",
-      "either": 11,
-      "shared": 11,
+      "either": 13,
+      "shared": 13,
       "strength": 1
     },
     {
       "a": "README.it.md",
       "b": "README.ja.md",
-      "either": 11,
-      "shared": 11,
+      "either": 13,
+      "shared": 13,
       "strength": 1
     },
     {
       "a": "README.it.md",
       "b": "README.pt-BR.md",
-      "either": 11,
-      "shared": 11,
+      "either": 13,
+      "shared": 13,
       "strength": 1
     },
     {
       "a": "README.it.md",
       "b": "README.zh.md",
-      "either": 11,
-      "shared": 11,
+      "either": 13,
+      "shared": 13,
       "strength": 1
     },
     {
       "a": "README.ja.md",
       "b": "README.pt-BR.md",
-      "either": 11,
-      "shared": 11,
+      "either": 13,
+      "shared": 13,
       "strength": 1
     },
     {
       "a": "README.ja.md",
       "b": "README.zh.md",
-      "either": 11,
-      "shared": 11,
+      "either": 13,
+      "shared": 13,
       "strength": 1
     },
     {
       "a": "README.pt-BR.md",
       "b": "README.zh.md",
-      "either": 11,
-      "shared": 11,
+      "either": 13,
+      "shared": 13,
       "strength": 1
+    },
+    {
+      "a": "STORE_LISTING.md",
+      "b": "docs/BETA_GUIDE.md",
+      "either": 6,
+      "shared": 5,
+      "strength": 0.833333
+    },
+    {
+      "a": "STORE_LISTING.md",
+      "b": "docs/RELEASE_PROCESS.md",
+      "either": 7,
+      "shared": 4,
+      "strength": 0.571429
     },
     {
       "a": "atlas/README.md",
       "b": "atlas/page.json",
-      "either": 15,
-      "shared": 15,
+      "either": 16,
+      "shared": 16,
       "strength": 1
     },
     {
       "a": "atlas/README.md",
       "b": "atlas/statistics.json",
-      "either": 15,
-      "shared": 15,
+      "either": 16,
+      "shared": 16,
       "strength": 1
     },
     {
       "a": "atlas/README.md",
       "b": "atlas/structure.json",
-      "either": 15,
-      "shared": 15,
+      "either": 16,
+      "shared": 16,
       "strength": 1
     },
     {
       "a": "atlas/page.json",
       "b": "atlas/statistics.json",
-      "either": 15,
-      "shared": 15,
+      "either": 16,
+      "shared": 16,
       "strength": 1
     },
     {
       "a": "atlas/page.json",
       "b": "atlas/structure.json",
-      "either": 15,
-      "shared": 15,
+      "either": 16,
+      "shared": 16,
       "strength": 1
     },
     {
       "a": "atlas/statistics.json",
       "b": "atlas/structure.json",
-      "either": 15,
-      "shared": 15,
+      "either": 16,
+      "shared": 16,
       "strength": 1
+    },
+    {
+      "a": "docs/BETA_GUIDE.md",
+      "b": "docs/RELEASE_PROCESS.md",
+      "either": 6,
+      "shared": 4,
+      "strength": 0.666667
+    },
+    {
+      "a": "docs/INSTALL_RUNBOOK.md",
+      "b": "docs/RELEASE_PROCESS.md",
+      "either": 6,
+      "shared": 4,
+      "strength": 0.666667
+    },
+    {
+      "a": "docs/RELEASE_PROCESS.md",
+      "b": "docs/VERIFY_RELEASE.md",
+      "either": 6,
+      "shared": 4,
+      "strength": 0.666667
     },
     {
       "a": "rust/Cargo.lock",
       "b": "rust/Cargo.toml",
-      "either": 10,
-      "shared": 9,
-      "strength": 0.9
-    },
-    {
-      "a": "rust/src/open.rs",
-      "b": "rust/tests/bundle_tests.rs",
-      "either": 12,
-      "shared": 6,
-      "strength": 0.5
+      "either": 11,
+      "shared": 10,
+      "strength": 0.909091
     },
     {
       "a": "rust/src/open.rs",
@@ -2868,9 +2952,30 @@
     {
       "a": "rust/src/ui.rs",
       "b": "rust/src/ui_tests.rs",
-      "either": 29,
+      "either": 30,
       "shared": 18,
-      "strength": 0.62069
+      "strength": 0.6
+    },
+    {
+      "a": "site/src/content/docs/handbook/beginners.md",
+      "b": "site/src/site-config.ts",
+      "either": 7,
+      "shared": 5,
+      "strength": 0.714286
+    },
+    {
+      "a": "site/src/content/docs/handbook/delta-analysis.md",
+      "b": "site/src/content/docs/handbook/geometry.md",
+      "either": 6,
+      "shared": 5,
+      "strength": 0.833333
+    },
+    {
+      "a": "site/src/content/docs/handbook/index.md",
+      "b": "site/src/site-config.ts",
+      "either": 8,
+      "shared": 4,
+      "strength": 0.5
     },
     {
       "a": "src/ScalarScope/ViewModels/ComparisonViewModel.cs",
@@ -2890,16 +2995,16 @@
     "floor": "fallen",
     "floorHeld": false,
     "floorTrigger": "revision-depth",
-    "headDate": "2026-10-07T04:41:15-04:00",
+    "headDate": "2026-10-07T11:22:35-04:00",
     "inScopeFiles": 469,
     "pinnedStart": null,
     "priorFloor": "fallen",
-    "qualifyingCommits": 87,
+    "qualifyingCommits": 91,
     "qualifyingMinimum": 30,
     "revisions": 5,
     "shared": 10,
     "sharedFloorUsed": 3,
-    "since": "2026-04-10T08:41:15.000Z",
+    "since": "2026-04-10T15:22:35.000Z",
     "sourceExtensions": [
       ".js",
       ".mjs",

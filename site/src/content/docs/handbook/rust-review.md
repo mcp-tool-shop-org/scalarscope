@@ -1,11 +1,11 @@
 ---
 title: The review
-description: Compare in ScalarScope 3.1.0, the files it opens, and how it is built.
+description: Compare in ScalarScope 3.1.1, the files it opens, and how it is built.
 sidebar:
   order: 2
 ---
 
-ScalarScope 3.1.0 is the Rust program in `rust/`. It is the Microsoft Store package `mcp-tool-shop.ScalarScope`, version 3.1.0.0, an update of listing `9P3HT1PHBKQK`.
+ScalarScope 3.1.1 is the Rust program in `rust/`. It is the Microsoft Store package `mcp-tool-shop.ScalarScope`, version 3.1.1.0, an update of listing `9P3HT1PHBKQK`.
 
 ## Run it
 
@@ -49,4 +49,4 @@ A complete `ProfilerStep` in a Chrome trace is one inference. The ops inside tha
 
 ## The package
 
-`packaging/pack.ps1` builds `ScalarScope_3.1.0.0_x64.msix`, `ScalarScope_3.1.0.0_Store.msixupload` and `checksums.txt` from the release binary. It reads the version from `packaging/AppxManifest.xml`. Partner Center signs the upload. The package name is `mcp-tool-shop.ScalarScope`, the publisher is `CN=5305D976-6952-4F00-9C21-3A5DB090359F`, and the architecture is x64.
+`packaging/pack.ps1` builds `ScalarScope_3.1.1.0_x64.msix`, `ScalarScope_3.1.1.0_Store.msixupload` and `checksums.txt` from the release binary. It reads the version from `packaging/AppxManifest.xml`. Partner Center signs the upload. The package name is `mcp-tool-shop.ScalarScope`, the publisher is `CN=5305D976-6952-4F00-9C21-3A5DB090359F`, and the architecture is x64.

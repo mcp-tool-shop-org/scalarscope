@@ -56,14 +56,14 @@ public class VersionConsistencyTests
         identity.Attribute("Publisher")!.Value.Should().Be("CN=5305D976-6952-4F00-9C21-3A5DB090359F");
         var manifestVersion = identity.Attribute("Version")!.Value;
         manifestVersion.Should().MatchRegex(@"^\d+\.\d+\.\d+\.\d+$");
-        manifestVersion.Should().Be("3.1.0.0");
+        manifestVersion.Should().Be("3.1.1.0");
         properties.Element(ns + "PublisherDisplayName")!.Value.Should().Be("mcp-tool-shop");
 
         var csproj = XDocument.Load(Path.Combine(root, "src", "ScalarScope", "ScalarScope.csproj"));
         var display = csproj.Descendants("ApplicationDisplayVersion").First().Value;
         var packaged = csproj.Descendants("Version").First().Value;
-        display.Should().Be("3.1.0");
-        packaged.Should().Be("3.1.0.0");
+        display.Should().Be("3.1.1");
+        packaged.Should().Be("3.1.1.0");
         packaged.Should().Be(manifestVersion);
         csproj.Descendants("ApplicationId").First().Value.Should().Be("org.mcptoolshop.scalarscope");
 

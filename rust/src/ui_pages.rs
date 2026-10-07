@@ -42,6 +42,10 @@ pub const GUIDE: &[Section] = &[
         body: "Structural emergence (ΔTd) and spectrum concentration (ΔĀ) describe training dynamics: the geometry of a training trajectory, and how much of the evaluators' spread sits in its first direction (λ1/Σλ). 2.0 called ΔĀ evaluator agreement, but it measures concentration, not agreement. They do not apply to an inference run, so they stay off the inference page. They come with the geometry views.",
     },
     Section {
+        title: "Geometry: two ASPIRE training runs",
+        body: "Open two aspire-si geometry exports to compare their training dynamics with five deltas: ΔF, ΔTc, ΔTd, ΔĀ and ΔO. They are 2.0's rules, with the corrections in the spec. An export can say its steps are checkpoints × items rather than time, as a drift export does. Then ΔTc, ΔTd, ΔO and ΔF are withheld, because they read step order, and ΔĀ is compared checkpoint by checkpoint: it fires only when one run is more concentrated by at least 0.05 at every checkpoint. When both runs' scores are fixed per item, ΔĀ compares the evaluators, not the runs, and stays out of the headline. When the scores were replayed or are fixed per item, ΔF is withheld, because its failures are score dips. The headline speaks only from the deltas that stand.",
+    },
+    Section {
         title: "The views",
         body: "Series: latency by step from the steady state, with the p10–p90 band, anomaly marks and each run's levels. Warmup: each run from its first sample, with where it settles shaded. Distribution: the cumulative distribution with a threshold you click or drag to read P(latency > x), and 20 dots per run, each 5% of the samples. Difference: B − A by percentile with its interval and a zero line. Spectrum: latency by percentile on a log tail axis. Heat map: where samples fall, step by step, on a shared scale.",
     },
@@ -51,11 +55,11 @@ pub const GUIDE: &[Section] = &[
     },
     Section {
         title: "Bundles and the content check",
-        body: "Save bundle writes the review as a .scbundle. Its SHA-256 checks that the bytes are intact. It is a content check, not a signature: it does not say who wrote the file. Opening a bundle shows the stored review exactly as saved, in review mode, with loading off until you close it.",
+        body: "Save bundle writes the review as a .scbundle. Its SHA-256 checks that the bytes are intact. It is a content check, not a signature: it does not say who wrote the file. Opening a bundle checks the hash and refuses it on a mismatch. It shows the stored review exactly as saved, in review mode, with loading off until you close it. A geometry bundle redraws its views from the stored runs; if today's rules read them differently, that reading is shown below the stored one, labelled. A bundle contains the runs it compares, so share it only if you would share them.",
     },
     Section {
         title: "What you can open",
-        body: "A latency CSV, a benchmark JSON, a Chrome or PyTorch profiler trace (.json or .json.gz), a runtime log, a ScalarScope RunTrace JSON, a run folder, or a backpropagate run_history.json. CSV columns for elapsed time (time_s), throughput, memory, CPU and GPU are read when present.",
+        body: "A latency CSV, a benchmark JSON, a Chrome or PyTorch profiler trace (.json or .json.gz), a runtime log, a ScalarScope RunTrace JSON, a run folder, a backpropagate run_history.json, or an ASPIRE geometry export. Open bundle opens a .scbundle. CSV columns for elapsed time (time_s), throughput, memory, CPU and GPU are read when present.",
     },
     Section {
         title: "The workbench",

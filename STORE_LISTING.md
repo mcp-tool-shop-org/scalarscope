@@ -6,16 +6,17 @@
 **Publisher display name:** mcp-tool-shop  
 **Package Family Name:** mcp-tool-shop.ScalarScope_yn6b8xqrexa5j  
 **Package SID:** S-1-15-2-850189134-3642041993-2632034504-2327210781-2703906947-3194312410-3859322172  
-**Display version:** 3.1.0 (the crate version. Settings > About shows "ScalarScope 3.1.0 (package 3.1.0.0 …)".)
-**ApplicationVersion:** 31 (package integer, not the About string)
-**Package identity version:** 3.1.0.0 (`packaging/AppxManifest.xml`, which `pack.ps1` reads, and the MAUI `Package.appxmanifest`, held equal by a test)
+**Display version:** 3.1.1 (the crate version. Settings > About shows "ScalarScope 3.1.1 (package 3.1.1.0 …)".)
+**ApplicationVersion:** 32 (package integer, not the About string)
+**Package identity version:** 3.1.1.0 (`packaging/AppxManifest.xml`, which `pack.ps1` reads, and the MAUI `Package.appxmanifest`, held equal by a test)
 
 Packages already in the Partner Center submission:
 
 - `ScalarScope_1.0.3.0_x64.msix`
 - `ScalarScope_v2.0.0_Store.msixupload`
+- `ScalarScope_3.1.0.0_Store.msixupload` (the first Rust package)
 
-The next upload is `ScalarScope_3.1.0.0_Store.msixupload`. Its package version is `3.1.0.0`, which is above both of those. 3.0.0.0 was never uploaded.
+The next upload is `ScalarScope_3.1.1.0_Store.msixupload`. Its package version is `3.1.1.0`, which is above all of those. 3.0.0.0 was never uploaded.
 
 ---
 
@@ -36,13 +37,13 @@ ScalarScope compares two machine-learning runs and says how run B differs from r
 
 **Training and geometry.**
 - **Training:** a backpropagate run history is drawn as training loss.
-- **Geometry:** two ASPIRE training runs side by side, with their trajectory, evaluator scores and eigen spectrum. When an export says its steps are not time, or its scores were replayed, the readings that depend on them are withheld with that reason.
+- **Geometry:** two ASPIRE training runs side by side, with their trajectory, evaluator scores and eigen spectrum. When an export says its steps are not time, or its scores were replayed, the readings that depend on them are withheld with that reason. On a drift export, spectrum concentration is compared checkpoint by checkpoint, and it says when it is comparing the evaluators rather than the runs.
 
 **Workbench.** Open runs that differ in a setting, such as batch size or precision. Ask a local model, through Ollama on your own computer, to measure them and propose what the setting does. ScalarScope tests every hypothesis and sets every verdict. The model's note is labelled as its words.
 
 **History.** Finished comparisons are grouped by project, and each measure is drawn across them with the points where it shifted.
 
-**Reviews you can reopen.** Save a review as a bundle and reopen it exactly as saved. A matching SHA-256 is a content check, not a signature. Bundles, settings and recent files from ScalarScope 2.0 carry over.
+**Reviews you can reopen.** Save a review as a bundle and reopen it exactly as saved. A bundle contains the runs it compares, so share it only if you would share them. A matching SHA-256 is a content check, not a signature, and a bundle whose hash does not match is refused. Bundles, settings and recent files from ScalarScope 2.0 carry over.
 
 **Private by design.** No account, no telemetry and no analytics. The only connection ScalarScope can make is the Workbench's Ask, to a local Ollama at 127.0.0.1. Cloud models are refused, so nothing leaves your machine.
 
@@ -71,18 +72,18 @@ The quick checks a certification tester can run are in `TESTING.md`, on the file
 ### Install Flow
 1. [ ] Download from Microsoft Store (9P3HT1PHBKQK)
 2. [ ] Launch ScalarScope. Welcome appears with Try the sample comparison, Compare two runs and Open a review bundle.
-3. [ ] Settings > About shows ScalarScope 3.1.0, package 3.1.0.0.
+3. [ ] Settings > About shows ScalarScope 3.1.1, package 3.1.1.0.
 
 ### Core Workflow
 4. [ ] Try the sample comparison: Compare shows the headline, three tiles and the series.
 5. [ ] Open path A and B with `samples/inference/baseline.runtrace.json` and `optimized.runtrace.json`.
 6. [ ] Verify deltas. These files state their steady-state milestone, so ΔTc reads it: it fires, 6 steps earlier. A missing milestone must not appear as a stabilization time.
 7. [ ] Click a delta tile: the Why panel opens. Click Show me: the view moves to the anchor.
-8. [ ] Open the geometry pair in `samples/geometry` (`.drift` files): ΔF, ΔTc and ΔO show withheld, with the reason.
+8. [ ] Open the geometry pair in `samples/geometry` (`.drift` files): ΔF, ΔTc, ΔTd and ΔO show withheld, with the reason. ΔĀ says the evaluator setups differ, and the headline reads "No meaningful divergence between the runs; the evaluator setups differ (spectrum concentration)."
 
 ### Export and Review Flow
-9. [ ] Save bundle writes a `.scbundle`. Copy hash copies its SHA-256.
-10. [ ] Open bundle on that file: review mode banner, load buttons disabled, same hash.
+9. [ ] Save bundle writes a `.scbundle`, and the page gives its hash.
+10. [ ] Open bundle on that file: review mode banner, load buttons disabled, the same hash, and Copy hash copies it.
 11. [ ] Export SVG and Export PNG write files where chosen.
 
 ### Workbench, History and Settings
@@ -115,6 +116,16 @@ The quick checks a certification tester can run are in `TESTING.md`, on the file
 - **Disk:** 100 MB
 
 ---
+
+## Release Notes (v3.1.1.0)
+
+For Partner Center's "What's new in this version":
+
+- **Saved reviews open as they were saved.** A saved geometry review now shows its stored headline and tiles. If today's rules read the runs differently, that reading is shown below, labelled.
+- **Drift exports read more carefully.** When an ASPIRE export's steps are checkpoints rather than time, the emergence timing is held back too, and spectrum concentration is compared checkpoint by checkpoint. It says when it is comparing the evaluators rather than the runs.
+- **Bundles say what they contain.** A geometry bundle now states that it holds both runs. Bundles saved by 3.1.0 keep their old label, because changing them would break their content check.
+
+The full list is in CHANGELOG.md.
 
 ## Release Notes (v3.1.0.0)
 

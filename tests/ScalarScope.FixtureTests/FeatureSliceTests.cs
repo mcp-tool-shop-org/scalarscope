@@ -14,7 +14,7 @@ public class FeatureSliceTests
         review.Should().Contain("Open path B");
         review.Should().Contain("Open bundle");
         review.Should().Contain("Save bundle");
-        // 3.1.0 is the Store package; the pages must not say the Store still has the .NET app.
+        // 3.1.1 is the Store package; the pages must not say the Store still has the .NET app.
         review.Should().Contain("an update of listing `9P3HT1PHBKQK`");
         review.Should().NotContain("still the previous .NET");
         review.Should().Contain("run_history.json");
@@ -66,16 +66,16 @@ public class FeatureSliceTests
         var packAt = build.IndexOf("pack-review:", StringComparison.Ordinal);
         packAt.Should().BeGreaterThan(0);
         var pack = build[packAt..];
-        pack.Should().Contain("release/ScalarScope_3.1.0.0_x64.msix");
-        pack.Should().Contain("release/ScalarScope_3.1.0.0_Store.msixupload");
+        pack.Should().Contain("release/ScalarScope_3.1.1.0_x64.msix");
+        pack.Should().Contain("release/ScalarScope_3.1.1.0_Store.msixupload");
         pack.Should().Contain("release/checksums.txt");
         pack.Should().Contain("if-no-files-found: error");
-        pack.Should().Contain("name: scalarscope-store-3.1.0.0");
+        pack.Should().Contain("name: scalarscope-store-3.1.1.0");
         pack.Should().NotContain("dotnet publish");
 
         var verify = Read("docs/VERIFY_RELEASE.md");
         verify.Should().Contain("./packaging/pack.ps1");
-        verify.Should().Contain("release/ScalarScope_3.1.0.0_Store.msixupload");
+        verify.Should().Contain("release/ScalarScope_3.1.1.0_Store.msixupload");
         verify.Should().NotContain("dotnet publish src/ScalarScope/ScalarScope.csproj");
     }
 
@@ -84,8 +84,8 @@ public class FeatureSliceTests
     {
         var project = Read("src/ScalarScope/ScalarScope.csproj");
         project.Should().Contain("<WindowsPackageType>MSIX</WindowsPackageType>");
-        project.Should().Contain("<ApplicationDisplayVersion>3.1.0</ApplicationDisplayVersion>");
-        project.Should().Contain("<Version>3.1.0.0</Version>");
+        project.Should().Contain("<ApplicationDisplayVersion>3.1.1</ApplicationDisplayVersion>");
+        project.Should().Contain("<Version>3.1.1.0</Version>");
         project.Should().Contain("not the Partner Center upload");
         project.Should().Contain("RejectMauiAsStoreUpload");
         project.Should().Contain("Do not publish this MAUI app as that upload.");
