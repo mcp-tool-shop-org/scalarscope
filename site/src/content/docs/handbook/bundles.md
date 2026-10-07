@@ -2,7 +2,7 @@
 title: Bundles & Review
 description: Reproducible exports and review mode.
 sidebar:
-  order: 3
+  order: 7
 ---
 
 ## Reproducible bundles

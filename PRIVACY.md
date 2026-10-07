@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**ScalarScope** | Version 3.0.0 | Policy effective: January 2025
+**ScalarScope** | Version 3.1.0 | Policy effective: January 2025, updated 2026-10-07
 
 ## Summary
 
@@ -21,6 +21,7 @@ All data stays on your device:
 
 - Comparison history stored in local application data
 - User preferences stored in local settings
+- The Workbench's memory (learned formulas, hypotheses, checkpoints) stored in local application data, with no file paths in it
 - Exported bundles saved to locations you choose
 - No cloud sync or remote backup
 

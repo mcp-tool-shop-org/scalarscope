@@ -1,6 +1,6 @@
 # ScalarScope v2.0.0 - Final Ship Verification
 
-This file records the 2.0.0 ship. It is not the current package. The working package version is **3.0.0.0**. Name, publisher, and publisher display name are unchanged.
+This file records the 2.0.0 ship. It is not the current package. The working package version is **3.1.0.0** (3.0.0.0 was never uploaded). Name, publisher, and publisher display name are unchanged.
 
 Generated: 2026-02-09
 
@@ -58,7 +58,7 @@ Generated: 2026-02-09
 - [x] **CheckpointService**: Resumable operation state
 
 ### 9. Packaging & Store Prep ✅
-- [x] **Version (2026-02-09 snapshot)**: 2.0.0.0 was in ScalarScope.csproj for that ship. The csproj `Version` is now 3.0.0.0.
+- [x] **Version (2026-02-09 snapshot)**: 2.0.0.0 was in ScalarScope.csproj for that ship. The csproj `Version` is now 3.1.0.0.
 - [x] **InformationalVersion (2026-02-09 snapshot)**: 2.0.0+7887384 was recorded for that ship. The csproj does not set InformationalVersion now.
 - [x] **MSIX**: WindowsPackageType=MSIX, SelfContained=true
 - [x] **Runtime**: win-x64, net9.0-windows10.0.19041.0
@@ -113,10 +113,10 @@ The table below is the 2026-02-09 snapshot of the 2.0.0 ship. It is not the curr
 
 | Component | Current |
 |-----------|---------|
-| ApplicationDisplayVersion | 3.0.0 |
-| ApplicationVersion | 30 |
-| csproj Version | 3.0.0.0 |
-| Package.appxmanifest Identity Version | 3.0.0.0 |
+| ApplicationDisplayVersion | 3.1.0 |
+| ApplicationVersion | 31 |
+| csproj Version | 3.1.0.0 |
+| Package.appxmanifest Identity Version | 3.1.0.0 |
 | InformationalVersion | not set |
 
 ## RECOMMENDATION

@@ -101,12 +101,14 @@ public class StageDCopyTests
         runbook.Should().NotContain("notification appears");
 
         var beginners = Read("site/src/content/docs/handbook/beginners.md");
-        beginners.Should().Contain("Ctrl+E is not mapped.");
+        // The Rust review's shortcuts, not 2.0's.
+        beginners.Should().Contain("| `F1` | Guide |");
         beginners.Should().NotContain("`Ctrl+S` or `Ctrl+E` | Quick export");
 
         var readme = Read("README.md");
         readme.Should().NotContain("ScalarScope-Desktop/readme.png");
-        readme.Should().Contain("Ctrl+E is not mapped.");
+        readme.Should().Contain("| `F1` | Guide |");
+        readme.Should().NotContain("Ctrl+E");
         foreach (var language in new[] { "ja", "zh", "es", "fr", "hi", "it", "pt-BR" })
             Read($"README.{language}.md").Should().NotContain("ScalarScope-Desktop/readme.png");
 

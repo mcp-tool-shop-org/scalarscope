@@ -5,15 +5,41 @@ sidebar:
   order: 1
 ---
 
-## The review this repo builds
+## Install
 
-The program you build here is the Rust review. From this repo:
+1. Visit the [Microsoft Store listing](https://apps.microsoft.com/detail/9P3HT1PHBKQK) (Store ID: `9P3HT1PHBKQK`).
+2. Click Install. ScalarScope needs Windows 10 version 1809 (build 17763) or later, x64.
+
+Or build it from this repo:
 
 ```bash
+git clone https://github.com/mcp-tool-shop-org/scalarscope.git
+cd scalarscope
 cargo run --manifest-path rust/Cargo.toml
 ```
 
-The window has four buttons: **Open path A**, **Open path B**, **Open bundle**, and **Save bundle**. An inference file is a latency CSV, a benchmark JSON, or a Chrome trace. A training file is a backpropagate `run_history.json`. The [Rust review](/scalarscope/handbook/rust-review/) page is the short guide. The Store copy is still the previous .NET package.
+## Your first comparison
+
+1. ScalarScope opens on **Welcome**. Click **Try the sample comparison** to load two built-in runs, or **Compare two runs** to open your own.
+2. On **Compare**, click **Open path A** and **Open path B**. Each takes a file of the kinds below. **Folder A** and **Folder B** take a run folder.
+3. Read the headline: how B compares with A at p50, p90 and p99, each with an interval.
+4. Click a tile for **Why**, then **Show me** to move to the evidence. Press `1` to `6` to switch views.
+5. **Save bundle** keeps the review as a `.scbundle`, and **Open bundle** shows it again exactly as saved.
+
+The repo's `samples/` folder has an inference pair, a geometry pair and a folder of runs for the Workbench. `TESTING.md` says which to open where. [The review](/scalarscope/handbook/rust-review/) explains each part of Compare.
+
+## The tabs
+
+| Tab | Purpose |
+|-----|---------|
+| **Welcome** | The sample comparison, recent reviews and what the review gives |
+| **Compare** | Two runs side by side: the headline, the tiles and the views |
+| **Workbench** | Many runs that differ in a setting, weighed with a local model ([Workbench](/scalarscope/handbook/workbench/)) |
+| **History** | A project's measures across its logged reviews ([History](/scalarscope/handbook/history/)) |
+| **Guide** | What each part means, with search |
+| **Settings** | Theme, color vision, high contrast, text scale, recent files and the anomaly rule |
+
+`F1` opens Guide, `Ctrl+,` opens Settings and `Ctrl+H` opens Welcome.
 
 ## Files the review opens
 
@@ -59,96 +85,27 @@ A training file is a backpropagate `run_history.json`. The review draws `loss_hi
 ]
 ```
 
-## Install from the Microsoft Store
+## Settings
 
-The listing is still the previous .NET package. The easiest way to get that package:
+The **Settings** tab writes the 2.0 `preferences.json` keys, so a 2.0 user's choices carry over. Every key it does not use is kept. It covers:
+- theme (Follow Windows, Light or Dark);
+- series colors for color-vision modes;
+- high contrast and text scale;
+- the recent-files limit and Clear recent files;
+- the anomaly rule: robust deviations, or 2.0's 3-sigma rule.
 
-1. Visit the [Microsoft Store listing](https://apps.microsoft.com/detail/9P3HT1PHBKQK) (Store ID: `9P3HT1PHBKQK`)
-2. Click Install
-3. Requires Windows 10 (build 17763) or later
+The review's caption names the rule a review used. About gives the version, the privacy statement, and links to report an issue and to the source.
 
-## Your first comparison on the Store package
-
-These steps are the four-tab shell on the Store. They are not the Rust review buttons.
-
-1. Open ScalarScope — the **Home** tab shows your workspace status
-2. Click **Compare Two Runs** to open the Compare tab
-3. Load your baseline TFRT trace (before optimization)
-4. Load your optimized TFRT trace (after optimization)
-5. Review deltas in the **Compare** tab — only statistically meaningful differences appear
-6. Click **Export Bundle** to save a `.scbundle` for reproducible sharing
-
-### Try the built-in example
-
-If you do not have traces yet, click **Try Example** on the Home tab. This loads a built-in demo comparison so you can explore the interface without your own data. The demo walks through the delta analysis workflow with pre-loaded traces.
-
-## Navigation
-
-ScalarScope uses four tabs:
-
-| Tab | Purpose |
-|-----|---------|
-| **Home** | Workspace status, recent comparisons, quick actions |
-| **Compare** | Side-by-side delta comparison — the core workflow |
-| **Guide** | Interpretation help and onboarding |
-| **Settings** | Theme, playback, export, and accessibility preferences |
-
-Switch tabs by clicking the tab bar. Number keys `1`–`6` request the routes overview, trajectory, scalars, geometry, compare, and failures. They do not open Home, Compare, Guide, or Settings. Pressing 1 does not open Home.
-
-## Build from source
-
-The review:
-
-```bash
-git clone https://github.com/mcp-tool-shop-org/scalarscope.git
-cd scalarscope
-cargo run --manifest-path rust/Cargo.toml
-```
-
-`dotnet run --project src/ScalarScope` builds the previous .NET shell. It is not the program the release packs.
-
-```bash
-# Prerequisites for that shell:
-#   .NET 9.0 SDK (global.json pins 9.0.100)
-#   dotnet workload install maui-windows
-
-dotnet restore
-dotnet build
-dotnet run --project src/ScalarScope
-```
-
-## VortexKit
-
-VortexKit is the project at `src/VortexKit`. It is not published to NuGet.
-
-See the [VortexKit page](/scalarscope/handbook/vortexkit/) for the types.
+Accessibility in the Rust review: it applies color vision, high contrast and text scale. It does not offer screen reader descriptions or a larger pointer; 2.0's settings for those are kept in the file but not applied. If the preferences file cannot be read, ScalarScope leaves that file unchanged and Settings says so.
 
 ## Running tests
 
 ```bash
-# All tests
-dotnet test
+cd rust
+cargo test
 
-# Fixture smoke tests only
-dotnet test --filter Category=FixtureSmoke
-
-# Determinism tests (verifies reproducible deltas)
-dotnet test --filter Category=Determinism
-
-# With coverage
-dotnet test --collect:"XPlat Code Coverage"
+# The 2.0 oracles and the version surfaces
+dotnet test tests/ScalarScope.FixtureTests
 ```
 
-## Settings overview
-
-Open the **Settings** tab to configure:
-
-- **Theme**: System, Light, or Dark
-- **Playback**: default speed (0.25x to 4x), auto-play on load
-- **Export**: default resolution (width/height), export folder
-- **Accessibility**: high contrast mode, color vision modes (deuteranopia, protanopia, tritanopia, monochrome), screen reader support, text scale (75% to 200%), large pointer
-- **Session**: auto-load last session, recent files limit
-
-The Settings tab writes these controls, and the four-tab shell reads them when it starts. The Rust review applies color vision, high contrast, and text scale. It does not offer screen reader descriptions or a larger pointer.
-
-All preferences are stored locally and persist between sessions. If the preferences file cannot be read, ScalarScope leaves that file unchanged and Settings says so.
+The .NET app in `src/ScalarScope` is 2.0. It stays in the repo as the reference that 3.x is checked against.

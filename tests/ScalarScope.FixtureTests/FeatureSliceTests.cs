@@ -14,7 +14,9 @@ public class FeatureSliceTests
         review.Should().Contain("Open path B");
         review.Should().Contain("Open bundle");
         review.Should().Contain("Save bundle");
-        review.Should().Contain("The Store copy is still the previous .NET package");
+        // 3.1.0 is the Store package; the pages must not say the Store still has the .NET app.
+        review.Should().Contain("an update of listing `9P3HT1PHBKQK`");
+        review.Should().NotContain("still the previous .NET");
         review.Should().Contain("run_history.json");
         review.Should().Contain("Loss stays loss");
 
@@ -27,12 +29,13 @@ public class FeatureSliceTests
         {
             var page = Read(relative);
             page.Should().Contain("cargo run --manifest-path rust/Cargo.toml");
-            page.Should().Contain("previous .NET");
+            page.Should().NotContain("still the previous .NET");
         }
 
         var index = Read("site/src/content/docs/handbook/index.md");
         index.Should().Contain("Rust review");
-        index.Should().Contain("still the previous .NET package");
+        index.Should().Contain("an update of the same listing");
+        index.Should().NotContain("still the previous .NET");
     }
 
     [Fact]

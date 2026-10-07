@@ -1,82 +1,50 @@
 ---
 title: Delta Analysis
-description: The five canonical delta types, detector configuration, and runtime presets.
+description: The deltas ScalarScope reports, the rule behind each, and when a delta is withheld.
 sidebar:
-  order: 2
+  order: 3
 ---
 
-Every comparison produces a set of canonical deltas. Each delta fires only when the difference is statistically meaningful — no noise, no false signals, no manual threshold tuning.
+A delta names one way run B differs from run A. Each tile says whether its delta **fired**, stayed **quiet** or was **withheld**, and **Why** gives the rule, this pair's numbers and the parameters.
 
-## Five canonical delta types
+## Inference: three deltas
 
-Deltas are ordered by causal salience, not mathematical complexity:
+These are 3.x's rules. Where they answer differently from 2.0, the [spec](https://github.com/mcp-tool-shop-org/scalarscope/blob/main/docs/parity-and-beyond.spec.md) records the change and the evidence for it.
 
-| Delta | Full Name | Category | What It Measures | Fires When |
-|-------|-----------|----------|------------------|------------|
-| **ΔF** | Failure Rate | Event | Anomaly frequency | Failure frequency or kind differs between runs |
-| **ΔTc** | Convergence Time | Timing | Steps to reach stable latency | Steady-state reached at different steps (3+ step separation) |
-| **ΔTd** | Total Duration | Timing | Wall-clock time / structural emergence | Dominance onset differs (suppressed in TFRT preset) |
-| **ΔĀ** | Average Latency | Behavior | Mean metric value | Mean differs meaningfully (suppressed in TFRT preset) |
-| **ΔO** | Output Variability | Behavior | Oscillation / runtime instability | Area-above-threshold score differs beyond noise floor |
+| Delta | What it asks | Fires when |
+|---|---|---|
+| **ΔF** | Did B gain runtime anomalies? | B has more steady samples beyond 5 robust deviations (1.4826 × MAD) from the median than chance allows: one-sided exact binomial test, p < 0.05 |
+| **ΔO** | Did the variability change? | The 95% block-bootstrap interval on B's relative spread, (p90 − p10) / p50 of the steady samples, over A's excludes 1 |
+| **ΔTc** | Did B settle at a different point? | Both runs settle, and their settle ranges do not overlap |
 
-Each delta has three possible statuses:
+**Notes on the rules.**
+- **Warmup.** Warmup samples are startup cost, so ΔF counts steady samples only.
+- **The 3-sigma rule.** 2.0's 3-sigma anomaly rule is a choice in Settings, and the caption names the rule a review used.
+- **Sample counts.** ΔF and ΔO need 20 steady samples per side. So do the ratios in the headline.
+- **ΔTc and run shape.** Each run gets a shape: flat, warmup, slowdown or no steady state. Only a flat run or one that warms up has a settle point.
+  - Where a run settles is a range, from the change points found at three penalties.
+  - When a RunTrace states its steady-state step, that step is used as written.
 
-- **Present** — the difference is real and meaningful
-- **Suppressed** — the difference is below threshold or irrelevant for the active preset
-- **Indeterminate** — cannot determine (insufficient data)
+**Kept off the inference page.** ΔTd and ΔĀ describe training dynamics, so they do not appear for inference.
 
-## How deltas are computed
+**Warnings.** The page warns when warmup takes more than half the run, when no steady state is found, and when a file holds only aggregated statistics.
 
-Each delta type has its own detector with configurable thresholds. Every delta includes:
+## Geometry: five deltas
 
-- **Confidence score** (0.0 to 1.0) — how certain the difference is meaningful
-- **Anchors** — specific data points and view targets that triggered the delta
-- **Trigger type** — what kind of signal caused the detection (e.g., sustained, recurrence, area episode, persistence-weighted)
-- **Human-readable explanation** — auto-generated text describing the finding (target: 12 words or fewer)
-- **Summary sentence** — neutral, descriptive sentence for export summaries
+For two ASPIRE training runs. These are 2.0's rules with 2.0's defaults, ported and checked against 2.0's results, with the corrections ruled on 2026-10-06.
 
-### Convergence detection (ΔTc)
+| Delta | What it asks | Defaults |
+|---|---|---|
+| **ΔF** | Did a run fail persistently? | A failure that persists for 3 recorded failures or steps. The time and the kind come from the same failure. |
+| **ΔTc** | Did the runs converge at different steps? | Velocity stays inside an epsilon band for 5 steps; the effective epsilon is max(0.02, 0.5 × robust sigma). Fires at 3 steps apart or more. |
+| **ΔTd** | Did a dominant direction emerge at a different time? | The first eigenvalue exceeds 1.5 × the next, sustained or recurring |
+| **ΔĀ** | Is one run's evaluator spectrum more concentrated? | λ1 / Σλ per step, compared over the longest sustained stretch. 2.0 called it evaluator agreement. |
+| **ΔO** | Did one run show sustained instability? | Curvature above an adaptive threshold for 4 steps or more; floor 0.05 between runs, 0.1 within a run |
 
-The convergence detector looks for when a signal stays within an epsilon band for a sustained window:
+## Withheld
 
-- **Window**: number of consecutive stable steps required (default: 5, minimum: 3)
-- **Epsilon**: base tolerance band; effective epsilon = max(base epsilon, 0.5 * robust sigma)
-- **Resolution**: minimum 3-step separation between runs to count as meaningful
-- Confidence is a heuristic based on tail stability and noise level — it affects visual intensity but never suppresses the delta
-
-### Stability detection (ΔO)
-
-The stability detector uses area-above-threshold scoring with an adaptive threshold:
-
-- Threshold adapts based on both median and sigma of curvature magnitudes
-- Episodes must sustain for at least 4 steps to avoid flicker false positives
-- Between-run suppression applies a delta floor of 0.05
-- Within-run noise floor of 0.1 filters out trivial episodes
-
-### Failure detection (ΔF)
-
-Detects anomalies using a persistence window (default: 3 steps). Can trigger on norm violations, loss explosions, or other failure kinds. Reports which run failed, at what step, and what kind of failure occurred.
-
-### Emergence detection (ΔTd)
-
-Detects structural emergence through eigenvalue dominance. Fires when one eigenvalue exceeds k times the next (default k = 1.5) for a sustained window, or through a recurrence rule (repeated dominance segments within a rolling window).
-
-## Runtime presets
-
-### TFRT (TensorFlow-TRT)
-
-The built-in TensorFlow-TRT preset (`tensorflowrt-runtime-v1`) is designed for inference comparison:
-
-- Maps inference-specific signals: latency, throughput, memory, CPU/GPU load
-- **Suppresses ΔĀ and ΔTd** — these have no meaning for inference workloads
-- Active deltas use latency as the primary signal (ΔTc for stabilization time, ΔO for oscillation, ΔF for outliers)
-
-#### TFRT guardrails
-
-The preset raises warnings when:
-
-- No steady-state milestone is found in the trace
-- Warmup exceeds 50% of the run duration
-- Only aggregated stats are available (disables time-based deltas entirely)
-
-These guardrails appear as inline warnings in the Compare tab so you know when results may be limited.
+A delta is **withheld** when the data cannot carry it. The tile then says why.
+- **On a geometry export that states its layout** (the [export contract](/scalarscope/handbook/geometry/)):
+  - ΔTc, ΔO and ΔF are withheld when the steps are checkpoints × items, not time.
+  - ΔF is withheld when the scores were replayed or are fixed per item.
+- **The headline speaks only from the deltas that stand.**

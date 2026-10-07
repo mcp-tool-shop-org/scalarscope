@@ -1,25 +1,28 @@
 ---
 title: Handbook
-description: Everything you need to know about ScalarScope.
+description: Everything you need to know about ScalarScope 3.1.0.
 sidebar:
   order: 0
 ---
 
-Welcome to the ScalarScope handbook. This is the complete guide to comparing ML inference runs with scientific rigor.
+Welcome to the ScalarScope handbook: the guide to comparing two machine-learning runs, and to reading how sure the comparison is.
 
 ## What's inside
 
-- **[Getting Started](/scalarscope/handbook/getting-started/)** — Install, run the review, and see a file of each kind
-- **[Rust review](/scalarscope/handbook/rust-review/)** — The program this repo builds
-- **[Delta Analysis](/scalarscope/handbook/delta-analysis/)** — The five canonical delta types and detector configuration
-- **[Bundles & Review](/scalarscope/handbook/bundles/)** — Reproducible exports, bundle profiles, and review mode
-- **[VortexKit](/scalarscope/handbook/vortexkit/)** — The standalone visualization framework
-- **[Beginners](/scalarscope/handbook/beginners/)** — Step-by-step guide for new users
+- **[Getting Started](/scalarscope/handbook/getting-started/)**: install, run the review, and see a file of each kind
+- **[The review](/scalarscope/handbook/rust-review/)**: Compare, the headline, the tiles and the views
+- **[Delta Analysis](/scalarscope/handbook/delta-analysis/)**: the deltas and the rules that make them fire
+- **[Geometry](/scalarscope/handbook/geometry/)**: two ASPIRE training runs, and the export contract
+- **[Workbench](/scalarscope/handbook/workbench/)**: weigh a setting across many runs with a local model
+- **[History](/scalarscope/handbook/history/)**: a project's measures across its logged reviews
+- **[Bundles & Review](/scalarscope/handbook/bundles/)**: reproducible exports and review mode
+- **[Beginners](/scalarscope/handbook/beginners/)**: a step-by-step first comparison
+- **[VortexKit](/scalarscope/handbook/vortexkit/)**: 2.0's visualization library, kept in the repo
 
 ## What is ScalarScope?
 
-Most ML teams eyeball logs. ScalarScope replaces that with structured, reproducible comparison. The program this repo builds is the Rust review. It opens an inference file or a training history, and it writes a `.scbundle`. A matching SHA-256 is a content check, not a signature.
+ScalarScope opens two inference traces, two training histories, or two ASPIRE geometry exports. It says how run B differs from run A, gives each difference an interval or its reason, and holds back what the data cannot support. A matching SHA-256 on a saved review is a content check, not a signature.
 
-The Store listing (ID: `9P3HT1PHBKQK`) is still the previous .NET package. That package has four tabs: **Home** (workspace and recent comparisons), **Compare** (side-by-side delta analysis), **Guide** (interpretation help), and **Settings** (theme, playback, export, accessibility).
+Version 3.1.0 is the Rust review, on the Microsoft Store as `9P3HT1PHBKQK`, an update of the same listing. Its tabs are **Welcome**, **Compare**, **Workbench**, **History**, **Guide** and **Settings**. Files, bundles and settings from 2.0 carry over.
 
 [Back to landing page](/scalarscope/)
