@@ -1,6 +1,6 @@
 # scalarscope: how it works
 
-Mapped at 2026-10-07 from commit 8e56823 by Atlas 1.24.0.
+Mapped at 2026-10-07 from commit 79874fb by Atlas 1.24.0.
 
 ## What this is
 
@@ -8,9 +8,9 @@ A review of two machine-learning runs. The app is the Rust program in rust/, pac
 
 10 parts, mostly C# (181 files), Rust (40), CSS (2), PowerShell (2), TypeScript (2), Astro (1), JavaScript (1), Python (1) and shell (1). Work enters through 7 doors; the busiest is Build and Test, which reaches 4 parts. It deploys a site to GitHub Pages. People run scalarscope.
 
-## What changed since 2026-10-07 (0180c44)
+## What changed since 2026-10-07 (8e56823)
 
-Nothing structural changed since 2026-10-07; 11 files changed content.
+Nothing structural changed since 2026-10-07; 46 files changed content.
 
 ## What comes in
 
@@ -55,7 +55,7 @@ packaging and src hold only C# and PowerShell files, which this map does not rea
 ## What tends to change together
 
 - **rust/src/open.rs** and **rust/tests/review_tests.rs** changed together in 10 of 13 commits, inside the rust part.
-- **rust/src/ui.rs** and **rust/src/ui_tests.rs** changed together in 18 of 29 commits, inside the rust part.
+- **rust/src/ui.rs** and **rust/src/ui_tests.rs** changed together in 18 of 30 commits, inside the rust part.
 - **rust/src/review.rs** and **rust/src/ui.rs** changed together in 17 of 29 commits, inside the rust part.
 - **rust/src/review.rs** and **rust/tests/review_tests.rs** changed together in 11 of 21 commits, inside the rust part.
 - **rust/src/open.rs** and **rust/tests/edge_tests.rs** changed together in 7 of 14 commits, inside the rust part.
