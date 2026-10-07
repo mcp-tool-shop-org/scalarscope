@@ -375,3 +375,16 @@ fn settling_is_compared_in_seconds_when_both_runs_have_time() {
     assert!(!review.fired.contains(&"ΔTc".to_string()), "ΔTc counts steps: {}", review.verdict);
     assert!(review.left_text.contains(" s)"), "{}", review.left_text);
 }
+
+/// The built-in sample: its runs settle apart in seconds but together in steps. The ΔTc tile and
+/// the elapsed-time note must both say which axis they judged, so they do not read as a contradiction.
+#[test]
+fn the_settle_tile_and_the_elapsed_note_name_their_axis() {
+    let left = scalarscope::open::open_text(include_str!("../samples/baseline.csv"), "baseline").unwrap();
+    let right = scalarscope::open::open_text(include_str!("../samples/optimized.csv"), "optimized").unwrap();
+    let scalarscope::review::Pair::Inference(review) = scalarscope::review::pair(&left, &right).unwrap() else { panic!("inference") };
+    let tc = review.explanations.iter().find(|tile| tile.symbol == "ΔTc").unwrap();
+    assert_eq!((tc.status.as_str(), tc.headline.as_str()), ("quiet", "Settles at about the same step"));
+    let note = review.notices.iter().find(|line| line.starts_with("In elapsed time")).expect("the elapsed-time note");
+    assert!(note.contains("the ranges do not overlap. ΔTc counts steps, and in steps they do."), "{note}");
+}

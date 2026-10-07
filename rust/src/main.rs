@@ -27,7 +27,7 @@ fn main() -> eframe::Result {
                 let view = var("SCALARSCOPE_CAPTURE_VIEW").and_then(|value| value.parse().ok());
                 let runs = var("SCALARSCOPE_CAPTURE_RUNS").map(std::path::PathBuf::from);
                 let scale = var("SCALARSCOPE_CAPTURE_SCALE").and_then(|value| value.parse().ok());
-                app.capture(out, &page, view, var("SCALARSCOPE_CAPTURE_WHY"), runs.as_deref(), scale);
+                app.capture(out, &page, view, var("SCALARSCOPE_CAPTURE_WHY"), runs.as_deref(), scale, var("SCALARSCOPE_CAPTURE_ASK"));
             }
             Ok(Box::new(app))
         }),

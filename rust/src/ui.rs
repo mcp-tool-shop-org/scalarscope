@@ -404,7 +404,10 @@ impl ScalarScopeApp {
     /// files in `samples/` (`docs/store/README.md`). The page, the view, an open Why panel and the
     /// Workbench's runs are set, the window is drawn for a few frames, and a PNG of it is written
     /// to `out`; then the window closes. Nothing is captured unless this is called.
-    pub fn capture(&mut self, out: std::path::PathBuf, page: &str, view: Option<usize>, why: Option<String>, bench: Option<&std::path::Path>, scale: Option<f32>) {
+    /// With `ask`, the Workbench runs a real session first (your call is `ask`), keeping its memory in
+    /// a fresh temporary folder, and the picture is taken once the session has answered.
+    #[allow(clippy::too_many_arguments)]
+    pub fn capture(&mut self, out: std::path::PathBuf, page: &str, view: Option<usize>, why: Option<String>, bench: Option<&std::path::Path>, scale: Option<f32>, ask: Option<String>) {
         if let Some(scale) = scale.filter(|scale| (0.75..=2.0).contains(scale)) {
             self.text_scale = scale;
         }
@@ -427,6 +430,15 @@ impl ScalarScopeApp {
                 Err(error) => self.note = error,
             }
         }
+        if let Some(call) = ask {
+            let memory = std::env::temp_dir().join(format!("scalarscope-capture-{}", std::process::id()));
+            let _ = std::fs::remove_dir_all(&memory);
+            if std::fs::create_dir_all(&memory).is_ok() {
+                self.history_dir = Some(memory);
+            }
+            self.bench.your_call = call;
+            self.ask_workbench();
+        }
         self.capture = Some((30, out));
     }
 
@@ -436,6 +448,10 @@ impl ScalarScopeApp {
             return;
         };
         ctx.request_repaint();
+        if self.bench.ask.is_some() {
+            // A session is still running; the picture waits for its answer.
+            return;
+        }
         if *frames > 1 {
             *frames -= 1;
         } else if *frames == 1 {

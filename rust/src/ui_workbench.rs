@@ -51,6 +51,18 @@ pub struct LastSession {
     pub record: Value,
 }
 
+/// The session loop against the local Ollama. A test build points it at a closed port, so no test
+/// ever reaches a real model or loads one on the GPU.
+#[cfg(not(test))]
+fn start(bench: Workbench) -> Receiver<BenchReply> {
+    workbench::start_bench(bench)
+}
+
+#[cfg(test)]
+fn start(bench: Workbench) -> Receiver<BenchReply> {
+    workbench::start_bench_on(9, bench)
+}
+
 fn today() -> String {
     crate::bundle::utc_now().chars().take(10).collect()
 }
@@ -169,7 +181,7 @@ impl ScalarScopeApp {
         let known = self.memory().map(|file| host::known_runs(&file)).unwrap_or_default();
         let bench = Workbench::new(board, self.bench.tools.clone(), self.bench.hypotheses.clone(), &today()).knowing(known);
         self.bench.status = "The workbench is running on the local model.".to_string();
-        self.bench.ask = Some(workbench::start_bench(bench));
+        self.bench.ask = Some(start(bench));
     }
 
     pub(super) fn poll_workbench(&mut self) {
