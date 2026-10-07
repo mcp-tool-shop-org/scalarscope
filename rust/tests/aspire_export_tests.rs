@@ -108,3 +108,64 @@ fn the_real_pairs_compare_as_the_runs_say() {
         assert!(delta.left_value.is_finite() && delta.right_value.is_finite(), "{}", delta.id);
     }
 }
+
+// The export contract (spec, "Geometry export contract"): the schema 1.1 fixtures state their
+// step axis and score source, and the review withholds what the layout invalidates.
+
+fn reviewed(left: &str, right: &str) -> scalarscope::review::GeometryReview {
+    let Pair::Geometry(review) = pair(&export(left), &export(right)).unwrap() else { panic!("geometry") };
+    review
+}
+
+fn status<'a>(review: &'a scalarscope::review::GeometryReview, symbol: &str) -> &'a scalarscope::review::Explanation {
+    review.explanations.iter().find(|tile| tile.symbol == symbol).unwrap()
+}
+
+#[test]
+fn the_fixtures_state_their_layout() {
+    let per_step = geometry("real-local-teacher.geometry.json").run.metadata;
+    assert_eq!((per_step.step_axis.as_deref(), per_step.scalar_source.as_deref()), (Some("training_step"), Some("replayed")));
+    assert!(per_step.steps_are_time());
+    let drift = geometry("real-local-teacher.drift.geometry.json").run.metadata;
+    assert_eq!((drift.step_axis.as_deref(), drift.checkpoints, drift.scalar_source.as_deref()), (Some("checkpoint_by_item"), Some(3), Some("fixed_per_item")));
+    assert!(!drift.steps_are_time());
+}
+
+#[test]
+fn drift_withholds_timing_oscillation_and_failure_and_speaks_from_what_stands() {
+    let review = reviewed("real-local-teacher.drift.geometry.json", "real-composite-teacher.drift.geometry.json");
+    for symbol in ["ΔTc", "ΔO", "ΔF"] {
+        let tile = status(&review, symbol);
+        assert_eq!(tile.status, "withheld", "{symbol}");
+        assert!(tile.why.contains("steps are checkpoint × item, not time"), "{symbol}: {}", tile.why);
+        assert!(tile.why.contains("2.0's reading was"), "{symbol}");
+    }
+    assert_eq!(status(&review, "Δ\u{0100}").status, "fired");
+    assert_eq!(review.verdict, "Path B had a more concentrated spectrum (sustained 31 steps)");
+}
+
+#[test]
+fn replayed_scores_withhold_the_failure_reading_only() {
+    let review = reviewed("real-local-teacher.geometry.json", "real-composite-teacher.geometry.json");
+    let failure = status(&review, "ΔF");
+    assert_eq!(failure.status, "withheld");
+    assert!(failure.why.contains("the scores repeat (replayed after the first epoch)"), "{}", failure.why);
+    // Steps are time here, so oscillation still reads (prompt to prompt, as the receipt says).
+    assert_eq!(status(&review, "ΔO").status, "fired");
+    assert_eq!(status(&review, "ΔTc").status, "quiet");
+    assert!(!review.verdict.contains("instability; Path B first"), "{}", review.verdict);
+}
+
+#[test]
+fn an_unknown_layout_value_warns_and_reads_as_before() {
+    let mut value: serde_json::Value = serde_json::from_str(&std::fs::read_to_string(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/aspire-si/steady.json")).unwrap()).unwrap();
+    value["run_metadata"]["step_axis"] = serde_json::json!("wall_clock");
+    value["run_metadata"]["scalar_source"] = serde_json::json!("guessed");
+    let opened = scalarscope::geometry::read(&value).unwrap();
+    assert!(opened.warnings.iter().any(|warning| warning.contains("Unknown step_axis \"wall_clock\"")));
+    assert!(opened.warnings.iter().any(|warning| warning.contains("Unknown scalar_source \"guessed\"")));
+    assert!(opened.run.metadata.steps_are_time() && opened.run.metadata.repeated_scores().is_none());
+    // A file that states nothing keeps every 2.0 reading: the simulated pair is unchanged.
+    let review = reviewed("steady.json", "regressing.json");
+    assert!(review.explanations.iter().all(|tile| tile.status != "withheld"));
+}

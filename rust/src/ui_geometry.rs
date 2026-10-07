@@ -60,6 +60,54 @@ pub fn professor_tips(run: &GeometryRun, length: f64) -> Vec<(String, bool, [f64
         .collect()
 }
 
+/// The export's layout, as the header states it (spec, "Geometry export contract").
+fn layout_text(meta: &crate::geometry::RunMetadata) -> String {
+    let mut out = String::new();
+    if !meta.steps_are_time() {
+        match meta.checkpoints {
+            Some(count) => out.push_str(&format!(" · steps: {count} checkpoints × items, not time")),
+            None => out.push_str(" · steps: checkpoints × items, not time"),
+        }
+    }
+    match meta.repeated_scores() {
+        Some("replayed") => out.push_str(" · scores replayed after the first epoch"),
+        Some(_) => out.push_str(" · scores fixed per item"),
+        None => {}
+    }
+    out
+}
+
+/// What a score panel's title adds when a run's scores repeat.
+fn score_note(left: &GeometryRun, right: &GeometryRun) -> String {
+    let sources: Vec<&str> = [left.metadata.repeated_scores(), right.metadata.repeated_scores()].into_iter().flatten().collect();
+    if sources.contains(&"replayed") {
+        " · replayed after the first epoch".to_string()
+    } else if sources.is_empty() {
+        String::new()
+    } else {
+        " · fixed per item".to_string()
+    }
+}
+
+/// The steps split into equal checkpoint blocks, or one block when the count is not stated.
+fn checkpoint_blocks(path: &[[f64; 2]], checkpoints: Option<i64>) -> Vec<Vec<[f64; 2]>> {
+    let count = checkpoints.filter(|count| *count > 0).unwrap_or(1) as usize;
+    let size = path.len().div_ceil(count).max(1);
+    path.chunks(size).map(<[[f64; 2]]>::to_vec).collect()
+}
+
+/// A label position moved down until its line clears every label already placed. A label is
+/// wide and short, so two clash when they are within `gap` vertically and eight gaps sideways.
+fn clear_of(placed: &[[f64; 2]], mut at: [f64; 2], gap: f64) -> [f64; 2] {
+    for _ in 0..12 {
+        if placed.iter().all(|other| (other[1] - at[1]).abs() >= gap || (other[0] - at[0]).abs() >= gap * 8.0) {
+            break;
+        }
+        at[1] -= gap;
+    }
+    at
+}
+
 fn over_time(run: &GeometryRun, value: impl Fn(&crate::geometry::Timestep) -> f64) -> Vec<[f64; 2]> {
     run.trajectory.timesteps.iter().map(|step| [step.t, value(step)]).filter(|[t, v]| t.is_finite() && v.is_finite()).collect()
 }
@@ -72,12 +120,13 @@ impl ScalarScopeApp {
             let holdout = meta.holdout_professor.as_deref().map(|name| format!(" · holdout {name}")).unwrap_or_default();
             ui.label(
                 RichText::new(format!(
-                    "{} · {} · {} timesteps · {} cycles · conscience tier {}{holdout}",
+                    "{} · {} · {} timesteps · {} cycles · conscience tier {}{holdout}{}",
                     run.name(),
                     if meta.condition.is_empty() { "no condition" } else { meta.condition.as_str() },
                     run.trajectory.timesteps.len(),
                     meta.cycles,
-                    meta.conscience_tier
+                    meta.conscience_tier,
+                    layout_text(meta)
                 ))
                 .color(color),
             );
@@ -100,8 +149,18 @@ impl ScalarScopeApp {
         });
 
         // The trajectory, with the professors.
-        ui.label(RichText::new("Trajectory in the run's 2-D projection, with each evaluator's direction. A fainter arrow is a held-out evaluator.").color(paint.note));
+        let ordered = review.left.metadata.steps_are_time() && review.right.metadata.steps_are_time();
+        ui.label(
+            RichText::new(if ordered {
+                "Trajectory in the run's 2-D projection, with each evaluator's direction. A fainter arrow is a held-out evaluator."
+            } else {
+                "Points in the run's 2-D projection, with each evaluator's direction. Unordered: a run's steps are checkpoint × item, not time, so the points are not joined; each checkpoint is one shade, darker for later ones."
+            })
+            .color(paint.note),
+        );
         let length = reach(&review.left).max(reach(&review.right)).max(1e-9);
+        // Label positions placed so far, so two evaluators that point the same way do not overlap.
+        let mut placed: Vec<[f64; 2]> = Vec::new();
         Plot::new("geometry-trajectory")
             .height(340.0)
             .data_aspect(1.0)
@@ -109,8 +168,17 @@ impl ScalarScopeApp {
             .show(ui, |plot| {
                 for (name, color, run) in [(&review.left_label, paint.left, &review.left), (&review.right_label, paint.right, &review.right)] {
                     let path: Vec<[f64; 2]> = run.trajectory.timesteps.iter().filter(|step| step.state_2d.len() >= 2).map(|step| [step.state_2d[0], step.state_2d[1]]).collect();
-                    plot.line(series_line(name, color, path.clone()));
-                    if let Some(first) = path.first() {
+                    if run.metadata.steps_are_time() {
+                        plot.line(series_line(name, color, path.clone()));
+                    } else {
+                        for (block, points) in checkpoint_blocks(&path, run.metadata.checkpoints).into_iter().enumerate() {
+                            let count = run.metadata.checkpoints.unwrap_or(1).max(1) as usize;
+                            let alpha = 90 + (165 * (block + 1) / count.max(1)).min(165) as u8;
+                            let shade = Color32::from_rgba_unmultiplied(color.r(), color.g(), color.b(), alpha);
+                            plot.points(Points::new(format!("{name} checkpoint {}", block + 1), PlotPoints::new(points)).color(shade).radius(2.5));
+                        }
+                    }
+                    if let Some(first) = path.first().filter(|_| run.metadata.steps_are_time()) {
                         plot.points(Points::new("start", PlotPoints::new(vec![*first])).color(color).radius(3.0));
                     }
                     if let Some(now) = position_at(run, t) {
@@ -121,7 +189,9 @@ impl ScalarScopeApp {
                         let legend = format!("{name} evaluators");
                         plot.arrows(Arrows::new(legend.clone(), PlotPoints::new(vec![[0.0, 0.0]]), PlotPoints::new(vec![tip])).color(faded).tip_length(10.0));
                         let label = if holdout { format!("{professor} (held out)") } else { professor };
-                        plot.text(Text::new(legend, PlotPoint::new(tip[0] * 1.06, tip[1] * 1.06), RichText::new(label).color(faded).small()));
+                        let at = clear_of(&placed, [tip[0] * 1.06, tip[1] * 1.06], length * 0.06);
+                        placed.push(at);
+                        plot.text(Text::new(legend, PlotPoint::new(at[0], at[1]), RichText::new(label).color(faded).small()));
                     }
                 }
             });
@@ -139,7 +209,7 @@ impl ScalarScopeApp {
         };
         for dimension in &dimensions {
             let scores = |run: &GeometryRun| run.scalars.values.iter().map(|step| [step.t, step.score(dimension)]).collect::<Vec<_>>();
-            panels.push((format!("{dimension} (evaluator score)"), scores(&review.left), scores(&review.right)));
+            panels.push((format!("{dimension} (evaluator score){}", score_note(&review.left, &review.right)), scores(&review.left), scores(&review.right)));
         }
         panels.push(("speed".to_string(), over_time(&review.left, |step| step.speed()), over_time(&review.right, |step| step.speed())));
         panels.push(("curvature".to_string(), over_time(&review.left, |step| step.curvature), over_time(&review.right, |step| step.curvature)));
@@ -241,4 +311,43 @@ mod tests {
         assert!(professor_tips(&GeometryRun::default(), 1.0).is_empty());
         assert!(time_range(&GeometryRun::default(), &GeometryRun::default()).is_none());
     }
+
+    #[test]
+    fn the_layout_is_stated_and_drawn_as_the_contract_says() {
+        let mut meta = crate::geometry::RunMetadata::default();
+        assert_eq!(layout_text(&meta), "");
+        meta.step_axis = Some("checkpoint_by_item".into());
+        meta.checkpoints = Some(3);
+        meta.scalar_source = Some("fixed_per_item".into());
+        assert_eq!(layout_text(&meta), " · steps: 3 checkpoints × items, not time · scores fixed per item");
+        meta.checkpoints = None;
+        meta.scalar_source = Some("replayed".into());
+        assert_eq!(layout_text(&meta), " · steps: checkpoints × items, not time · scores replayed after the first epoch");
+
+        let mut left = GeometryRun::default();
+        let right = GeometryRun::default();
+        assert_eq!(score_note(&left, &right), "");
+        left.metadata.scalar_source = Some("fixed_per_item".into());
+        assert_eq!(score_note(&left, &right), " · fixed per item");
+        left.metadata.scalar_source = Some("replayed".into());
+        assert_eq!(score_note(&right, &left), " · replayed after the first epoch");
+
+        let path: Vec<[f64; 2]> = (0..7).map(|i| [i as f64, 0.0]).collect();
+        assert_eq!(checkpoint_blocks(&path, Some(3)).iter().map(Vec::len).collect::<Vec<_>>(), vec![3, 3, 1]);
+        assert_eq!(checkpoint_blocks(&path, None).len(), 1);
+        assert_eq!(checkpoint_blocks(&path, Some(0)).len(), 1);
+    }
+
+    #[test]
+    fn a_label_close_to_another_moves_clear_of_it() {
+        let placed = vec![[1.0, 1.0]];
+        assert_eq!(clear_of(&placed, [3.0, 3.0], 0.5), [3.0, 3.0]);
+        let moved = clear_of(&placed, [1.05, 1.0], 0.5);
+        assert!(moved[1] < 1.0 && (moved[0] - 1.05).abs() < 1e-12);
+        assert!((moved[1] - 1.0).abs() >= 0.5);
+        // A long label beside another on the same line also moves; one far to the side does not.
+        assert!(clear_of(&placed, [2.5, 1.1], 0.5)[1] < 1.1);
+        assert_eq!(clear_of(&placed, [6.0, 1.1], 0.5), [6.0, 1.1]);
+    }
+
 }

@@ -771,7 +771,10 @@ pub fn geometry_with_deltas(
     warnings: Vec<String>,
 ) -> GeometryReview {
     use crate::geometry_deltas::{self as deltas, DeltaStatus};
-    let result = deltas::compute_with_summary(&left, &right, deltas::Alignment::ByStep, 1.0, &deltas::DeltaConfig::default());
+    let mut result = deltas::compute_with_summary(&left, &right, deltas::Alignment::ByStep, 1.0, &deltas::DeltaConfig::default());
+    // The export contract: withhold what the runs' layout invalidates, then speak only from what stands.
+    deltas::withhold_by_layout(&mut result.deltas, &left.metadata, &right.metadata);
+    result.comparative_summary = deltas::auto_summary(&result.deltas);
     let explanations = result
         .deltas
         .iter()

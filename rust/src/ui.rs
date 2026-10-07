@@ -398,7 +398,12 @@ impl ScalarScopeApp {
     /// been picked. A path that does not open leaves its side empty with the reason shown.
     pub fn open_pair(&mut self, left: &std::path::Path, right: &std::path::Path) {
         self.load_paths(true, &[left.to_path_buf()]);
+        let left_error = self.left.is_none().then(|| self.note.clone());
         self.load_paths(false, &[right.to_path_buf()]);
+        // Opening B must not hide why A did not open.
+        if let Some(error) = left_error.filter(|error| !error.is_empty()) {
+            self.note = if self.right.is_none() && !self.note.is_empty() { format!("{error} {}", self.note) } else { error };
+        }
     }
 
     fn load_paths(&mut self, left: bool, paths: &[std::path::PathBuf]) {

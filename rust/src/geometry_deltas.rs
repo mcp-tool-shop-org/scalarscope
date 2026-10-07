@@ -1394,7 +1394,8 @@ fn find_dominance_onset(run: &GeometryRun, config: &EmergenceConfig) -> (i64, f6
 /// 2.0's `GenerateAutoSummary`, from the meaningful deltas (suppressed ones are left out, as 2.0's
 /// list left them out). At most 25 words; past that it falls back to the first delta alone.
 pub fn auto_summary(deltas: &[GeometryDelta]) -> String {
-    let deltas: Vec<&GeometryDelta> = deltas.iter().filter(|delta| delta.status != DeltaStatus::Suppressed).collect();
+    // A withheld delta (`Indeterminate`, which 2.0 never produced) does not speak either.
+    let deltas: Vec<&GeometryDelta> = deltas.iter().filter(|delta| delta.status == DeltaStatus::Present).collect();
     if deltas.is_empty() {
         return "No meaningful divergence observed between paths.".to_string();
     }
@@ -1486,4 +1487,38 @@ pub fn dotnet_double(value: f64) -> String {
         return format!("{mantissa}E{sign}{:02}", exponent.abs());
     }
     format!("{value}")
+}
+
+// ========================================================================
+// Export contract: step axis and score source (spec, "Geometry export contract")
+// ========================================================================
+
+/// Why steps that are not time cannot carry a timing or oscillation reading.
+pub const NOT_TIME: &str = "steps are checkpoint × item, not time";
+/// Why repeating scores cannot carry a failure reading.
+pub const SCORES_REPEAT: &str = "its failures are score dips, and the scores repeat";
+
+/// Withhold the deltas a run's own layout invalidates, with the reason, as the export contract
+/// says. A run that states neither field is untouched, so 2.0's results stand for 2.0's files.
+pub fn withhold_by_layout(deltas: &mut [GeometryDelta], left: &crate::geometry::RunMetadata, right: &crate::geometry::RunMetadata) {
+    let not_time = !left.steps_are_time() || !right.steps_are_time();
+    let repeated: Vec<&str> = [left.repeated_scores(), right.repeated_scores()].into_iter().flatten().collect();
+    for delta in deltas.iter_mut() {
+        let reason = match delta.id.as_str() {
+            delta_ids::CONVERGENCE_TIMING | delta_ids::STABILITY_OSCILLATION if not_time => Some(NOT_TIME.to_string()),
+            delta_ids::FAILURE_PRESENCE if not_time => Some(NOT_TIME.to_string()),
+            delta_ids::FAILURE_PRESENCE if !repeated.is_empty() => {
+                let how = if repeated.contains(&"replayed") { "replayed after the first epoch" } else { "fixed per item" };
+                Some(format!("{SCORES_REPEAT} ({how})"))
+            }
+            _ => None,
+        };
+        if let Some(reason) = reason {
+            delta.status = DeltaStatus::Indeterminate;
+            delta.notes.insert(0, format!("2.0's reading was: {}", delta.explanation));
+            delta.explanation = format!("Withheld: {reason}");
+            delta.summary_sentence = None;
+            delta.visual_anchor_time = None;
+        }
+    }
 }

@@ -297,6 +297,38 @@ The fixes are applied in `rust/src/geometry_deltas.rs`, each marked `G<n> (ruled
 
 One rounding choice for G3: the step is rounded to the nearest one rather than truncated. A time stored as i / (n − 1) can come back as i − 0.000…1, as it nearly did on the aspire-si pair.
 
+## Geometry export contract: step axis and score source (2026-10-07)
+
+On the real aspire-si exports, three of the five deltas fired on how the data was laid out, not on what changed (`docs/receipts/geometry/README.md`). The page's headline was built from them, which is a trust problem for a Store user, so this contract is required before the Store submission.
+
+**The fields.** They were agreed with aspire-si. All three are optional and live in `run_metadata`. Their schema is version 1.1.
+- `step_axis`:
+  - `"training_step"`: steps are training time, in order.
+  - `"checkpoint_by_item"`: steps are blocks, one per checkpoint, over a fixed item order, so they are not time within a block. This is what drift and probe exports use.
+- `checkpoints`: an integer, given with `checkpoint_by_item`, so the page can draw block boundaries.
+- `scalar_source`:
+  - `"live"`: every step is scored fresh.
+  - `"replayed"`: epochs after the first replay cached scores.
+  - `"fixed_per_item"`: each item's scores repeat in every block.
+
+**Reading the fields.**
+- In a 1.1 file, an absent field means `training_step` or `live`.
+- A 1.0 file states neither. It is read exactly as before, with every 2.0 rule and every 2.0 oracle unchanged.
+- An unknown value is a warning, and the file is read as if the field were absent.
+
+**What ScalarScope withholds.** A withheld delta has the status 2.0 declared and never produced, `Indeterminate`, shown as "withheld". Its explanation states the reason.
+- **Either run has `checkpoint_by_item`:**
+  - ΔTc and ΔO are withheld: "steps are checkpoint × item, not time".
+  - ΔF is withheld too, because its divergence and collapse checks read across steps.
+  - The trajectory is drawn as unordered points per checkpoint block, not as one joined line, and is labelled so.
+- **Either run's `scalar_source` is `replayed` or `fixed_per_item`:**
+  - ΔF is withheld: its recorded failures are score dips, and the scores repeat.
+  - The score panels say the scores are replayed or fixed per item.
+- **ΔTd and ΔĀ are never withheld for these reasons.**
+- **The headline** is built only from deltas that stand: neither quiet nor withheld.
+
+**Also fixed with this:** evaluator labels that overlap when two evaluators point the same way.
+
 ## Corrections
 
 - The 3.0.0 changelog says ΔTc's 3-step floor is "the same resolution the .NET app used". That is true of 2.0's geometry convergence delta (`ResolutionSteps = 3`), not its inference comparer, which fires on any nonzero difference. The line is corrected in this change.
