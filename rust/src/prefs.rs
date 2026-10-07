@@ -5,7 +5,7 @@
 //! Plugin DLLs in the same folder are not loaded.
 
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use serde_json::{Map, Value};
 
@@ -37,6 +37,9 @@ pub struct ReviewPrefs {
     pub anomaly_rule: u8,
     pub recent_limit: usize,
     pub recent: Vec<RecentFile>,
+    /// `LastFolder`, new in 3.1: the folder a file dialog was last used in. It lives only here,
+    /// never in a bundle or in workbench.json.
+    pub last_folder: Option<String>,
 }
 
 impl Default for ReviewPrefs {
@@ -49,6 +52,7 @@ impl Default for ReviewPrefs {
             anomaly_rule: 0,
             recent_limit: 10,
             recent: Vec::new(),
+            last_folder: None,
         }
     }
 }
@@ -116,6 +120,24 @@ pub fn write_settings(directory: &Path, settings: &ReviewPrefs) -> Result<(), St
     root.insert("RecentFilesLimit".to_string(), Value::from(settings.recent_limit.clamp(1, 40) as u64));
     root.insert("AnomalyRule".to_string(), Value::from(settings.anomaly_rule));
     write_object(directory, &root)
+}
+
+/// Record the folder a file dialog was last used in, as `LastFolder`. Every other key stays.
+pub fn remember_folder(directory: &Path, folder: &Path) -> Result<(), String> {
+    let mut root = read_object(directory)?;
+    root.insert("LastFolder".to_string(), Value::from(folder.display().to_string()));
+    write_object(directory, &root)
+}
+
+/// Where a file dialog starts: the folder used last, else Documents, else the user's profile.
+/// Only an absolute folder that exists is used. It is never the working directory, which for
+/// the Store package is the system folder.
+pub fn start_folder(last: Option<&Path>, documents: Option<PathBuf>, home: Option<PathBuf>) -> Option<PathBuf> {
+    last.map(Path::to_path_buf)
+        .into_iter()
+        .chain(documents)
+        .chain(home)
+        .find(|folder| folder.is_absolute() && folder.is_dir())
 }
 
 /// Empty `RecentFiles`. Every other key stays.
@@ -232,6 +254,7 @@ fn prefs_from(map: &Map<String, Value>) -> ReviewPrefs {
         anomaly_rule: json_u8(map.get("AnomalyRule")).filter(|rule| *rule <= 1).unwrap_or(0),
         recent_limit: recent_limit(map.get("RecentFilesLimit")),
         recent,
+        last_folder: string_field(map, "LastFolder").filter(|folder| !folder.trim().is_empty()),
     }
 }
 

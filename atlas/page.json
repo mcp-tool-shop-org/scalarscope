@@ -35,48 +35,24 @@
   ],
   "changes": {
     "fileCounts": {
-      "added": 2,
-      "changed": 1,
+      "added": 0,
+      "changed": 15,
       "moved": 0,
       "parts": 2,
       "removed": 0
     },
     "items": [
       {
-        "kind": "door",
-        "sentence": "Build and Test now also runs rust/build.rs.",
-        "subjects": [
-          ".github/workflows/build.yml",
-          "rust/build.rs"
-        ]
-      },
-      {
-        "kind": "door",
-        "sentence": "Coverage now also runs rust/build.rs.",
-        "subjects": [
-          ".github/workflows/coverage.yml",
-          "rust/build.rs"
-        ]
-      },
-      {
-        "kind": "door",
-        "sentence": "Release now also runs rust/build.rs.",
-        "subjects": [
-          ".github/workflows/release.yml",
-          "rust/build.rs"
-        ]
-      },
-      {
         "kind": "counts",
-        "sentence": "2 files added and 1 changed content, across 2 parts.",
+        "sentence": "Nothing structural changed since 2026-10-07; 15 files changed content.",
         "subjects": []
       }
     ],
     "since": {
-      "commit": "5d367251987fe3c1fdc23b22509d3540834d9ca4",
-      "generatedAt": "2026-10-07T05:00:40.845Z"
+      "commit": "05e9f42e40f6b818ae51c13931e6db64f2cf9371",
+      "generatedAt": "2026-10-07T05:21:47.462Z"
     },
-    "unchanged": false
+    "unchanged": true
   },
   "changesTogether": [
     {
@@ -160,7 +136,7 @@
     "Window: 180 days; a pair counts from 3 shared commits, since 8 source files reach 10 revisions; the floor rises to 10 when 25 do."
   ],
   "changesTogetherWithTests": 0,
-  "commit": "05e9f42e40f6b818ae51c13931e6db64f2cf9371",
+  "commit": "67fa43554a51ddc6dd32e09e52f20fc10779a843",
   "defaultBranch": "main",
   "derived": "10 parts, mostly C# (181 files), Rust (40), CSS (2), PowerShell (2), TypeScript (2), Astro (1), JavaScript (1), Python (1) and shell (1). Work enters through 7 doors; the busiest is Build and Test, which reaches 4 parts. It deploys a site to GitHub Pages. People run scalarscope.",
   "doors": [
@@ -430,7 +406,7 @@
   "edges": [],
   "engine": "1.24.0",
   "generated": [],
-  "generatedAt": "2026-10-07T05:21:47.462Z",
+  "generatedAt": "2026-10-07T05:42:01.599Z",
   "limits": [
     "5 writes and 4 reads use paths built at run time and are not named here.",
     "5 writes and 12 reads go to a path their caller passes, not to this repository.",

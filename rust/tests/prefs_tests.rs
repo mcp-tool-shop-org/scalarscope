@@ -187,3 +187,30 @@ fn settings_write_under_the_2_0_keys_and_keep_the_rest() {
     assert!(scalarscope::prefs::write_settings(&dir, &settings).is_err());
     assert_eq!(std::fs::read_to_string(dir.join("preferences.json")).unwrap(), "[1]");
 }
+
+#[test]
+fn the_last_folder_is_remembered_beside_the_other_keys_and_starts_the_dialogs() {
+    let dir = std::env::temp_dir().join(format!("scalarscope-lastfolder-{}", std::process::id()));
+    fs::create_dir_all(&dir).unwrap();
+    fs::write(dir.join(prefs::FILE_NAME), r#"{"Theme":2,"Plugin":"kept"}"#).unwrap();
+    assert_eq!(prefs::read(&dir).last_folder, None);
+
+    let used = dir.join("runs");
+    fs::create_dir_all(&used).unwrap();
+    prefs::remember_folder(&dir, &used).unwrap();
+    let saved = prefs::read(&dir);
+    assert_eq!(saved.last_folder, Some(used.display().to_string()));
+    assert_eq!(saved.theme, 2);
+    assert!(fs::read_to_string(dir.join(prefs::FILE_NAME)).unwrap().contains("\"Plugin\": \"kept\""));
+
+    let documents = dir.join("Documents");
+    fs::create_dir_all(&documents).unwrap();
+    let home = dir.clone();
+    let gone = dir.join("gone");
+    assert_eq!(prefs::start_folder(Some(&used), Some(documents.clone()), Some(home.clone())), Some(used.clone()));
+    assert_eq!(prefs::start_folder(Some(&gone), Some(documents.clone()), Some(home.clone())), Some(documents.clone()));
+    assert_eq!(prefs::start_folder(None, Some(gone.clone()), Some(home.clone())), Some(home.clone()));
+    // A relative folder would resolve against the working directory, so it is never used.
+    assert_eq!(prefs::start_folder(Some(std::path::Path::new(".")), None, None), None);
+    fs::remove_dir_all(&dir).unwrap();
+}
