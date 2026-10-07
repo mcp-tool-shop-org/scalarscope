@@ -212,8 +212,20 @@
           "path": "docs/index.md"
         },
         {
-          "hash": "fd0defa11c0f154b088108b6edc1c9e7b58582b71d2c28a87288e5dbf297ad96",
+          "hash": "06ac5c1b5e71358843badf8bdde71f8a5520a74b2afad72b2a381edcad1c2de8",
           "path": "docs/parity-and-beyond.spec.md"
+        },
+        {
+          "hash": "c8acb091ebc84b50daad582b29fa5ccebf8d7460fcbd3eb9fdf43826f19212ea",
+          "path": "docs/receipts/README.md"
+        },
+        {
+          "hash": "cf2562ed46a485525e2b390cebb48092e3799c704192e2b5bf439c7eb5063ca6",
+          "path": "docs/receipts/workbench-golden-pair.json"
+        },
+        {
+          "hash": "adde229d8e96774668421caa7d44031c9d7722fcc7e751a888183e238561d94a",
+          "path": "docs/receipts/workbench-knob-folder.json"
         }
       ],
       "globs": [
@@ -294,7 +306,7 @@
           "path": ".gitignore"
         },
         {
-          "hash": "a588e568c3acc592b409ee2164018b77b0c19c854d1de125c97057436a6d0e9e",
+          "hash": "623cd1ddbaf427efe470d777163d816152b987535c8852a923bb5ac6f8d7e788",
           "path": "CHANGELOG.md"
         },
         {
@@ -761,15 +773,15 @@
             {
               "in": "record",
               "kind": "err",
-              "line": 91
+              "line": 111
             },
             {
               "in": "attach_bundle",
               "kind": "err",
-              "line": 122
+              "line": 142
             }
           ],
-          "hash": "188542507907294709cd3621b5407236f7b19c012a0147c115659bbe4763f2d0",
+          "hash": "23ef6eb15f13b93bc91c6aff20008089ea5251930f323e99025c8790dd923773",
           "importsFiles": [
             "rust/src/bundle.rs"
           ],
@@ -783,7 +795,7 @@
           "path": "rust/src/knobs.rs"
         },
         {
-          "hash": "bd0fb100d7b68a35665c6c3ef801fce5f7de2b9ab381c1f981b95f0bf6e04ea3",
+          "hash": "f556510cd08a47fb7a44a95a556dfa3b3443359ee3b92d5b2237870e2f8e889b",
           "importsFiles": [
             "rust/src/bundle.rs",
             "rust/src/geometry.rs",
@@ -799,6 +811,7 @@
             "rust/src/shape.rs",
             "rust/src/stats.rs",
             "rust/src/svg.rs",
+            "rust/src/trends.rs",
             "rust/src/ui.rs",
             "rust/src/views.rs",
             "rust/src/workbench.rs"
@@ -2141,6 +2154,23 @@
         },
         {
           "exports": [
+            "entry_facts",
+            "marks",
+            "mean_shift_pelt",
+            "projects",
+            "trend"
+          ],
+          "hash": "62b48b653b1c356a8f23d7b23339981069e4f38858ba361870f7772f22775a59",
+          "importsFiles": [
+            "rust/src/history.rs",
+            "rust/src/open.rs",
+            "rust/src/stats.rs",
+            "rust/src/workbench.rs"
+          ],
+          "path": "rust/src/trends.rs"
+        },
+        {
+          "exports": [
             "encode_png",
             "install_style"
           ],
@@ -2148,32 +2178,22 @@
             {
               "in": "page",
               "kind": "match-err",
-              "line": 315
+              "line": 321
             },
             {
               "in": "load",
               "kind": "match-err",
-              "line": 404
+              "line": 410
             },
             {
               "in": "open_bundle",
               "kind": "match-err",
-              "line": 427
+              "line": 433
             },
             {
               "in": "save_bundle",
               "kind": "match-err",
-              "line": 441
-            },
-            {
-              "in": "save_bundle",
-              "kind": "match-err",
-              "line": 458
-            },
-            {
-              "in": "save_bundle",
-              "kind": "match-err",
-              "line": 462
+              "line": 447
             },
             {
               "in": "save_bundle",
@@ -2181,44 +2201,49 @@
               "line": 464
             },
             {
+              "in": "save_bundle",
+              "kind": "match-err",
+              "line": 468
+            },
+            {
+              "in": "save_bundle",
+              "kind": "match-err",
+              "line": 470
+            },
+            {
               "in": "export_svg",
               "kind": "match-err",
-              "line": 649
+              "line": 655
             },
             {
               "in": "receive_screenshot",
               "kind": "match-err",
-              "line": 673
+              "line": 679
             },
             {
               "in": "settings_changed",
               "kind": "match-err",
-              "line": 712
+              "line": 718
             },
             {
               "in": "draw_settings",
               "kind": "match-err",
-              "line": 759
+              "line": 765
             },
             {
               "in": "remember",
               "kind": "match-err",
-              "line": 1146
+              "line": 1159
             },
             {
               "in": "open_saved_path",
               "kind": "match-err",
-              "line": 1272
+              "line": 1287
             },
             {
               "in": "remember_opened_file",
               "kind": "match-err",
-              "line": 1286
-            },
-            {
-              "in": "reopen",
-              "kind": "match-err",
-              "line": 1303
+              "line": 1301
             },
             {
               "in": "reopen",
@@ -2228,10 +2253,15 @@
             {
               "in": "reopen",
               "kind": "match-err",
-              "line": 1318
+              "line": 1333
+            },
+            {
+              "in": "reopen",
+              "kind": "match-err",
+              "line": 1333
             }
           ],
-          "hash": "9529bd3d49e3a94ab5ddc46434ba7281270b854244f260f07f5c573aab0df7d9",
+          "hash": "dc984788ba1d17efd5d29497f83e5d9974647d2695d0380accf86bb395ae79a7",
           "importOrder": [
             "rust/src/bundle.rs",
             "rust/src/history.rs",
@@ -2241,8 +2271,10 @@
             "rust/src/review.rs",
             "rust/src/views.rs",
             "rust/src/ui_workbench.rs",
+            "rust/src/ui_history.rs",
             "rust/src/svg.rs",
             "rust/src/stats.rs",
+            "rust/src/trends.rs",
             "rust/src/ui_pages.rs",
             "rust/src/ui_geometry.rs",
             "rust/src/ui_tests.rs"
@@ -2256,7 +2288,9 @@
             "rust/src/review.rs",
             "rust/src/stats.rs",
             "rust/src/svg.rs",
+            "rust/src/trends.rs",
             "rust/src/ui_geometry.rs",
+            "rust/src/ui_history.rs",
             "rust/src/ui_pages.rs",
             "rust/src/ui_tests.rs",
             "rust/src/ui_workbench.rs",
@@ -2267,7 +2301,7 @@
             {
               "calls": [
                 {
-                  "line": 940,
+                  "line": 946,
                   "name": "nines",
                   "target": {
                     "file": "rust/src/views.rs"
@@ -2282,7 +2316,7 @@
             {
               "calls": [
                 {
-                  "line": 961,
+                  "line": 967,
                   "name": "spectrum",
                   "target": {
                     "file": "rust/src/views.rs"
@@ -2297,14 +2331,14 @@
             {
               "calls": [
                 {
-                  "line": 993,
+                  "line": 999,
                   "name": "heat_range",
                   "target": {
                     "file": "rust/src/views.rs"
                   }
                 },
                 {
-                  "line": 1010,
+                  "line": 1016,
                   "name": "heat_cells",
                   "target": {
                     "file": "rust/src/views.rs"
@@ -2319,7 +2353,7 @@
             {
               "calls": [
                 {
-                  "line": 1385,
+                  "line": 1400,
                   "name": "stored_pair",
                   "target": {
                     "file": "rust/src/bundle.rs"
@@ -2355,6 +2389,15 @@
           "testsInside": true
         },
         {
+          "hash": "1da800e0694c5be0a6c7405c585a14c60d14aa53db0b35b5aec9ba220c2a1461",
+          "importsFiles": [
+            "rust/src/history.rs",
+            "rust/src/trends.rs",
+            "rust/src/ui.rs"
+          ],
+          "path": "rust/src/ui_history.rs"
+        },
+        {
           "exports": [
             "search",
             "view_for_key"
@@ -2363,15 +2406,15 @@
             {
               "in": "load_sample",
               "kind": "match-err",
-              "line": 141
+              "line": 145
             },
             {
               "in": "load_sample",
               "kind": "match-err",
-              "line": 141
+              "line": 145
             }
           ],
-          "hash": "4bcbf0065e84cf39277bd4f5496d875d1a30f06c29128b6a235b3eaa5524f653",
+          "hash": "8de15913f3fff3550d25591ffb926e9e3aeecff32f8075481dc9c687c39f86d0",
           "importOrder": [
             "rust/src/ui.rs",
             "rust/src/open.rs"
@@ -2387,10 +2430,10 @@
             {
               "in": "the_workbench_page_asks_for_runs_then_weighs_a_picked_folder",
               "kind": "match-err",
-              "line": 765
+              "line": 768
             }
           ],
-          "hash": "095e45616e8358794f008a56456d3b741e392e43228a3ec5bc42982a54ac2930",
+          "hash": "9b388b3cf448942cf8b750b2e5098b88abaf2f62f025fce13ec8275c950a8a37",
           "importOrder": [
             "rust/src/bundle.rs",
             "rust/src/history.rs",
@@ -2640,7 +2683,7 @@
           "testsInside": true
         },
         {
-          "hash": "89568d9bf54c803e53cbbd5e1adcf5b9c114342fd752fed49672ca5c89180ae5",
+          "hash": "33379dbad1c4227883d62560daa3d75e91325991a6ff8f86a76cbbc83cbc7f00",
           "importsFiles": [
             "rust/src/bundle.rs",
             "rust/src/history.rs",
@@ -2661,6 +2704,14 @@
         {
           "hash": "fc53c3e8d26207b8a299f0a7ddaec6534947537c9d1295fcaaa2b600bb0ebb6f",
           "path": "rust/tests/fixtures/aspire-si/steady.json"
+        },
+        {
+          "hash": "6d981971557bd3ed9b3c59e7781dc7fc7afbcdd7f89bbc0f8b370e8a5c02e539",
+          "path": "rust/tests/fixtures/history/README.md"
+        },
+        {
+          "hash": "cb9dfd55356b4dcb52145e9d6047855f869a8caed10f9d69a2eb49515f732634",
+          "path": "rust/tests/fixtures/history/comparison-log.json"
         },
         {
           "hash": "1527a473177b065971d3852a52f9ac31feb36021bbf157b93e2fbf66af3653f6",
@@ -2720,7 +2771,7 @@
           "testsInside": true
         },
         {
-          "hash": "351c7d51b567fe5dfcf253323da2d399fac73fcc20201408beb734ce93e28e3d",
+          "hash": "bd3a27cb814e2d8ae7b057fe36d107508d98b6d21f8acf60d421d609304ca13d",
           "importsFiles": [
             "rust/src/history.rs"
           ],
@@ -2771,6 +2822,24 @@
           "testsInside": true
         },
         {
+          "hash": "bb518de0c08ca0be5cdb9fa1a691c8833cf1c4c4b50f96221baa941683a87913",
+          "importOrder": [
+            "rust/src/history.rs",
+            "rust/src/stats.rs",
+            "rust/src/trends.rs",
+            "rust/src/open.rs"
+          ],
+          "importsFiles": [
+            "rust/src/history.rs",
+            "rust/src/open.rs",
+            "rust/src/stats.rs",
+            "rust/src/trends.rs"
+          ],
+          "library": "rust/src/lib.rs",
+          "path": "rust/tests/trends_tests.rs",
+          "testsInside": true
+        },
+        {
           "hash": "3a621a964bd39687e926e7209703086fef9f307dd07c6c8470a23f5fa8e21086",
           "importsFiles": [
             "rust/src/knobs.rs",
@@ -2811,7 +2880,7 @@
       "testRunners": [
         "cargo test"
       ],
-      "testedBy": 18,
+      "testedBy": 19,
       "unresolvedSites": 0
     },
     {
@@ -4181,7 +4250,7 @@
         {
           "boundary": "rust",
           "depth": 0,
-          "files": 23
+          "files": 25
         },
         {
           "boundary": "src",
@@ -4412,7 +4481,7 @@
         {
           "boundary": "rust",
           "depth": 0,
-          "files": 32
+          "files": 35
         }
       ],
       "readers": [],
@@ -4539,12 +4608,19 @@
         {
           "job": "test",
           "matched": true,
+          "path": "rust/tests/trends_tests.rs",
+          "runKind": "executes",
+          "via": "cargo test"
+        },
+        {
+          "job": "test",
+          "matched": true,
           "path": "rust/tests/workbench_tests.rs",
           "runKind": "executes",
           "via": "cargo test"
         }
       ],
-      "runsCount": 18,
+      "runsCount": 19,
       "secrets": [],
       "sends": {
         "deploysPages": false,
@@ -4561,7 +4637,7 @@
         {
           "coverage": true,
           "dir": "rust",
-          "files": 18,
+          "files": 19,
           "job": "test",
           "runner": "cargo test",
           "step": "Test"
@@ -4929,7 +5005,7 @@
         {
           "boundary": "rust",
           "depth": 0,
-          "files": 23
+          "files": 25
         }
       ],
       "readers": [],
@@ -5051,7 +5127,7 @@
         {
           "boundary": "rust",
           "depth": 0,
-          "files": 22
+          "files": 24
         }
       ],
       "readers": [],
@@ -5082,8 +5158,8 @@
   "edges": [],
   "engine": "1.24.0",
   "generatedFrom": {
-    "commit": "893523cfe5cfaa0cf89185d96c84e5494dbd0007",
-    "tracked": 404
+    "commit": "975415be0d0d26172bae62e253f1395706ad6367",
+    "tracked": 412
   },
   "landings": [
     {
@@ -5362,6 +5438,6 @@
   "overlaps": [],
   "submodules": [],
   "symlinks": [],
-  "testFiles": 67,
+  "testFiles": 70,
   "unassigned": []
 }
