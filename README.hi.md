@@ -6,7 +6,7 @@
   <img src="https://raw.githubusercontent.com/mcp-tool-shop-org/brand/main/logos/ScalarScope/readme.png" width="400" alt="ScalarScope">
 </p>
 
-[MCP टूल शॉप](https://mcptoolshop.com) का हिस्सा।
+> [MCP टूल शॉप](https://mcptoolshop.com) का हिस्सा
 
 <p align="center">
   <a href="https://github.com/mcp-tool-shop-org/scalarscope/actions/workflows/build.yml"><img src="https://github.com/mcp-tool-shop-org/scalarscope/actions/workflows/build.yml/badge.svg" alt="Build and Test"></a>
@@ -16,191 +16,113 @@
   <a href="https://apps.microsoft.com/detail/9P3HT1PHBKQK"><img src="https://img.shields.io/badge/Microsoft%20Store-9P3HT1PHBKQK-0078D4?style=flat-square&logo=microsoft" alt="Microsoft Store"></a>
 </p>
 
-**दो मशीन-लर्निंग रनों की समीक्षा।** इस रिपॉजिटरी से आप जो ऐप बनाते हैं, वह `rust/` में रस्ट प्रोग्राम है। रिलीज़ वर्कफ़्लो उस प्रोग्राम को बिना हस्ताक्षरित 3.0.0.0 MSIX के रूप में पैक करता है। पैकेज का नाम और प्रकाशक समान रहते हैं। वह फ़ाइल अपलोड नहीं की जाती है। स्टोर कॉपी अभी भी पिछली .NET पैकेज है जब तक कि वह अपलोड न हो जाए।
+**दो मशीन-लर्निंग रनों की तुलना करें, और देखें कि तुलना कितनी सटीक है।** स्केलरस्कोप दो अनुमान ट्रेस, दो प्रशिक्षण इतिहास, या दो एस्पायर ज्यामिति निर्यात खोलता है। यह बताता है कि रन बी, रन ए से कैसे भिन्न है, प्रत्येक अंतर को एक अंतराल या उसके कारण के साथ प्रस्तुत करता है, और उस जानकारी को रोक लेता है जिसका डेटा समर्थन नहीं कर सकता।
 
-पैकेज संस्करण **3.0.0.0**। [9P3HT1PHBKQK](https://apps.microsoft.com/detail/9P3HT1PHBKQK) के स्टोर अपडेट नाम `mcp-tool-shop.ScalarScope` और प्रकाशक `CN=5305D976-6952-4F00-9C21-3A5DB090359F` को बनाए रखते हैं।
+संस्करण **3.1.0** रस्ट में फिर से लिखा गया है। यह माइक्रोसॉफ्ट स्टोर पर विंडोज ऐप है, जिसका पैकेज नाम [9P3HT1PHBKQK](https://apps.microsoft.com/detail/9P3HT1PHBKQK) और पैकेज संस्करण 3.1.0.0 है, जो उसी सूची का एक अद्यतन है। पैकेज नाम `mcp-tool-shop.ScalarScope` और प्रकाशक `CN=5305D976-6952-4F00-9C21-3A5DB090359F` अपरिवर्तित हैं, इसलिए 2.0 से सहेजी गई फाइलें, समीक्षाएं और सेटिंग्स बरकरार रहेंगी।
 
 ## ट्रस्ट मॉडल
 
-समीक्षा उन दो फ़ाइलों को पढ़ती है जिन्हें आप खोलते हैं। एक पैकेज किए गए रन में उस पैकेज के LocalState फ़ोल्डर में `comparison-log.json` और `preferences.json` भी पढ़ा और लिखा जाता है। एक बंडल केवल उस पथ पर लिखा जाता है जिसे आप चुनते हैं।
-
-यह उन फ़ाइलों को कहीं भी नहीं भेजता है। कोई खाता, कोई टेलीमेट्री और कोई एनालिटिक्स नहीं है। उस फ़ोल्डर में प्लगइन्स अपनी जगह पर छोड़ दिए जाते हैं और लोड नहीं किए जाते हैं। बंडल पर हैश संग्रहीत बाइट्स की जांच करता है। यह एक सामग्री जांच है, हस्ताक्षर नहीं, और यह नहीं बताता है कि फ़ाइल किसने लिखी।
-
-प्रोग्राम को उन फ़ाइलों को पढ़ने और उस बंडल को लिखने की अनुमति की आवश्यकता होती है जिसे आप सहेजते हैं।
-
----
-
-## स्केलरस्कोप क्यों?
-
-अधिकांश एमएल टीमें लॉग को देखकर विश्लेषण करती हैं। स्केलरस्कोप इसे संरचित, पुनरुत्पादनीय तुलना से बदल देता है।
-
-नीचे दी गई बुलेट बिंदुओं में प्रकाशित .NET पैकेज का वर्णन किया गया है। रस्ट समीक्षा एक अनुमान श्रृंखला या एक बैकप्रोपैगेट प्रशिक्षण-हानि वक्र बनाती है। एक अनुमान जोड़ी पर यह ΔF और ΔO, और केवल तभी ΔTc की रिपोर्ट करता है जब दोनों पक्षों में एक स्थिर-अवस्था मील का पत्थर हो। जब दोनों मील के पत्थर मौजूद होते हैं, तो श्रृंखला वहां एक ऊर्ध्वाधर रेखा खींचती है। यह चरण 7.2 लेआउट में `.scbundle` लिखता है। उस फ़ाइल को फिर से खोलने से संग्रहीत समीक्षा दिखाई देती है। हैश संग्रहीत फ़ाइल बाइट्स का SHA-256 है, और `integrity.json` सील है। मिलान हैश एक सामग्री जांच है, हस्ताक्षर नहीं। एक पैकेज किए गए रन में उस पैकेज के LocalState फ़ोल्डर में `comparison-log.json` और `preferences.json` होते हैं, जो वही फ़ाइलें हैं जिन्हें .NET ऐप ने लिखा था। श्रृंखला रंग सहेजे गए रंग-दृष्टि मोड का पालन करते हैं। उस फ़ोल्डर से हालिया फ़ाइलें और सहेजे गए दृश्य यहां फिर से खुलते हैं। उस फ़ोल्डर में प्लगइन्स अपनी जगह पर छोड़ दिए जाते हैं और लोड नहीं किए जाते हैं। एक अनपैकेज किए गए रन में वह फ़ोल्डर नहीं लिखा जाता है।
-
-- **एक-से-एक तुलना** — दो अनुमान ट्रेस को एक साथ लोड करें और देखें कि वास्तव में क्या बदला
-- **मानक डेल्टा विश्लेषण** — पांच डेल्टा प्रकार (ΔTc, ΔO, ΔF, ΔĀ, ΔTd) केवल तभी सक्रिय होते हैं जब अंतर सांख्यिकीय रूप से सार्थक होते हैं
-- **रनटाइम प्रीसेट** — TFRT प्रीसेट अप्रासंगिक मेट्रिक्स को स्वचालित रूप से दबा देता है ताकि आप TensorFlow-TRT वर्कलोड के लिए महत्वपूर्ण चीज़ों पर ध्यान केंद्रित कर सकें
-- **पुनरुत्पादनीय बंडल** — SHA-256 अखंडता, जमे हुए डेल्टा और पूर्ण उत्पत्ति मेटाडेटा के साथ `.scbundle` अभिलेखागार निर्यात करें
-- **समीक्षा मोड** — पुनर्गणना किए बिना एक बंडल खोलें। मिलान SHA-256 एक सामग्री जांच है, हस्ताक्षर नहीं।
-- **गोपनीयता पहले** — शून्य टेलीमेट्री, शून्य एनालिटिक्स, सभी डेटा स्थानीय रूप से रहता है जब तक कि आप स्पष्ट रूप से निर्यात नहीं करते
+- **यह क्या पढ़ता है।** आपके द्वारा खोली गई फाइलें। स्टोर पैकेज अपने स्वयं के लोकलस्टेट फ़ोल्डर में `comparison-log.json`, `preferences.json` और `workbench.json` को भी पढ़ता और लिखता है, जो कि 2.0 द्वारा उपयोग किया गया फ़ोल्डर है। बिना पैकेज किए गए बिल्ड इनमें से किसी को भी नहीं लिखते हैं।
+- **यह क्या लिखता है।** एक बंडल, एक चित्र या एक सत्र रिकॉर्ड, केवल आपके द्वारा चुने गए पथ पर।
+- **नेटवर्क।** कोई खाता, कोई टेलीमेट्री और कोई एनालिटिक्स नहीं है। ऐप द्वारा बनाया जा सकने वाला एकमात्र कनेक्शन वर्कबेंच टैब से है, और केवल तभी जब आप **पूछें** पर क्लिक करें: इस कंप्यूटर पर एक स्थानीय ओलामा से `127.0.0.1` पर। ओलामा के क्लाउड मॉडल अस्वीकार कर दिए जाते हैं। कुछ भी मशीन से बाहर नहीं जाता है।
+- **बंडल।** मिलान करने वाला SHA-256 एक सामग्री जांच है, हस्ताक्षर नहीं। यह बताता है कि बाइट्स बरकरार हैं। यह नहीं बताता कि फ़ाइल किसने लिखी।
+- **प्लगइन्स।** 2.0 फ़ोल्डर में छोड़े गए प्लगइन्स लोड नहीं किए जाते हैं।
 
 ---
 
-## वोर्टेक्सकिट
+## यह क्या करता है
 
-वोर्टेक्सकिट `src/VortexKit` में विज़ुअलाइज़ेशन लाइब्रेरी है। यह इस रिपॉजिटरी का हिस्सा है। इसे NuGet पर प्रकाशित नहीं किया गया है।
+**अनुमान: प्रति चरण विलंबता के दो रन।**
+- **मुख्य शीर्षक** p50, p90 और p99 पर B/A है। प्रत्येक अनुपात में 95% मूविंग-ब्लॉक बूटस्ट्रैप अंतराल होता है।
+- **प्रत्येक तरफ कई रन** खोले जा सकते हैं। फिर अंतराल पूरे रन को भी फिर से नमूना करता है, और इसे नीचे तीन रन प्रति तरफ के रूप में दर्शाया गया है।
+- **पर्याप्त नमूनों के बिना एक प्रतिशतक** मुद्रित नहीं किया जाता है; p99 को 368 की आवश्यकता होती है।
+- **तीन डेल्टा,** प्रत्येक में एक टाइल होती है जो बताती है कि क्या यह सक्रिय हुआ, शांत रहा या रोक दिया गया, और क्यों:
+- **ΔF (नए विसंगतियां)** 5 मजबूत विचलन से परे स्थिर नमूनों की गणना करता है। यह केवल तभी सक्रिय होता है जब B का अतिरिक्त मान संयोग से परे हो।
+- **ΔO (परिवर्तनशीलता)** तब सक्रिय होता है जब A के सापेक्ष B के प्रसार पर अंतराल 1 को बाहर करता है।
+- **ΔTc (स्थिरीकरण)** प्रत्येक रन को एक आकार देता है। यह केवल तभी सक्रिय होता है जब दोनों स्थिर हो जाएं और उनके स्थिरीकरण रेंज ओवरलैप न करें।
+- **छह दृश्य:** श्रृंखला, वार्मअप, एक सीमा के साथ वितरण जिसे आप खींचते हैं, प्रतिशतक द्वारा अंतर, स्पेक्ट्रम और हीट मैप। इनमें से कोई भी एनिमेट नहीं होता है।
 
-इसमें समय-सिंक्रनाइज़ प्लेबैक, एनिमेटेड SkiaSharp कैनवस, तुलना दृश्य, एनोटेशन ओवरले, SVG और PNG निर्यात और एक सिमेंटिक रंग प्रणाली शामिल है।
+**प्रशिक्षण।** एक बैकप्रोपैगेट `run_history.json` को प्रशिक्षण हानि के रूप में खींचा जाता है, जिसमें होल्ड-आउट हानि, पेर्प्लेक्सिटी और कार्य मेट्रिक्स इसके बगल में होते हैं। अनुमान डेल्टा की गणना इस पर नहीं की जाती है।
+
+**ज्यामिति: दो एस्पायर प्रशिक्षण रन।**
+- **यह क्या पढ़ता है:** ज्यामिति निर्यात जो [एस्पायर-एसआई](https://github.com/mcp-tool-shop-org/aspire-si) लिखता है, जिसमें इसकी प्रक्षेपवक्र, मूल्यांकनकर्ता स्कोर, आइजन स्पेक्ट्रम और विफलताएं शामिल हैं।
+- **पांच डेल्टा:** ΔF, ΔTc, ΔTd, ΔĀ (स्पेक्ट्रम एकाग्रता) और ΔO। इन्हें 2.0 से पोर्ट किया गया है और 2.0 के अपने परिणामों के विरुद्ध जांचा गया है, जिसमें [विशिष्टता](docs/parity-and-beyond.spec.md) में दर्ज सुधार शामिल हैं।
+- **निर्यात अनुबंध (स्कीमा 1.1)।** एक निर्यात यह बता सकता है कि इसके चरण समय के बजाय चेकपॉइंट × आइटम हैं, या यह कि इसके स्कोर को फिर से चलाया गया था। जब यह ऐसा करता है, तो समय या स्कोर में गिरावट पढ़ने वाले डेल्टा को उस कारण के साथ रोक दिया जाता है, और मुख्य शीर्षक केवल उन डेल्टा से बोलता है जो मौजूद हैं। पुराने निर्यात पहले की तरह पढ़े जाते हैं।
+
+**वर्कबेंच।**
+- **कई रन खोलें** जो एक सेटिंग में भिन्न हों, जैसे कि बैच आकार या परिशुद्धता।
+- **पूछें:** एक स्थानीय मॉडल जो उपकरणों को कॉल कर सकता है, वह रनों को सूत्रों के साथ मापता है और प्रस्ताव करता है कि प्रत्येक सेटिंग क्या करती है।
+- **कार्यक्रम प्रत्येक संख्या और निर्णय निर्धारित करता है।** एक परिकल्पना का परीक्षण रनों के प्रत्येक सेट पर एक सटीक रैंक परीक्षण द्वारा किया जाता है। सेटों में निर्णय केवल चेकपॉइंट पर, 5% झूठी खोज दर पर ई-बीएच द्वारा आते हैं।
+- **सबसे पहले आपकी बात।** आप पूछने से पहले अपना स्वयं का कॉल लिख सकते हैं। मॉडल का नोट निर्णयों के नीचे दिखाया गया है, जिसे इसके शब्दों के रूप में लेबल किया गया है।
+
+**इतिहास।** स्टोर पैकेज में, आपके द्वारा पूरी की गई तुलनाओं को साइड बी के डेटासेट और मॉडल द्वारा समूहीकृत किया जाता है। प्रत्येक माप उन समीक्षाओं में खींचा जाता है, जिसमें उन बिंदुओं को दर्शाया जाता है जहां इसका स्तर बदल गया। एक कोड या पर्यावरण परिवर्तन जो एक बदलाव के बगल में है, उसे नामित किया जाता है, और इसे कारण नहीं, बल्कि संयोग कहा जाता है। लॉग अंतिम 40 समीक्षाओं को रखता है।
+
+**बंडल और सहेजी गई स्थिति।**
+- **बंडल सहेजें** समीक्षा को `.scbundle` के रूप में लिखता है। **बंडल खोलें** इसे ठीक उसी तरह दिखाता है जैसे इसे समीक्षा मोड में सहेजा गया था।
+- **2.0 बंडल** खुलते हैं: तुलना बंडल जिसमें उनके संग्रहीत डेल्टा होते हैं, और अनुमान समीक्षाएं जिन्हें अपरिवर्तित के रूप में चिह्नित किया गया है।
+- **2.0 की सेटिंग्स** बरकरार रहती हैं: थीम, रंग-दृष्टि पैलेट, उच्च कंट्रास्ट, पाठ स्केल, हालिया-फ़ाइल सीमा और विसंगति नियम।
+- **वर्तमान दृश्य को SVG के रूप में, या विंडो को PNG के रूप में निर्यात करें।**
 
 ---
 
 ## त्वरित शुरुआत
 
-### रस्ट समीक्षा
-
-इस रिपॉजिटरी से:
-
-```
-cargo run --manifest-path rust/Cargo.toml
-```
-
-दो अनुमान फ़ाइलें या दो बैकप्रोपैगेट `run_history.json` फ़ाइलें खोलें। एक अनुमान फ़ाइल एक विलंबता CSV, एक बेंचमार्क JSON या एक क्रोम ट्रेस है। उस ट्रेस में एक पूर्ण `ProfilerStep` एक अनुमान है, और इसके अंदर के ऑप अतिरिक्त नमूने नहीं हैं। बिना किसी चरण के ट्रेस में भी उन घटनाओं का उपयोग किया जाता है जिनके नामों में TensorRT या अनुमान शामिल है। एक प्रशिक्षण फ़ाइल को प्रशिक्षण हानि के रूप में खींचा जाता है। होल्ड-आउट हानि, जटिलता और कार्य मेट्रिक्स उस वक्र के साथ होते हैं। `final_loss` को स्वयं एक संख्या के रूप में दिखाया गया है। एक अनुमान जोड़ी विलंबता श्रृंखला से ΔF और ΔO की रिपोर्ट करती है। ΔTc की रिपोर्ट केवल तभी की जाती है जब दोनों फ़ाइलों में एक स्थिर-अवस्था मील का पत्थर हो। उस मील के पत्थर के बिना, अंतिम चरण को स्थिरीकरण समय नहीं कहा जाता है, और श्रृंखला एक स्थिर-अवस्था रेखा नहीं खींचती है। ΔTd और ΔĀ अनुमान पृष्ठ से दूर रहते हैं। अनुमान डेल्टा की गणना प्रशिक्षण इतिहास पर नहीं की जाती है। सहेजें बंडल पृष्ठ पर समीक्षा लिखता है। खुला बंडल उस संग्रहीत समीक्षा को फिर से दिखाता है। हैश .NET चरण 7.2 जांच से मेल खाता है। एक मिलान का मतलब है कि बाइट्स अक्षुण्ण हैं। यह एक हस्ताक्षर नहीं है।
-
-`packaging/pack.ps1` बिना हस्ताक्षरित `ScalarScope_3.0.0.0_x64.msix` को रिलीज़ बाइनरी से बनाता है। पैकेज का नाम `mcp-tool-shop.ScalarScope` है, प्रकाशक `CN=5305D976-6952-4F00-9C21-3A5DB090359F` है, और आर्किटेक्चर x64 है। यह अपलोड नहीं किया गया है। स्टोर पर कॉपी अभी भी पिछली .NET पैकेज है।
-
 ### माइक्रोसॉफ्ट स्टोर से
 
-1. [माइक्रोसॉफ्ट स्टोर](https://apps.microsoft.com/detail/9P3HT1PHBKQK) (स्टोर आईडी: `9P3HT1PHBKQK`) से **स्केलरस्कोप** स्थापित करें
-2. **दो रन की तुलना करें** पर क्लिक करें
-3. एक आधारभूत ट्रेस लोड करें: एक विलंबता CSV, एक बेंचमार्क JSON या एक प्रोफाइलर `trace.json`
-4. उसी प्रकार की फ़ाइल में अनुकूलित ट्रेस लोड करें
-5. **तुलना** टैब में डेल्टा की समीक्षा करें
-6. पुनरुत्पादनीय साझाकरण के लिए `.scbundle` निर्यात करें
+1. **स्केलरस्कोप** को [माइक्रोसॉफ्ट स्टोर](https://apps.microsoft.com/detail/9P3HT1PHBKQK) से स्थापित करें। इसे विंडोज 10 संस्करण 1809 (बिल्ड 17763) या बाद के संस्करण, x64 की आवश्यकता है।
+2. **स्वागत** पर, **नमूना तुलना का प्रयास करें** पर क्लिक करें। या **दो रन की तुलना करें** पर क्लिक करें और पथ ए और पथ बी खोलें।
+3. मुख्य शीर्षक पढ़ें, फिर **क्यों** और **दिखाओ** के लिए एक टाइल पर क्लिक करें।
 
-### वोर्टेक्सकिट का उपयोग करना
-
-```csharp
-using VortexKit.Core;
-
-// 1. Create a shared playback controller (0.0 -> 1.0 timeline)
-var player = new PlaybackController { Duration = 10.0, Loop = true };
-
-// 2. Bind multiple animated canvases to the same controller
-player.TimeChanged += () =>
-{
-    trajectoryCanvas.CurrentTime = player.Time;
-    eigenCanvas.CurrentTime      = player.Time;
-    scalarsCanvas.CurrentTime    = player.Time;
-};
-
-// 3. Subclass AnimatedCanvas for custom rendering
-public class MyTrajectoryCanvas : AnimatedCanvas
-{
-    protected override void OnRender(SKCanvas canvas, SKImageInfo info, double time)
-    {
-        // Your SkiaSharp rendering at the current time position
-    }
-}
-
-// 4. Export a side-by-side comparison as PNG
-var exporter = new ExportService();
-await exporter.ExportComparisonAsync(
-    leftRender, rightRender, time: 0.5,
-    outputPath: "comparison.png",
-    new ComparisonExportOptions
-    {
-        Width = 1920, Height = 1080,
-        LeftLabel = "Baseline", RightLabel = "Optimized",
-        ShowLabels = true
-    });
-
-// 5. Export as layered SVG (Inkscape-compatible)
-var svgExporter = new SvgExportService();
-await svgExporter.ExportSvgAsync(svgData, "trajectory.svg",
-    new SvgExportOptions
-    {
-        Palette = SvgColorPalette.Publication,
-        UseCatmullRomSplines = true,
-        EnableGlow = false
-    });
-```
-
----
-
-## विशेषताएं
-
-### डेल्टा विश्लेषण — पांच मानक डेल्टा प्रकार
-
-प्रत्येक तुलना मानक डेल्टा का एक सेट उत्पन्न करती है। प्रत्येक डेल्टा केवल तभी सक्रिय होता है जब अंतर सांख्यिकीय रूप से सार्थक होता है; अप्रासंगिक डेल्टा स्वचालित रूप से दबा दिए जाते हैं।
-
-| डेल्टा | पूर्ण नाम | यह क्या मापता है | कब सक्रिय होता है |
-|-------|-----------|------------------|------------|
-| **ΔTc** | अभिसरण समय | स्थिर विलंबता तक पहुंचने के लिए चरण | स्थिर अवस्था विभिन्न चरणों पर पहुंचती है (3+ चरण का अंतर) |
-| **ΔO** | आउटपुट परिवर्तनशीलता | दोलन / रनटाइम अस्थिरता | थ्रेशोल्ड-से-ऊपर क्षेत्र स्कोर शोर तल से परे भिन्न होता है |
-| **ΔF** | विफलता दर | विसंगति आवृत्ति | विफलता आवृत्ति या प्रकार रन के बीच भिन्न होते हैं |
-| **ΔĀ** | औसत विलंबता | माध्य मीट्रिक मान | माध्य में सार्थक अंतर (TFRT प्रीसेट में दबाया गया) |
-| **ΔTd** | कुल अवधि | वास्तविक समय / संरचनात्मक उद्भव | अवधि या प्रमुखता की शुरुआत में अंतर (TFRT प्रीसेट में दबाया गया) |
-
-### रनटाइम प्रीसेट — TFRT
-
-अंतर्निहित **TensorFlow-TRT** प्रीसेट (`tensorflowrt-runtime-v1`) अनुमान-विशिष्ट संकेतों (विलंबता, थ्रूपुट, मेमोरी, CPU/GPU लोड) को मैप करता है और केवल प्रशिक्षण-विशिष्ट अंतरों (ΔĀ, ΔTd) को दबा देता है जिनका अनुमान तुलना के लिए कोई अर्थ नहीं है। गार्डरेल चेतावनी देते हैं जब वार्मअप रन के 50% से अधिक हो जाता है या जब केवल एकत्रित आंकड़े उपलब्ध होते हैं।
-
-### पुनरुत्पादनीय बंडल
-
-परिणामों को `.scbundle` अभिलेखागार के रूप में निर्यात करें (ComparisonBundle v1.0.0):
-
-- **`manifest.json`** — बंडल मेटाडेटा, ऐप संस्करण, तुलना लेबल, संरेखण मोड
-- **`repro/repro.json`** — इनपुट फिंगरप्रिंट, प्रीसेट हैश, नियतिवादी बीज, पर्यावरण जानकारी
-- **`findings/deltas.json`** — आत्मविश्वास स्कोर, एंकर और ट्रिगर प्रकार के साथ विहित अंतर
-- **`findings/why.json`** — मानव-पठनीय स्पष्टीकरण, गार्डरेल, पैरामीटर स्निपेट
-- **`findings/summary.md`** — स्वचालित रूप से उत्पन्न मार्कडाउन सारांश
-- **अखंडता** — प्रत्येक फ़ाइल SHA-256 के साथ हैश की गई। बंडल हैश एक सामग्री जांच है, हस्ताक्षर नहीं।
-
-### समीक्षा मोड
-
-किसी भी `.scbundle` को पुनर्गणना किए बिना खोलें। मिलान करने वाला SHA-256 एक सामग्री जांच है, हस्ताक्षर नहीं। संग्रहीत अंतरों को संग्रहीत के रूप में दिखाया जाता है।
-
-### वोर्टेक्सकिट विज़ुअलाइज़ेशन फ्रेमवर्क
-
-वोर्टेक्सकिट `src/VortexKit` में विज़ुअलाइज़ेशन लाइब्रेरी है। यह इस रिपॉजिटरी के साथ आता है। यह NuGet पैकेज नहीं है।
-
-| घटक | यह क्या करता है |
-|-----------|-------------|
-| `PlaybackController` | साझा 0→1 टाइमलाइन जिसमें प्ले/पॉज़/स्टेप/लूप, गति प्रीसेट (0.25x—4x), ~60 एफपीएस टिक शामिल हैं |
-| `AnimatedCanvas` | समय-सिंक्रनाइज़ अमान्यकरण, ग्रिड ड्राइंग, टच/ड्रैग इवेंट, समन्वय सहायकों के साथ सार `SKCanvasView` आधार |
-| `ITimeSeries<T>` / `TimeSeries<T>` | इंडेक्स↔समय मैपिंग और ट्रेल गणना के साथ सामान्य समय-श्रृंखला |
-| `ExportService` | एकल-फ़्रेम PNG, फ़्रेम अनुक्रम (ffmpeg संकेतों के साथ), और साइड-बाय-साइड तुलना निर्यात |
-| `SvgExportService` | इन्केस्केप लेयर्स, कैटमुल-रोम स्प्लिन, हीटमैप, वेक्टर फ़ील्ड और चार रंग पैलेट (डिफ़ॉल्ट, लाइट, हाईकंट्रास्ट, प्रकाशन) के साथ पूर्ण-वेक्टर SVG निर्यात |
-| `IAnnotation` | टाइप किए गए एनोटेशन (फेज, चेतावनी, अंतर्दृष्टि, विफलता, कस्टम) जिसमें सैद्धांतिक आधार और प्राथमिकता शामिल है |
-| `VortexColors` | सिमेंटिक रंग पैलेट — पृष्ठभूमि परतें, उच्चारण सिमेंटिक्स, गंभीरता कोडिंग, आइगेनवैल्यू पैलेट, लेर्प/ग्रेडिएंट सहायक |
-
----
-
-## स्थापना
-
-### माइक्रोसॉफ्ट स्टोर (अनुशंसित)
-
-**स्टोर आईडी:** `9P3HT1PHBKQK`
-
-[इसे माइक्रोसॉफ्ट स्टोर से प्राप्त करें](https://apps.microsoft.com/detail/9P3HT1PHBKQK)
-
-विंडोज 10 (बिल्ड 17763) या बाद का संस्करण आवश्यक है।
+नमूना फाइलें जिन्हें आज़माना है, एक अनुमान जोड़ी, एक ज्यामिति जोड़ी और वर्कबेंच के लिए रनों का एक फ़ोल्डर, [`samples/`](samples/) में हैं। [TESTING.md](TESTING.md) बताता है कि कौन सी फाइल कहां खोलनी है।
 
 ### स्रोत से
 
 ```bash
-# Prerequisites:
-#   .NET 9.0 SDK (global.json pins 9.0.100)
-#   Visual Studio 2022 with MAUI workload, or:
-#     dotnet workload install maui-windows
-
 git clone https://github.com/mcp-tool-shop-org/scalarscope.git
 cd scalarscope
-dotnet restore
-dotnet build
-
-# Run the desktop app
-dotnet run --project src/ScalarScope
+cargo run --release --manifest-path rust/Cargo.toml
 ```
+
+`scalarscope <path A> <path B>` लॉन्च पर एक जोड़ी खोलता है।
+
+### आप क्या खोल सकते हैं
+
+| प्रकार | फाइलें |
+|---|---|
+| अनुमान | एक विलंबता CSV, एक बेंचमार्क JSON, एक क्रोम या पायटॉर्च प्रोफाइलर ट्रेस (`.json` या `.json.gz`), एक रनटाइम लॉग, एक स्केलरस्कोप रनट्रेस JSON, या एक रन फ़ोल्डर |
+| प्रशिक्षण | एक बैकप्रोपैगेट `run_history.json` |
+| ज्यामिति | एक एस्पायर ज्यामिति निर्यात (एस्पायर-एसआई, स्कीमा 1.x) |
+| समीक्षा | 3.x या 2.0 से `.scbundle` |
+
+[हैंडबुक](https://mcp-tool-shop-org.github.io/scalarscope/handbook/getting-started/) में शुरुआत करने पर, प्रत्येक फ़ाइल का एक संक्षिप्त उदाहरण दिया गया है।
+
+---
+
+## कीबोर्ड शॉर्टकट
+
+| शॉर्टकट | क्रिया |
+|---|---|
+| `F1` | गाइड |
+| `Ctrl+,` | सेटिंग्स |
+| `Ctrl+H` | स्वागत है |
+| `1`–`6` | तुलना पर: श्रृंखला, वार्मअप, वितरण, अंतर, स्पेक्ट्रम, हीट मैप |
+| `Esc` | "क्यों" पैनल बंद करें |
+
+---
+
+## परीक्षण
+
+```bash
+# The review: 215 tests. Line coverage must stay above 90%.
+cd rust
+cargo test
+cargo llvm-cov --locked --all-targets --fail-under-lines 90
+
+# The .NET fixture tests: the 2.0 oracles, bundle compatibility and the version surfaces (134 tests)
+dotnet test tests/ScalarScope.FixtureTests
+```
+
+`src/ScalarScope` में .NET प्रोजेक्ट 2.0 ऐप है। यह रिपॉजिटरी में एक संदर्भ के रूप में रहता है, जिसके विरुद्ध 3.x की जाँच की जाती है। स्टोर पैकेज `rust/` से `packaging/pack.ps1` द्वारा बनाया गया है, और MAUI प्रोजेक्ट उस अपलोड के रूप में प्रकाशित होने से इनकार करता है।
 
 ---
 
@@ -208,115 +130,34 @@ dotnet run --project src/ScalarScope
 
 ```
 scalarscope/
-├── src/
-│   ├── ScalarScope/                    # .NET MAUI desktop app
-│   │   ├── Models/                     # GeometryRun, InsightEvent
-│   │   ├── ViewModels/                 # Welcome, Comparison, Export, Settings, TrajectoryPlayer, VortexSession
-│   │   ├── Views/                      # XAML pages + 19 custom controls
-│   │   │   ├── WelcomePage.xaml        # First-60-seconds onboarding (Home tab)
-│   │   │   ├── ComparisonPage.xaml     # Side-by-side delta comparison (Compare tab)
-│   │   │   ├── HelpPage.xaml           # Interpretation guide (Guide tab)
-│   │   │   ├── SettingsPage.xaml       # Preferences and about (Settings tab)
-│   │   │   └── Controls/              # DeltaZone, BundleExportPanel, PlaybackControl, etc.
-│   │   ├── Services/
-│   │   │   ├── Connectors/            # RunTraceComparer, TfrtRuntimePreset, validation
-│   │   │   ├── Bundles/               # BundleBuilder, BundleExporter, integrity, schemas
-│   │   │   ├── Evidence/              # Comparison evidence reports, detector diagnostics
-│   │   │   ├── Plugins/               # PluginManager
-│   │   │   ├── CanonicalDeltaService.cs
-│   │   │   ├── DeltaTypes.cs          # 5 canonical deltas + detector configs
-│   │   │   ├── DeterminismService.cs  # Reproducible seed management
-│   │   │   ├── FlowFieldService.cs    # Vector field computation
-│   │   │   └── ...                    # 70+ service files
-│   │   └── Resources/
-│   │       ├── Styles/DesignSystem.xaml # Unified visual grammar
-│   │       └── Raw/Samples/            # Built-in example traces
-│   │
-│   └── VortexKit/                      # Visualization library in this repo
-│       ├── Core/
-│       │   ├── AnimatedCanvas.cs       # Time-synced SkiaSharp canvas base
-│       │   ├── PlaybackController.cs   # Shared playback timeline
-│       │   ├── ITimeSeries.cs          # Generic time-series interface
-│       │   ├── ExportService.cs        # PNG frame/sequence export
-│       │   └── SvgExportService.cs     # Layered SVG export
-│       ├── Annotations/
-│       │   └── IAnnotation.cs          # Typed annotation system
-│       └── Theme/
-│           └── VortexColors.cs         # Semantic color palette
-│
-├── tests/
-│   ├── ScalarScope.FixtureTests/       # Golden-file fixture tests
-│   ├── ScalarScope.DeterminismTests/   # Reproducibility verification
-│   ├── ScalarScope.SoakTests/          # Long-running stability tests
-│   └── Fixtures/                       # Shared test data
-│
-├── docs/                               # Design docs, results, limitations
-├── .github/workflows/
-│   ├── build.yml                       # CI: restore, build, format check, pack, artifacts
-│   ├── publish.yml                     # NuGet publish
-│   └── release.yml                     # GitHub Release + Store submission
-├── global.json                         # .NET SDK 9.0.100
-├── ScalarScope.sln                     # Solution file
-├── CHANGELOG.md                        # Keep-a-Changelog format
-├── PRIVACY.md                          # Privacy policy (no telemetry)
-├── SECURITY.md                         # Security policy
-└── STORE_LISTING.md                    # Microsoft Store listing copy
+├── rust/                 # The app: ScalarScope 3.x (egui)
+│   ├── src/              # review, geometry, workbench, history, bundles, settings, UI
+│   └── tests/            # Rust tests and fixtures (real and simulated aspire-si exports, the knob folder)
+├── samples/              # Files a first-time user or tester can open
+├── packaging/            # AppxManifest.xml and pack.ps1 (the Store package)
+├── src/ScalarScope/      # The 2.0 .NET app, kept as the reference
+├── src/VortexKit/        # 2.0's visualization library
+├── tests/                # .NET fixture tests and the 2.0 fixtures
+├── site/                 # Landing page and handbook
+└── docs/                 # The 3.x spec, receipts and release notes
 ```
-
----
-
-## परीक्षण
-
-```bash
-# Run all tests
-dotnet test
-
-# Fixture smoke tests only
-dotnet test --filter Category=FixtureSmoke
-
-# Determinism tests (verifies reproducible deltas)
-dotnet test --filter Category=Determinism
-
-# With coverage
-dotnet test --collect:"XPlat Code Coverage"
-
-# Rust review. Line coverage has to stay above 90%.
-cd rust
-cargo llvm-cov --offline --locked --all-targets --fail-under-lines 90
-```
-
----
-
-## कीबोर्ड शॉर्टकट
-
-| शॉर्टकट | क्रिया |
-|----------|--------|
-| `Space` | प्ले / पॉज़ |
-| `Left` / `Right` | पिछली ओर / आगे की ओर कदम (1%) |
-| `Shift+Left` / `Shift+Right` | बारीक कदम (0.1%) |
-| `Home` / `End` | शुरुआत / अंत पर जाएं |
-| `Up` / `+` | प्लेबैक गति बढ़ाएँ |
-| `Down` / `-` | प्लेबैक गति घटाएँ |
-| `0` | गति को 1x पर रीसेट करें |
-| `S` या `Ctrl+S` | सेटिंग्स से निर्यात फ़ोल्डर में PNG लिखने का प्रयास करता है, या जब कोई सेट नहीं है तो Documents/ScalarScope Exports में। कोई सूचना नहीं दिखाई जाती है। Ctrl+E मैप नहीं किया गया है। |
-| `1`–`6` | मार्गों, प्रक्षेपवक्र, स्केलर, ज्यामिति, तुलना और विफलताओं का अवलोकन अनुरोध करें। होम, तुलना, गाइड या सेटिंग्स नहीं। 1 दबाने से होम नहीं खुलता है। |
-| `?` | सहायता / गाइड खोलें |
 
 ---
 
 ## संबंधित
 
-- [हैंडबुक](https://mcp-tool-shop-org.github.io/scalarscope/handbook/) — समीक्षा के लिए गाइड
-- [RESULTS_AND_LIMITATIONS.md](docs/RESULTS_AND_LIMITATIONS.md) — पूर्ण प्रयोगात्मक परिणाम
-- [CHANGELOG.md](CHANGELOG.md) — रिलीज़ इतिहास
-- [PRIVACY.md](PRIVACY.md) — गोपनीयता नीति
-- [ROADMAP.md](ROADMAP.md) — एक पुरानी अप्रयुक्त योजना, वर्तमान समीक्षा नहीं
+- [हैंडबुक](https://mcp-tool-shop-org.github.io/scalarscope/handbook/): समीक्षा के लिए गाइड
+- [समानता और उससे आगे](docs/parity-and-beyond.spec.md): 3.x, 2.0 से क्या रखता है, यह क्या बदलता है और क्यों, स्रोतों के साथ
+- [CHANGELOG.md](CHANGELOG.md): रिलीज़ इतिहास
+- [PRIVACY.md](PRIVACY.md): गोपनीयता नीति
+- [TESTING.md](TESTING.md): इस रिलीज़ का परीक्षण कैसे करें
+- [द वर्कबेंच](https://github.com/mcp-tool-shop-org/runforge): रनफ़ोर्ज के साथ साझा किया गया
 
 ---
 
 ## लाइसेंस
 
-[MIT](LICENSE) — कॉपीराइट (c) 2025-2026 स्केलरस्कोप प्रोजेक्ट (mcp-tool-shop-org)
+[MIT](LICENSE)। कॉपीराइट (c) 2025-2026 स्केलरस्कोप प्रोजेक्ट (mcp-tool-shop-org)
 
 <p align="center">
   Built by <a href="https://mcp-tool-shop.github.io/">MCP Tool Shop</a>

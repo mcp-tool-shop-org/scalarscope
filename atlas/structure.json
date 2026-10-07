@@ -272,7 +272,7 @@
           "path": "docs/receipts/workbench-knob-folder.json"
         },
         {
-          "hash": "756d280bea4d68fd736984ce10c9295e837fe03a6f5ff5464bf454d63bad6137",
+          "hash": "38328dcdba2b26673605f810297a3e9608b4b9c0305a46d5669e71bb9f4617f5",
           "path": "docs/store/1-compare-headline.png"
         },
         {
@@ -288,7 +288,7 @@
           "path": "docs/store/4-geometry-drift.png"
         },
         {
-          "hash": "678d46ae8cae9065d2ea1b0a9f923e2d2ace25918bc5986625305d307323a9b2",
+          "hash": "b581a4c7b70a2828a0443d31d865144360a58cb2884db29dc8a879fd4dd4b489",
           "path": "docs/store/5-workbench.png"
         },
         {
@@ -296,7 +296,7 @@
           "path": "docs/store/6-guide.png"
         },
         {
-          "hash": "ad89b656055018057c7bd5f0b00d8a07141e7daf28cd7898d810caeec23959c7",
+          "hash": "9617e42747ac93c7042a58a5de09cc2bc06aa36cae0d1ce52cbfcd3c648eee0d",
           "path": "docs/store/README.md"
         }
       ],
@@ -378,7 +378,7 @@
           "path": ".gitignore"
         },
         {
-          "hash": "33292aa447028294ac9864a7af6add32460e8441d0ab6ad8e97ead0786385e99",
+          "hash": "182b363cc203a2818570df3a1c0f7c33b0d2531108d4cf72403ea7bee09036e6",
           "path": "CHANGELOG.md"
         },
         {
@@ -394,35 +394,35 @@
           "path": "PRIVACY.md"
         },
         {
-          "hash": "9776d1173b3130d6586b0df174fd3cc64cfb6d882cbe0fa2497ea30373c8bb2c",
+          "hash": "0a4af03553bec9ece1d4deae9648819436e44d4dbfa3e7744e174e1efebea52f",
           "path": "README.es.md"
         },
         {
-          "hash": "5646145504675c742b9791e4161d91e100a4b276122b1d6391819ab0b0029fcd",
+          "hash": "7a2cb1fdf677b3f62a322e51cadef0fe2941eccb91cb307cec33588a639f3d3e",
           "path": "README.fr.md"
         },
         {
-          "hash": "d59373c649f2215c51aa91f7d88564b301edc0e4decef83dfb63da8d51d9c04c",
+          "hash": "ecc1daa37dd91320fa5779c31fb2cae4fc12aee4ccd79fd362741297dd30e781",
           "path": "README.hi.md"
         },
         {
-          "hash": "46fd2732431ea18453097f0a54cb668931442edc07843aee044ea9602761e162",
+          "hash": "ec315404dd0072a706b4bd351902ce83c60880bac4666285811e4b99c85ddc92",
           "path": "README.it.md"
         },
         {
-          "hash": "0caf6f991521b14311f46bdd90f6f851c2426ebaaa42c22fb36e9bc84969aa70",
+          "hash": "2d48128a24928a8b21f214a1ed9804fd53c6e46eedfcc9702d5a0098de44b270",
           "path": "README.ja.md"
         },
         {
-          "hash": "0b68c673463e89408930f5e25aeeccacd2061151cd6541ffeee4c015f058dba8",
+          "hash": "e650c30109b63a61e7f147eee95c5c618bf72b737d2a54de8ae5df1b22c4414e",
           "path": "README.md"
         },
         {
-          "hash": "9cab6f5ab8295502282dd191b7b70d77dc5568fb825a302d468a23b7c057e902",
+          "hash": "ae3b56efe13542b6adc8e927dd805604d50e53812f0d42e06e1a99b19a77721e",
           "path": "README.pt-BR.md"
         },
         {
-          "hash": "6550cd90b119e02b5b53a6f3c62ea1f3836433d21933e02aec08aff9ef0a1444",
+          "hash": "17ed0313f9b1e88cc4d3b7d47351d4f2b7ad83676bdfbb32447c3d09fa668813",
           "path": "README.zh.md"
         },
         {
@@ -898,7 +898,7 @@
         {
           "entry": "main",
           "entryRule": 1,
-          "hash": "f51c86afc2ff23efb390f83ff48ee4edca07866c36d522e290bcab8ca2975ad4",
+          "hash": "aa6c53fbb6b4bb2320d5fdeaaf7b7b1212975363aea7528f099245289db5893f",
           "importsFiles": [
             "rust/src/ui.rs"
           ],
@@ -2110,7 +2110,7 @@
               "line": 487
             }
           ],
-          "hash": "a63fbb461ee1d72df4a5ce0ed30542765b5cc1c2fe55fc3923b7803183084b73",
+          "hash": "d19e756be884fe612f4eb54297857b9aafbfd7b3cfba91b716cc506d4d757c38",
           "importOrder": [
             "rust/src/open.rs",
             "rust/src/readings.rs",
@@ -2260,90 +2260,90 @@
             {
               "in": "capture",
               "kind": "match-err",
-              "line": 427
+              "line": 430
             },
             {
               "in": "load_paths",
               "kind": "match-err",
-              "line": 478
+              "line": 494
             },
             {
               "in": "open_bundle",
               "kind": "match-err",
-              "line": 501
+              "line": 517
             },
             {
               "in": "save_bundle",
               "kind": "match-err",
-              "line": 515
+              "line": 531
             },
             {
               "in": "save_bundle",
               "kind": "match-err",
-              "line": 532
+              "line": 548
             },
             {
               "in": "save_bundle",
               "kind": "match-err",
-              "line": 536
+              "line": 552
             },
             {
               "in": "save_bundle",
               "kind": "match-err",
-              "line": 538
+              "line": 554
             },
             {
               "in": "export_svg",
               "kind": "match-err",
-              "line": 723
+              "line": 739
             },
             {
               "in": "receive_screenshot",
               "kind": "match-err",
-              "line": 747
+              "line": 763
             },
             {
               "in": "settings_changed",
               "kind": "match-err",
-              "line": 786
+              "line": 802
             },
             {
               "in": "draw_settings",
               "kind": "match-err",
-              "line": 833
+              "line": 849
             },
             {
               "in": "remember",
               "kind": "match-err",
-              "line": 1227
+              "line": 1243
             },
             {
               "in": "open_saved_path",
               "kind": "match-err",
-              "line": 1355
+              "line": 1371
             },
             {
               "in": "remember_opened_file",
               "kind": "match-err",
-              "line": 1369
+              "line": 1385
             },
             {
               "in": "reopen",
               "kind": "match-err",
-              "line": 1386
+              "line": 1402
             },
             {
               "in": "reopen",
               "kind": "match-err",
-              "line": 1401
+              "line": 1417
             },
             {
               "in": "reopen",
               "kind": "match-err",
-              "line": 1401
+              "line": 1417
             }
           ],
-          "hash": "57021d06fff0247b2802e45d5491b5706df693b680fc77d883bf44904b8bffc0",
+          "hash": "2cfdfbc42151bf8b0883ec9a52fb8153f2097357e026feaf817c8321cf8ce934",
           "importOrder": [
             "rust/src/bundle.rs",
             "rust/src/history.rs",
@@ -2383,7 +2383,7 @@
             {
               "calls": [
                 {
-                  "line": 1014,
+                  "line": 1030,
                   "name": "nines",
                   "target": {
                     "file": "rust/src/views.rs"
@@ -2398,7 +2398,7 @@
             {
               "calls": [
                 {
-                  "line": 1035,
+                  "line": 1051,
                   "name": "spectrum",
                   "target": {
                     "file": "rust/src/views.rs"
@@ -2413,14 +2413,14 @@
             {
               "calls": [
                 {
-                  "line": 1067,
+                  "line": 1083,
                   "name": "heat_range",
                   "target": {
                     "file": "rust/src/views.rs"
                   }
                 },
                 {
-                  "line": 1084,
+                  "line": 1100,
                   "name": "heat_cells",
                   "target": {
                     "file": "rust/src/views.rs"
@@ -2435,7 +2435,7 @@
             {
               "calls": [
                 {
-                  "line": 1468,
+                  "line": 1484,
                   "name": "stored_pair",
                   "target": {
                     "file": "rust/src/bundle.rs"
@@ -2515,7 +2515,7 @@
               "line": 769
             }
           ],
-          "hash": "469787c32c7ac758d8684a0f9571c78a23f0d81f3bce46249eb8acf4421a79fd",
+          "hash": "5e8a01bd67d261cf2f6bb911ec1f534b9e9576d43faf477ec6a12830f62406d0",
           "importOrder": [
             "rust/src/bundle.rs",
             "rust/src/history.rs",
@@ -2555,65 +2555,65 @@
             {
               "in": "open_runs",
               "kind": "match-err",
-              "line": 84
+              "line": 96
             },
             {
               "in": "open_runs",
               "kind": "err",
-              "line": 84
+              "line": 96
             },
             {
               "in": "open_runs",
               "kind": "match-err",
-              "line": 85
+              "line": 97
             },
             {
               "in": "open_runs",
               "kind": "err",
-              "line": 90
+              "line": 102
             },
             {
               "in": "retest",
               "kind": "match-err",
-              "line": 156
+              "line": 168
             },
             {
               "in": "retest",
               "kind": "match-err",
-              "line": 161
+              "line": 173
             },
             {
               "in": "poll_workbench",
               "kind": "match-err",
-              "line": 188
+              "line": 200
             },
             {
               "in": "poll_workbench",
               "kind": "match-err",
-              "line": 189
+              "line": 201
             },
             {
               "in": "keep_session",
               "kind": "match-err",
-              "line": 213
+              "line": 225
             },
             {
               "in": "open_bench_runs",
               "kind": "match-err",
-              "line": 247
+              "line": 259
             },
             {
               "in": "save_session_record",
               "kind": "match-err",
-              "line": 265
+              "line": 277
             },
             {
               "in": "draw_workbench",
               "kind": "match-err",
-              "line": 328
+              "line": 340
             }
           ],
-          "hash": "6d198edcb34eeeca207620350d32e528e94bd51dc85675c13ca61a2f440494b8",
+          "hash": "afeaf00811fcf99dadb63d58f87c5f94ab311007aa728d70ee8b81aba6eeae51",
           "importOrder": [
             "rust/src/open.rs",
             "rust/src/workbench.rs",
@@ -2894,7 +2894,7 @@
           "testsInside": true
         },
         {
-          "hash": "1264c33ae0a234fdccf3cf9028886c1cd899f412a0e883dd6f1be568888c2755",
+          "hash": "009b318737929f181df06a3de0fb8d7651830f76f98d45e5c6cc7fae128ae086",
           "importsFiles": [
             "rust/src/milestones.rs",
             "rust/src/open.rs",
@@ -2986,11 +2986,11 @@
           "where": [
             "temp"
           ],
-          "writes": 1
+          "writes": 2
         }
       ],
       "outsideReads": 12,
-      "outsideWrites": 6,
+      "outsideWrites": 7,
       "role": "code",
       "testRunners": [
         "cargo test"
@@ -5292,7 +5292,7 @@
   "edges": [],
   "engine": "1.24.0",
   "generatedFrom": {
-    "commit": "d06cf13b2b5c2b6a95de1f21307c79889b35339a",
+    "commit": "5d367251987fe3c1fdc23b22509d3540834d9ca4",
     "tracked": 455
   },
   "landings": [
@@ -5387,6 +5387,12 @@
           "by": "rust/src/ui_pages.rs",
           "call": "include_str",
           "confidence": "ast"
+        },
+        {
+          "by": "rust/tests/review_tests.rs",
+          "call": "include_str",
+          "confidence": "ast",
+          "fromTests": true
         }
       ],
       "target": "rust/samples/baseline.csv",
@@ -5398,6 +5404,12 @@
           "by": "rust/src/ui_pages.rs",
           "call": "include_str",
           "confidence": "ast"
+        },
+        {
+          "by": "rust/tests/review_tests.rs",
+          "call": "include_str",
+          "confidence": "ast",
+          "fromTests": true
         }
       ],
       "target": "rust/samples/optimized.csv",
@@ -5427,41 +5439,6 @@
     },
     {
       "readers": [
-        {
-          "by": "README.es.md",
-          "call": "--project",
-          "confidence": "text"
-        },
-        {
-          "by": "README.fr.md",
-          "call": "--project",
-          "confidence": "text"
-        },
-        {
-          "by": "README.hi.md",
-          "call": "--project",
-          "confidence": "text"
-        },
-        {
-          "by": "README.it.md",
-          "call": "--project",
-          "confidence": "text"
-        },
-        {
-          "by": "README.ja.md",
-          "call": "--project",
-          "confidence": "text"
-        },
-        {
-          "by": "README.pt-BR.md",
-          "call": "--project",
-          "confidence": "text"
-        },
-        {
-          "by": "README.zh.md",
-          "call": "--project",
-          "confidence": "text"
-        },
         {
           "by": "codecov.yml",
           "call": "literal",
