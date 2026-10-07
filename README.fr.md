@@ -25,7 +25,7 @@ La version **3.1.0** est une réécriture en Rust. Il s’agit de l’applicatio
 - **Ce qu’il lit.** Les fichiers que vous ouvrez. Le package du Store lit et écrit également `comparison-log.json`, `preferences.json` et `workbench.json` dans son propre dossier LocalState, le dossier utilisé par la version 2.0. Une version non empaquetée n’en écrit aucun.
 - **Ce qu’il écrit.** Un ensemble de données, une image ou un enregistrement de session, uniquement dans un chemin que vous choisissez.
 - **Réseau.** Il n’y a pas de compte, pas de télémétrie et pas d’analyse. La seule connexion que l’application peut établir provient de l’onglet Workbench, et uniquement lorsque vous appuyez sur **Demander** : vers un Ollama local à l’emplacement `127.0.0.1` sur cet ordinateur. Les modèles cloud d’Ollama sont refusés. Rien ne quitte la machine.
-- **Ensembles de données.** Une correspondance SHA-256 est une vérification du contenu, et non une signature. Cela indique que les octets sont intacts. Cela n’indique pas qui a écrit le fichier.
+- **Paquets (bundles).** Un hachage SHA-256 correspondant est une vérification du contenu, et non une signature. Cela indique que les octets sont intacts. Cela n’indique pas qui a écrit le fichier.
 - **Modules complémentaires.** Les modules complémentaires laissés dans le dossier 2.0 ne sont pas chargés.
 
 ---
