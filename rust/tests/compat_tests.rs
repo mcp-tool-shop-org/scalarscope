@@ -66,7 +66,8 @@ fn a_geometry_review_has_2_0_deltas_as_tiles_and_round_trips_through_a_bundle() 
     let Pair::Geometry(review) = &built else { panic!("geometry") };
     let fired: Vec<&str> = review.explanations.iter().filter(|tile| tile.status == "fired").map(|tile| tile.symbol.as_str()).collect();
     assert_eq!(fired.len(), 4, "{fired:?}");
-    assert!(review.verdict.starts_with("Only Path A experienced correctness_dip"), "{}", review.verdict);
+    // 2.0 said correctness_dip; G8 names the failure at the time it reports (tradeoffs_failure).
+    assert!(review.verdict.starts_with("Only Path A experienced tradeoffs_failure"), "{}", review.verdict);
     let sealed = seal(&document_from_pair(&built), "2026-10-06T00:00:00Z").unwrap();
     let path = std::env::temp_dir().join(format!("scalarscope-geometry-{}.scbundle", std::process::id()));
     fs::write(&path, &sealed.bytes).unwrap();

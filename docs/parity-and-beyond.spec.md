@@ -281,6 +281,16 @@ Each fix was applied by itself on a scratch copy and run on the two pairs Scalar
 
 In short: G1, G2, G3, G4 and G9 are safe fixes that are invisible on today's data. G5 and G8 change words a user sees. G6 and G7 stay as they are. G10 waits for real exports.
 
+**Rulings (2026-10-06).** The Publisher session, which coordinates these repos at the director's direction, ruled as recommended, and the director may override any of these:
+- G1, G2 (absolute curvature for both the mean and the comparison), G3, G4 (the right-minus-left sign), G8 and G9 (with a sparse-step test) are fixed.
+- G5 is renamed "Spectrum concentration", keeping its id and symbol.
+- G6 and G7 stay as 2.0 has them, and G7 is closed.
+- G10 waits for the real exports.
+
+The fixes are applied in `rust/src/geometry_deltas.rs`, each marked `G<n> (ruled 2026-10-06)`. The oracles that change keep 2.0's wording in a comment.
+
+One rounding choice for G3: the step is rounded to the nearest one rather than truncated. A time stored as i / (n − 1) can come back as i − 0.000…1, as it nearly did on the aspire-si pair.
+
 ## Corrections
 
 - The 3.0.0 changelog says ΔTc's 3-step floor is "the same resolution the .NET app used". That is true of 2.0's geometry convergence delta (`ResolutionSteps = 3`), not its inference comparer, which fires on any nonzero difference. The line is corrected in this change.

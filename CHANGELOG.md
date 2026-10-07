@@ -5,6 +5,18 @@ All notable changes to ScalarScope will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- The geometry delta ΔĀ is called **Spectrum concentration**. 2.0 called it evaluator agreement, but it measures how much of the evaluators' spread sits in one direction (λ1/Σλ), not whether they agree. Its tile, explanation, summary and Guide text say so. Its id and symbol are unchanged, so 2.0 bundles still match.
+- ΔF names the failure it dates. With several recorded failures, 2.0 gave the time of the third but the kind of the first, so a sentence could read "correctness_dip near step 6" when the failure at step 6 was a tradeoffs_failure. Both now come from the same failure. How many failures make one persistent follows the persistence window setting (three by default, as before).
+- Smaller geometry fixes, none of which changes a result on the 2.0 samples:
+  - Alignment at convergence reads the same settings as ΔTc.
+  - Alignment at first instability uses absolute curvature, as the stability delta does.
+  - A failure on the last step is reported on the last step, not one past it.
+  - When only one run settles, ΔTc's sign says which one.
+  - A step without enough eigenvalues is left out of ΔĀ instead of counting as zero.
+
 ## [3.0.0] - 2026-10-03
 
 ### Added

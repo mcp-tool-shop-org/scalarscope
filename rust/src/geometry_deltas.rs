@@ -13,7 +13,10 @@
 //! Numbers formatted into sentences use 2.0's rules (`F2`/`F3` round half away from zero, and a
 //! bare double prints as .NET prints it), see [`fixed`] and [`dotnet_double`].
 //!
-//! Behaviour believed to be a bug in 2.0 is ported as it is and marked `C# BUG?` in a comment.
+//! Behaviour believed to be a bug in 2.0 was ported as it was and listed as G1-G10 in the spec.
+//! The rulings of 2026-10-06 (spec "Decision brief") are applied and marked `G<n> (ruled ...)` where they
+//! change 2.0's answer, or `kept as 2.0` where they do not. G10 waits for real exports and is
+//! still marked `C# BUG?`.
 
 use std::cmp::Ordering;
 
@@ -326,7 +329,7 @@ pub struct GeometryDeltaResult {
 /// 2.0's `ComputeDeltas`: the five detectors in causal order (failure, convergence, structural
 /// emergence, evaluator alignment, stability). Suppressed deltas are included and marked.
 pub fn compute(left: &GeometryRun, right: &GeometryRun, alignment: Alignment, current_time: f64, config: &DeltaConfig) -> Vec<GeometryDelta> {
-    let map = create_alignment_map(left, right, alignment);
+    let map = create_alignment_map_with(left, right, alignment, &config.convergence);
     compute_with_map(left, right, current_time, config, &map)
 }
 
@@ -345,7 +348,7 @@ pub fn compute_with_map(left: &GeometryRun, right: &GeometryRun, current_time: f
 
 /// 2.0's `ComputeDeltasWithAlignment`: the alignment map, the deltas and the auto summary.
 pub fn compute_with_summary(left: &GeometryRun, right: &GeometryRun, alignment: Alignment, current_time: f64, config: &DeltaConfig) -> GeometryDeltaResult {
-    let map = create_alignment_map(left, right, alignment);
+    let map = create_alignment_map_with(left, right, alignment, &config.convergence);
     let deltas = compute_with_map(left, right, current_time, config, &map);
     let comparative_summary = auto_summary(&deltas);
     GeometryDeltaResult { alignment: map, deltas, comparative_summary }
@@ -359,8 +362,13 @@ fn step_count(run: &GeometryRun) -> i64 {
 // Alignment (AlignmentMapper.cs)
 // ========================================================================
 
-/// 2.0's `AlignmentMapper.CreateAlignmentMap`.
+/// 2.0's `AlignmentMapper.CreateAlignmentMap`, with the default convergence settings.
 pub fn create_alignment_map(run_a: &GeometryRun, run_b: &GeometryRun, mode: Alignment) -> AlignmentMap {
+    create_alignment_map_with(run_a, run_b, mode, &ConvergenceConfig::default())
+}
+
+/// The alignment map, with convergence read by the same settings ΔTc uses (G1).
+pub fn create_alignment_map_with(run_a: &GeometryRun, run_b: &GeometryRun, mode: Alignment, convergence: &ConvergenceConfig) -> AlignmentMap {
     let steps_a = step_count(run_a);
     let steps_b = step_count(run_b);
     if steps_a == 0 || steps_b == 0 {
@@ -369,8 +377,8 @@ pub fn create_alignment_map(run_a: &GeometryRun, run_b: &GeometryRun, mode: Alig
     match mode {
         Alignment::ByStep => step_alignment(steps_a, steps_b),
         Alignment::ByConvergence => {
-            let tc_a = find_convergence_step(run_a);
-            let tc_b = find_convergence_step(run_b);
+            let tc_a = find_convergence_step(run_a, convergence);
+            let tc_b = find_convergence_step(run_b, convergence);
             if tc_a < 0 && tc_b < 0 {
                 let mut fallback = step_alignment(steps_a, steps_b);
                 fallback.description = "Neither path converged; using step alignment".to_string();
@@ -433,20 +441,21 @@ fn anchored_alignment(steps_a: i64, steps_b: i64, anchor_a: i64, anchor_b: i64, 
     AlignmentMap { mode, idx_to_step_a, idx_to_step_b, compare_index, description }
 }
 
-/// 2.0's `AlignmentMapper.FindConvergenceStep`: velocity settles, with the default window of 5 and
-/// epsilon `max(0.02, 0.5·sigma)`.
+/// 2.0's `AlignmentMapper.FindConvergenceStep`: velocity settles within the window, epsilon
+/// `max(epsilon, multiplier·sigma)`.
 ///
-/// C# BUG? (AlignmentMapper.cs:183-186) The constants are pinned here instead of read from
-/// `ConvergenceConfig`, so changing the config moves ΔTc but not the ByConvergence alignment.
-fn find_convergence_step(run: &GeometryRun) -> i64 {
+/// G1 (ruled 2026-10-06): 2.0 pinned the window of 5 and epsilon `max(0.02, 0.5·sigma)` here
+/// (AlignmentMapper.cs:183-186), so changing the config moved ΔTc but not this alignment. It
+/// reads the config ΔTc reads. The defaults are 2.0's constants, so default results are unchanged.
+fn find_convergence_step(run: &GeometryRun, config: &ConvergenceConfig) -> i64 {
     let steps = &run.trajectory.timesteps;
     if steps.len() < 10 {
         return -1;
     }
     let velocities: Vec<f64> = steps.iter().map(Timestep::speed).collect();
     let sigma = robust_sigma(&velocities);
-    let epsilon = 0.02f64.max(sigma * 0.5);
-    let window: i64 = 5;
+    let epsilon = config.epsilon.max(sigma * config.epsilon_sigma_multiplier);
+    let window = config.window.max(1);
     let count = steps.len() as i64;
     let mut i = window;
     while i < count - window {
@@ -468,18 +477,18 @@ fn find_convergence_step(run: &GeometryRun) -> i64 {
     -1
 }
 
-/// 2.0's `AlignmentMapper.FindFirstInstabilityStep`: the first curvature above
-/// `max(2·mean, 0.3)`.
+/// 2.0's `AlignmentMapper.FindFirstInstabilityStep`: the first absolute curvature above
+/// `max(2·mean, 0.3)` of the absolute curvature.
 ///
-/// C# BUG? (AlignmentMapper.cs:217-219) The mean is of the signed curvature, while the stability
-/// detector works on absolute curvature, so the two disagree about "unstable" for a run that bends
-/// mostly one way.
+/// G2 (ruled 2026-10-06): 2.0 took the mean and the comparison on signed curvature
+/// (AlignmentMapper.cs:217-219), while the stability detector uses absolute curvature, so the two
+/// disagreed about "unstable" for a run that bends mostly one way. Both use absolute curvature.
 fn find_first_instability_step(run: &GeometryRun) -> i64 {
     let steps = &run.trajectory.timesteps;
     if steps.len() < 3 {
         return -1;
     }
-    let curvatures: Vec<f64> = steps.iter().map(|step| step.curvature).collect();
+    let curvatures: Vec<f64> = steps.iter().map(|step| step.curvature.abs()).collect();
     let mean = average(&curvatures);
     let threshold = (mean * 2.0).max(0.3);
     for (i, curvature) in curvatures.iter().enumerate().skip(1) {
@@ -510,15 +519,17 @@ pub fn robust_sigma(values: &[f64]) -> f64 {
 // ========================================================================
 
 /// ΔF. 2.0 `DetectFailurePresence` - "Did something break?"
-fn detect_failure_presence(left: &GeometryRun, right: &GeometryRun, _config: &FailureConfig, left_steps: i64, right_steps: i64) -> GeometryDelta {
-    let (left_has, left_time, left_kind) = has_persistent_failure(left);
-    let (right_has, right_time, right_kind) = has_persistent_failure(right);
+fn detect_failure_presence(left: &GeometryRun, right: &GeometryRun, config: &FailureConfig, left_steps: i64, right_steps: i64) -> GeometryDelta {
+    let (left_has, left_time, left_kind) = has_persistent_failure(left, config.persistence_window);
+    let (right_has, right_time, right_kind) = has_persistent_failure(right, config.persistence_window);
 
-    // C# BUG? (CanonicalDeltaService.cs:127-128) The step is the normalised time times the step
-    // *count*, but the divergence and collapse detectors normalise by count - 1, so a failure on the
-    // last step reports as one past it.
-    let left_fail_step = (left_time * left_steps as f64) as i64;
-    let right_fail_step = (right_time * right_steps as f64) as i64;
+    // G3 (ruled 2026-10-06): 2.0 multiplied the normalised time by the step count
+    // (CanonicalDeltaService.cs:127-128) while the detectors normalise by count - 1, so a failure
+    // on the last step reported one step past the end. It is count - 1 here, rounded to the
+    // nearest step, so a time computed as i / (n - 1) comes back as step i.
+    let fail_step = |time: f64, steps: i64| (time * (steps - 1).max(0) as f64).round() as i64;
+    let left_fail_step = fail_step(left_time, left_steps);
+    let right_fail_step = fail_step(right_time, right_steps);
 
     let mut delta = GeometryDelta::new(delta_ids::FAILURE_PRESENCE, SYMBOL_FAILURE, "Failure Events");
 
@@ -612,9 +623,10 @@ fn detect_convergence_timing(left: &GeometryRun, right: &GeometryRun, config: &C
         delta.status = DeltaStatus::Present;
         delta.left_value = l.time;
         delta.right_value = r.time;
-        // C# BUG? (CanonicalDeltaService.cs:273) The delta is +1 whichever run converged, so its
-        // sign does not say which one it was.
-        delta.delta = 1.0;
+        // G4 (ruled 2026-10-06): 2.0 set +1 whichever run converged (CanonicalDeltaService.cs:273).
+        // The sign follows the both-converged branch, right minus left: a run that never settles
+        // is later than one that did, so +1 when only A converged and -1 when only B did.
+        delta.delta = if left_converged { 1.0 } else { -1.0 };
         delta.magnitude = 1.0;
         delta.confidence = confidence;
         delta.visual_anchor_time = Some(if left_converged { l.time } else { r.time });
@@ -777,12 +789,13 @@ fn detect_structural_emergence(left: &GeometryRun, right: &GeometryRun, config: 
 
 /// ΔĀ. 2.0 `DetectEvaluatorAlignment` - "Did internal evaluators agree differently?"
 ///
-/// C# BUG? (CanonicalDeltaService.cs:1010, 1070) "Evaluator agreement" is the first eigenvalue's
-/// share of the eigenvalue sum, λ1/Σλ. That is how concentrated the spectrum is, not how much the
-/// professors agree; the name outran the measure.
+/// G5 (ruled 2026-10-06): 2.0 called this "evaluator agreement" (CanonicalDeltaService.cs:1010,
+/// 1070), but the measure is the first eigenvalue's share of the eigenvalue sum, λ1/Σλ: how
+/// concentrated the spectrum is, not how much the professors agree. The words now say
+/// "spectrum concentration". The id and the symbol ΔĀ are 2.0's, so 2.0 bundles still match.
 fn detect_evaluator_alignment(left: &GeometryRun, right: &GeometryRun, config: &AlignmentDetectionConfig, current_time: f64, alignment: &AlignmentMap) -> GeometryDelta {
     let p = persistence_weighted_alignment_delta(left, right, current_time, config, alignment);
-    let mut delta = GeometryDelta::new(delta_ids::EVALUATOR_ALIGNMENT, SYMBOL_ALIGNMENT, "Agreement");
+    let mut delta = GeometryDelta::new(delta_ids::EVALUATOR_ALIGNMENT, SYMBOL_ALIGNMENT, "Spectrum concentration");
 
     if p.paired == 0 {
         delta.explanation = "No aligned samples".to_string();
@@ -795,19 +808,21 @@ fn detect_evaluator_alignment(left: &GeometryRun, right: &GeometryRun, config: &
     // The persistence score is the magnitude.
     let magnitude = p.score;
 
-    // C# BUG? (CanonicalDeltaService.cs:526-527, 569) The sign and the "higher" path come from the
-    // mean over every paired step, while the magnitude and the step count come from the longest
-    // sustained segment, so the two can disagree about which path agreed more.
+    // G6, kept as 2.0 (ruled 2026-10-06): the sign and the "higher" path come from the mean over
+    // every paired step, while the magnitude and the step count come from the longest sustained
+    // segment (CanonicalDeltaService.cs:526-527, 569). The two can disagree, but they did not on
+    // any pair measured, and taking the direction from the segment would make the change shown
+    // differ from right minus left of the means shown beside it.
 
     // Suppression: the persistence-weighted difference is negligible.
     if magnitude < config.delta_floor {
-        delta.explanation = "Similar evaluator alignment".to_string();
+        delta.explanation = "Similar spectrum concentration".to_string();
         delta.status = DeltaStatus::Suppressed;
         delta.left_value = p.left_mean;
         delta.right_value = p.right_mean;
         delta.delta = difference;
         delta.magnitude = magnitude;
-        delta.notes = vec!["Persistence-weighted alignment difference below threshold".to_string()];
+        delta.notes = vec!["Persistence-weighted concentration difference below threshold".to_string()];
         delta.mean_align_a = Some(p.left_mean);
         delta.mean_align_b = Some(p.right_mean);
         return delta;
@@ -815,7 +830,7 @@ fn detect_evaluator_alignment(left: &GeometryRun, right: &GeometryRun, config: &
 
     // Suppression: the sustained segment is too short.
     if p.segment_duration < config.min_persistence_steps {
-        delta.explanation = "Brief alignment difference".to_string();
+        delta.explanation = "Brief concentration difference".to_string();
         delta.status = DeltaStatus::Suppressed;
         delta.left_value = p.left_mean;
         delta.right_value = p.right_mean;
@@ -828,8 +843,8 @@ fn detect_evaluator_alignment(left: &GeometryRun, right: &GeometryRun, config: &
     }
 
     let higher = if difference > 0.0 { "Path B" } else { "Path A" };
-    delta.explanation = format!("{higher} maintained higher evaluator agreement over {} steps", p.segment_duration);
-    delta.summary_sentence = Some(format!("{higher} showed stronger internal alignment (sustained {} steps)", p.segment_duration));
+    delta.explanation = format!("{higher} kept a more concentrated spectrum over {} steps", p.segment_duration);
+    delta.summary_sentence = Some(format!("{higher} had a more concentrated spectrum (sustained {} steps)", p.segment_duration));
     delta.status = DeltaStatus::Present;
     delta.left_value = p.left_mean;
     delta.right_value = p.right_mean;
@@ -906,9 +921,10 @@ fn detect_stability_oscillation(left: &GeometryRun, right: &GeometryRun, config:
         explanation.push_str(&format!(" ({} steps)", peak_episode.duration));
     }
 
-    // C# BUG? (CanonicalDeltaService.cs:694 against 679, 715) The owner of the anchor is the left run
-    // on a tie (>=), while the words say Path B on a tie (>). A tie cannot reach here unless
-    // DeltaFloor is 0 or less.
+    // G7, kept as 2.0 and closed (ruled 2026-10-06): the owner of the anchor is the left run on a
+    // tie (>=), while the words say Path B on a tie (>) (CanonicalDeltaService.cs:694 against 679,
+    // 715). A tie is below the delta floor and is suppressed before this, unless DeltaFloor is 0
+    // or less.
     let owner_is_left = l.score >= r.score;
     let owner_paired = if owner_is_left { &paired_a } else { &paired_b };
     let owner_length = 1i64.max(if owner_is_left { left_length } else { right_length });
@@ -949,20 +965,22 @@ fn detect_stability_oscillation(left: &GeometryRun, right: &GeometryRun, config:
 // ========================================================================
 
 /// 2.0's `HasPersistentFailure`: (failed, normalised failure time, kind). Time is 0 and the kind
-/// "instability" when it did not fail.
+/// "instability" when it did not fail. The recorded `t` is taken as already normalised, as 2.0 did.
 ///
-/// C# BUG? (CanonicalDeltaService.cs:750, 754) Three recorded failures are required (hard-coded;
-/// `FailureConfig.PersistenceWindow` is never read), the time is the third failure's but the kind is
-/// the first's, and the recorded `t` is taken as already normalised while the inferred cases are
-/// normalised here.
-fn has_persistent_failure(run: &GeometryRun) -> (bool, f64, String) {
-    // Annotated events use the same persistence bar as inferred spikes: three recorded failures
-    // count as persistent.
-    if run.failures.len() >= 3 {
+/// G8 (ruled 2026-10-06): 2.0 hard-coded three where `FailureConfig.PersistenceWindow` was meant,
+/// and took the time from the third recorded failure but the kind from the first
+/// (CanonicalDeltaService.cs:750, 754), so its sentence named one failure's kind at another's
+/// time. The window is read, and the time and the kind both come from the failure that makes
+/// the run persistent. The default window is 2.0's three.
+fn has_persistent_failure(run: &GeometryRun, window: i64) -> (bool, f64, String) {
+    let window = window.max(1) as usize;
+    // Annotated events use the same persistence bar as inferred spikes.
+    if run.failures.len() >= window {
         let mut ordered: Vec<&crate::geometry::Failure> = run.failures.iter().collect();
         ordered.sort_by(|a, b| cmp_f64(&a.t, &b.t));
-        let kind = if ordered[0].category.is_empty() { "instability".to_string() } else { ordered[0].category.clone() };
-        return (true, ordered[2].t, kind);
+        let failure = ordered[window - 1];
+        let kind = if failure.category.is_empty() { "instability".to_string() } else { failure.category.clone() };
+        return (true, failure.t, kind);
     }
 
     // Divergence: the velocity explodes for three steps running.
@@ -974,8 +992,8 @@ fn has_persistent_failure(run: &GeometryRun) -> (bool, f64, String) {
             let prior_vel = steps[i.saturating_sub(5)].speed();
             if current_vel > 10.0 * prior_vel && current_vel > 1.0 {
                 divergence_count += 1;
-                if divergence_count >= 3 {
-                    return (true, (i as f64 - 2.0) / (steps.len() - 1) as f64, "divergence".to_string());
+                if divergence_count >= window {
+                    return (true, (i + 1 - window) as f64 / (steps.len() - 1) as f64, "divergence".to_string());
                 }
             } else {
                 divergence_count = 0;
@@ -990,8 +1008,8 @@ fn has_persistent_failure(run: &GeometryRun) -> (bool, f64, String) {
         for (i, step) in eigenvalues.iter().enumerate() {
             if sum(&step.values) < 0.001 {
                 collapse_count += 1;
-                if collapse_count >= 3 {
-                    return (true, (i as f64 - 2.0) / (eigenvalues.len() - 1) as f64, "geometry collapse".to_string());
+                if collapse_count >= window {
+                    return (true, (i + 1 - window) as f64 / (eigenvalues.len() - 1) as f64, "geometry collapse".to_string());
                 }
             } else {
                 collapse_count = 0;
@@ -1213,23 +1231,16 @@ fn persistence_weighted_alignment_delta(left: &GeometryRun, right: &GeometryRun,
         let left_values = &left_eigen[step_a as usize].values;
         let right_values = &right_eigen[step_b as usize].values;
 
-        // C# BUG? (CanonicalDeltaService.cs:1064-1078) A step without enough eigenvalues, or with a
-        // sum under 0.001, counts as alignment 0 instead of being left out, so it pulls the mean
-        // and the difference toward the other run.
-        let mut left_alignment = 0.0;
-        let mut right_alignment = 0.0;
-        if left_values.len() as i64 >= config.min_evaluators {
-            let left_sum = sum(left_values);
-            if left_sum > 0.001 {
-                left_alignment = left_values[0] / left_sum;
-            }
-        }
-        if right_values.len() as i64 >= config.min_evaluators {
-            let right_sum = sum(right_values);
-            if right_sum > 0.001 {
-                right_alignment = right_values[0] / right_sum;
-            }
-        }
+        // G9 (ruled 2026-10-06): 2.0 counted a step without enough eigenvalues, or with a sum of
+        // 0.001 or less, as alignment 0 (CanonicalDeltaService.cs:1064-1078), which pulled the
+        // mean and the difference toward the other run. Such a step is left out.
+        let concentration = |values: &[f64]| {
+            let total = sum(values);
+            (values.len() as i64 >= config.min_evaluators && total > 0.001).then(|| values[0] / total)
+        };
+        let (Some(left_alignment), Some(right_alignment)) = (concentration(left_values), concentration(right_values)) else {
+            continue;
+        };
 
         left_alignments.push(left_alignment);
         right_alignments.push(right_alignment);
@@ -1398,7 +1409,7 @@ pub fn auto_summary(deltas: &[GeometryDelta]) -> String {
         delta_ids::CONVERGENCE_TIMING => " with different convergence timing",
         delta_ids::STABILITY_OSCILLATION => " alongside stability differences",
         delta_ids::STRUCTURAL_EMERGENCE => " and distinct structural emergence",
-        delta_ids::EVALUATOR_ALIGNMENT => " while evaluator alignment differed",
+        delta_ids::EVALUATOR_ALIGNMENT => " while spectrum concentration differed",
         delta_ids::FAILURE_PRESENCE => " compounded by failure events",
         _ => "",
     };

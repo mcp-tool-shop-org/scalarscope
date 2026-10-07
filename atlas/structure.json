@@ -212,7 +212,7 @@
           "path": "docs/index.md"
         },
         {
-          "hash": "78ed3cca5e5e3c3448176ae0f7b8c672b58f45b01142a35606bc2c36a81d7d43",
+          "hash": "2dfd4f9ffb0da3260f3385a3e86e68b3be60820fd387f328406c02fd534acc3a",
           "path": "docs/parity-and-beyond.spec.md"
         }
       ],
@@ -294,7 +294,7 @@
           "path": ".gitignore"
         },
         {
-          "hash": "97a55ba5d646dd3a53234c924586d9c3723d9e06df0ff4356b20152f564baca0",
+          "hash": "989a4b6c2b67104821310a6a74d9645c8acb2c9eef47d8ce1b6af8df8d3e2e17",
           "path": "CHANGELOG.md"
         },
         {
@@ -545,11 +545,12 @@
             "compute_with_map",
             "compute_with_summary",
             "create_alignment_map",
+            "create_alignment_map_with",
             "dotnet_double",
             "fixed",
             "robust_sigma"
           ],
-          "hash": "e39b1b955464dd6560ff3b2bb689a5eddde4825c93034105c77ea68d76b2c089",
+          "hash": "b7eab851cce132dee4ee17af7349b915ac69cc0caf861599c954c2a4430f70e4",
           "importsFiles": [
             "rust/src/geometry.rs"
           ],
@@ -1153,7 +1154,7 @@
               "line": 133
             }
           ],
-          "hash": "229198a87ff3c69aa01347dec8a99e7badd9710f2ce54d447ab38db217ac9cd9",
+          "hash": "b5cbe8f6ab66a601eeaee725f253353d23641e264805addc960e94b68c2d2bdd",
           "importOrder": [
             "rust/src/ui.rs",
             "rust/src/open.rs"
@@ -1234,7 +1235,7 @@
           "testsInside": true
         },
         {
-          "hash": "26b9bb294314f8898cf561b6b18e008c143bc2b68dd58283740cf956a6702f63",
+          "hash": "64ecc8b8cc1ace1171adbdaaeb9380236e0ff844c0109ecac6b3fd8faa9a91e4",
           "importsFiles": [
             "rust/src/bundle.rs",
             "rust/src/open.rs",
@@ -1268,7 +1269,7 @@
           "path": "rust/tests/fixtures/aspire-si/steady.json"
         },
         {
-          "hash": "f605ce1108276fb0fbecc34470eacb61f4cc6b3b31935a4afea81dcf137394ff",
+          "hash": "da13c3980edfffc8616bceac0a8f3a30e1aa24ee502744fe97a4f40db129acf2",
           "importsFiles": [
             "rust/src/geometry.rs",
             "rust/src/geometry_deltas.rs"
@@ -3516,7 +3517,7 @@
   "edges": [],
   "engine": "1.24.0",
   "generatedFrom": {
-    "commit": "3d471dc241a2d0012b248b22e032f9b354cf47bd",
+    "commit": "9a109beaa472b07f3f1f1a096967e3337876907b",
     "tracked": 388
   },
   "landings": [

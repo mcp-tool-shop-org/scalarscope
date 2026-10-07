@@ -39,7 +39,7 @@ pub const GUIDE: &[Section] = &[
     },
     Section {
         title: "ΔTd and ΔĀ",
-        body: "Structural emergence (ΔTd) and evaluator alignment (ΔĀ) describe training dynamics: the geometry of a training trajectory and the agreement of its evaluators. They do not apply to an inference run, so they stay off the inference page. They come with the geometry views.",
+        body: "Structural emergence (ΔTd) and spectrum concentration (ΔĀ) describe training dynamics: the geometry of a training trajectory, and how much of the evaluators' spread sits in its first direction (λ1/Σλ). 2.0 called ΔĀ evaluator agreement, but it measures concentration, not agreement. They do not apply to an inference run, so they stay off the inference page. They come with the geometry views.",
     },
     Section {
         title: "The views",

@@ -113,7 +113,7 @@
       "confidence": "low",
       "highWater": null,
       "name": "rust",
-      "qualifyingSourceCommits": 23,
+      "qualifyingSourceCommits": 25,
       "rebaseline": null
     },
     {
@@ -219,8 +219,8 @@
         "path": ".gitignore"
       },
       {
-        "commits": 37,
-        "lines": 438,
+        "commits": 38,
+        "lines": 450,
         "path": "CHANGELOG.md"
       },
       {
@@ -349,8 +349,8 @@
         "path": "assets/logo.png"
       },
       {
-        "commits": 3,
-        "lines": 216,
+        "commits": 5,
+        "lines": 228,
         "path": "atlas/README.md"
       },
       {
@@ -359,18 +359,18 @@
         "path": "atlas/boundaries.yaml"
       },
       {
-        "commits": 3,
-        "lines": 848,
+        "commits": 5,
+        "lines": 872,
         "path": "atlas/page.json"
       },
       {
-        "commits": 3,
-        "lines": 4678,
+        "commits": 5,
+        "lines": 4774,
         "path": "atlas/statistics.json"
       },
       {
-        "commits": 3,
-        "lines": 7606,
+        "commits": 5,
+        "lines": 7622,
         "path": "atlas/structure.json"
       },
       {
@@ -479,8 +479,8 @@
         "path": "docs/index.md"
       },
       {
-        "commits": 15,
-        "lines": 877,
+        "commits": 16,
+        "lines": 887,
         "path": "docs/parity-and-beyond.spec.md"
       },
       {
@@ -579,8 +579,8 @@
         "path": "rust/src/geometry.rs"
       },
       {
-        "commits": 4,
-        "lines": 5912,
+        "commits": 6,
+        "lines": 6083,
         "path": "rust/src/geometry_deltas.rs"
       },
       {
@@ -654,8 +654,8 @@
         "path": "rust/src/ui_geometry.rs"
       },
       {
-        "commits": 2,
-        "lines": 398,
+        "commits": 3,
+        "lines": 400,
         "path": "rust/src/ui_pages.rs"
       },
       {
@@ -679,8 +679,8 @@
         "path": "rust/tests/bundle_tests.rs"
       },
       {
-        "commits": 5,
-        "lines": 180,
+        "commits": 6,
+        "lines": 183,
         "path": "rust/tests/compat_tests.rs"
       },
       {
@@ -699,8 +699,8 @@
         "path": "rust/tests/fixtures/aspire-si/steady.json"
       },
       {
-        "commits": 4,
-        "lines": 1472,
+        "commits": 6,
+        "lines": 1580,
         "path": "rust/tests/geometry_delta_tests.rs"
       },
       {
@@ -729,18 +729,18 @@
         "path": "rust/tests/sources_tests.rs"
       },
       {
-        "commits": 2,
-        "lines": 32,
+        "commits": 3,
+        "lines": 34,
         "path": "site/astro.config.mjs"
       },
       {
-        "commits": 2,
-        "lines": 13695,
+        "commits": 3,
+        "lines": 19851,
         "path": "site/package-lock.json"
       },
       {
-        "commits": 2,
-        "lines": 26,
+        "commits": 3,
+        "lines": 34,
         "path": "site/package.json"
       },
       {
@@ -2139,17 +2139,17 @@
     "level": "low",
     "reason": "fewer than 25 source files reach 10 revisions in the window"
   },
-  "generatedAt": "2026-10-07T01:31:59.876Z",
+  "generatedAt": "2026-10-07T01:45:52.315Z",
   "generatedFrom": {
-    "commit": "3d471dc241a2d0012b248b22e032f9b354cf47bd"
+    "commit": "9a109beaa472b07f3f1f1a096967e3337876907b"
   },
   "pairs": [
     {
       "a": "CHANGELOG.md",
       "b": "rust/src/ui.rs",
-      "either": 27,
+      "either": 28,
       "shared": 15,
-      "strength": 0.555556
+      "strength": 0.535714
     },
     {
       "a": "rust/src/bundle.rs",
@@ -2295,16 +2295,16 @@
     "floor": "fallen",
     "floorHeld": false,
     "floorTrigger": "revision-depth",
-    "headDate": "2026-10-06T21:31:54-04:00",
+    "headDate": "2026-10-06T21:45:45-04:00",
     "inScopeFiles": 393,
     "pinnedStart": null,
     "priorFloor": "fallen",
-    "qualifyingCommits": 52,
+    "qualifyingCommits": 55,
     "qualifyingMinimum": 30,
     "revisions": 5,
     "shared": 10,
     "sharedFloorUsed": 3,
-    "since": "2026-04-10T01:31:54.000Z",
+    "since": "2026-04-10T01:45:45.000Z",
     "sourceExtensions": [
       ".js",
       ".mjs",
