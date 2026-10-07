@@ -1,5 +1,7 @@
 # Receipts
 
+Runs 1–4 predate runforge#11: a recorded hypothesis's sentence was then "On these runs it is {state}", and the note's description did not ask for the program's state words. Both changed afterwards.
+
 ## Live workbench sessions, 2026-10-06 (phase 5 exit test, run 1)
 
 Two sessions with `qwen3:14b` on the local Ollama. The digest is in each file. They were run with `rust/examples/live_workbench.rs`.

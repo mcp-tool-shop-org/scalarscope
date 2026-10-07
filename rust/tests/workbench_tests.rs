@@ -213,6 +213,8 @@ fn a_session_record_names_the_model_and_holds_no_paths() {
     let specs = bench.tool_specs();
     let why = specs[3]["function"]["parameters"]["properties"]["why"]["description"].as_str().unwrap();
     assert!(why.contains("name a measure by its name, such as p99"), "{why}");
+    let note = specs[4]["function"]["parameters"]["properties"]["note"]["description"].as_str().unwrap();
+    assert!(note.contains("use the program's words"), "{note}");
     // No measure's description carries a digit the model could echo into its words.
     for measure in scalarscope::workbench::MEASURES {
         assert!(!measure.means.chars().any(|ch| ch.is_ascii_digit()), "{}: {}", measure.name, measure.means);
