@@ -325,7 +325,12 @@ On the real aspire-si exports, three of the five deltas fired on how the data wa
 - **Either run's `scalar_source` is `replayed` or `fixed_per_item`:**
   - ΔF is withheld: its recorded failures are score dips, and the scores repeat.
   - The score panels say the scores are replayed or fixed per item.
-- **ΔĀ is never withheld for these reasons.**
+- **ΔĀ on checkpoint × item** (ruled 2026-10-07). 2.0's rule keeps the longest stretch of consecutive steps, which depends on step order.
+  - On these exports, each run's λ1/Σλ is averaged over each checkpoint block's items, which is order-free within a block.
+  - Consistency across blocks replaces the sustained-stretch filter: ΔĀ fires only if B − A clears the delta floor (0.05) with the same sign in every block. The wording is "Path B had a more concentrated spectrum at all N checkpoints", with no "sustained N steps".
+  - Otherwise it is quiet, with the reason: "differs by checkpoint", or the checkpoints where the difference is below the floor.
+  - It is withheld when the blocks cannot pair: a different number of checkpoints, or one run whose steps are time.
+  - Time-ordered exports keep 2.0's rule unchanged.
 - **The headline** is built only from deltas that stand: neither quiet nor withheld.
 
 **Also fixed with this:** evaluator labels that overlap when two evaluators point the same way.

@@ -341,7 +341,11 @@ pub fn compute_with_map(left: &GeometryRun, right: &GeometryRun, current_time: f
         detect_failure_presence(left, right, &config.failure, left_steps, right_steps),
         detect_convergence_timing(left, right, &config.convergence, left_steps, right_steps),
         detect_structural_emergence(left, right, &config.emergence),
-        detect_evaluator_alignment(left, right, &config.alignment, current_time, map),
+        if left.metadata.steps_are_time() && right.metadata.steps_are_time() {
+            detect_evaluator_alignment(left, right, &config.alignment, current_time, map)
+        } else {
+            concentration_by_checkpoint(left, right, &config.alignment)
+        },
         detect_stability_oscillation(left, right, &config.stability, current_time, map),
     ]
 }
@@ -1495,6 +1499,100 @@ pub fn dotnet_double(value: f64) -> String {
 
 /// Why steps that are not time cannot carry a timing or oscillation reading.
 pub const NOT_TIME: &str = "steps are checkpoint × item, not time";
+/// ΔĀ on exports whose steps are checkpoints × items (ruled 2026-10-07). 2.0's rule keeps the
+/// longest stretch of consecutive steps, which depends on step order, and these steps are not
+/// time. Here each run's λ1/Σλ is averaged over each checkpoint block's items, which does not
+/// depend on their order, and the rule asks for consistency across blocks instead of a
+/// sustained stretch: it fires only when B − A clears the floor with the same sign at every
+/// checkpoint. The whole file is read; the time marker does not cut a block.
+pub fn concentration_by_checkpoint(left: &GeometryRun, right: &GeometryRun, config: &AlignmentDetectionConfig) -> GeometryDelta {
+    let mut delta = GeometryDelta::new(delta_ids::EVALUATOR_ALIGNMENT, SYMBOL_ALIGNMENT, "Spectrum concentration");
+    let blocks = |run: &GeometryRun| -> Option<Vec<Option<f64>>> {
+        if run.metadata.steps_are_time() {
+            return None;
+        }
+        let count = usize::try_from(run.metadata.checkpoints?).ok().filter(|count| *count > 0)?;
+        let steps = run.geometry.eigenvalues.len();
+        if steps == 0 || steps % count != 0 {
+            return None;
+        }
+        let size = steps / count;
+        Some(
+            run.geometry
+                .eigenvalues
+                .chunks(size)
+                .map(|block| {
+                    let shares: Vec<f64> = block
+                        .iter()
+                        .filter_map(|step| {
+                            let total = sum(&step.values);
+                            (step.values.len() as i64 >= config.min_evaluators && total > 0.001).then(|| step.values[0] / total)
+                        })
+                        .collect();
+                    (!shares.is_empty()).then(|| average(&shares))
+                })
+                .collect(),
+        )
+    };
+    let (Some(left_blocks), Some(right_blocks)) = (blocks(left), blocks(right)) else {
+        delta.status = DeltaStatus::Indeterminate;
+        delta.explanation = format!("Withheld: {NOT_TIME}, and the two runs' checkpoint blocks cannot be paired");
+        delta.notes = vec!["Both runs must state checkpoint_by_item with a checkpoint count that divides their steps.".to_string()];
+        return delta;
+    };
+    if left_blocks.len() != right_blocks.len() {
+        delta.status = DeltaStatus::Indeterminate;
+        delta.explanation = format!("Withheld: the runs have {} and {} checkpoints, so their blocks do not pair", left_blocks.len(), right_blocks.len());
+        return delta;
+    }
+    let pairs: Vec<(f64, f64)> = left_blocks.iter().zip(&right_blocks).filter_map(|(a, b)| Some(((*a)?, (*b)?))).collect();
+    if pairs.len() != left_blocks.len() {
+        delta.status = DeltaStatus::Indeterminate;
+        delta.explanation = "Withheld: a checkpoint has no step with enough eigenvalues".to_string();
+        return delta;
+    }
+    let count = pairs.len();
+    let left_mean = average(&pairs.iter().map(|pair| pair.0).collect::<Vec<_>>());
+    let right_mean = average(&pairs.iter().map(|pair| pair.1).collect::<Vec<_>>());
+    let differences: Vec<f64> = pairs.iter().map(|(a, b)| b - a).collect();
+    delta.left_value = left_mean;
+    delta.right_value = right_mean;
+    delta.delta = right_mean - left_mean;
+    delta.magnitude = differences.iter().fold(f64::INFINITY, |least, difference| least.min(difference.abs()));
+    delta.mean_align_a = Some(left_mean);
+    delta.mean_align_b = Some(right_mean);
+    delta.notes = pairs
+        .iter()
+        .enumerate()
+        .map(|(index, (a, b))| format!("Checkpoint {}: A {a:.3}, B {b:.3}, B − A {:+.3}.", index + 1, b - a))
+        .collect();
+    delta
+        .notes
+        .push(format!("Fires when B − A is at least {} in size with the same sign at every checkpoint; each block's mean is over its items, so their order does not matter.", config.delta_floor));
+
+    let higher = differences.iter().all(|difference| *difference >= config.delta_floor);
+    let lower = differences.iter().all(|difference| *difference <= -config.delta_floor);
+    if higher || lower {
+        let path = if higher { "Path B" } else { "Path A" };
+        let at = if count == 1 { "at its one checkpoint".to_string() } else { format!("at all {count} checkpoints") };
+        delta.status = DeltaStatus::Present;
+        delta.explanation = format!("{path} kept a more concentrated spectrum {at}");
+        delta.summary_sentence = Some(format!("{path} had a more concentrated spectrum {at}"));
+        delta.delta_type = DeltaType::Structure;
+        return delta;
+    }
+    delta.status = DeltaStatus::Suppressed;
+    let positive = differences.iter().any(|difference| *difference > 0.0);
+    let negative = differences.iter().any(|difference| *difference < 0.0);
+    delta.explanation = if positive && negative {
+        "Spectrum concentration differs by checkpoint".to_string()
+    } else {
+        let short: Vec<String> = differences.iter().enumerate().filter(|(_, difference)| difference.abs() < config.delta_floor).map(|(index, _)| (index + 1).to_string()).collect();
+        if short.len() == count { "Similar spectrum concentration at every checkpoint".to_string() } else { format!("Similar spectrum concentration at checkpoint {}", short.join(", ")) }
+    };
+    delta
+}
+
 /// Why repeating scores cannot carry a failure reading.
 pub const SCORES_REPEAT: &str = "its failures are score dips, and the scores repeat";
 

@@ -41,6 +41,7 @@ A geometry export can state two things about its own layout in `run_metadata`:
 
 When a run's steps are not time:
 - ΔTc, ΔTd, ΔO and ΔF are **withheld**, with the reason "steps are checkpoint × item, not time".
+- ΔĀ is compared checkpoint by checkpoint: each run's mean λ1/Σλ over a checkpoint's items, whose order does not matter. It fires only when one run is more concentrated by at least the floor (0.05) at every checkpoint, and then says so: "Path B had a more concentrated spectrum at all 3 checkpoints". When the sign changes between checkpoints it is quiet. When the two runs have different numbers of checkpoints, it is withheld.
 - The trajectory is drawn as unordered points, one shade per checkpoint.
 
 When a run's scores repeat:

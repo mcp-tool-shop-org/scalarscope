@@ -38,7 +38,7 @@ For two ASPIRE training runs. These are 2.0's rules with 2.0's defaults, ported 
 | **ΔF** | Did a run fail persistently? | A failure that persists for 3 recorded failures or steps. The time and the kind come from the same failure. |
 | **ΔTc** | Did the runs converge at different steps? | Velocity stays inside an epsilon band for 5 steps; the effective epsilon is max(0.02, 0.5 × robust sigma). Fires at 3 steps apart or more. |
 | **ΔTd** | Did a dominant direction emerge at a different time? | The first eigenvalue exceeds 1.5 × the next, sustained or recurring |
-| **ΔĀ** | Is one run's evaluator spectrum more concentrated? | λ1 / Σλ per step, compared over the longest sustained stretch. 2.0 called it evaluator agreement. |
+| **ΔĀ** | Is one run's evaluator spectrum more concentrated? | λ1 / Σλ per step, compared over the longest sustained stretch; on checkpoint × item exports, per checkpoint, with the same sign at every one. 2.0 called it evaluator agreement. |
 | **ΔO** | Did one run show sustained instability? | Curvature above an adaptive threshold for 4 steps or more; floor 0.05 between runs, 0.1 within a run |
 
 ## Withheld
