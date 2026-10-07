@@ -1,0 +1,136 @@
+{
+  "digest": "bdbd181c33f2ed1b31c972991882db3cf4d192569092138a7d29e973cd9debe8",
+  "learned": [
+    {
+      "formula": "p99 / p90",
+      "meaning": "How heavy the tail is above the 90th percentile, measured as the ratio of the 99th percentile to the 90th percentile.",
+      "name": "tail_heaviness"
+    }
+  ],
+  "measures_not_used": [
+    "p99_over_p50",
+    "quantile_between",
+    "mean_between"
+  ],
+  "model": "qwen3:14b",
+  "model_note": "I looked at the impact of batch size on latency metrics, including tail heaviness, and observed variability across different seeds. What remains open is understanding the exact mechanism behind the variability and how other factors, such as precision, might influence these outcomes.",
+  "model_note_dropped": false,
+  "program": "ScalarScope",
+  "proposed": [],
+  "runs": [
+    {
+      "identity": "4ecc44d88da49452",
+      "knobs": {
+        "batch": 1,
+        "precision": "fp16"
+      },
+      "name": "batch 1 seed 1"
+    },
+    {
+      "identity": "f8a30621cd855801",
+      "knobs": {
+        "batch": 1,
+        "precision": "fp16"
+      },
+      "name": "batch 1 seed 2"
+    },
+    {
+      "identity": "8b395c5bafc1cbac",
+      "knobs": {
+        "batch": 1,
+        "precision": "fp16"
+      },
+      "name": "batch 1 seed 3"
+    },
+    {
+      "identity": "0996baf0a4274a8c",
+      "knobs": {
+        "batch": 4,
+        "precision": "fp16"
+      },
+      "name": "batch 4 seed 1"
+    },
+    {
+      "identity": "41f9c6ba7a00992f",
+      "knobs": {
+        "batch": 4,
+        "precision": "fp16"
+      },
+      "name": "batch 4 seed 2"
+    },
+    {
+      "identity": "45a80e2e90d03c5b",
+      "knobs": {
+        "batch": 4,
+        "precision": "fp16"
+      },
+      "name": "batch 4 seed 3"
+    },
+    {
+      "identity": "c7ae185ef6aab735",
+      "knobs": {
+        "batch": 8,
+        "precision": "fp16"
+      },
+      "name": "batch 8 seed 1"
+    },
+    {
+      "identity": "34d032317ad02a56",
+      "knobs": {
+        "batch": 8,
+        "precision": "fp16"
+      },
+      "name": "batch 8 seed 2"
+    },
+    {
+      "identity": "fe69dd9df35875f9",
+      "knobs": {
+        "batch": 8,
+        "precision": "fp16"
+      },
+      "name": "batch 8 seed 3"
+    }
+  ],
+  "seconds": 3,
+  "session": "knob-folder",
+  "steps": [
+    {
+      "answer": "The formula has text after its end.",
+      "args": "{\"formula\":\"p50, p90, p99, steady_mean, warmup_cost, anomaly_rate, throughput_p50, memory_peak, samples\"}",
+      "ok": false,
+      "tool": "measure"
+    },
+    {
+      "answer": "The formula has text after its end.",
+      "args": "{\"formula\":\"p50, p90, p99, steady_mean, warmup_cost, anomaly_rate, throughput_p50, memory_peak, samples\"}",
+      "ok": false,
+      "tool": "measure"
+    },
+    {
+      "answer": "Kept tail_heaviness as a provisional tool. It becomes a kept tool once it is used on a second folder.\nbatch 1 seed 1: 2.7079\nbatch 1 seed 2: 1.0543\nbatch 1 seed 3: 2.7373\nbatch 4 seed 1: 2.7852\nbatch 4 seed 2: 2.8335\nbatch 4 seed 3: 2.8928\nbatch 8 seed 1: 2.8086\nbatch 8 seed 2: 2.9313\nbatch 8 seed 3: 2.7979",
+      "args": "{\"formula\":\"p99 / p90\",\"meaning\":\"How heavy the tail is above the 90th percentile, measured as the ratio of the 99th percentile to the 90th percentile.\",\"name\":\"tail_heaviness\"}",
+      "ok": true,
+      "tool": "learn_tool"
+    },
+    {
+      "answer": "The reason was refused: it carried a digit, and numbers come only from the tools.",
+      "args": "{\"formula\":\"tail_heaviness\",\"formula_moves\":\"up\",\"knob\":\"batch\",\"knob_change\":\"raise\",\"why\":\"Increasing the batch size may lead to more variability in latency, resulting in a heavier tail as the 99th percentile becomes significantly higher compared to the 90th percentile.\"}",
+      "ok": false,
+      "tool": "propose_hypothesis"
+    },
+    {
+      "answer": "The reason was refused: it carried a digit, and numbers come only from the tools.",
+      "args": "{\"formula\":\"tail_heaviness\",\"formula_moves\":\"up\",\"knob\":\"batch\",\"knob_change\":\"raise\",\"why\":\"Increasing the batch size may lead to more variability in latency, resulting in a heavier tail as the 99th percentile becomes significantly higher compared to the 90th percentile.\"}",
+      "ok": false,
+      "tool": "propose_hypothesis"
+    },
+    {
+      "answer": "Finished. Your note is kept.",
+      "args": "{\"note\":\"I looked at the impact of batch size on latency metrics, including tail heaviness, and observed variability across different seeds. What remains open is understanding the exact mechanism behind the variability and how other factors, such as precision, might influence these outcomes.\"}",
+      "ok": true,
+      "tool": "finish"
+    }
+  ],
+  "stopped": "The model finished.",
+  "your_call": "I expect a larger batch to raise p50 and to make the tail heavier."
+}

@@ -1,0 +1,12 @@
+# Receipts
+
+## Live workbench sessions, 2026-10-06 (phase 5 exit test, run 1)
+
+Two sessions with `qwen3:14b` on the local Ollama. The digest is in each file. They were run with `rust/examples/live_workbench.rs`.
+
+- **`workbench-golden-pair.json`** (2.0 golden pair, 6 calls, 34 s). The model tried a list of measures where a formula goes, and the program refused it twice. Its first tool, `p99 / p90`, was refused: the runs have 7 and 13 steady samples, and a p99 needs 368. It then kept `initial_slowdown = quantile_between(0, 9, 0.5) / p50` (1.25 and 1.06) and finished with a note. It proposed nothing; the files record no knobs.
+- **`workbench-knob-folder.json`** (the simulated batch folder, 6 calls). It kept `tail_heaviness = p99 / p90`. Twice it proposed "raise batch → tail_heaviness up". The program refused the hypothesis's reason both times, because the reason said "99th percentile" and the fence forbids digits in the model's words. The session ended with no hypothesis recorded.
+
+Every number in both records is the program's, and every refusal is the program's. **What the exit test asked for is only partly met.** No session left a hypothesis in a program-set state, because the one proposed was stopped at the wording fence.
+
+The finding: the fence was written for RunForge's loss measures, whose names have no digits. A latency workbench names its measures `p50` and `p99`, so a reason that names them is refused, and the refusal does not say how to fix it. The fence lives in the shared `workbench` crate. The fix belongs there, followed by a second run.
