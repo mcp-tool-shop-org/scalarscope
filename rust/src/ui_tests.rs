@@ -735,7 +735,7 @@ fn the_band_is_one_convex_trapezoid_per_step() {
 }
 
 fn workbench_folder() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../tests/Fixtures/Workbench")
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/workbench")
 }
 
 #[test]

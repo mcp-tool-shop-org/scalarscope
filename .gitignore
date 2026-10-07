@@ -32,3 +32,6 @@ site/dist/
 # OS
 Thumbs.db
 Desktop.ini
+
+# offrig project memory (local)
+.offrig/

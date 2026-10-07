@@ -66,7 +66,7 @@ fn main() {
     let mut knob_runs = Vec::new();
     for batch in [1, 4, 8] {
         for seed in 1..=3 {
-            knob_runs.push(inference(&fixtures().join(format!("Workbench/batch{batch}_seed{seed}_runtrace.json"))));
+            knob_runs.push(inference(&PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(format!("tests/fixtures/workbench/batch{batch}_seed{seed}_runtrace.json"))));
         }
     }
     session(port, "knob-folder", knob_runs, "I expect a larger batch to raise p50 and to make the tail heavier.", &out);

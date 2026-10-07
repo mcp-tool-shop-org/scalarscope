@@ -1,5 +1,5 @@
 //! The workbench on inference runs: knobs, latency measures, and the shared crate's verdicts
-//! on the simulated knob folder (`tests/Fixtures/Workbench`) and the 2.0 golden pair.
+//! on the simulated knob folder (`rust/tests/fixtures/workbench`) and the 2.0 golden pair.
 
 use std::path::PathBuf;
 
@@ -26,7 +26,7 @@ fn knob_runs() -> Vec<InferenceRun> {
     let mut runs = Vec::new();
     for batch in [1, 4, 8] {
         for seed in 1..=3 {
-            runs.push(inference(fixtures().join(format!("Workbench/batch{batch}_seed{seed}_runtrace.json"))));
+            runs.push(inference(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(format!("tests/fixtures/workbench/batch{batch}_seed{seed}_runtrace.json"))));
         }
     }
     runs
@@ -49,7 +49,7 @@ fn scratch(name: &str) -> PathBuf {
 
 #[test]
 fn a_runtrace_carries_its_knobs_seed_and_framework() {
-    let run = inference(fixtures().join("Workbench/batch4_seed2_runtrace.json"));
+    let run = inference(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/workbench/batch4_seed2_runtrace.json"));
     assert_eq!(run.knobs.values["batch"], json!(4));
     assert_eq!(run.knobs.values["precision"], json!("fp16"));
     assert_eq!(run.knobs.sources["batch"], Source::Trace);
@@ -79,7 +79,7 @@ fn the_trace_wins_then_the_knobs_file_then_the_folder_name() {
     let dir = scratch("sources").join("batch=2_threads=8");
     std::fs::create_dir_all(&dir).unwrap();
     std::fs::write(dir.join(knobs::KNOBS_FILE), r#"{"batch": 16, "precision": "int8", "shape": [1, 3], "trt": true}"#).unwrap();
-    let source = fixtures().join("Workbench/batch1_seed1_runtrace.json");
+    let source = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/workbench/batch1_seed1_runtrace.json");
     std::fs::copy(&source, dir.join("run.json")).unwrap();
     let run = inference(dir.join("run.json"));
     let knobs = &run.knobs;
