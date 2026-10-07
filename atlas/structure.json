@@ -1369,15 +1369,15 @@
       "externals": 0,
       "files": [
         {
-          "hash": "f28162a1043cc69da1b528c0a13a9aa7efd9be6a7bee69cb6c8f06bd5fb4d454",
+          "hash": "2de6a6d9362c10883f686babac8bc3773a6e156da562931ac8affcf0fa9b4576",
           "path": "site/astro.config.mjs"
         },
         {
-          "hash": "baeef27103706a82b6cb18b044164d949248b2d90f40e133f94172c14d4f65ca",
+          "hash": "85f78c09f0329d937ba57dc65d24adeeecdba65ea4a0eda01b02129f1d2ea07d",
           "path": "site/package-lock.json"
         },
         {
-          "hash": "e3948f3adea612a50f80b0084dc874569b512d5150b14de8d1323a5fff09cd6d",
+          "hash": "9c39e620ebae2c5718ecd8c6188bd3451409a614ec8f5308dc15d5fd886e5b91",
           "path": "site/package.json"
         },
         {
@@ -3516,7 +3516,7 @@
   "edges": [],
   "engine": "1.24.0",
   "generatedFrom": {
-    "commit": "fd6dcdac68952b42899d6474f8bb64534b63d484",
+    "commit": "3d471dc241a2d0012b248b22e032f9b354cf47bd",
     "tracked": 388
   },
   "landings": [

@@ -1,6 +1,6 @@
 # scalarscope: how it works
 
-Mapped at 2026-10-07 from commit fd6dcda by Atlas 1.24.0.
+Mapped at 2026-10-07 from commit 3d471dc by Atlas 1.24.0.
 
 ## What this is
 
@@ -8,9 +8,9 @@ A review of two machine-learning runs. The app is the Rust program in rust/, pac
 
 10 parts, mostly C# (181 files), Rust (30), CSS (2), PowerShell (2), TypeScript (2), Astro (1), JavaScript (1) and shell (1). Work enters through 6 doors; the busiest is Build and Test, which reaches 4 parts. It deploys a site to GitHub Pages. People run scalarscope.
 
-## What changed since 2026-10-07 (4584e94)
+## What changed since 2026-10-07 (fd6dcda)
 
-Nothing structural changed since 2026-10-07; 1 file changed content.
+Nothing structural changed since 2026-10-07; 3 files changed content.
 
 ## What comes in
 
