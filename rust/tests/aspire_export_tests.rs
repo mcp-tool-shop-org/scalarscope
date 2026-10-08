@@ -393,3 +393,44 @@ fn drift_replicates_read_alike_and_mixed_checkpoint_counts_do_not_pair() {
     let teachers = reviewed(&seeded("control-local-teacher", 43, ".drift-from-base"), &seeded("control-composite-teacher", 43, ".drift-from-base"));
     assert_eq!(teachers.verdict, "No meaningful divergence between the runs; the evaluator setups differ (spectrum concentration).");
 }
+
+// Ruled 2026-10-07: on a pair of per-step exports, ΔĀ and ΔO carry a caveat, because seed
+// replicates of one condition fire them on dialogue noise. Text only: no reading changes.
+
+fn caveats(review: &scalarscope::review::GeometryReview) -> Vec<(&str, Option<&str>)> {
+    review.explanations.iter().map(|tile| (tile.symbol.as_str(), tile.caveat.as_deref())).collect()
+}
+
+#[test]
+fn per_step_pairs_carry_the_seed_caveat_on_concentration_and_oscillation_only() {
+    use scalarscope::review::PER_STEP_SEEDS;
+    let expect = |symbol: &str| (symbol == "Δ\u{0100}" || symbol == "ΔO").then_some(PER_STEP_SEEDS);
+    // The control pair: the readings are those 3.1.1 gives.
+    let review = reviewed("real-local-teacher.geometry.json", "real-composite-teacher.geometry.json");
+    assert_eq!(review.verdict, "Path B had a more concentrated spectrum (sustained 69 steps) alongside stability differences.");
+    for (symbol, caveat) in caveats(&review) {
+        assert_eq!(caveat, expect(symbol), "{symbol}");
+    }
+    // Two seeds of one condition: the pair the caveat is about. Both still fire.
+    let replicates = reviewed(&seeded("control-local-teacher", 43, ""), &seeded("control-local-teacher", 44, ""));
+    assert_eq!(status(&replicates, "Δ\u{0100}").headline, "Path B had a more concentrated spectrum (sustained 12 steps)");
+    assert_eq!(status(&replicates, "ΔO").status, "fired");
+    for (symbol, caveat) in caveats(&replicates) {
+        assert_eq!(caveat, expect(symbol), "{symbol}");
+    }
+}
+
+#[test]
+fn drift_mixed_and_unstated_layouts_carry_no_seed_caveat() {
+    for (left, right) in [
+        // Drift: the comparable view.
+        ("real-local-teacher.drift.geometry.json", "real-composite-teacher.drift.geometry.json"),
+        // One per-step run and one drift run: not a per-step pair.
+        ("real-local-teacher.geometry.json", "real-composite-teacher.drift.geometry.json"),
+        // Files that state no layout read as 2.0 read them.
+        ("steady.json", "regressing.json"),
+    ] {
+        let review = reviewed(left, right);
+        assert!(review.explanations.iter().all(|tile| tile.caveat.is_none()), "{left} vs {right}");
+    }
+}

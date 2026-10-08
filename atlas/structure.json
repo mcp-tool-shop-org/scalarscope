@@ -212,7 +212,7 @@
           "path": "docs/index.md"
         },
         {
-          "hash": "bee8bb13bcd6e3f1031d193f516aa2718de03f577832802d1316466b286b6529",
+          "hash": "1964e0732d10d544d41c703ee074f104568be67d9e4c4dada1a5fc43d9fc1eda",
           "path": "docs/parity-and-beyond.spec.md"
         },
         {
@@ -378,7 +378,7 @@
           "path": ".gitignore"
         },
         {
-          "hash": "77e99446278ba6ef041948fcd1cb9db9ca5ee009da50df674f8353eda35a77f5",
+          "hash": "f3cf0e7cc295343dc7e517c958d49233401b33c0566e9fb93cde77cfe7599fe0",
           "path": "CHANGELOG.md"
         },
         {
@@ -394,35 +394,35 @@
           "path": "PRIVACY.md"
         },
         {
-          "hash": "dd289775f30a3a98cdc2cebe0d3889d65f0f159ab23e8855db974ff58d785973",
+          "hash": "5339f7d880e1a1f4c4f041bc40721818a893859395ee0faec1febd4b49f8ca63",
           "path": "README.es.md"
         },
         {
-          "hash": "7618e8461d09181e381b3c9f6ff76f888c069d8078bf7d4e7238125e60ba7d03",
+          "hash": "38114cb8b6bbe0c24270056973ddd33c34a121257dd8920a55e935c3a70dcd74",
           "path": "README.fr.md"
         },
         {
-          "hash": "21416f58e683f6cae11a134b95bad416e5a8aa0ab9353b219cf607688af23fd9",
+          "hash": "e1920f26683f01fe44eb483d8486525c2cc1732e45e23fba24a33ac4b4b52965",
           "path": "README.hi.md"
         },
         {
-          "hash": "3ad951958c935d28dbb507362c1178e7194812a338736ed74462f8dbaa817ff2",
+          "hash": "8f6777f69bbff8d5916a691bf6ed5466797a0b34040c24ed4a5b1190fc4fc218",
           "path": "README.it.md"
         },
         {
-          "hash": "dbd49e04237338c998828f5a18b69fcf19859af7e3b14ff3be599bb70c0df054",
+          "hash": "f6d9057379929f03f2a2a908ba75c544f555418427917b5540edb4619461d5db",
           "path": "README.ja.md"
         },
         {
-          "hash": "d472e1fea6a41360255f9a06a90831b309ceb9b222bddd583153812447693e8c",
+          "hash": "4974300ba01b0ca11b49b6764e31274f3d066522fbab75548f011ced6d76cc7a",
           "path": "README.md"
         },
         {
-          "hash": "823c45c290f42db4d02a4ea0321c90f40383167348607daa72c46ba48a67dc4c",
+          "hash": "5300b7a7bf6415e50fb0ad9e8c42cda2775cff76d410d6ba95b5dc83c7814de0",
           "path": "README.pt-BR.md"
         },
         {
-          "hash": "e47a6103c8fb3e51fe0119a752a360a973a8a7472a308c3f5dcbf9a033b962b6",
+          "hash": "e7d6cbd73f9183d5638ef3e7690082cbb2cce60481c56ae58271cc2f42d5c800",
           "path": "README.zh.md"
         },
         {
@@ -764,35 +764,35 @@
             {
               "in": "pack",
               "kind": "err",
-              "line": 617
+              "line": 618
             },
             {
               "in": "pack",
               "kind": "err",
-              "line": 620
+              "line": 621
             },
             {
               "in": "findings_only",
               "kind": "err",
-              "line": 807
+              "line": 808
             },
             {
               "in": "to_json",
               "kind": "err",
-              "line": 913
+              "line": 915
             },
             {
               "in": "canon_json",
               "kind": "err",
-              "line": 922
+              "line": 924
             },
             {
               "in": "normalize",
               "kind": "err",
-              "line": 1048
+              "line": 1050
             }
           ],
-          "hash": "1ecffafa641d70565d2d644589d9b3aa38f16a7a320b643d2128dd7c2bad99f6",
+          "hash": "11f011c997d2fd66565eddd4c6c9db0edf459130e6b2767ce2db6106cc7183f6",
           "importOrder": [
             "rust/src/readings.rs",
             "rust/src/review.rs",
@@ -2112,20 +2112,20 @@
             {
               "in": "pair_with",
               "kind": "err",
-              "line": 177
-            },
-            {
-              "in": "blocked",
-              "kind": "err",
-              "line": 484
+              "line": 181
             },
             {
               "in": "blocked",
               "kind": "err",
               "line": 491
+            },
+            {
+              "in": "blocked",
+              "kind": "err",
+              "line": 498
             }
           ],
-          "hash": "ddb60bb823441656333d0e629885f10ee756b0fd5a22327cf4b3b5ff2c6487cb",
+          "hash": "b507aededfc5a95f2ce0191e17bbc5fedcc846b9d1bd3ff2af4cc8265e6d8d24",
           "importOrder": [
             "rust/src/open.rs",
             "rust/src/readings.rs",
@@ -2270,95 +2270,95 @@
             {
               "in": "page",
               "kind": "match-err",
-              "line": 326
+              "line": 340
             },
             {
               "in": "capture",
               "kind": "match-err",
-              "line": 460
+              "line": 474
             },
             {
               "in": "load_paths",
               "kind": "match-err",
-              "line": 524
+              "line": 538
             },
             {
               "in": "open_bundle",
-              "kind": "match-err",
-              "line": 548
-            },
-            {
-              "in": "save_bundle",
               "kind": "match-err",
               "line": 562
             },
             {
               "in": "save_bundle",
               "kind": "match-err",
-              "line": 580
+              "line": 576
             },
             {
               "in": "save_bundle",
               "kind": "match-err",
-              "line": 584
+              "line": 594
             },
             {
               "in": "save_bundle",
               "kind": "match-err",
-              "line": 586
+              "line": 598
+            },
+            {
+              "in": "save_bundle",
+              "kind": "match-err",
+              "line": 600
             },
             {
               "in": "export_svg",
               "kind": "match-err",
-              "line": 773
+              "line": 787
             },
             {
               "in": "receive_screenshot",
               "kind": "match-err",
-              "line": 797
+              "line": 811
             },
             {
               "in": "settings_changed",
               "kind": "match-err",
-              "line": 836
+              "line": 850
             },
             {
               "in": "draw_settings",
               "kind": "match-err",
-              "line": 883
+              "line": 897
             },
             {
               "in": "remember",
               "kind": "match-err",
-              "line": 1277
+              "line": 1298
             },
             {
               "in": "open_saved_path",
               "kind": "match-err",
-              "line": 1405
+              "line": 1426
             },
             {
               "in": "remember_opened_file",
               "kind": "match-err",
-              "line": 1419
+              "line": 1440
             },
             {
               "in": "reopen",
               "kind": "match-err",
-              "line": 1436
+              "line": 1457
             },
             {
               "in": "reopen",
               "kind": "match-err",
-              "line": 1451
+              "line": 1472
             },
             {
               "in": "reopen",
               "kind": "match-err",
-              "line": 1451
+              "line": 1472
             }
           ],
-          "hash": "98a515f07d1eda3ecae19c0f72e09faa73900a21ffd171e7d29ecebc3ec0286b",
+          "hash": "104218b616c1ff69d322e15c46b50a62b7cea442b1d9763d3bcfec09c83a478e",
           "importOrder": [
             "rust/src/bundle.rs",
             "rust/src/history.rs",
@@ -2398,7 +2398,7 @@
             {
               "calls": [
                 {
-                  "line": 1064,
+                  "line": 1085,
                   "name": "nines",
                   "target": {
                     "file": "rust/src/views.rs"
@@ -2413,7 +2413,7 @@
             {
               "calls": [
                 {
-                  "line": 1085,
+                  "line": 1106,
                   "name": "spectrum",
                   "target": {
                     "file": "rust/src/views.rs"
@@ -2428,14 +2428,14 @@
             {
               "calls": [
                 {
-                  "line": 1117,
+                  "line": 1138,
                   "name": "heat_range",
                   "target": {
                     "file": "rust/src/views.rs"
                   }
                 },
                 {
-                  "line": 1134,
+                  "line": 1155,
                   "name": "heat_cells",
                   "target": {
                     "file": "rust/src/views.rs"
@@ -2450,7 +2450,7 @@
             {
               "calls": [
                 {
-                  "line": 1518,
+                  "line": 1539,
                   "name": "stored_pair",
                   "target": {
                     "file": "rust/src/bundle.rs"
@@ -2531,7 +2531,7 @@
               "line": 770
             }
           ],
-          "hash": "e6b189e050bb158555df70e65a777c8a68c249ce6c38f48cff81d0ec6425b6f2",
+          "hash": "e6edb4a907bb8471145abde91a2ea3fecee3b8b036faaf121321789c34be6347",
           "importOrder": [
             "rust/src/bundle.rs",
             "rust/src/history.rs",
@@ -2750,7 +2750,7 @@
           ]
         },
         {
-          "hash": "77e0b050b42248de5960547058389d9ba000dc7309a21a7a44ec5e47b715c74c",
+          "hash": "69c98522dc918be3709b52ea54f1214cedfe6f0c895f8da6e7d32cdecd574c95",
           "importOrder": [
             "rust/src/geometry_deltas.rs",
             "rust/src/open.rs",
@@ -5446,7 +5446,7 @@
   "edges": [],
   "engine": "1.24.0",
   "generatedFrom": {
-    "commit": "599a5d572f95bcabb18df4499669aa6be98bd0f5",
+    "commit": "02709850d22196f6681e28806614ecab047db504",
     "tracked": 484
   },
   "landings": [

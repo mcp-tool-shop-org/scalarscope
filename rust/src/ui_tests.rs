@@ -1022,3 +1022,19 @@ fn the_guide_covers_the_geometry_export_contract_and_review_mode() {
     assert_eq!(bundles.len(), 1);
     assert!(bundles[0].body.contains("share it only if you would share them"));
 }
+
+#[test]
+fn caveats_show_once_under_the_tiles_with_the_tiles_they_belong_to() {
+    let tile = |symbol: &str, caveat: Option<&str>| crate::review::Explanation {
+        symbol: symbol.to_string(),
+        caveat: caveat.map(str::to_string),
+        status: "fired".to_string(),
+        headline: String::new(),
+        why: String::new(),
+        parameters: Vec::new(),
+        anchor: None,
+    };
+    let tiles = [tile("ΔF", None), tile("ΔĀ", Some("Per-step readings vary.")), tile("ΔO", Some("Per-step readings vary."))];
+    assert_eq!(super::caveat_lines(&tiles), vec!["ΔĀ, ΔO: Per-step readings vary.".to_string()]);
+    assert!(super::caveat_lines(&tiles[..1]).is_empty());
+}

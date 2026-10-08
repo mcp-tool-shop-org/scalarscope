@@ -335,6 +335,9 @@ On the real aspire-si exports, three of the five deltas fired on how the data wa
   - It is not withheld, because the comparison is true.
   - The tile and the Why say what it compares: "Evaluator setups differ: B's evaluators' scores are more concentrated at all 3 checkpoints. The scores are fixed per item, so this compares the evaluators, not the training runs." A quiet tile adds the second sentence to its Why.
   - It is kept out of the run headline. When it is the only delta that fires, the headline reads "No meaningful divergence between the runs; the evaluator setups differ (spectrum concentration)." When run deltas fire too, their headline is followed by "The evaluator setups differ (spectrum concentration)."
+- **ΔĀ and ΔO on per-step exports** (ruled 2026-10-07). A per-step export follows one training order over sampled dialogues. A different seed samples different dialogues with different teacher scores, so two seeds of one condition can fire ΔĀ (sustained stretch) and ΔO on noise alone. In aspire-si's seed 43 and 44 runs, control with the local teacher fires ΔĀ over 12 steps and ΔO by 1.84 between seeds.
+  - When both runs state `step_axis: training_step`, the ΔĀ and ΔO tiles carry the caveat "Per-step readings vary between seeds of the same condition; drift exports are the comparable view." This is text only; the rules and readings are unchanged.
+  - Not done yet: a seed-replicate floor, a minimum difference measured between replicates. That is a rules change, and it would need its own spec and replicate data from more than one pair.
 - **The headline** is built only from deltas that stand: neither quiet nor withheld.
 
 **Also fixed with this:** evaluator labels that overlap when two evaluators point the same way.

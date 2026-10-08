@@ -470,6 +470,7 @@ fn dotnet_review(entries: &[(String, Vec<u8>)]) -> Option<Result<OpenedBundle, S
         let shown = |value: Option<f64>| value.map_or("none".to_string(), |value| format!("{value}"));
         explanations.push(crate::review::Explanation {
             symbol: symbol.clone(),
+            caveat: None,
             status: if is_fired { "fired" } else if suppressed { "withheld" } else { "quiet" }.to_string(),
             headline,
             why: format!(
@@ -834,6 +835,7 @@ fn findings_only(entries: &[(String, Vec<u8>)]) -> Result<StoredReview, String> 
         }
         explanations.push(crate::review::Explanation {
             symbol: symbol_for(id).unwrap_or(id).to_string(),
+            caveat: None,
             status: match status {
                 "Present" => "fired",
                 "Suppressed" => "withheld",

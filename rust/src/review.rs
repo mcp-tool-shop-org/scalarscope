@@ -116,6 +116,10 @@ pub struct Explanation {
     pub parameters: Vec<[String; 2]>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub anchor: Option<Anchor>,
+    /// A limit of this reading on this kind of file, shown under the tiles and in Why. None on
+    /// almost every tile, and then not written into a bundle.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub caveat: Option<String>,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -305,6 +309,7 @@ fn explain(
     let right_marks = stats::anomalies(rule, &window(&right.latency_ms, skip_right, count));
     tiles.push(Explanation {
         symbol: "ΔF".to_string(),
+        caveat: None,
         status: status.to_string(),
         headline: fired("ΔF").map_or_else(|| "No new runtime anomalies beyond chance".to_string(), |row| row.sentence.clone()),
         why: format!("{why} An anomaly is a sample {}. Warmup samples are not counted.", rule.describe()),
@@ -350,6 +355,7 @@ fn explain(
         .collect();
     tiles.push(Explanation {
         symbol: "ΔTc".to_string(),
+        caveat: None,
         status: status.to_string(),
         headline,
         why,
@@ -381,6 +387,7 @@ fn explain(
     };
     tiles.push(Explanation {
         symbol: "ΔO".to_string(),
+        caveat: None,
         status: status.to_string(),
         headline: fired("ΔO").map_or_else(|| "Runtime variability unchanged".to_string(), |row| row.sentence.clone()),
         why,
@@ -766,6 +773,9 @@ fn geometry_review(left: &crate::open::GeometrySide, right: &crate::open::Geomet
     geometry_with_deltas(left_label, right_label, left.run.clone(), right.run.clone(), warnings)
 }
 
+/// The caveat on ΔĀ and ΔO for a pair of per-step geometry exports (ruled 2026-10-07).
+pub const PER_STEP_SEEDS: &str = "Per-step readings vary between seeds of the same condition; drift exports are the comparable view.";
+
 /// A geometry review with 2.0's deltas: step alignment, read at the end of the runs, default
 /// thresholds, exactly as 2.0 computed them (tests/Fixtures/Bundles holds 2.0's own answers).
 pub fn geometry_with_deltas(
@@ -780,6 +790,9 @@ pub fn geometry_with_deltas(
     // The export contract: withhold what the runs' layout invalidates, then speak only from what stands.
     deltas::withhold_by_layout(&mut result.deltas, &left.metadata, &right.metadata);
     result.comparative_summary = deltas::auto_summary(&result.deltas);
+    // Both runs say their steps are training steps: a per-step export, one training order over
+    // sampled dialogues.
+    let per_step = [&left, &right].iter().all(|run| run.metadata.step_axis.as_deref() == Some("training_step"));
     let explanations = result
         .deltas
         .iter()
@@ -805,6 +818,12 @@ pub fn geometry_with_deltas(
             }
             Explanation {
                 symbol: delta.symbol.clone(),
+                // Ruled 2026-10-07: on per-step exports, seed replicates of one condition can fire
+                // ΔĀ and ΔO on dialogue noise alone (the seed 43/44 fixtures). Text only.
+                caveat: (per_step
+                    && delta.status != DeltaStatus::Indeterminate
+                    && (delta.id == deltas::delta_ids::EVALUATOR_ALIGNMENT || delta.id == deltas::delta_ids::STABILITY_OSCILLATION))
+                    .then(|| PER_STEP_SEEDS.to_string()),
                 status: match delta.status {
                     DeltaStatus::Present => "fired",
                     DeltaStatus::Suppressed => "quiet",
