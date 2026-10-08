@@ -3162,7 +3162,7 @@
           "path": "site/src/content/docs/handbook/delta-analysis.md"
         },
         {
-          "hash": "f1a4877dd3fdb0f8a8e455421b8b8da0980bbbcf6d6a31cd521414e0a3d9019f",
+          "hash": "51c61bacf14da34e1b9f0ddb5decfa955415d9b33a23bcb5006ff87f1901f57c",
           "path": "site/src/content/docs/handbook/geometry.md"
         },
         {
@@ -5446,7 +5446,7 @@
   "edges": [],
   "engine": "1.24.0",
   "generatedFrom": {
-    "commit": "d55deb6ea71f04198e66f65c831190fec6320703",
+    "commit": "599a5d572f95bcabb18df4499669aa6be98bd0f5",
     "tracked": 484
   },
   "landings": [

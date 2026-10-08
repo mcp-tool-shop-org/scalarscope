@@ -113,7 +113,7 @@
       "confidence": "full",
       "highWater": null,
       "name": "rust",
-      "qualifyingSourceCommits": 49,
+      "qualifyingSourceCommits": 50,
       "rebaseline": null
     },
     {
@@ -219,8 +219,8 @@
         "path": ".gitignore"
       },
       {
-        "commits": 66,
-        "lines": 571,
+        "commits": 67,
+        "lines": 576,
         "path": "CHANGELOG.md"
       },
       {
@@ -239,43 +239,43 @@
         "path": "PRIVACY.md"
       },
       {
-        "commits": 23,
-        "lines": 1312,
+        "commits": 24,
+        "lines": 1314,
         "path": "README.es.md"
       },
       {
-        "commits": 23,
-        "lines": 1304,
+        "commits": 24,
+        "lines": 1306,
         "path": "README.fr.md"
       },
       {
-        "commits": 23,
-        "lines": 1286,
+        "commits": 24,
+        "lines": 1288,
         "path": "README.hi.md"
       },
       {
-        "commits": 23,
-        "lines": 1316,
+        "commits": 24,
+        "lines": 1318,
         "path": "README.it.md"
       },
       {
-        "commits": 23,
-        "lines": 1328,
+        "commits": 24,
+        "lines": 1330,
         "path": "README.ja.md"
       },
       {
-        "commits": 32,
-        "lines": 1105,
+        "commits": 33,
+        "lines": 1107,
         "path": "README.md"
       },
       {
-        "commits": 23,
-        "lines": 1310,
+        "commits": 24,
+        "lines": 1312,
         "path": "README.pt-BR.md"
       },
       {
-        "commits": 23,
-        "lines": 1324,
+        "commits": 24,
+        "lines": 1326,
         "path": "README.zh.md"
       },
       {
@@ -354,8 +354,8 @@
         "path": "assets/logo.png"
       },
       {
-        "commits": 31,
-        "lines": 662,
+        "commits": 32,
+        "lines": 668,
         "path": "atlas/README.md"
       },
       {
@@ -364,18 +364,18 @@
         "path": "atlas/boundaries.yaml"
       },
       {
-        "commits": 31,
-        "lines": 2156,
+        "commits": 32,
+        "lines": 2174,
         "path": "atlas/page.json"
       },
       {
-        "commits": 31,
-        "lines": 11475,
+        "commits": 32,
+        "lines": 11590,
         "path": "atlas/statistics.json"
       },
       {
-        "commits": 31,
-        "lines": 13456,
+        "commits": 32,
+        "lines": 13562,
         "path": "atlas/structure.json"
       },
       {
@@ -819,8 +819,8 @@
         "path": "rust/src/workbench.rs"
       },
       {
-        "commits": 13,
-        "lines": 684,
+        "commits": 14,
+        "lines": 773,
         "path": "rust/tests/aspire_export_tests.rs"
       },
       {
@@ -837,6 +837,46 @@
         "commits": 22,
         "lines": 758,
         "path": "rust/tests/edge_tests.rs"
+      },
+      {
+        "commits": 1,
+        "lines": 8106,
+        "path": "rust/tests/fixtures/aspire-si/control-composite-teacher-s43.drift-from-base.geometry.json"
+      },
+      {
+        "commits": 1,
+        "lines": 8207,
+        "path": "rust/tests/fixtures/aspire-si/control-composite-teacher-s43.geometry.json"
+      },
+      {
+        "commits": 1,
+        "lines": 8106,
+        "path": "rust/tests/fixtures/aspire-si/control-composite-teacher-s44.drift-from-base.geometry.json"
+      },
+      {
+        "commits": 1,
+        "lines": 8165,
+        "path": "rust/tests/fixtures/aspire-si/control-composite-teacher-s44.geometry.json"
+      },
+      {
+        "commits": 1,
+        "lines": 7798,
+        "path": "rust/tests/fixtures/aspire-si/control-local-teacher-s43.drift-from-base.geometry.json"
+      },
+      {
+        "commits": 1,
+        "lines": 7809,
+        "path": "rust/tests/fixtures/aspire-si/control-local-teacher-s43.geometry.json"
+      },
+      {
+        "commits": 1,
+        "lines": 7798,
+        "path": "rust/tests/fixtures/aspire-si/control-local-teacher-s44.drift-from-base.geometry.json"
+      },
+      {
+        "commits": 1,
+        "lines": 7593,
+        "path": "rust/tests/fixtures/aspire-si/control-local-teacher-s44.geometry.json"
       },
       {
         "commits": 4,
@@ -864,6 +904,36 @@
         "path": "rust/tests/fixtures/aspire-si/regressing.json"
       },
       {
+        "commits": 1,
+        "lines": 9770,
+        "path": "rust/tests/fixtures/aspire-si/sft-composite-teacher-s43.drift-from-base.geometry.json"
+      },
+      {
+        "commits": 1,
+        "lines": 8106,
+        "path": "rust/tests/fixtures/aspire-si/sft-composite-teacher-s43.drift-from-sft.geometry.json"
+      },
+      {
+        "commits": 1,
+        "lines": 8069,
+        "path": "rust/tests/fixtures/aspire-si/sft-composite-teacher-s43.geometry.json"
+      },
+      {
+        "commits": 1,
+        "lines": 9770,
+        "path": "rust/tests/fixtures/aspire-si/sft-composite-teacher-s44.drift-from-base.geometry.json"
+      },
+      {
+        "commits": 1,
+        "lines": 8106,
+        "path": "rust/tests/fixtures/aspire-si/sft-composite-teacher-s44.drift-from-sft.geometry.json"
+      },
+      {
+        "commits": 1,
+        "lines": 8021,
+        "path": "rust/tests/fixtures/aspire-si/sft-composite-teacher-s44.geometry.json"
+      },
+      {
         "commits": 2,
         "lines": 19540,
         "path": "rust/tests/fixtures/aspire-si/sft-composite-teacher.drift-from-base.geometry.json"
@@ -877,6 +947,36 @@
         "commits": 2,
         "lines": 16282,
         "path": "rust/tests/fixtures/aspire-si/sft-composite-teacher.geometry.json"
+      },
+      {
+        "commits": 1,
+        "lines": 9348,
+        "path": "rust/tests/fixtures/aspire-si/sft-local-teacher-s43.drift-from-base.geometry.json"
+      },
+      {
+        "commits": 1,
+        "lines": 7798,
+        "path": "rust/tests/fixtures/aspire-si/sft-local-teacher-s43.drift-from-sft.geometry.json"
+      },
+      {
+        "commits": 1,
+        "lines": 7443,
+        "path": "rust/tests/fixtures/aspire-si/sft-local-teacher-s43.geometry.json"
+      },
+      {
+        "commits": 1,
+        "lines": 9348,
+        "path": "rust/tests/fixtures/aspire-si/sft-local-teacher-s44.drift-from-base.geometry.json"
+      },
+      {
+        "commits": 1,
+        "lines": 7798,
+        "path": "rust/tests/fixtures/aspire-si/sft-local-teacher-s44.drift-from-sft.geometry.json"
+      },
+      {
+        "commits": 1,
+        "lines": 7761,
+        "path": "rust/tests/fixtures/aspire-si/sft-local-teacher-s44.geometry.json"
       },
       {
         "commits": 2,
@@ -2629,9 +2729,9 @@
     "level": "low",
     "reason": "fewer than 25 source files reach 10 revisions in the window"
   },
-  "generatedAt": "2026-10-08T00:00:45.364Z",
+  "generatedAt": "2026-10-08T00:12:14.525Z",
   "generatedFrom": {
-    "commit": "d55deb6ea71f04198e66f65c831190fec6320703"
+    "commit": "599a5d572f95bcabb18df4499669aa6be98bd0f5"
   },
   "pairs": [
     {
@@ -2693,148 +2793,148 @@
     {
       "a": "README.es.md",
       "b": "README.fr.md",
-      "either": 13,
-      "shared": 13,
+      "either": 14,
+      "shared": 14,
       "strength": 1
     },
     {
       "a": "README.es.md",
       "b": "README.hi.md",
-      "either": 13,
-      "shared": 13,
+      "either": 14,
+      "shared": 14,
       "strength": 1
     },
     {
       "a": "README.es.md",
       "b": "README.it.md",
-      "either": 13,
-      "shared": 13,
+      "either": 14,
+      "shared": 14,
       "strength": 1
     },
     {
       "a": "README.es.md",
       "b": "README.ja.md",
-      "either": 13,
-      "shared": 13,
+      "either": 14,
+      "shared": 14,
       "strength": 1
     },
     {
       "a": "README.es.md",
       "b": "README.pt-BR.md",
-      "either": 13,
-      "shared": 13,
+      "either": 14,
+      "shared": 14,
       "strength": 1
     },
     {
       "a": "README.es.md",
       "b": "README.zh.md",
-      "either": 13,
-      "shared": 13,
+      "either": 14,
+      "shared": 14,
       "strength": 1
     },
     {
       "a": "README.fr.md",
       "b": "README.hi.md",
-      "either": 13,
-      "shared": 13,
+      "either": 14,
+      "shared": 14,
       "strength": 1
     },
     {
       "a": "README.fr.md",
       "b": "README.it.md",
-      "either": 13,
-      "shared": 13,
+      "either": 14,
+      "shared": 14,
       "strength": 1
     },
     {
       "a": "README.fr.md",
       "b": "README.ja.md",
-      "either": 13,
-      "shared": 13,
+      "either": 14,
+      "shared": 14,
       "strength": 1
     },
     {
       "a": "README.fr.md",
       "b": "README.pt-BR.md",
-      "either": 13,
-      "shared": 13,
+      "either": 14,
+      "shared": 14,
       "strength": 1
     },
     {
       "a": "README.fr.md",
       "b": "README.zh.md",
-      "either": 13,
-      "shared": 13,
+      "either": 14,
+      "shared": 14,
       "strength": 1
     },
     {
       "a": "README.hi.md",
       "b": "README.it.md",
-      "either": 13,
-      "shared": 13,
+      "either": 14,
+      "shared": 14,
       "strength": 1
     },
     {
       "a": "README.hi.md",
       "b": "README.ja.md",
-      "either": 13,
-      "shared": 13,
+      "either": 14,
+      "shared": 14,
       "strength": 1
     },
     {
       "a": "README.hi.md",
       "b": "README.pt-BR.md",
-      "either": 13,
-      "shared": 13,
+      "either": 14,
+      "shared": 14,
       "strength": 1
     },
     {
       "a": "README.hi.md",
       "b": "README.zh.md",
-      "either": 13,
-      "shared": 13,
+      "either": 14,
+      "shared": 14,
       "strength": 1
     },
     {
       "a": "README.it.md",
       "b": "README.ja.md",
-      "either": 13,
-      "shared": 13,
+      "either": 14,
+      "shared": 14,
       "strength": 1
     },
     {
       "a": "README.it.md",
       "b": "README.pt-BR.md",
-      "either": 13,
-      "shared": 13,
+      "either": 14,
+      "shared": 14,
       "strength": 1
     },
     {
       "a": "README.it.md",
       "b": "README.zh.md",
-      "either": 13,
-      "shared": 13,
+      "either": 14,
+      "shared": 14,
       "strength": 1
     },
     {
       "a": "README.ja.md",
       "b": "README.pt-BR.md",
-      "either": 13,
-      "shared": 13,
+      "either": 14,
+      "shared": 14,
       "strength": 1
     },
     {
       "a": "README.ja.md",
       "b": "README.zh.md",
-      "either": 13,
-      "shared": 13,
+      "either": 14,
+      "shared": 14,
       "strength": 1
     },
     {
       "a": "README.pt-BR.md",
       "b": "README.zh.md",
-      "either": 13,
-      "shared": 13,
+      "either": 14,
+      "shared": 14,
       "strength": 1
     },
     {
@@ -2854,43 +2954,43 @@
     {
       "a": "atlas/README.md",
       "b": "atlas/page.json",
-      "either": 17,
-      "shared": 17,
+      "either": 18,
+      "shared": 18,
       "strength": 1
     },
     {
       "a": "atlas/README.md",
       "b": "atlas/statistics.json",
-      "either": 17,
-      "shared": 17,
+      "either": 18,
+      "shared": 18,
       "strength": 1
     },
     {
       "a": "atlas/README.md",
       "b": "atlas/structure.json",
-      "either": 17,
-      "shared": 17,
+      "either": 18,
+      "shared": 18,
       "strength": 1
     },
     {
       "a": "atlas/page.json",
       "b": "atlas/statistics.json",
-      "either": 17,
-      "shared": 17,
+      "either": 18,
+      "shared": 18,
       "strength": 1
     },
     {
       "a": "atlas/page.json",
       "b": "atlas/structure.json",
-      "either": 17,
-      "shared": 17,
+      "either": 18,
+      "shared": 18,
       "strength": 1
     },
     {
       "a": "atlas/statistics.json",
       "b": "atlas/structure.json",
-      "either": 17,
-      "shared": 17,
+      "either": 18,
+      "shared": 18,
       "strength": 1
     },
     {
@@ -3002,16 +3102,16 @@
     "floor": "fallen",
     "floorHeld": false,
     "floorTrigger": "revision-depth",
-    "headDate": "2026-10-07T08:50:49-07:00",
+    "headDate": "2026-10-07T17:09:24-07:00",
     "inScopeFiles": 489,
     "pinnedStart": null,
     "priorFloor": "fallen",
-    "qualifyingCommits": 89,
+    "qualifyingCommits": 90,
     "qualifyingMinimum": 30,
     "revisions": 5,
     "shared": 10,
     "sharedFloorUsed": 3,
-    "since": "2026-04-10T15:50:49.000Z",
+    "since": "2026-04-11T00:09:24.000Z",
     "sourceExtensions": [
       ".js",
       ".mjs",
