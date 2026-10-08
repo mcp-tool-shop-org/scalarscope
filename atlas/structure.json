@@ -378,7 +378,7 @@
           "path": ".gitignore"
         },
         {
-          "hash": "77ac96173939df2af07887dc5ed77986a11e157a48ef3dcec17f6d4604a0c471",
+          "hash": "77e99446278ba6ef041948fcd1cb9db9ca5ee009da50df674f8353eda35a77f5",
           "path": "CHANGELOG.md"
         },
         {
@@ -394,35 +394,35 @@
           "path": "PRIVACY.md"
         },
         {
-          "hash": "382170a5df43ba52041874a1658daf6fa4ecaa239f17a094367d4d59f3f99ecb",
+          "hash": "dd289775f30a3a98cdc2cebe0d3889d65f0f159ab23e8855db974ff58d785973",
           "path": "README.es.md"
         },
         {
-          "hash": "53a81ef0e4eb206a2e3bbf021752f34e669af197cdf4f6af2e4208420f60a8e1",
+          "hash": "7618e8461d09181e381b3c9f6ff76f888c069d8078bf7d4e7238125e60ba7d03",
           "path": "README.fr.md"
         },
         {
-          "hash": "41c00dd83c0985dfe8d63ce1502e740c6eebc41bc1e50c39059d808d455bd93c",
+          "hash": "21416f58e683f6cae11a134b95bad416e5a8aa0ab9353b219cf607688af23fd9",
           "path": "README.hi.md"
         },
         {
-          "hash": "1dc284848c21e6e43606e36e64875a0e20b6e1fe94b9c513cb9e8d8a6912bd9d",
+          "hash": "3ad951958c935d28dbb507362c1178e7194812a338736ed74462f8dbaa817ff2",
           "path": "README.it.md"
         },
         {
-          "hash": "f3009bcbacf3aeea77e4dc3c4e763c7aa03794b70afd6149e7e5ec5827b60b08",
+          "hash": "dbd49e04237338c998828f5a18b69fcf19859af7e3b14ff3be599bb70c0df054",
           "path": "README.ja.md"
         },
         {
-          "hash": "e69867d2f78ec1c71fa03e7f1cde28656e2e913ba0a5660a4bdb6c63c7156c66",
+          "hash": "d472e1fea6a41360255f9a06a90831b309ceb9b222bddd583153812447693e8c",
           "path": "README.md"
         },
         {
-          "hash": "a31120dd72bfffbf8c3391f22096afdd8596c3ce96dffbc2e9ff2fdb1fd7c46c",
+          "hash": "823c45c290f42db4d02a4ea0321c90f40383167348607daa72c46ba48a67dc4c",
           "path": "README.pt-BR.md"
         },
         {
-          "hash": "ccf0ee7c33fa8165197a1ddacc91d37053123d4191f84fbfeb7c2a567472e800",
+          "hash": "e47a6103c8fb3e51fe0119a752a360a973a8a7472a308c3f5dcbf9a033b962b6",
           "path": "README.zh.md"
         },
         {
@@ -2750,7 +2750,7 @@
           ]
         },
         {
-          "hash": "5368fd12c2d0ed2f40d607b66be9828d643985ab9db988587ca0d9cc63929574",
+          "hash": "77e0b050b42248de5960547058389d9ba000dc7309a21a7a44ec5e47b715c74c",
           "importOrder": [
             "rust/src/geometry_deltas.rs",
             "rust/src/open.rs",
@@ -2805,6 +2805,38 @@
           "testsInside": true
         },
         {
+          "hash": "38104600c98d35cf9ce57e8bcbbba00c03e9a0e19c270c485662144e1a9c8c25",
+          "path": "rust/tests/fixtures/aspire-si/control-composite-teacher-s43.drift-from-base.geometry.json"
+        },
+        {
+          "hash": "ef119985a468c43aca85da6b20d52618b105fab680181a09ddf94967a1b18be0",
+          "path": "rust/tests/fixtures/aspire-si/control-composite-teacher-s43.geometry.json"
+        },
+        {
+          "hash": "cd4796714653be771c08894f55ab35812a12050ae132d46683431e515a7da104",
+          "path": "rust/tests/fixtures/aspire-si/control-composite-teacher-s44.drift-from-base.geometry.json"
+        },
+        {
+          "hash": "deb5c53d715b21e0b6d4e35af4f9f4d284314533182c75abc2d2749f484bd4db",
+          "path": "rust/tests/fixtures/aspire-si/control-composite-teacher-s44.geometry.json"
+        },
+        {
+          "hash": "3f7792533a1710fac52cb3a283daace5f5699b2758cbd216ff9fdb686f225f79",
+          "path": "rust/tests/fixtures/aspire-si/control-local-teacher-s43.drift-from-base.geometry.json"
+        },
+        {
+          "hash": "dc32e1bd1bdc062713cba8df1fed0ceb5bf6672a0bbfc305f0e1cee38d96b152",
+          "path": "rust/tests/fixtures/aspire-si/control-local-teacher-s43.geometry.json"
+        },
+        {
+          "hash": "6da9c9fa9b9aef5abfc3afd77f459a8d3218ddb0968a009404bcaec0e0cbc6e6",
+          "path": "rust/tests/fixtures/aspire-si/control-local-teacher-s44.drift-from-base.geometry.json"
+        },
+        {
+          "hash": "b59c9b93bbb434ae8857afab03b1b0347af09fd58078c83490836f737a54f333",
+          "path": "rust/tests/fixtures/aspire-si/control-local-teacher-s44.geometry.json"
+        },
+        {
           "hash": "156c2a5dc7c6e814b605a051bba9152dd85352313285b848336caa96cc8834da",
           "path": "rust/tests/fixtures/aspire-si/real-composite-teacher.drift.geometry.json"
         },
@@ -2825,6 +2857,30 @@
           "path": "rust/tests/fixtures/aspire-si/regressing.json"
         },
         {
+          "hash": "c1084ec2b910822c8e51528c6a58ada3f0f8b152c57d43dc3d89d49941759a37",
+          "path": "rust/tests/fixtures/aspire-si/sft-composite-teacher-s43.drift-from-base.geometry.json"
+        },
+        {
+          "hash": "76a990da731b0ba6780ef4501cb204d39f762fa534812a99c5c29de7547b0105",
+          "path": "rust/tests/fixtures/aspire-si/sft-composite-teacher-s43.drift-from-sft.geometry.json"
+        },
+        {
+          "hash": "e92a36a0ba07035cc4643f6cced1b022889f51791b086b902e15d5442d5b5d5c",
+          "path": "rust/tests/fixtures/aspire-si/sft-composite-teacher-s43.geometry.json"
+        },
+        {
+          "hash": "6ade2bd7ba05430400dd56d9b4fdbbbfad994000f3d8e980e259f794093b880e",
+          "path": "rust/tests/fixtures/aspire-si/sft-composite-teacher-s44.drift-from-base.geometry.json"
+        },
+        {
+          "hash": "0cd5b47de8a6c39f0afe1b83a266e23464c9fe187a0b881fad7e15f9767f9d40",
+          "path": "rust/tests/fixtures/aspire-si/sft-composite-teacher-s44.drift-from-sft.geometry.json"
+        },
+        {
+          "hash": "d67219950e0d5ca306597ef0c9cb0e83b0e3f28a6a6f8305b78f1faf4267bd6f",
+          "path": "rust/tests/fixtures/aspire-si/sft-composite-teacher-s44.geometry.json"
+        },
+        {
           "hash": "2e678fa4bed8cb4af6bf28764b83a475b74002cc99379c70673a3d4871aa1fc5",
           "path": "rust/tests/fixtures/aspire-si/sft-composite-teacher.drift-from-base.geometry.json"
         },
@@ -2835,6 +2891,30 @@
         {
           "hash": "1e0b621413832d3ba2a055479038896e5b57286e4760ad1ab3c79e111c40d710",
           "path": "rust/tests/fixtures/aspire-si/sft-composite-teacher.geometry.json"
+        },
+        {
+          "hash": "c1b4d0c66ce71e1049551310e77a7a2f9493d7bd43e56824d47970b50208da21",
+          "path": "rust/tests/fixtures/aspire-si/sft-local-teacher-s43.drift-from-base.geometry.json"
+        },
+        {
+          "hash": "8e6cfa5c10c26e7eeb0478da6e16511d787ed46ac33fa878f14ddbae9a62ea01",
+          "path": "rust/tests/fixtures/aspire-si/sft-local-teacher-s43.drift-from-sft.geometry.json"
+        },
+        {
+          "hash": "f06828d254ebbbbed8190d031c8beed6b9e2b4cd43bc04b56028cc67e38ceb25",
+          "path": "rust/tests/fixtures/aspire-si/sft-local-teacher-s43.geometry.json"
+        },
+        {
+          "hash": "0f05a5fbd31633994c58a1e3ba7863aa7c19e9d53eff6c113186c982771d1a10",
+          "path": "rust/tests/fixtures/aspire-si/sft-local-teacher-s44.drift-from-base.geometry.json"
+        },
+        {
+          "hash": "6fd321eb2df57928e63a15988f15439ba669a204e89cf70908ae52abe3f9f999",
+          "path": "rust/tests/fixtures/aspire-si/sft-local-teacher-s44.drift-from-sft.geometry.json"
+        },
+        {
+          "hash": "044d7f91ca87484c48fda35c0ad45ee7e36aad041aad2c0fe8d6466bec82cb69",
+          "path": "rust/tests/fixtures/aspire-si/sft-local-teacher-s44.geometry.json"
         },
         {
           "hash": "7a423c2d117352a8eb0b3dc27fd6418ace63713fb55c43a2671b6223b3ea2280",
@@ -5366,8 +5446,8 @@
   "edges": [],
   "engine": "1.24.0",
   "generatedFrom": {
-    "commit": "79874fbf27fb0482a101a18d41d2b55e8d500e93",
-    "tracked": 464
+    "commit": "d55deb6ea71f04198e66f65c831190fec6320703",
+    "tracked": 484
   },
   "landings": [
     {
@@ -5608,7 +5688,7 @@
   "overlaps": [],
   "submodules": [],
   "symlinks": [],
-  "testFiles": 83,
+  "testFiles": 103,
   "unassigned": [
     {
       "hash": "ad49e4674452bc0d29d4c241cf9aa952ffe06745e4a67547cb7fc46c8877bb9e",

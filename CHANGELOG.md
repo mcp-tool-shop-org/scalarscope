@@ -5,6 +5,11 @@ All notable changes to ScalarScope will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- Test fixtures from seeds 43 and 44 of aspire-si's fine-tune-then-ASPIRE run: per-step and drift exports for both teachers, with and without the fine-tune. Tests check that each opens with its seed and layout, that per-step scores belong to their seed, and that drift replicates read alike. No reading changes.
+
 ## [3.1.1] - 2026-10-07
 
 3.1.1 is about geometry reviews of drift exports, and about trusting a saved review. A drift export's steps are checkpoints × items, not time, so readings that depend on step order are now held back. A saved review now opens showing what was saved.
