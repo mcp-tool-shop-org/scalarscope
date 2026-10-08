@@ -57,3 +57,16 @@ When both runs' scores are fixed per item, ΔĀ compares the evaluators, not the
 Two real training runs, compared per step and by drift, are in `samples/geometry`. Their screenshots and a reading of each delta are in the repo's [geometry receipt](https://github.com/mcp-tool-shop-org/scalarscope/blob/main/docs/receipts/geometry/README.md), recorded with 3.1.0's rules. On the drift pair, 3.1.1 also withholds ΔTd and reads ΔĀ as a difference between the evaluator setups.
 
 One limit holds even with the contract. In a per-step export, consecutive steps are often different prompts. ΔO can then read the student moving from prompt to prompt as instability. The contract cannot tell the two apart, because those steps really are in training order.
+
+### Per-step exports and seeds
+
+A per-step export follows one training order over sampled dialogues. A different seed samples different dialogues, and the teachers score them differently. So two runs of the same condition with different seeds can fire ΔĀ, on its sustained-stretch rule, and ΔO, on noise alone.
+
+The repo's test fixtures show it. These are seeds 43 and 44 of aspire-si's fine-tune-then-ASPIRE run, the same condition at both seeds:
+
+| Pair (seed 43 vs seed 44) | ΔĀ | ΔO |
+|---|---|---|
+| control, local teacher | fires: "Path B had a more concentrated spectrum (sustained 12 steps)" | fires: Path B shows 1.84 more oscillation |
+| fine-tuned, local teacher | fires: sustained 28 steps | fires: Path A shows 0.41 more oscillation |
+
+The drift exports of the same runs agree between seeds: in all six drift families, seed 43 against seed 44 reads "No meaningful divergence observed between paths". To compare conditions, use drift exports, which score a fixed set of exchanges, and use more than one seed per condition.
