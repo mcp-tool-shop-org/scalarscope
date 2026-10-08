@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- On a pair of per-step geometry exports, the ΔĀ and ΔO tiles carry a caveat: "Per-step readings vary between seeds of the same condition; drift exports are the comparable view." Two seeds of the same condition can fire both on dialogue noise alone, as aspire-si's seed 43 and 44 runs show. A line under the tiles names the tiles it applies to, and the Why panel repeats it. No reading changes.
+
 ### Added
 - Test fixtures from seeds 43 and 44 of aspire-si's fine-tune-then-ASPIRE run: per-step and drift exports for both teachers, with and without the fine-tune. Tests check that each opens with its seed and layout, that per-step scores belong to their seed, and that drift replicates read alike. No reading changes.
 

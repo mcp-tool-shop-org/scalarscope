@@ -124,6 +124,20 @@ fn pick_export_path(dialog: rfd::FileDialog, kind: &str, name: &str) -> Option<s
     dialog.add_filter(filter, &[kind]).set_file_name(format!("{name}.{kind}")).save_file()
 }
 
+/// One line under the tiles per distinct caveat, naming the tiles it applies to, such as
+/// "ΔĀ, ΔO: Per-step readings vary …".
+fn caveat_lines(explanations: &[crate::review::Explanation]) -> Vec<String> {
+    let mut lines: Vec<(String, Vec<&str>)> = Vec::new();
+    for tile in explanations {
+        let Some(caveat) = &tile.caveat else { continue };
+        match lines.iter_mut().find(|(text, _)| text == caveat) {
+            Some((_, symbols)) => symbols.push(&tile.symbol),
+            None => lines.push((caveat.clone(), vec![&tile.symbol])),
+        }
+    }
+    lines.into_iter().map(|(text, symbols)| format!("{}: {text}", symbols.join(", "))).collect()
+}
+
 /// A window screenshot as PNG bytes.
 pub fn encode_png(image: &egui::ColorImage) -> Result<Vec<u8>, String> {
     let [width, height] = image.size;
@@ -928,12 +942,18 @@ impl ScalarScopeApp {
                 }
             }
         });
+        for line in caveat_lines(explanations) {
+            ui.label(RichText::new(line).color(paint.note));
+        }
         let Some(tile) = explanations.iter().find(|tile| Some(tile.symbol.as_str()) == self.why.as_deref()) else {
             return;
         };
         egui::Frame::group(ui.style()).show(ui, |ui| {
             ui.set_width(ui.available_width());
             ui.label(RichText::new(format!("{} {}: {}", tile.symbol, tile.status, tile.headline)).color(self.paint.text).strong());
+            if let Some(caveat) = &tile.caveat {
+                ui.add(egui::Label::new(RichText::new(caveat).color(paint.mark)).wrap());
+            }
             ui.add(egui::Label::new(RichText::new(&tile.why).color(paint.note)).wrap());
             egui::Grid::new(format!("why-{}", tile.symbol)).num_columns(2).show(ui, |ui| {
                 for [name, value] in &tile.parameters {
@@ -945,7 +965,8 @@ impl ScalarScopeApp {
             ui.horizontal(|ui| {
                 if ui.button("Copy finding").clicked() {
                     let parameters: Vec<String> = tile.parameters.iter().map(|[name, value]| format!("{name}: {value}")).collect();
-                    ui.ctx().copy_text(format!("{} {}: {}\n{}\n{}", tile.symbol, tile.status, tile.headline, tile.why, parameters.join("\n")));
+                    let caveat = tile.caveat.as_deref().map(|line| format!("{line}\n")).unwrap_or_default();
+                    ui.ctx().copy_text(format!("{} {}: {}\n{caveat}{}\n{}", tile.symbol, tile.status, tile.headline, tile.why, parameters.join("\n")));
                 }
                 if let Some(anchor) = &tile.anchor {
                     if ui.button("Show me").clicked() {
