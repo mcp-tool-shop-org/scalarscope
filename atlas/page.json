@@ -35,22 +35,22 @@
   ],
   "changes": {
     "fileCounts": {
-      "added": 0,
-      "changed": 46,
+      "added": 20,
+      "changed": 10,
       "moved": 0,
-      "parts": 8,
+      "parts": 2,
       "removed": 0
     },
     "items": [
       {
         "kind": "counts",
-        "sentence": "Nothing structural changed since 2026-10-07; 46 files changed content.",
+        "sentence": "Nothing structural changed since 2026-10-07; 20 files added and 10 changed content.",
         "subjects": []
       }
     ],
     "since": {
-      "commit": "8e56823361d426f8c98cfbe5c4397d786c586184",
-      "generatedAt": "2026-10-07T08:46:57.932Z"
+      "commit": "79874fbf27fb0482a101a18d41d2b55e8d500e93",
+      "generatedAt": "2026-10-07T15:30:03.201Z"
     },
     "unchanged": true
   },
@@ -136,7 +136,7 @@
     "Window: 180 days; a pair counts from 3 shared commits, since 8 source files reach 10 revisions; the floor rises to 10 when 25 do."
   ],
   "changesTogetherWithTests": 0,
-  "commit": "79874fbf27fb0482a101a18d41d2b55e8d500e93",
+  "commit": "d55deb6ea71f04198e66f65c831190fec6320703",
   "defaultBranch": "main",
   "derived": "10 parts, mostly C# (181 files), Rust (40), CSS (2), PowerShell (2), TypeScript (2), Astro (1), JavaScript (1), Python (1) and shell (1). Work enters through 7 doors; the busiest is Build and Test, which reaches 4 parts. It deploys a site to GitHub Pages. People run scalarscope.",
   "doors": [
@@ -407,7 +407,7 @@
   "edges": [],
   "engine": "1.24.0",
   "generated": [],
-  "generatedAt": "2026-10-07T15:30:03.201Z",
+  "generatedAt": "2026-10-08T00:00:45.364Z",
   "limits": [
     "5 writes and 4 reads use paths built at run time and are not named here.",
     "5 writes and 12 reads go to a path their caller passes, not to this repository.",
@@ -446,7 +446,7 @@
   "startReason": "This path follows Coverage, since Build and Test only checks code.",
   "summary": "A review of two machine-learning runs. The app is the Rust program in rust/, packed as an MSIX for the Microsoft Store; src/ holds the earlier .NET MAUI app the Store copy still runs.",
   "summaryFrom": "person",
-  "testFiles": 83,
+  "testFiles": 103,
   "testedBy": {
     "rust": 21
   },

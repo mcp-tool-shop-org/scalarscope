@@ -304,3 +304,92 @@ fn time_ordered_exports_keep_the_sustained_stretch_rule() {
     assert!(tile.why.contains("2.0's geometry rule"), "{}", tile.why);
     assert!(!tile.headline.contains("checkpoint"), "{}", tile.headline);
 }
+
+// Seeds 43 and 44 of the fine-tune-then-ASPIRE run (aspire-si PR #30): the same conditions as the
+// sft-* and real-* fixtures, run again with new dialogues. These tests pin how the reader treats
+// replicates; they change no reading.
+
+const SEEDS: [i64; 2] = [43, 44];
+
+fn seeded(stem: &str, seed: i64, kind: &str) -> String {
+    format!("{stem}-s{seed}{kind}.geometry.json")
+}
+
+#[test]
+fn every_seeded_export_opens_in_full_and_states_its_seed_and_layout() {
+    for seed in SEEDS {
+        for teacher in ["local", "composite"] {
+            let professors = if teacher == "local" { 1 } else { 2 };
+            for (stem, kind, steps, axis, checkpoints, source) in [
+                ("control", "", 96, "training_step", None, "replayed"),
+                ("sft", "", 96, "training_step", None, "replayed"),
+                ("control", ".drift-from-base", 96, "checkpoint_by_item", Some(3), "fixed_per_item"),
+                ("sft", ".drift-from-base", 128, "checkpoint_by_item", Some(4), "fixed_per_item"),
+                ("sft", ".drift-from-sft", 96, "checkpoint_by_item", Some(3), "fixed_per_item"),
+            ] {
+                let name = seeded(&format!("{stem}-{teacher}-teacher"), seed, kind);
+                let side = geometry(&name);
+                assert!(side.warnings.is_empty(), "{name}: {:?}", side.warnings);
+                let run = &side.run;
+                let meta = &run.metadata;
+                assert_eq!(meta.run_id, name.trim_end_matches(".geometry.json"), "{name}");
+                assert_eq!(meta.seed, seed, "{name}");
+                assert_eq!((meta.step_axis.as_deref(), meta.checkpoints, meta.scalar_source.as_deref()), (Some(axis), checkpoints, Some(source)), "{name}");
+                assert_eq!(run.trajectory.timesteps.len(), steps, "{name}");
+                assert_eq!(run.geometry.eigenvalues.len(), steps, "{name}");
+                assert_eq!(run.evaluators.professors.len(), professors, "{name}");
+                assert_eq!(run.dimension_names().len(), 9, "{name}");
+            }
+        }
+    }
+}
+
+/// The mean over every score of every step: one number per file, to tell score sets apart.
+fn mean_score(run: &scalarscope::geometry::GeometryRun) -> f64 {
+    let scores: Vec<f64> = run.scalars.values.iter().flat_map(|step| step.scores.values().copied()).collect();
+    scores.iter().sum::<f64>() / scores.len() as f64
+}
+
+#[test]
+fn per_step_scores_belong_to_their_seed_not_to_the_condition() {
+    // New dialogues at each seed mean new teacher scores, so two seeds of one condition differ.
+    for stem in ["control-local-teacher", "control-composite-teacher", "sft-composite-teacher"] {
+        let (a, b) = (geometry(&seeded(stem, 43, "")).run, geometry(&seeded(stem, 44, "")).run);
+        assert!((mean_score(&a) - mean_score(&b)).abs() > 1e-4, "{stem}");
+        let review = reviewed(&seeded(stem, 43, ""), &seeded(stem, 44, ""));
+        assert_eq!((review.left.metadata.seed, review.right.metadata.seed), (43, 44));
+        // Replayed scores withhold ΔF on replicates as on any pair.
+        assert_eq!(status(&review, "ΔF").status, "withheld", "{stem}");
+    }
+}
+
+#[test]
+fn drift_replicates_read_alike_and_mixed_checkpoint_counts_do_not_pair() {
+    // Drift scores are fixed per item: the same items at every seed, so the evaluators' spectrum
+    // is the same, and ΔĀ is quiet at every checkpoint between replicates.
+    for (stem, kind) in [
+        ("control-local-teacher", ".drift-from-base"),
+        ("control-composite-teacher", ".drift-from-base"),
+        ("sft-local-teacher", ".drift-from-base"),
+        ("sft-composite-teacher", ".drift-from-base"),
+        ("sft-local-teacher", ".drift-from-sft"),
+        ("sft-composite-teacher", ".drift-from-sft"),
+    ] {
+        let review = reviewed(&seeded(stem, 43, kind), &seeded(stem, 44, kind));
+        let tile = status(&review, "Δ\u{0100}");
+        assert_eq!((tile.status.as_str(), tile.headline.as_str()), ("quiet", "Similar spectrum concentration at every checkpoint"), "{stem}{kind}");
+        assert_eq!(review.verdict, "No meaningful divergence observed between paths.", "{stem}{kind}");
+        for symbol in ["ΔTc", "ΔTd", "ΔO", "ΔF"] {
+            assert_eq!(status(&review, symbol).status, "withheld", "{stem}{kind} {symbol}");
+        }
+    }
+    // The seeded control drift reads like the unseeded one.
+    let review = reviewed("real-local-teacher.drift.geometry.json", &seeded("control-local-teacher", 43, ".drift-from-base"));
+    assert_eq!(status(&review, "Δ\u{0100}").status, "quiet");
+    // Three checkpoints against four: ΔĀ is withheld, the blocks do not pair.
+    let mixed = reviewed(&seeded("control-local-teacher", 43, ".drift-from-base"), &seeded("sft-local-teacher", 43, ".drift-from-base"));
+    assert!(status(&mixed, "Δ\u{0100}").why.contains("the runs have 3 and 4 checkpoints"));
+    // Across teachers at one seed, the difference is the evaluator setups'.
+    let teachers = reviewed(&seeded("control-local-teacher", 43, ".drift-from-base"), &seeded("control-composite-teacher", 43, ".drift-from-base"));
+    assert_eq!(teachers.verdict, "No meaningful divergence between the runs; the evaluator setups differ (spectrum concentration).");
+}
