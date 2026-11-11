@@ -36,21 +36,21 @@
   "changes": {
     "fileCounts": {
       "added": 0,
-      "changed": 15,
+      "changed": 3,
       "moved": 0,
-      "parts": 3,
+      "parts": 2,
       "removed": 0
     },
     "items": [
       {
         "kind": "counts",
-        "sentence": "Nothing structural changed since 2026-10-08; 15 files changed content.",
+        "sentence": "Nothing structural changed since 2026-10-08; 3 files changed content.",
         "subjects": []
       }
     ],
     "since": {
-      "commit": "599a5d572f95bcabb18df4499669aa6be98bd0f5",
-      "generatedAt": "2026-10-08T00:12:14.525Z"
+      "commit": "02709850d22196f6681e28806614ecab047db504",
+      "generatedAt": "2026-10-08T00:28:24.198Z"
     },
     "unchanged": true
   },
@@ -73,6 +73,21 @@
     {
       "a": "rust/src/ui.rs",
       "b": "rust/src/ui_tests.rs",
+      "either": 31,
+      "partLabels": [
+        "rust",
+        "rust"
+      ],
+      "parts": [
+        "rust",
+        "rust"
+      ],
+      "relation": "inside",
+      "shared": 19
+    },
+    {
+      "a": "rust/src/review.rs",
+      "b": "rust/src/ui.rs",
       "either": 30,
       "partLabels": [
         "rust",
@@ -87,23 +102,8 @@
     },
     {
       "a": "rust/src/review.rs",
-      "b": "rust/src/ui.rs",
-      "either": 29,
-      "partLabels": [
-        "rust",
-        "rust"
-      ],
-      "parts": [
-        "rust",
-        "rust"
-      ],
-      "relation": "inside",
-      "shared": 17
-    },
-    {
-      "a": "rust/src/review.rs",
       "b": "rust/tests/review_tests.rs",
-      "either": 21,
+      "either": 22,
       "partLabels": [
         "rust",
         "rust"
@@ -136,7 +136,7 @@
     "Window: 180 days; a pair counts from 3 shared commits, since 8 source files reach 10 revisions; the floor rises to 10 when 25 do."
   ],
   "changesTogetherWithTests": 0,
-  "commit": "02709850d22196f6681e28806614ecab047db504",
+  "commit": "8e5060c64c88b1b92d99667fcc729060808507da",
   "defaultBranch": "main",
   "derived": "10 parts, mostly C# (181 files), Rust (40), CSS (2), PowerShell (2), TypeScript (2), Astro (1), JavaScript (1), Python (1) and shell (1). Work enters through 7 doors; the busiest is Build and Test, which reaches 4 parts. It deploys a site to GitHub Pages. People run scalarscope.",
   "doors": [
@@ -405,9 +405,9 @@
   "duplicatesLead": null,
   "duplicatesNote": [],
   "edges": [],
-  "engine": "1.24.0",
+  "engine": "1.26.0",
   "generated": [],
-  "generatedAt": "2026-10-08T00:28:24.198Z",
+  "generatedAt": "2026-11-11T22:39:35.574Z",
   "limits": [
     "5 writes and 4 reads use paths built at run time and are not named here.",
     "5 writes and 12 reads go to a path their caller passes, not to this repository.",
@@ -432,6 +432,17 @@
   "readers": [],
   "repo": "mcp-tool-shop-org/scalarscope",
   "sequences": [],
+  "startBeside": [
+    {
+      "files": [
+        "rust/src/milestones.rs",
+        "rust/src/knobs.rs",
+        "rust/src/runtrace.rs",
+        "rust/src/geometry.rs"
+      ],
+      "from": "rust/src/open.rs"
+    }
+  ],
   "startDoor": ".github/workflows/coverage.yml",
   "startHere": [
     ".github/workflows/coverage.yml",
@@ -450,6 +461,7 @@
   "testedBy": {
     "rust": 21
   },
+  "testedCodeParts": 1,
   "unnamedWrites": 5,
   "unread": [],
   "unreadCode": [

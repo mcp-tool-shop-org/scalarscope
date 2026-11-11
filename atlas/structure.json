@@ -29,7 +29,7 @@
           "path": ".github/workflows/build.yml"
         },
         {
-          "hash": "f920e5a5c8b57ba87ffe6710a61543208d0d27a03a3900532a9399603f1f049e",
+          "hash": "ae340d20d4b0515094b775bb7f042df00865901bcba7b85de3db477e4a8fea2e",
           "path": ".github/workflows/coverage.yml"
         },
         {
@@ -3137,11 +3137,11 @@
           "path": "site/astro.config.mjs"
         },
         {
-          "hash": "85f78c09f0329d937ba57dc65d24adeeecdba65ea4a0eda01b02129f1d2ea07d",
+          "hash": "ef25695b1164c7574b2fba4f6f7015ea2dc5d8cb898b6b6cd0e9001907f4b57d",
           "path": "site/package-lock.json"
         },
         {
-          "hash": "9c39e620ebae2c5718ecd8c6188bd3451409a614ec8f5308dc15d5fd886e5b91",
+          "hash": "3d6a0ba855f8b5fdd67cf410eca7311b73b2cc857a2758f8899d0b4c8e9528d9",
           "path": "site/package.json"
         },
         {
@@ -5444,9 +5444,9 @@
     }
   ],
   "edges": [],
-  "engine": "1.24.0",
+  "engine": "1.26.0",
   "generatedFrom": {
-    "commit": "02709850d22196f6681e28806614ecab047db504",
+    "commit": "8e5060c64c88b1b92d99667fcc729060808507da",
     "tracked": 484
   },
   "landings": [
