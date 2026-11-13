@@ -639,7 +639,10 @@ pub fn unpack(bytes: &[u8]) -> Result<Vec<(String, Vec<u8>)>, String> {
         let mut file = archive
             .by_index(index)
             .map_err(|error| format!("Could not read a bundle entry. {error}"))?;
-        let path = normalize(file.name())?;
+        let name = file
+            .name()
+            .map_err(|error| format!("Could not read a bundle entry name. {error}"))?;
+        let path = normalize(&name)?;
         if path.is_empty() || path.ends_with('/') {
             continue;
         }
