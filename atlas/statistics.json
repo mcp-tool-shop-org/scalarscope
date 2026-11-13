@@ -194,8 +194,8 @@
         "path": ".github/workflows/build.yml"
       },
       {
-        "commits": 3,
-        "lines": 102,
+        "commits": 4,
+        "lines": 104,
         "path": ".github/workflows/coverage.yml"
       },
       {
@@ -354,8 +354,8 @@
         "path": "assets/logo.png"
       },
       {
-        "commits": 34,
-        "lines": 680,
+        "commits": 35,
+        "lines": 694,
         "path": "atlas/README.md"
       },
       {
@@ -364,18 +364,18 @@
         "path": "atlas/boundaries.yaml"
       },
       {
-        "commits": 34,
-        "lines": 2204,
+        "commits": 35,
+        "lines": 2242,
         "path": "atlas/page.json"
       },
       {
-        "commits": 34,
-        "lines": 11926,
+        "commits": 35,
+        "lines": 12148,
         "path": "atlas/statistics.json"
       },
       {
-        "commits": 34,
-        "lines": 13662,
+        "commits": 35,
+        "lines": 13672,
         "path": "atlas/structure.json"
       },
       {
@@ -1254,8 +1254,8 @@
         "path": "site/astro.config.mjs"
       },
       {
-        "commits": 4,
-        "lines": 19857,
+        "commits": 5,
+        "lines": 19869,
         "path": "site/package-lock.json"
       },
       {
@@ -2729,9 +2729,9 @@
     "level": "low",
     "reason": "fewer than 25 source files reach 10 revisions in the window"
   },
-  "generatedAt": "2026-11-11T22:39:35.574Z",
+  "generatedAt": "2026-11-13T00:07:40.803Z",
   "generatedFrom": {
-    "commit": "8e5060c64c88b1b92d99667fcc729060808507da"
+    "commit": "51b0464ad98677a4a47686caedde8bcc29c2345f"
   },
   "pairs": [
     {
@@ -2954,43 +2954,43 @@
     {
       "a": "atlas/README.md",
       "b": "atlas/page.json",
-      "either": 20,
-      "shared": 20,
+      "either": 21,
+      "shared": 21,
       "strength": 1
     },
     {
       "a": "atlas/README.md",
       "b": "atlas/statistics.json",
-      "either": 20,
-      "shared": 20,
+      "either": 21,
+      "shared": 21,
       "strength": 1
     },
     {
       "a": "atlas/README.md",
       "b": "atlas/structure.json",
-      "either": 20,
-      "shared": 20,
+      "either": 21,
+      "shared": 21,
       "strength": 1
     },
     {
       "a": "atlas/page.json",
       "b": "atlas/statistics.json",
-      "either": 20,
-      "shared": 20,
+      "either": 21,
+      "shared": 21,
       "strength": 1
     },
     {
       "a": "atlas/page.json",
       "b": "atlas/structure.json",
-      "either": 20,
-      "shared": 20,
+      "either": 21,
+      "shared": 21,
       "strength": 1
     },
     {
       "a": "atlas/statistics.json",
       "b": "atlas/structure.json",
-      "either": 20,
-      "shared": 20,
+      "either": 21,
+      "shared": 21,
       "strength": 1
     },
     {
@@ -3102,16 +3102,16 @@
     "floor": "fallen",
     "floorHeld": false,
     "floorTrigger": "revision-depth",
-    "headDate": "2026-10-15T01:43:30-07:00",
+    "headDate": "2026-11-12T19:04:08-05:00",
     "inScopeFiles": 489,
     "pinnedStart": null,
     "priorFloor": "fallen",
-    "qualifyingCommits": 93,
+    "qualifyingCommits": 95,
     "qualifyingMinimum": 30,
     "revisions": 5,
     "shared": 10,
     "sharedFloorUsed": 3,
-    "since": "2026-04-18T08:43:30.000Z",
+    "since": "2026-05-17T00:04:08.000Z",
     "sourceExtensions": [
       ".js",
       ".mjs",

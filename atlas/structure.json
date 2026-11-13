@@ -508,11 +508,11 @@
       "externals": 0,
       "files": [
         {
-          "hash": "d4e2d9c9f429df236cccac56ea19bb2aba5399520401e743af70d26f27e00bdc",
+          "hash": "a7bf7e79945dd48d97c547cd4f83de7b3448f13a308749ce4d9ed810c643ce13",
           "path": "rust/Cargo.lock"
         },
         {
-          "hash": "fe569e4227c06ffe381a093ef60c3298268c4d4a86b9b937d5b171abaa7089b4",
+          "hash": "597c33349bfaba06b7fb785e1072901e04ccb399428b602177ceb2c80bc5e92e",
           "path": "rust/Cargo.toml"
         },
         {
@@ -774,25 +774,25 @@
             {
               "in": "findings_only",
               "kind": "err",
-              "line": 808
+              "line": 811
             },
             {
               "in": "to_json",
               "kind": "err",
-              "line": 915
+              "line": 918
             },
             {
               "in": "canon_json",
               "kind": "err",
-              "line": 924
+              "line": 927
             },
             {
               "in": "normalize",
               "kind": "err",
-              "line": 1050
+              "line": 1053
             }
           ],
-          "hash": "11f011c997d2fd66565eddd4c6c9db0edf459130e6b2767ce2db6106cc7183f6",
+          "hash": "5fbcbac27cb1d87f72badaca8bc147d9e74be0a38cdf16876c9bc476cec02b06",
           "importOrder": [
             "rust/src/readings.rs",
             "rust/src/review.rs",
@@ -3137,7 +3137,7 @@
           "path": "site/astro.config.mjs"
         },
         {
-          "hash": "ef25695b1164c7574b2fba4f6f7015ea2dc5d8cb898b6b6cd0e9001907f4b57d",
+          "hash": "c1bd8712acaa54bf3eb1950f18c3797199ccc670e5b994d74a9cc77336b322bb",
           "path": "site/package-lock.json"
         },
         {
@@ -4177,7 +4177,7 @@
           "path": "tests/Fixtures/Bundles/dotnet-inference-review.scbundle"
         },
         {
-          "hash": "880f09bca36f687b4de36878618c6030a7ef243452791c6f9a705005e18389e0",
+          "hash": "67216b27e5b013bc080e09f4de1e7a4ad217c138c553050b3d88c231a423b413",
           "path": "tests/Fixtures/Bundles/rust-inference-review.scbundle"
         },
         {
@@ -5446,7 +5446,7 @@
   "edges": [],
   "engine": "1.26.0",
   "generatedFrom": {
-    "commit": "8e5060c64c88b1b92d99667fcc729060808507da",
+    "commit": "51b0464ad98677a4a47686caedde8bcc29c2345f",
     "tracked": 484
   },
   "landings": [
